@@ -1,0 +1,63 @@
+package com.akdemya.adapter.outbound.persistence.entity;
+
+import jakarta.persistence.*;
+import java.util.UUID;
+
+@Entity
+@Table(name = "units")
+public class UnitEntity {
+    @Id
+    private UUID id = UUID.randomUUID();
+    @Column(nullable = false)
+    private String name;
+    @Column(name = "order_index", nullable = false)
+    private int orderIndex = 0;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subject_id", nullable = false)
+    private SubjectEntity subject;
+
+    public UnitEntity() {
+    }
+
+    public UnitEntity(SubjectEntity subject, String name, int orderIndex) {
+        this.subject = subject;
+        this.name = name;
+        this.orderIndex = orderIndex;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getOrderIndex() {
+        return orderIndex;
+    }
+
+    public UUID getSubjectId() {
+        return subject != null ? subject.getId() : null;
+    }
+
+    public SubjectEntity getSubject() {
+        return subject;
+    }
+
+    public void setName(String n) {
+        this.name = n;
+    }
+
+    public void setOrderIndex(int i) {
+        this.orderIndex = i;
+    }
+
+    public void setSubject(SubjectEntity s) {
+        this.subject = s;
+    }
+}
