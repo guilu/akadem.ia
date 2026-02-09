@@ -47,7 +47,6 @@ public class SecurityConfig {
 
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/subjects/**", "/api/units/**", "/api/questions/**").permitAll()
 
                         // Resto autenticado
                         .anyRequest().authenticated());

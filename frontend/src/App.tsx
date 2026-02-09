@@ -16,8 +16,11 @@ export default function App(){
   const [result, setResult] = useState<{ total:number, correct:number, percentage:number }|null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/subjects').then(r=>r.json()).then(setSubjects);
-  }, []);
+    if (!token) { setSubjects([]); return; }
+    fetch('http://localhost:8080/api/subjects', {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    }).then(r=>r.json()).then(setSubjects);
+  }, [token]);
 
   function onToken(t:string){
     setToken(t);
@@ -69,19 +72,23 @@ export default function App(){
       {mode === 'home' && (
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Asignaturas</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {subjects.map(s => (
-              <div key={s.id} className="border border-slate-700 rounded-xl p-4">
-                <div className="text-lg font-semibold">{s.name}</div>
-                <div className="text-sm text-slate-400">{s.description}</div>
-                <div className="mt-3">
-                  <button className="px-3 py-2 rounded-xl bg-cyan-600" onClick={()=>{ setSubject(s); setMode('builder'); }}>
-                    Crear simulacro
-                  </button>
+          {!token ? (
+            <div className="text-slate-400">Inicia sesión para ver las asignaturas disponibles.</div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {subjects.map(s => (
+                <div key={s.id} className="border border-slate-700 rounded-xl p-4">
+                  <div className="text-lg font-semibold">{s.name}</div>
+                  <div className="text-sm text-slate-400">{s.description}</div>
+                  <div className="mt-3">
+                    <button className="px-3 py-2 rounded-xl bg-cyan-600" onClick={()=>{ setSubject(s); setMode('builder'); }}>
+                      Crear simulacro
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
