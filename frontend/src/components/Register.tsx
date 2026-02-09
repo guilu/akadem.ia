@@ -5,9 +5,11 @@ export default function Register({ onToken }:{ onToken: (t:string)=>void }){
   const [password, setPassword] = useState('demo1234');
   const [err, setErr] = useState<string>('');
 
+  const apiBase = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`;
+
   async function register(){
     setErr('');
-    const res = await fetch('http://localhost:8080/api/auth/register', {
+    const res = await fetch(`${apiBase}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
