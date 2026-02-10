@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 type Unit = { id: string; name: string; available: number };
 
 export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void }){
   const [units, setUnits] = useState<Unit[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
+  const apiBase = useMemo(() => import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`, []);
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/units?subjectId=${subjectId}`)
+    const token = localStorage.getItem('ak_token') || '';
+    fetch(`${apiBase}/api/units?subjectId=${subjectId}`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    })
       .then(r => r.json())
       .then((us: any[]) => {
         // naive available count fetch by querying questions per unit later, but for MVP we'll set a constant
         const mapped = us.map(u => ({ id: u.id, name: u.name, available: 20 }));
         setUnits(mapped);
       });
-  }, [subjectId]);
+  }, [subjectId, apiBase]);
 
   function setCount(id: string, count: number){ setRules(prev => ({ ...prev, [id]: count })); }
   function total(){ return Object.values(rules).reduce((a,b)=>a+(b||0),0); }
