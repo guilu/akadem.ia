@@ -8,7 +8,10 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
   const apiBase = useMemo(() => import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`, []);
 
   useEffect(() => {
-    fetch(`${apiBase}/api/units?subjectId=${subjectId}`)
+    const token = localStorage.getItem('ak_token') || '';
+    fetch(`${apiBase}/api/units?subjectId=${subjectId}`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    })
       .then(r => r.json())
       .then((us: any[]) => {
         // naive available count fetch by querying questions per unit later, but for MVP we'll set a constant
