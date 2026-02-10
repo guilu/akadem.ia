@@ -77,7 +77,7 @@ export default function App(){
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <button className="text-2xl font-bold flex items-center gap-3" onClick={()=>setView('home')}>
-            <img src="/assets/icons/akdmia-icon-32x32.png" alt="AKDMIA" className="w-8 h-8" />
+            <img src="/assets/icons/akdmia-icon-24x24.png" alt="AKDMIA" className="w-6 h-6" />
             Akdemya
           </button>
           <nav className="flex gap-4 items-center">
