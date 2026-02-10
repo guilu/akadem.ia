@@ -63,8 +63,12 @@ public class SecurityConfig {
         CorsConfiguration cfg = new CorsConfiguration();
 
         // En dev: permite tu frontend
-        cfg.setAllowedOrigins(List.of("http://localhost:5173"));
-        // Si usas otras URLs (127.0.0.1, puertos distintos, etc.), añádelas aquí
+        cfg.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://192.168.1.175:5173"
+        ));
+        // Si usas otras URLs (puertos distintos, etc.), añádelas aquí
         // cfg.setAllowedOriginPatterns(List.of("*")); // alternativa amplia en dev
 
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
