@@ -53,7 +53,7 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </div>
-        <div className="text-xs text-slate-400">Puedes usar cualquier email y contraseña (demo).</div>
+        <div className="text-xs text-slate-400">Introduce tus credenciales para acceder.</div>
       </div>
     </div>
   );
