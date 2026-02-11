@@ -5,7 +5,7 @@ public interface AuthUseCase {
 
   AuthResponse login(LoginCommand command);
 
-  record RegisterCommand(String email, String password) {
+  record RegisterCommand(String email, String password, String confirmPassword, String firstName, String lastName, String occupation) {
   }
 
   record LoginCommand(String email, String password) {
