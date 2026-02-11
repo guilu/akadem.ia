@@ -5,19 +5,35 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
   const [email, setEmail] = useState('demo@akdemya');
   const [password, setPassword] = useState('demo1234');
   const [err, setErr] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+
+  function validate(){
+    if (!email.trim()) return 'El email es obligatorio';
+    if (!password.trim()) return 'La contraseña es obligatoria';
+    return '';
+  }
 
   async function login(){
+    const validation = validate();
+    if (validation) { setErr(validation); return; }
     setErr('');
-    const res = await fetch(`${apiBase}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if(res.ok){
-      onToken(data.accessToken);
-    } else {
-      setErr(data.error || 'error');
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(res.ok && data.accessToken){
+        onToken(data.accessToken);
+      } else {
+        setErr(data.error || 'Credenciales inválidas');
+      }
+    } catch {
+      setErr('No se pudo conectar con el servidor');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -31,7 +47,9 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
                value={password} onChange={e=>setPassword(e.target.value)} />
         {err && <div className="text-red-400 text-sm">{err}</div>}
         <div className="flex gap-2">
-          <button onClick={login} className="px-3 py-2 rounded bg-indigo-600">Entrar</button>
+          <button onClick={login} disabled={loading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
         </div>
         <div className="text-xs text-slate-400">Puedes usar cualquier email y contraseña (demo).</div>
       </div>
