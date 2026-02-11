@@ -3,6 +3,7 @@ import ExamRunner, { Question } from './components/ExamRunner';
 import ExamBuilder from './components/ExamBuilder';
 import Login from './components/Login';
 import Register from './components/Register';
+import { apiBase } from './api';
 
 type Subject = { id: string; name: string; description?: string };
 
@@ -19,7 +20,6 @@ export default function App(){
   const [result, setResult] = useState<{ total:number, correct:number, percentage:number }|null>(null);
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
-  const apiBase = useMemo(() => import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`, []);
 
   useEffect(() => {
     if (!token) {

@@ -1,11 +1,10 @@
 import { useState } from 'react';
+import { apiBase } from '../api';
 
 export default function Login({ onToken }:{ onToken: (t:string)=>void }){
   const [email, setEmail] = useState('demo@akdemya');
   const [password, setPassword] = useState('demo1234');
   const [err, setErr] = useState<string>('');
-
-  const apiBase = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`;
 
   async function login(){
     setErr('');

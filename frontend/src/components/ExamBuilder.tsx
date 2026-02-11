@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { apiBase } from '../api';
 type Unit = { id: string; name: string; available: number };
 
 export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void }){
   const [units, setUnits] = useState<Unit[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
-  const apiBase = useMemo(() => import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`, []);
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
