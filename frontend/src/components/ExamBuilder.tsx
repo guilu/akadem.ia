@@ -9,18 +9,22 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
-    fetch(`${apiBase}/api/units?subjectId=${subjectId}`, {
+    fetch(`${apiBase}/api/units/availability?subjectId=${subjectId}`, {
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
     })
       .then(r => r.json())
       .then((us: any[]) => {
-        // naive available count fetch by querying questions per unit later, but for MVP we'll set a constant
-        const mapped = us.map(u => ({ id: u.id, name: u.name, available: 20 }));
+        const mapped = us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }));
         setUnits(mapped);
       });
   }, [subjectId, apiBase]);
 
-  function setCount(id: string, count: number){ setRules(prev => ({ ...prev, [id]: count })); }
+  function setCount(id: string, count: number){
+    const unit = units.find(u => u.id === id);
+    const max = unit ? unit.available : count;
+    const safe = Math.max(0, Math.min(count, max));
+    setRules(prev => ({ ...prev, [id]: safe }));
+  }
   function total(){ return Object.values(rules).reduce((a,b)=>a+(b||0),0); }
 
   return (
