@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface SpringDataQuestionRepository extends JpaRepository<QuestionEntity, UUID> {
     List<QuestionEntity> findByUnit_Id(UUID unitId);
+    long countByUnit_Id(UUID unitId);
 }

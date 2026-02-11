@@ -51,4 +51,9 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   public void deleteById(UUID id) {
     repository.deleteById(id);
   }
+
+  @Override
+  public long countByUnitId(UUID unitId) {
+    return repository.countByUnit_Id(unitId);
+  }
 }

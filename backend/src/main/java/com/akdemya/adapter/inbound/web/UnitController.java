@@ -31,6 +31,11 @@ public class UnitController {
         return contentService.getUnitsBySubject(subjectId);
     }
 
+    @GetMapping("/availability")
+    public List<ContentManagement.UnitAvailability> getAvailability(@RequestParam UUID subjectId) {
+        return contentService.getUnitAvailability(subjectId);
+    }
+
     @PostMapping
     public Unit create(@RequestBody Unit u) {
         return contentService.createUnit(u);

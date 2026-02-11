@@ -9,18 +9,22 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
-    fetch(`${apiBase}/api/units?subjectId=${subjectId}`, {
+    fetch(`${apiBase}/api/units/availability?subjectId=${subjectId}`, {
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
     })
       .then(r => r.json())
       .then((us: any[]) => {
-        // naive available count fetch by querying questions per unit later, but for MVP we'll set a constant
-        const mapped = us.map(u => ({ id: u.id, name: u.name, available: 20 }));
+        const mapped = us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }));
         setUnits(mapped);
       });
   }, [subjectId, apiBase]);
 
-  function setCount(id: string, count: number){ setRules(prev => ({ ...prev, [id]: count })); }
+  function setCount(id: string, count: number){
+    const unit = units.find(u => u.id === id);
+    const max = unit ? unit.available : count;
+    const safe = Math.max(0, Math.min(count, max));
+    setRules(prev => ({ ...prev, [id]: safe }));
+  }
   function total(){ return Object.values(rules).reduce((a,b)=>a+(b||0),0); }
 
   return (
@@ -33,9 +37,28 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
               <div className="font-semibold">{u.name}</div>
               <div className="text-sm text-slate-400">Disponibles: {u.available}</div>
             </div>
-            <input type="number" min={0} max={u.available} value={rules[u.id]||0}
-              onChange={e => setCount(u.id, Number(e.target.value))}
-              className="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1"/>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCount(u.id, (rules[u.id] || 0) - 1)}
+                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                aria-label="disminuir">
+                −
+              </button>
+              <input
+                type="number"
+                min={0}
+                max={u.available}
+                value={rules[u.id] || 0}
+                onChange={e => setCount(u.id, Number(e.target.value))}
+                className="w-16 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1"
+              />
+              <button
+                onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
+                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                aria-label="aumentar">
+                +
+              </button>
+            </div>
           </div>
         ))}
       </div>

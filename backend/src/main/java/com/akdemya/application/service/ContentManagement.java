@@ -40,6 +40,14 @@ public class ContentManagement {
     return unitRepo.findBySubjectId(subjectId);
   }
 
+  public List<UnitAvailability> getUnitAvailability(UUID subjectId) {
+    return unitRepo.findBySubjectId(subjectId).stream()
+        .map(u -> new UnitAvailability(u.getId(), u.getName(), questionRepo.countByUnitId(u.getId())))
+        .toList();
+  }
+
+  public record UnitAvailability(UUID id, String name, long available) {}
+
   public Unit createUnit(Unit u) {
     return unitRepo.save(u);
   }
