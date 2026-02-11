@@ -44,9 +44,14 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
                 aria-label="disminuir">
                 −
               </button>
-              <div className="w-12 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1">
-                {rules[u.id] || 0}
-              </div>
+              <input
+                type="number"
+                min={0}
+                max={u.available}
+                value={rules[u.id] || 0}
+                onChange={e => setCount(u.id, Number(e.target.value))}
+                className="w-16 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1"
+              />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
                 className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
