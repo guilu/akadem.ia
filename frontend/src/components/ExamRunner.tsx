@@ -23,7 +23,16 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
   }, [remaining]);
 
   const q = shuffled[index];
-  const progress = Math.round(((index+1) / shuffled.length) * 100);
+  const progress = shuffled.length ? Math.round(((index+1) / shuffled.length) * 100) : 0;
+
+  if (shuffled.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
+        <h2 className="text-xl font-semibold mb-2">No hay preguntas disponibles</h2>
+        <p className="text-slate-400">Selecciona otra configuración y vuelve a intentarlo.</p>
+      </div>
+    );
+  }
 
   function choose(ansId: string){ setSelections(prev => ({ ...prev, [q.id]: prev[q.id] === ansId ? undefined : ansId })); }
   function next(){ setIndex(i => Math.min(i+1, shuffled.length-1)); }
