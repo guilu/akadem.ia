@@ -8,7 +8,9 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
   const [loading, setLoading] = useState(false);
 
   function validate(){
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (!email.trim()) return 'El email es obligatorio';
+    if (!emailRegex.test(email)) return 'El email no es válido';
     if (!password.trim()) return 'La contraseña es obligatoria';
     return '';
   }

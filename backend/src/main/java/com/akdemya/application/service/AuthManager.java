@@ -26,10 +26,26 @@ public class AuthManager implements AuthUseCase {
 
   @Override
   public AuthResponse register(RegisterCommand command) {
+    if (command.email() == null || !command.email().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+      return AuthResponse.fail("invalid_email");
+    }
+    if (command.password() == null || command.password().length() < 8) {
+      return AuthResponse.fail("password_too_short");
+    }
+    if (command.confirmPassword() == null || !command.password().equals(command.confirmPassword())) {
+      return AuthResponse.fail("password_mismatch");
+    }
     if (users.existsByEmail(command.email())) {
       return AuthResponse.fail("email_in_use");
     }
-    AppUser user = AppUser.create(command.email(), hasher.encode(command.password()), "STUDENT");
+    AppUser user = AppUser.create(
+        command.email(),
+        hasher.encode(command.password()),
+        "STUDENT",
+        command.firstName(),
+        command.lastName(),
+        command.occupation()
+    );
     users.save(user);
     String token = tokenProvider.generate(user.getEmail(),
         Map.of("uid", user.getId().toString(), "role", user.getRole()));

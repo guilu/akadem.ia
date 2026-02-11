@@ -14,6 +14,12 @@ public class AppUserEntity {
     private String passwordHash;
     @Column(nullable = false)
     private String role = "STUDENT";
+    @Column(name = "first_name")
+    private String firstName;
+    @Column(name = "last_name")
+    private String lastName;
+    @Column
+    private String occupation;
 
     public AppUserEntity() {
     }
@@ -53,5 +59,29 @@ public class AppUserEntity {
 
     public void setRole(String r) {
         this.role = r;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
     }
 }
