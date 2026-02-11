@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { apiBase } from '../api';
 
 export default function Register({ onToken }:{ onToken: (t:string)=>void }){
-  const [email, setEmail] = useState('demo@akdemya');
+  const [email, setEmail] = useState('demo@akdemya.com');
   const [password, setPassword] = useState('demo1234');
   const [confirmPassword, setConfirmPassword] = useState('demo1234');
   const [firstName, setFirstName] = useState('');
