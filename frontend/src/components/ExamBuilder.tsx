@@ -37,9 +37,23 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
               <div className="font-semibold">{u.name}</div>
               <div className="text-sm text-slate-400">Disponibles: {u.available}</div>
             </div>
-            <input type="number" min={0} max={u.available} value={rules[u.id]||0}
-              onChange={e => setCount(u.id, Number(e.target.value))}
-              className="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1"/>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCount(u.id, (rules[u.id] || 0) - 1)}
+                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                aria-label="disminuir">
+                −
+              </button>
+              <div className="w-12 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1">
+                {rules[u.id] || 0}
+              </div>
+              <button
+                onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
+                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                aria-label="aumentar">
+                +
+              </button>
+            </div>
           </div>
         ))}
       </div>
