@@ -21,14 +21,24 @@ export default function App(){
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
 
+  async function authedFetch(url: string, options: RequestInit = {}) {
+    const res = await fetch(url, {
+      ...options,
+      headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` }
+    });
+    if (res.status === 401) {
+      onLogout();
+      throw new Error('unauthorized');
+    }
+    return res;
+  }
+
   useEffect(() => {
     if (!token) {
       setSubjects([]);
       return;
     }
-    fetch(`${apiBase}/api/subjects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    authedFetch(`${apiBase}/api/subjects`)
       .then(r => r.ok ? r.json() : [])
       .then(setSubjects)
       .catch(() => setSubjects([]));
@@ -47,9 +57,9 @@ export default function App(){
   }
 
   async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number }){
-    const res = await fetch(`${apiBase}/api/exams/attempts/start`, {
+    const res = await authedFetch(`${apiBase}/api/exams/attempts/start`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify(cfg)
     });
     const data = await res.json();
@@ -62,9 +72,9 @@ export default function App(){
   async function finishExam(payload:{ selections: Record<string,string|undefined> }){
     const selections: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) selections[q] = a; });
-    const res = await fetch(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
+    const res = await authedFetch(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ selections })
     });
     const data = await res.json();
@@ -134,7 +144,7 @@ export default function App(){
         )}
 
         {view === 'builder' && subject && (
-          <ExamBuilder subjectId={subject.id} onStart={startExam}/>
+          <ExamBuilder subjectId={subject.id} onStart={startExam} onUnauthorized={onLogout}/>
         )}
 
         {view === 'runner' && questions.length > 0 && (
