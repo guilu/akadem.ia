@@ -17,6 +17,7 @@ export default function App(){
   const [attemptId, setAttemptId] = useState<string>('');
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
   const [result, setResult] = useState<ExamResult|null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
 
@@ -83,7 +84,7 @@ export default function App(){
             <img src="/assets/icons/akdmia-icon-32x32.png" alt="AKDMIA" className="w-8 h-8" />
             Akdemya
           </button>
-          <nav className="flex gap-4 items-center">
+          <nav className="hidden md:flex gap-4 items-center">
             <button className="hover:underline" onClick={()=>setView('home')}>Home</button>
             {!isAuthed && (
               <>
@@ -98,6 +99,31 @@ export default function App(){
               </>
             )}
           </nav>
+          <button
+            className="md:hidden text-sm border border-slate-600 rounded px-2 py-1"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label="menu"
+          >
+            {menuOpen ? 'Cerrar' : 'Menu'}
+          </button>
+        </div>
+        {menuOpen && (
+          <div className="md:hidden border-t border-slate-800 px-6 py-3 flex flex-col gap-2">
+            <button className="text-left hover:underline" onClick={()=>{ setView('home'); setMenuOpen(false); }}>Home</button>
+            {!isAuthed && (
+              <>
+                <button className="text-left hover:underline" onClick={()=>{ setView('login'); setMenuOpen(false); }}>Login</button>
+                <button className="text-left hover:underline" onClick={()=>{ setView('register'); setMenuOpen(false); }}>Register</button>
+              </>
+            )}
+            {isAuthed && (
+              <>
+                <button className="text-left hover:underline" onClick={()=>{ setView('subjects'); setMenuOpen(false); }}>Asignaturas</button>
+                <button className="text-left border border-slate-600 rounded px-2 py-1 w-fit" onClick={()=>{ onLogout(); setMenuOpen(false); }}>Salir</button>
+              </>
+            )}
+          </div>
+        )}
         </div>
       </header>
 
