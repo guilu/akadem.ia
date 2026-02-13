@@ -11,24 +11,65 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
   const [index, setIndex] = useState(0);
   const [remaining, setRemaining] = useState(totalTimeSeconds);
   const [selections, setSelections] = useState<Record<string,string|undefined>>({});
+  const [finished, setFinished] = useState(false);
 
   const shuffled = useMemo(() => (
     questions.map(q => ({ ...q, answers: [...q.answers].sort(() => Math.random() - 0.5) }))
   ), [questions]);
 
   useEffect(() => {
-    if (remaining <= 0) return onFinish({ selections, timeSpentSeconds: totalTimeSeconds });
+    if (totalTimeSeconds <= 0 || finished) return;
     const t = setInterval(() => setRemaining(r => r - 1), 1000);
     return () => clearInterval(t);
-  }, [remaining]);
+  }, [totalTimeSeconds, finished]);
 
-  const q = shuffled[index];
-  const progress = Math.round(((index+1) / shuffled.length) * 100);
+  useEffect(() => {
+    if (finished) return;
+    if (remaining <= 0) {
+      setFinished(true);
+      onFinish({ selections, timeSpentSeconds: totalTimeSeconds });
+    }
+  }, [remaining, finished]);
+
+  const safeIndex = Math.min(Math.max(index, 0), Math.max(shuffled.length - 1, 0));
+  const q = shuffled[safeIndex];
+  const progress = shuffled.length ? Math.round(((safeIndex+1) / shuffled.length) * 100) : 0;
+
+  if (totalTimeSeconds <= 0) {
+    return (
+      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
+        <h2 className="text-xl font-semibold mb-2">Tiempo inválido</h2>
+        <p className="text-slate-400">Configura un tiempo válido para empezar.</p>
+      </div>
+    );
+  }
+
+  if (shuffled.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
+        <h2 className="text-xl font-semibold mb-2">No hay preguntas disponibles</h2>
+        <p className="text-slate-400">Selecciona otra configuración y vuelve a intentarlo.</p>
+      </div>
+    );
+  }
+
+  if (!q) {
+    return (
+      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
+        <h2 className="text-xl font-semibold mb-2">No se pudo cargar la pregunta</h2>
+        <p className="text-slate-400">Vuelve a intentarlo.</p>
+      </div>
+    );
+  }
 
   function choose(ansId: string){ setSelections(prev => ({ ...prev, [q.id]: prev[q.id] === ansId ? undefined : ansId })); }
   function next(){ setIndex(i => Math.min(i+1, shuffled.length-1)); }
   function prev(){ setIndex(i => Math.max(i-1, 0)); }
-  function finish(){ onFinish({ selections, timeSpentSeconds: totalTimeSeconds - remaining }); }
+  function finish(){
+    if (finished) return;
+    setFinished(true);
+    onFinish({ selections, timeSpentSeconds: totalTimeSeconds - remaining });
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4">
