@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { apiBase } from '../api';
-type Unit = { id: string; name: string; available: number };
+import { apiBase, apiAuthJson } from '../api';
+import type { UnitAvailability } from '../types';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
   const [units, setUnits] = useState<Unit[]>([]);
@@ -9,16 +9,14 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
-    fetch(`${apiBase}/api/units/availability?subjectId=${subjectId}`, {
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-    })
-      .then(r => {
-        if (r.status === 401) { onUnauthorized(); return []; }
-        return r.json();
-      })
-      .then((us: any[]) => {
+    apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}`, token)
+      .then(us => {
         const mapped = us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }));
         setUnits(mapped);
+      })
+      .catch(err => {
+        if (err?.status === 401) onUnauthorized();
+        setUnits([]);
       });
   }, [subjectId, apiBase]);
 
