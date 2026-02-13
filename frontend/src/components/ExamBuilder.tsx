@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiBase } from '../api';
 type Unit = { id: string; name: string; available: number };
 
-export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void }){
+export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
   const [units, setUnits] = useState<Unit[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
@@ -12,7 +12,10 @@ export default function ExamBuilder({ subjectId, onStart }:{ subjectId: string; 
     fetch(`${apiBase}/api/units/availability?subjectId=${subjectId}`, {
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
     })
-      .then(r => r.json())
+      .then(r => {
+        if (r.status === 401) { onUnauthorized(); return []; }
+        return r.json();
+      })
       .then((us: any[]) => {
         const mapped = us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }));
         setUnits(mapped);
