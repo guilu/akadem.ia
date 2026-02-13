@@ -3,9 +3,8 @@ import ExamRunner, { Question } from './components/ExamRunner';
 import ExamBuilder from './components/ExamBuilder';
 import Login from './components/Login';
 import Register from './components/Register';
-import { apiBase } from './api';
-
-type Subject = { id: string; name: string; description?: string };
+import { apiBase, apiAuthJson } from './api';
+import type { Subject, ExamResult, ExamStartResponse } from './types';
 
 type View = 'home'|'login'|'register'|'subjects'|'builder'|'runner'|'result';
 
@@ -17,20 +16,17 @@ export default function App(){
   const [minutes, setMinutes] = useState(20);
   const [attemptId, setAttemptId] = useState<string>('');
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
-  const [result, setResult] = useState<{ total:number, correct:number, percentage:number }|null>(null);
+  const [result, setResult] = useState<ExamResult|null>(null);
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
 
-  async function authedFetch(url: string, options: RequestInit = {}) {
-    const res = await fetch(url, {
-      ...options,
-      headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` }
-    });
-    if (res.status === 401) {
-      onLogout();
-      throw new Error('unauthorized');
+  async function authedJson<T>(url: string, options: RequestInit = {}) {
+    try {
+      return await apiAuthJson<T>(url, token, options);
+    } catch (err: any) {
+      if (err?.status === 401) onLogout();
+      throw err;
     }
-    return res;
   }
 
   useEffect(() => {
@@ -38,8 +34,7 @@ export default function App(){
       setSubjects([]);
       return;
     }
-    authedFetch(`${apiBase}/api/subjects`)
-      .then(r => r.ok ? r.json() : [])
+    authedJson<Subject[]>(`${apiBase}/api/subjects`)
       .then(setSubjects)
       .catch(() => setSubjects([]));
   }, [token, apiBase]);
@@ -57,12 +52,11 @@ export default function App(){
   }
 
   async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number }){
-    const res = await authedFetch(`${apiBase}/api/exams/attempts/start`, {
+    const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify(cfg)
     });
-    const data = await res.json();
     setAttemptId(data.attemptId);
     setMinutes(Math.round(data.totalTimeSeconds / 60));
     setQuestions(data.questions);
@@ -72,12 +66,11 @@ export default function App(){
   async function finishExam(payload:{ selections: Record<string,string|undefined> }){
     const selections: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) selections[q] = a; });
-    const res = await authedFetch(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
+    const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ selections })
     });
-    const data = await res.json();
     setResult(data);
     setView('result');
   }
