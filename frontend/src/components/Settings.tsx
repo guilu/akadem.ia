@@ -86,6 +86,7 @@ export default function Settings({ token }: { token: string }) {
   const [questionDeleteError, setQuestionDeleteError] = useState('');
   const isQuestionEditing = useMemo(() => Boolean(questionForm.id), [questionForm.id]);
   const [questionSubjectId, setQuestionSubjectId] = useState('');
+  const [questionUnitId, setQuestionUnitId] = useState('');
 
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
@@ -157,9 +158,9 @@ export default function Settings({ token }: { token: string }) {
   useEffect(() => {
     if (tab === 'questions') {
       loadUnits(questionSubjectId).catch(() => setUnits([]));
-      loadQuestions(questionForm.unitId).catch(() => setQuestions([]));
+      loadQuestions(questionUnitId).catch(() => setQuestions([]));
     }
-  }, [tab, questionSubjectId, questionForm.unitId]);
+  }, [tab, questionSubjectId, questionUnitId]);
 
   async function saveUser() {
     if (!form.email.trim()) return;
@@ -275,14 +276,15 @@ export default function Settings({ token }: { token: string }) {
   }
 
   async function saveQuestion() {
-    if (!questionForm.unitId || !questionForm.text.trim()) return;
+    const unitId = questionUnitId || questionForm.unitId;
+    if (!unitId || !questionForm.text.trim()) return;
     if (questionForm.answers.some(a => !a.text.trim())) return;
     const correctCount = questionForm.answers.filter(a => a.correct).length;
     if (correctCount !== 1) return;
     setQuestionLoading(true);
     try {
       const payload = {
-        unitId: questionForm.unitId,
+        unitId,
         text: questionForm.text,
         explanation: questionForm.explanation || null,
         difficulty: questionForm.difficulty,
@@ -302,16 +304,16 @@ export default function Settings({ token }: { token: string }) {
         });
       }
       resetQuestionForm();
-      await loadQuestions(questionForm.unitId);
+      await loadQuestions(unitId);
       await loadUnits(questionSubjectId);
     } finally {
       setQuestionLoading(false);
     }
   }
 
-  async function removeQuestion(id: string) {
+  async function removeQuestion(id: string, unitId: string) {
     await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' });
-    await loadQuestions(questionForm.unitId);
+    await loadQuestions(unitId);
     await loadUnits(questionSubjectId);
   }
 
@@ -330,13 +332,13 @@ export default function Settings({ token }: { token: string }) {
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold">Preguntas</h2>
             <div className="grid gap-2 md:grid-cols-2">
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionSubjectId} onChange={e=>{ setQuestionSubjectId(e.target.value); setQuestionForm(f=>({ ...f, unitId: '' })); }}>
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionSubjectId} onChange={e=>{ setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }}>
                 <option value="">Selecciona materia</option>
                 {subjects.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionForm.unitId} onChange={e=>setQuestionForm(f=>({ ...f, unitId: e.target.value }))}>
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionUnitId} onChange={e=>setQuestionUnitId(e.target.value)}>
                 <option value="">Selecciona unidad</option>
                 {units.map(u => (
                   <option key={u.id} value={u.id}>{u.name}</option>
@@ -411,6 +413,7 @@ export default function Settings({ token }: { token: string }) {
                             <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>{
                               const unit = units.find(u => u.id === q.unitId);
                               if (unit) setQuestionSubjectId(unit.subjectId);
+                              setQuestionUnitId(q.unitId);
                               setQuestionForm({
                                 id: q.id,
                                 unitId: q.unitId,
@@ -741,7 +744,7 @@ export default function Settings({ token }: { token: string }) {
                   setQuestionDeleteError('');
                   setQuestionDeleteLoading(true);
                   try {
-                    await removeQuestion(confirmQuestionDelete.id);
+                    await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId);
                     setConfirmQuestionDelete(null);
                   } catch {
                     setQuestionDeleteError('No se pudo eliminar');
