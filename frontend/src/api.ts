@@ -1,5 +1,6 @@
 const rawBase = import.meta.env.VITE_API_URL || window.location.origin;
-export const apiBase = rawBase.endsWith('/api') ? rawBase.slice(0, -4) : rawBase;
+const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+export const apiBase = normalizedBase.endsWith('/api') ? normalizedBase.slice(0, -4) : normalizedBase;
 
 export async function apiJson<T>(url: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(url, options);
