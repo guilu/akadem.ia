@@ -128,9 +128,39 @@ export default function App(){
 
       <main className="max-w-4xl mx-auto p-6">
         {view === 'home' && (
-          <section className="mt-6 text-center">
-            <h1 className="text-3xl font-bold mb-3">Tu academia online para tests</h1>
-            <p className="text-slate-400">Practica con simulacros, mide tu progreso y mejora tus resultados.</p>
+          <section className="mt-6">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-3">Prepárate con simulacros reales</h1>
+              <p className="text-slate-400 max-w-2xl mx-auto">
+                Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
+              </p>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                <button className="px-5 py-3 rounded-xl bg-cyan-600" onClick={()=>setView('subjects')}>
+                  Crear simulacro
+                </button>
+                {!isAuthed && (
+                  <div className="flex gap-2 justify-center">
+                    <button className="px-3 py-2 rounded-full border border-slate-600 text-sm" onClick={()=>setView('login')}>Login</button>
+                    <button className="px-3 py-2 rounded-full border border-slate-600 text-sm" onClick={()=>setView('register')}>Register</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              <div className="border border-slate-700 rounded-xl p-4">
+                <div className="text-2xl font-bold">+20</div>
+                <div className="text-sm text-slate-400">Preguntas por materia</div>
+              </div>
+              <div className="border border-slate-700 rounded-xl p-4">
+                <div className="text-2xl font-bold">Simulacros</div>
+                <div className="text-sm text-slate-400">Con tiempo real</div>
+              </div>
+              <div className="border border-slate-700 rounded-xl p-4">
+                <div className="text-2xl font-bold">Progreso</div>
+                <div className="text-sm text-slate-400">Resultados inmediatos</div>
+              </div>
+            </div>
           </section>
         )}
 
