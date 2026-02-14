@@ -303,12 +303,12 @@ export default function Settings({ token }: { token: string }) {
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
             <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
-            {confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && (
+            {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <div className="text-sm text-red-400 mb-3">
                 Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
               </div>
             )}
-            {confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && (
+            {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <input
                 className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
                 placeholder='Escribe "eliminar" para confirmar'
@@ -322,7 +322,7 @@ export default function Settings({ token }: { token: string }) {
               <button
                 type="button"
                 className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
-                disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
+                disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
                 onClick={async () => {
                   setSubjectDeleteError('');
                   setSubjectDeleteLoading(true);
