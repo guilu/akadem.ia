@@ -22,7 +22,9 @@ public class AdminSubjectController {
 
   @GetMapping
   public List<SubjectResponse> list() {
-    return subjects.findAll().stream().map(SubjectResponse::from).toList();
+    return subjects.findAll().stream()
+        .map(s -> SubjectResponse.from(s, units.findBySubjectId(s.getId()).size()))
+        .toList();
   }
 
   @PostMapping
@@ -48,17 +50,14 @@ public class AdminSubjectController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> delete(@PathVariable UUID id) {
-    if (!units.findBySubjectId(id).isEmpty()) {
-      return ResponseEntity.badRequest().body(java.util.Map.of("error", "subject_has_units"));
-    }
     subjects.deleteById(id);
     return ResponseEntity.ok().build();
   }
 
   record SubjectRequest(String name, String description) {}
-  record SubjectResponse(UUID id, String name, String description) {
-    static SubjectResponse from(Subject s) {
-      return new SubjectResponse(s.getId(), s.getName(), s.getDescription());
+  record SubjectResponse(UUID id, String name, String description, int unitCount) {
+    static SubjectResponse from(Subject s, int unitCount) {
+      return new SubjectResponse(s.getId(), s.getName(), s.getDescription(), unitCount);
     }
   }
 }

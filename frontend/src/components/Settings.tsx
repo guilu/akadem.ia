@@ -14,6 +14,7 @@ export type AdminSubject = {
   id: string;
   name: string;
   description?: string | null;
+  unitCount?: number;
 };
 
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
@@ -34,6 +35,7 @@ export default function Settings({ token }: { token: string }) {
   const [confirmSubjectDelete, setConfirmSubjectDelete] = useState<AdminSubject | null>(null);
   const [subjectDeleteLoading, setSubjectDeleteLoading] = useState(false);
   const [subjectDeleteError, setSubjectDeleteError] = useState('');
+  const [subjectDeleteText, setSubjectDeleteText] = useState('');
   const isSubjectEditing = useMemo(() => Boolean(subjectForm.id), [subjectForm.id]);
 
   function resetForm() {
@@ -245,7 +247,13 @@ export default function Settings({ token }: { token: string }) {
                         <td className="p-2">
                           <div className="flex gap-2">
                             <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmSubjectDelete(s)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                            <button
+                              type="button"
+                              className="text-red-400 cursor-pointer"
+                              onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
+                              aria-label="Eliminar"
+                              title="Eliminar"
+                            >🗑️</button>
                           </div>
                         </td>
                       </tr>
@@ -294,27 +302,35 @@ export default function Settings({ token }: { token: string }) {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+            {confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && (
+              <div className="text-sm text-red-400 mb-3">
+                Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
+              </div>
+            )}
+            {confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && (
+              <input
+                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                placeholder='Escribe "eliminar" para confirmar'
+                value={subjectDeleteText}
+                onChange={e=>setSubjectDeleteText(e.target.value)}
+              />
+            )}
             {subjectDeleteError && <div className="text-sm text-red-400 mb-2">{subjectDeleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmSubjectDelete(null)}>Cancelar</button>
               <button
                 type="button"
                 className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
-                disabled={subjectDeleteLoading}
+                disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
                 onClick={async () => {
                   setSubjectDeleteError('');
                   setSubjectDeleteLoading(true);
                   try {
                     await removeSubject(confirmSubjectDelete.id);
                     setConfirmSubjectDelete(null);
-                  } catch (e: any) {
-                    const err = e?.body?.error;
-                    if (err === 'subject_has_units') {
-                      setSubjectDeleteError('No se puede eliminar: tiene unidades asociadas');
-                    } else {
-                      setSubjectDeleteError('No se pudo eliminar');
-                    }
+                  } catch {
+                    setSubjectDeleteError('No se pudo eliminar');
                   } finally {
                     setSubjectDeleteLoading(false);
                   }
