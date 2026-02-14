@@ -118,7 +118,8 @@ export default function Settings({ token }: { token: string }) {
             </div>
 
             <div className="border border-slate-700 rounded-xl overflow-hidden">
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-[640px] w-full text-sm">
                 <thead className="bg-slate-900">
                   <tr>
                     <th className="text-left p-2">Email</th>
@@ -140,7 +141,8 @@ export default function Settings({ token }: { token: string }) {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </div>
           </div>
         )}
