@@ -16,6 +16,9 @@ public class UnitEntity {
     @JoinColumn(name = "subject_id", nullable = false)
     private SubjectEntity subject;
 
+    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<QuestionEntity> questions = new java.util.ArrayList<>();
+
     public UnitEntity() {
     }
 
@@ -47,6 +50,14 @@ public class UnitEntity {
 
     public SubjectEntity getSubject() {
         return subject;
+    }
+
+    public java.util.List<QuestionEntity> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(java.util.List<QuestionEntity> questions) {
+        this.questions = questions;
     }
 
     public void setName(String n) {
