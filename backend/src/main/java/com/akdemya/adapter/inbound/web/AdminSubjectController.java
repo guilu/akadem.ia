@@ -33,7 +33,7 @@ public class AdminSubjectController {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
     Subject subject = Subject.create(req.name().trim(), req.description());
-    return ResponseEntity.ok(SubjectResponse.from(subjects.save(subject)));
+    return ResponseEntity.ok(SubjectResponse.from(subjects.save(subject), 0));
   }
 
   @PutMapping("/{id}")
@@ -45,7 +45,8 @@ public class AdminSubjectController {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
     Subject updated = new Subject(id, name, req.description());
-    return ResponseEntity.ok(SubjectResponse.from(subjects.save(updated)));
+    int unitCount = units.findBySubjectId(id).size();
+    return ResponseEntity.ok(SubjectResponse.from(subjects.save(updated), unitCount));
   }
 
   @DeleteMapping("/{id}")
