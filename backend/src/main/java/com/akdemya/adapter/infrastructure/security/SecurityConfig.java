@@ -69,7 +69,8 @@ public class SecurityConfig {
         cfg.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "http://192.168.1.175:5173"
+                "http://192.168.1.175:5173",
+                "https://akademia.diegobarrioh.dev"
         ));
         // Si usas otras URLs (puertos distintos, etc.), añádelas aquí
         // cfg.setAllowedOriginPatterns(List.of("*")); // alternativa amplia en dev

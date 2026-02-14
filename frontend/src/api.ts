@@ -1,4 +1,10 @@
-export const apiBase = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`;
+const rawBase = import.meta.env.VITE_API_URL || '';
+const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+const envBase = normalizedBase.endsWith('/api') ? normalizedBase.slice(0, -4) : normalizedBase;
+
+const isExternalHost = window.location.hostname.endsWith('diegobarrioh.dev');
+const defaultBase = isExternalHost ? window.location.origin : `http://${window.location.hostname}:8080`;
+export const apiBase = envBase || defaultBase;
 
 export async function apiJson<T>(url: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(url, options);
