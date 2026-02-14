@@ -134,9 +134,11 @@ export default function Settings({ token }: { token: string }) {
                       <td className="p-2">{u.email}</td>
                       <td className="p-2">{u.role}</td>
                       <td className="p-2">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
-                      <td className="p-2 flex gap-2">
-                        <button className="text-cyan-400" onClick={()=>setForm(u)}>Editar</button>
-                        <button className="text-red-400" onClick={()=>removeUser(u.id)}>Eliminar</button>
+                      <td className="p-2">
+                        <div className="flex gap-2">
+                          <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar">✏️</button>
+                          <button className="text-red-400" onClick={()=>removeUser(u.id)} aria-label="Eliminar">🗑️</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
