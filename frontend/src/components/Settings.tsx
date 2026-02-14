@@ -23,6 +23,7 @@ export type AdminUnit = {
   name: string;
   description?: string | null;
   orderIndex: number;
+  questionCount?: number;
 };
 
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
@@ -52,6 +53,7 @@ export default function Settings({ token }: { token: string }) {
   const [confirmUnitDelete, setConfirmUnitDelete] = useState<AdminUnit | null>(null);
   const [unitDeleteLoading, setUnitDeleteLoading] = useState(false);
   const [unitDeleteError, setUnitDeleteError] = useState('');
+  const [unitDeleteText, setUnitDeleteText] = useState('');
   const isUnitEditing = useMemo(() => Boolean(unitForm.id), [unitForm.id]);
 
   function resetForm() {
@@ -382,7 +384,7 @@ export default function Settings({ token }: { token: string }) {
                         <td className="p-2">
                           <div className="flex gap-2">
                             <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
                           </div>
                         </td>
                       </tr>
@@ -476,14 +478,27 @@ export default function Settings({ token }: { token: string }) {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar unidad</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+            {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
+              <div className="text-sm text-red-400 mb-3">
+                Esta unidad tiene preguntas asociadas, si la eliminas se eliminarán todas sus preguntas y respuestas asociadas. Esta acción es irreversible.
+              </div>
+            )}
+            {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
+              <input
+                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                placeholder='Escribe "eliminar" para confirmar'
+                value={unitDeleteText}
+                onChange={e=>setUnitDeleteText(e.target.value)}
+              />
+            )}
             {unitDeleteError && <div className="text-sm text-red-400 mb-2">{unitDeleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmUnitDelete(null)}>Cancelar</button>
               <button
                 type="button"
                 className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
-                disabled={unitDeleteLoading}
+                disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
                 onClick={async () => {
                   setUnitDeleteError('');
                   setUnitDeleteLoading(true);
