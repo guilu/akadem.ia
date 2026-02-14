@@ -10,6 +10,12 @@ export type AdminUser = {
   role: 'ADMIN' | 'TEACHER' | 'STUDENT';
 };
 
+export type AdminSubject = {
+  id: string;
+  name: string;
+  description?: string | null;
+};
+
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
 
 export default function Settings({ token }: { token: string }) {
@@ -22,8 +28,20 @@ export default function Settings({ token }: { token: string }) {
   const [deleteError, setDeleteError] = useState('');
   const isEditing = useMemo(() => Boolean(form.id), [form.id]);
 
+  const [subjects, setSubjects] = useState<AdminSubject[]>([]);
+  const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '' });
+  const [subjectLoading, setSubjectLoading] = useState(false);
+  const [confirmSubjectDelete, setConfirmSubjectDelete] = useState<AdminSubject | null>(null);
+  const [subjectDeleteLoading, setSubjectDeleteLoading] = useState(false);
+  const [subjectDeleteError, setSubjectDeleteError] = useState('');
+  const isSubjectEditing = useMemo(() => Boolean(subjectForm.id), [subjectForm.id]);
+
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
+  }
+
+  function resetSubjectForm() {
+    setSubjectForm({ id: '', name: '', description: '' });
   }
 
   async function loadUsers() {
@@ -31,8 +49,14 @@ export default function Settings({ token }: { token: string }) {
     setUsers(data);
   }
 
+  async function loadSubjects() {
+    const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/admin/subjects`, token);
+    setSubjects(data);
+  }
+
   useEffect(() => {
     loadUsers().catch(() => setUsers([]));
+    loadSubjects().catch(() => setSubjects([]));
   }, []);
 
   async function saveUser() {
@@ -71,9 +95,44 @@ export default function Settings({ token }: { token: string }) {
     }
   }
 
+  async function saveSubject() {
+    if (!subjectForm.name.trim()) return;
+    setSubjectLoading(true);
+    try {
+      if (isSubjectEditing) {
+        await apiAuthJson(`${apiBase}/api/admin/subjects/${subjectForm.id}`, token, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: subjectForm.name,
+            description: subjectForm.description || null
+          })
+        });
+      } else {
+        await apiAuthJson(`${apiBase}/api/admin/subjects`, token, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: subjectForm.name,
+            description: subjectForm.description || null
+          })
+        });
+      }
+      resetSubjectForm();
+      await loadSubjects();
+    } finally {
+      setSubjectLoading(false);
+    }
+  }
+
   async function removeUser(id: string) {
     await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' });
     await loadUsers();
+  }
+
+  async function removeSubject(id: string) {
+    await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' });
+    await loadSubjects();
   }
 
   return (
@@ -87,7 +146,7 @@ export default function Settings({ token }: { token: string }) {
       </aside>
 
       <section className="border border-slate-800 rounded-xl p-4">
-        {tab !== 'users' && (
+        {(tab === 'units' || tab === 'questions') && (
           <div className="text-slate-400">Próximamente…</div>
         )}
 
@@ -151,6 +210,52 @@ export default function Settings({ token }: { token: string }) {
             </div>
           </div>
         )}
+
+        {tab === 'subjects' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Materias</h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={subjectForm.name} onChange={e=>setSubjectForm(f=>({ ...f, name: e.target.value }))} />
+              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={saveSubject} disabled={subjectLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
+                {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
+              </button>
+              {isSubjectEditing && (
+                <button onClick={resetSubjectForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
+              )}
+            </div>
+
+            <div className="border border-slate-700 rounded-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-900">
+                    <tr>
+                      <th className="text-left p-2">Materia</th>
+                      <th className="text-left p-2 hidden sm:table-cell">Descripción</th>
+                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subjects.map(s => (
+                      <tr key={s.id} className="border-t border-slate-800">
+                        <td className="p-2">{s.name}</td>
+                        <td className="p-2 hidden sm:table-cell">{s.description || '-'}</td>
+                        <td className="p-2">
+                          <div className="flex gap-2">
+                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmSubjectDelete(s)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {confirmDelete && (
@@ -179,6 +284,43 @@ export default function Settings({ token }: { token: string }) {
                 }}
               >
                 {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmSubjectDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
+            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+            {subjectDeleteError && <div className="text-sm text-red-400 mb-2">{subjectDeleteError}</div>}
+            <div className="flex gap-2 justify-end">
+              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmSubjectDelete(null)}>Cancelar</button>
+              <button
+                type="button"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                disabled={subjectDeleteLoading}
+                onClick={async () => {
+                  setSubjectDeleteError('');
+                  setSubjectDeleteLoading(true);
+                  try {
+                    await removeSubject(confirmSubjectDelete.id);
+                    setConfirmSubjectDelete(null);
+                  } catch (e: any) {
+                    const err = e?.body?.error;
+                    if (err === 'subject_has_units') {
+                      setSubjectDeleteError('No se puede eliminar: tiene unidades asociadas');
+                    } else {
+                      setSubjectDeleteError('No se pudo eliminar');
+                    }
+                  } finally {
+                    setSubjectDeleteLoading(false);
+                  }
+                }}
+              >
+                {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>
