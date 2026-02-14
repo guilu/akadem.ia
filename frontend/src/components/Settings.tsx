@@ -117,7 +117,7 @@ export default function Settings({ token }: { token: string }) {
               )}
             </div>
 
-            <div className="border border-slate-700 rounded-xl overflow-hidden">
+            <div className="border border-slate-700 rounded-xl">
               <div className="overflow-x-auto">
                 <table className="min-w-[640px] w-full text-sm">
                 <thead className="bg-slate-900">
@@ -136,8 +136,8 @@ export default function Settings({ token }: { token: string }) {
                       <td className="p-2">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
                       <td className="p-2">
                         <div className="flex gap-2">
-                          <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar">✏️</button>
-                          <button className="text-red-400" onClick={()=>removeUser(u.id)} aria-label="Eliminar">🗑️</button>
+                          <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                          <button className="text-red-400" onClick={()=>removeUser(u.id)} aria-label="Eliminar" title="Eliminar">🗑️</button>
                         </div>
                       </td>
                     </tr>
