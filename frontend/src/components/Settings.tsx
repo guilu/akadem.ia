@@ -18,6 +18,8 @@ export default function Settings({ token }: { token: string }) {
   const [form, setForm] = useState<AdminUser>({ id: '', email: '', role: 'STUDENT' });
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const isEditing = useMemo(() => Boolean(form.id), [form.id]);
 
   function resetForm() {
@@ -156,16 +158,27 @@ export default function Settings({ token }: { token: string }) {
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
             <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
+            {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
             <div className="flex gap-2 justify-end">
-              <button className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
+              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
               <button
-                className="px-3 py-2 rounded bg-red-600"
+                type="button"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                disabled={deleteLoading}
                 onClick={async () => {
-                  await removeUser(confirmDelete.id);
-                  setConfirmDelete(null);
+                  setDeleteError('');
+                  setDeleteLoading(true);
+                  try {
+                    await removeUser(confirmDelete.id);
+                    setConfirmDelete(null);
+                  } catch {
+                    setDeleteError('No se pudo eliminar');
+                  } finally {
+                    setDeleteLoading(false);
+                  }
                 }}
               >
-                Eliminar
+                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>
