@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnitMapper {
   public Unit toDomain(UnitEntity entity) {
-    return new Unit(entity.getId(), entity.getSubjectId(), entity.getName(), entity.getOrderIndex());
+    return new Unit(entity.getId(), entity.getSubjectId(), entity.getName(), entity.getDescription(), entity.getOrderIndex());
   }
 
   public UnitEntity toEntity(Unit domain) {
-    UnitEntity entity = new UnitEntity(null, domain.getName(), domain.getOrderIndex());
+    UnitEntity entity = new UnitEntity(null, domain.getName(), domain.getDescription(), domain.getOrderIndex());
     entity.setId(domain.getId());
     return entity;
   }

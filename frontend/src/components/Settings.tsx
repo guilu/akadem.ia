@@ -17,6 +17,14 @@ export type AdminSubject = {
   unitCount?: number;
 };
 
+export type AdminUnit = {
+  id: string;
+  subjectId: string;
+  name: string;
+  description?: string | null;
+  orderIndex: number;
+};
+
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
 
 export default function Settings({ token }: { token: string }) {
@@ -38,12 +46,24 @@ export default function Settings({ token }: { token: string }) {
   const [subjectDeleteText, setSubjectDeleteText] = useState('');
   const isSubjectEditing = useMemo(() => Boolean(subjectForm.id), [subjectForm.id]);
 
+  const [units, setUnits] = useState<AdminUnit[]>([]);
+  const [unitForm, setUnitForm] = useState<AdminUnit>({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 });
+  const [unitLoading, setUnitLoading] = useState(false);
+  const [confirmUnitDelete, setConfirmUnitDelete] = useState<AdminUnit | null>(null);
+  const [unitDeleteLoading, setUnitDeleteLoading] = useState(false);
+  const [unitDeleteError, setUnitDeleteError] = useState('');
+  const isUnitEditing = useMemo(() => Boolean(unitForm.id), [unitForm.id]);
+
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
   }
 
   function resetSubjectForm() {
     setSubjectForm({ id: '', name: '', description: '' });
+  }
+
+  function resetUnitForm() {
+    setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 });
   }
 
   async function loadUsers() {
@@ -56,10 +76,25 @@ export default function Settings({ token }: { token: string }) {
     setSubjects(data);
   }
 
+  async function loadUnits(subjectId: string) {
+    if (!subjectId) {
+      setUnits([]);
+      return;
+    }
+    const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/admin/units?subjectId=${subjectId}`, token);
+    setUnits(data);
+  }
+
   useEffect(() => {
     loadUsers().catch(() => setUsers([]));
     loadSubjects().catch(() => setSubjects([]));
   }, []);
+
+  useEffect(() => {
+    if (tab === 'units') {
+      loadUnits(unitForm.subjectId).catch(() => setUnits([]));
+    }
+  }, [tab, unitForm.subjectId]);
 
   async function saveUser() {
     if (!form.email.trim()) return;
@@ -137,6 +172,43 @@ export default function Settings({ token }: { token: string }) {
     await loadSubjects();
   }
 
+  async function saveUnit() {
+    if (!unitForm.subjectId || !unitForm.name.trim()) return;
+    setUnitLoading(true);
+    try {
+      const payload = {
+        subjectId: unitForm.subjectId,
+        name: unitForm.name,
+        description: unitForm.description || null,
+        orderIndex: unitForm.orderIndex || 0
+      };
+      if (isUnitEditing) {
+        await apiAuthJson(`${apiBase}/api/admin/units/${unitForm.id}`, token, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await apiAuthJson(`${apiBase}/api/admin/units`, token, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      resetUnitForm();
+      await loadUnits(unitForm.subjectId);
+      await loadSubjects();
+    } finally {
+      setUnitLoading(false);
+    }
+  }
+
+  async function removeUnit(id: string) {
+    await apiAuthJson(`${apiBase}/api/admin/units/${id}`, token, { method: 'DELETE' });
+    await loadUnits(unitForm.subjectId);
+    await loadSubjects();
+  }
+
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
@@ -148,7 +220,7 @@ export default function Settings({ token }: { token: string }) {
       </aside>
 
       <section className="border border-slate-800 rounded-xl p-4">
-        {(tab === 'units' || tab === 'questions') && (
+        {tab === 'questions' && (
           <div className="text-slate-400">Próximamente…</div>
         )}
 
@@ -264,6 +336,63 @@ export default function Settings({ token }: { token: string }) {
             </div>
           </div>
         )}
+
+        {tab === 'units' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Unidades</h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
+                <option value="">Selecciona materia</option>
+                {subjects.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
+              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="descripción (opcional)" value={unitForm.description || ''} onChange={e=>setUnitForm(f=>({ ...f, description: e.target.value }))} />
+              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={saveUnit} disabled={unitLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
+                {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
+              </button>
+              {isUnitEditing && (
+                <button onClick={resetUnitForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
+              )}
+            </div>
+
+            <div className="border border-slate-700 rounded-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-900">
+                    <tr>
+                      <th className="text-left p-2">Materia</th>
+                      <th className="text-left p-2">Unidad</th>
+                      <th className="text-left p-2 hidden sm:table-cell">Descripción</th>
+                      <th className="text-left p-2 hidden sm:table-cell">Orden</th>
+                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {units.map(u => (
+                      <tr key={u.id} className="border-t border-slate-800">
+                        <td className="p-2">{subjects.find(s => s.id === u.subjectId)?.name || '-'}</td>
+                        <td className="p-2">{u.name}</td>
+                        <td className="p-2 hidden sm:table-cell">{u.description || '-'}</td>
+                        <td className="p-2 hidden sm:table-cell">{u.orderIndex}</td>
+                        <td className="p-2">
+                          <div className="flex gap-2">
+                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {confirmDelete && (
@@ -337,6 +466,38 @@ export default function Settings({ token }: { token: string }) {
                 }}
               >
                 {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmUnitDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-2">Eliminar unidad</h3>
+            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+            {unitDeleteError && <div className="text-sm text-red-400 mb-2">{unitDeleteError}</div>}
+            <div className="flex gap-2 justify-end">
+              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmUnitDelete(null)}>Cancelar</button>
+              <button
+                type="button"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                disabled={unitDeleteLoading}
+                onClick={async () => {
+                  setUnitDeleteError('');
+                  setUnitDeleteLoading(true);
+                  try {
+                    await removeUnit(confirmUnitDelete.id);
+                    setConfirmUnitDelete(null);
+                  } catch {
+                    setUnitDeleteError('No se pudo eliminar');
+                  } finally {
+                    setUnitDeleteLoading(false);
+                  }
+                }}
+              >
+                {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>

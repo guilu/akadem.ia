@@ -10,6 +10,8 @@ public class UnitEntity {
     private UUID id = UUID.randomUUID();
     @Column(nullable = false)
     private String name;
+    @Column(columnDefinition = "text")
+    private String description;
     @Column(name = "order_index", nullable = false)
     private int orderIndex = 0;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,9 +24,10 @@ public class UnitEntity {
     public UnitEntity() {
     }
 
-    public UnitEntity(SubjectEntity subject, String name, int orderIndex) {
+    public UnitEntity(SubjectEntity subject, String name, String description, int orderIndex) {
         this.subject = subject;
         this.name = name;
+        this.description = description;
         this.orderIndex = orderIndex;
     }
 
@@ -38,6 +41,10 @@ public class UnitEntity {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getOrderIndex() {
@@ -62,6 +69,10 @@ public class UnitEntity {
 
     public void setName(String n) {
         this.name = n;
+    }
+
+    public void setDescription(String d) {
+        this.description = d;
     }
 
     public void setOrderIndex(int i) {
