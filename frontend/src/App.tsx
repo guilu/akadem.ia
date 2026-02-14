@@ -135,9 +135,11 @@ export default function App(){
                 Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
               </p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                <button className="px-5 py-3 rounded-xl bg-cyan-600" onClick={()=>setView('subjects')}>
-                  Crear simulacro
-                </button>
+                {isAuthed && (
+                  <button className="px-5 py-3 rounded-xl bg-cyan-600" onClick={()=>setView('subjects')}>
+                    Crear simulacro
+                  </button>
+                )}
                 {!isAuthed && (
                   <div className="flex gap-2 justify-center">
                     <button className="px-3 py-2 rounded-full border border-slate-600 text-sm" onClick={()=>setView('login')}>Login</button>
