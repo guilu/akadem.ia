@@ -119,7 +119,7 @@ export default function Settings({ token }: { token: string }) {
 
             <div className="border border-slate-700 rounded-xl">
               <div className="overflow-x-auto">
-                <table className="min-w-[640px] w-full text-sm">
+                <table className="w-full text-sm">
                 <thead className="bg-slate-900">
                   <tr>
                     <th className="text-left p-2">Email</th>
