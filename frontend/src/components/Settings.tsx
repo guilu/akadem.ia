@@ -123,17 +123,17 @@ export default function Settings({ token }: { token: string }) {
                 <thead className="bg-slate-900">
                   <tr>
                     <th className="text-left p-2">Email</th>
-                    <th className="text-left p-2">Rol</th>
-                    <th className="text-left p-2">Nombre</th>
-                    <th className="text-left p-2">Acciones</th>
+                    <th className="text-left p-2 hidden sm:table-cell">Rol</th>
+                    <th className="text-left p-2 hidden sm:table-cell">Nombre</th>
+                    <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map(u => (
                     <tr key={u.id} className="border-t border-slate-800">
                       <td className="p-2">{u.email}</td>
-                      <td className="p-2">{u.role}</td>
-                      <td className="p-2">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
+                      <td className="p-2 hidden sm:table-cell">{u.role}</td>
+                      <td className="p-2 hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
                       <td className="p-2">
                         <div className="flex gap-2">
                           <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
