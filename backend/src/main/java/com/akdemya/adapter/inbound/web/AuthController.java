@@ -22,7 +22,7 @@ public class AuthController {
         if (response.error() != null) {
             return ResponseEntity.badRequest().body(Map.of("error", response.error()));
         }
-        return ResponseEntity.ok(Map.of("accessToken", response.accessToken()));
+        return ResponseEntity.ok(Map.of("accessToken", response.accessToken(), "role", response.role()));
     }
 
     @PostMapping("/login")
@@ -31,6 +31,6 @@ public class AuthController {
         if (response.error() != null) {
             return ResponseEntity.status(401).body(Map.of("error", response.error()));
         }
-        return ResponseEntity.ok(Map.of("accessToken", response.accessToken()));
+        return ResponseEntity.ok(Map.of("accessToken", response.accessToken(), "role", response.role()));
     }
 }
