@@ -26,6 +26,16 @@ export type AdminUnit = {
   questionCount?: number;
 };
 
+export type AdminAnswer = { id?: string; text: string; correct: boolean };
+export type AdminQuestion = {
+  id: string;
+  unitId: string;
+  text: string;
+  explanation?: string | null;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  answers: AdminAnswer[];
+};
+
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
 
 export default function Settings({ token }: { token: string }) {
@@ -56,6 +66,27 @@ export default function Settings({ token }: { token: string }) {
   const [unitDeleteText, setUnitDeleteText] = useState('');
   const isUnitEditing = useMemo(() => Boolean(unitForm.id), [unitForm.id]);
 
+  const [questions, setQuestions] = useState<AdminQuestion[]>([]);
+  const [questionForm, setQuestionForm] = useState<AdminQuestion>({
+    id: '',
+    unitId: '',
+    text: '',
+    explanation: '',
+    difficulty: 'EASY',
+    answers: [
+      { text: '', correct: true },
+      { text: '', correct: false },
+      { text: '', correct: false },
+      { text: '', correct: false }
+    ]
+  });
+  const [questionLoading, setQuestionLoading] = useState(false);
+  const [confirmQuestionDelete, setConfirmQuestionDelete] = useState<AdminQuestion | null>(null);
+  const [questionDeleteLoading, setQuestionDeleteLoading] = useState(false);
+  const [questionDeleteError, setQuestionDeleteError] = useState('');
+  const isQuestionEditing = useMemo(() => Boolean(questionForm.id), [questionForm.id]);
+  const [questionSubjectId, setQuestionSubjectId] = useState('');
+
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
   }
@@ -66,6 +97,22 @@ export default function Settings({ token }: { token: string }) {
 
   function resetUnitForm() {
     setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 });
+  }
+
+  function resetQuestionForm() {
+    setQuestionForm({
+      id: '',
+      unitId: '',
+      text: '',
+      explanation: '',
+      difficulty: 'EASY',
+      answers: [
+        { text: '', correct: true },
+        { text: '', correct: false },
+        { text: '', correct: false },
+        { text: '', correct: false }
+      ]
+    });
   }
 
   async function loadUsers() {
@@ -87,6 +134,15 @@ export default function Settings({ token }: { token: string }) {
     setUnits(data);
   }
 
+  async function loadQuestions(unitId: string) {
+    if (!unitId) {
+      setQuestions([]);
+      return;
+    }
+    const data = await apiAuthJson<AdminQuestion[]>(`${apiBase}/api/admin/questions?unitId=${unitId}`, token);
+    setQuestions(data);
+  }
+
   useEffect(() => {
     loadUsers().catch(() => setUsers([]));
     loadSubjects().catch(() => setSubjects([]));
@@ -97,6 +153,13 @@ export default function Settings({ token }: { token: string }) {
       loadUnits(unitForm.subjectId).catch(() => setUnits([]));
     }
   }, [tab, unitForm.subjectId]);
+
+  useEffect(() => {
+    if (tab === 'questions') {
+      loadUnits(questionSubjectId).catch(() => setUnits([]));
+      loadQuestions(questionForm.unitId).catch(() => setQuestions([]));
+    }
+  }, [tab, questionSubjectId, questionForm.unitId]);
 
   async function saveUser() {
     if (!form.email.trim()) return;
@@ -211,6 +274,47 @@ export default function Settings({ token }: { token: string }) {
     await loadSubjects();
   }
 
+  async function saveQuestion() {
+    if (!questionForm.unitId || !questionForm.text.trim()) return;
+    if (questionForm.answers.some(a => !a.text.trim())) return;
+    const correctCount = questionForm.answers.filter(a => a.correct).length;
+    if (correctCount !== 1) return;
+    setQuestionLoading(true);
+    try {
+      const payload = {
+        unitId: questionForm.unitId,
+        text: questionForm.text,
+        explanation: questionForm.explanation || null,
+        difficulty: questionForm.difficulty,
+        answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct }))
+      };
+      if (isQuestionEditing) {
+        await apiAuthJson(`${apiBase}/api/admin/questions/${questionForm.id}`, token, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await apiAuthJson(`${apiBase}/api/admin/questions`, token, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      resetQuestionForm();
+      await loadQuestions(questionForm.unitId);
+      await loadUnits(questionSubjectId);
+    } finally {
+      setQuestionLoading(false);
+    }
+  }
+
+  async function removeQuestion(id: string) {
+    await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' });
+    await loadQuestions(questionForm.unitId);
+    await loadUnits(questionSubjectId);
+  }
+
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
@@ -223,7 +327,109 @@ export default function Settings({ token }: { token: string }) {
 
       <section className="border border-slate-800 rounded-xl p-4">
         {tab === 'questions' && (
-          <div className="text-slate-400">Próximamente…</div>
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Preguntas</h2>
+            <div className="grid gap-2 md:grid-cols-2">
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionSubjectId} onChange={e=>{ setQuestionSubjectId(e.target.value); setQuestionForm(f=>({ ...f, unitId: '' })); }}>
+                <option value="">Selecciona materia</option>
+                {subjects.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionForm.unitId} onChange={e=>setQuestionForm(f=>({ ...f, unitId: e.target.value }))}>
+                <option value="">Selecciona unidad</option>
+                {units.map(u => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <textarea className="bg-slate-900 border border-slate-700 rounded px-3 py-2" rows={3} placeholder="enunciado" value={questionForm.text} onChange={e=>setQuestionForm(f=>({ ...f, text: e.target.value }))} />
+              <textarea className="bg-slate-900 border border-slate-700 rounded px-3 py-2" rows={2} placeholder="explicación (opcional)" value={questionForm.explanation || ''} onChange={e=>setQuestionForm(f=>({ ...f, explanation: e.target.value }))} />
+              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2 w-full md:w-48" value={questionForm.difficulty} onChange={e=>setQuestionForm(f=>({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
+                <option value="EASY">EASY</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HARD">HARD</option>
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <div className="text-sm text-slate-400">Respuestas (marca la correcta)</div>
+              {questionForm.answers.map((a, idx) => (
+                <label key={idx} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="correct"
+                    checked={a.correct}
+                    onChange={() => setQuestionForm(f => ({
+                      ...f,
+                      answers: f.answers.map((ans, i) => ({ ...ans, correct: i === idx }))
+                    }))}
+                  />
+                  <input
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                    placeholder={`respuesta ${idx + 1}`}
+                    value={a.text}
+                    onChange={e => setQuestionForm(f => ({
+                      ...f,
+                      answers: f.answers.map((ans, i) => i === idx ? { ...ans, text: e.target.value } : ans)
+                    }))}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={saveQuestion} disabled={questionLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
+                {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
+              </button>
+              {isQuestionEditing && (
+                <button onClick={resetQuestionForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
+              )}
+            </div>
+
+            <div className="border border-slate-700 rounded-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-900">
+                    <tr>
+                      <th className="text-left p-2">Unidad</th>
+                      <th className="text-left p-2">Pregunta</th>
+                      <th className="text-left p-2 hidden sm:table-cell">Dificultad</th>
+                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {questions.map(q => (
+                      <tr key={q.id} className="border-t border-slate-800">
+                        <td className="p-2">{units.find(u => u.id === q.unitId)?.name || '-'}</td>
+                        <td className="p-2">{q.text}</td>
+                        <td className="p-2 hidden sm:table-cell">{q.difficulty}</td>
+                        <td className="p-2">
+                          <div className="flex gap-2">
+                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>{
+                              const unit = units.find(u => u.id === q.unitId);
+                              if (unit) setQuestionSubjectId(unit.subjectId);
+                              setQuestionForm({
+                                id: q.id,
+                                unitId: q.unitId,
+                                text: q.text,
+                                explanation: q.explanation || '',
+                                difficulty: q.difficulty,
+                                answers: q.answers.map(a => ({ text: a.text, correct: a.correct }))
+                              });
+                            }} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         )}
 
         {tab === 'users' && (
@@ -513,6 +719,38 @@ export default function Settings({ token }: { token: string }) {
                 }}
               >
                 {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmQuestionDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-2">Eliminar pregunta</h3>
+            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
+            {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
+            <div className="flex gap-2 justify-end">
+              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmQuestionDelete(null)}>Cancelar</button>
+              <button
+                type="button"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                disabled={questionDeleteLoading}
+                onClick={async () => {
+                  setQuestionDeleteError('');
+                  setQuestionDeleteLoading(true);
+                  try {
+                    await removeQuestion(confirmQuestionDelete.id);
+                    setConfirmQuestionDelete(null);
+                  } catch {
+                    setQuestionDeleteError('No se pudo eliminar');
+                  } finally {
+                    setQuestionDeleteLoading(false);
+                  }
+                }}
+              >
+                {questionDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>
