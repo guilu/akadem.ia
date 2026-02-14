@@ -29,7 +29,7 @@ public class UnitPersistenceAdapter implements UnitRepository {
 
   @Override
   public List<Unit> findBySubjectId(UUID subjectId) {
-    return repository.findBySubject_IdOrderByOrderIndexAsc(subjectId).stream()
+    return repository.findBySubject_IdOrderByOrderIndexAscNameAsc(subjectId).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }

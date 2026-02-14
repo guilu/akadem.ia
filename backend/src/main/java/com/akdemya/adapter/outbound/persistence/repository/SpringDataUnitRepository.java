@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SpringDataUnitRepository extends JpaRepository<UnitEntity, UUID> {
-    List<UnitEntity> findBySubject_IdOrderByOrderIndexAsc(UUID subjectId);
+    List<UnitEntity> findBySubject_IdOrderByOrderIndexAscNameAsc(UUID subjectId);
 }
