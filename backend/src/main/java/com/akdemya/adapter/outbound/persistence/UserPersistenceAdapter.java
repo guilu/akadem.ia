@@ -39,4 +39,14 @@ public class UserPersistenceAdapter implements UserRepository {
   public boolean existsByEmail(String email) {
     return repository.existsByEmail(email);
   }
+
+  @Override
+  public java.util.List<AppUser> findAll() {
+    return repository.findAll().stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public void deleteById(UUID id) {
+    repository.deleteById(id);
+  }
 }

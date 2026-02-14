@@ -24,6 +24,11 @@ INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES
   ('00000000-0000-0000-0000-000000000204','00000000-0000-0000-0000-000000000102','Resuelve: 5x - 10 = 0','Suma 10 y divide entre 5','EASY')
 ON CONFLICT DO NOTHING;
 
+-- ============ USERS ============
+INSERT INTO users(id, email, password_hash, role, first_name, last_name, occupation) VALUES
+  ('22222222-2222-2222-2222-222222222222','demo@akdemya.com','$2b$05$ZQaA2oiJaXCVFN540AU1du73.MrLGBMoacIKQ/.IJaDc2samK3eum','ADMIN',NULL,NULL,NULL)
+ON CONFLICT DO NOTHING;
+
 -- ============ ANSWERS ============
 -- Pregunta 1 (Fracciones)
 INSERT INTO answers(id, question_id, text, correct) VALUES

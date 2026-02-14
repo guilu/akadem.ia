@@ -3,10 +3,11 @@ import ExamRunner, { Question } from './components/ExamRunner';
 import ExamBuilder from './components/ExamBuilder';
 import Login from './components/Login';
 import Register from './components/Register';
+import Settings from './components/Settings';
 import { apiBase, apiAuthJson } from './api';
 import type { Subject, ExamResult, ExamStartResponse } from './types';
 
-type View = 'home'|'login'|'register'|'subjects'|'builder'|'runner'|'result';
+type View = 'home'|'login'|'register'|'subjects'|'builder'|'runner'|'result'|'settings';
 
 export default function App(){
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -20,6 +21,15 @@ export default function App(){
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
+  const role = useMemo(() => {
+    try {
+      if (!token) return null;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role || null;
+    } catch {
+      return null;
+    }
+  }, [token]);
 
   async function authedJson<T>(url: string, options: RequestInit = {}) {
     try {
@@ -95,6 +105,9 @@ export default function App(){
             {isAuthed && (
               <>
                 <button className="hover:underline" onClick={()=>setView('subjects')}>Asignaturas</button>
+                {role === 'ADMIN' && (
+                  <button className="hover:underline" onClick={()=>setView('settings')}>Configuración</button>
+                )}
                 <button className="text-sm border border-slate-600 rounded px-2 py-1" onClick={onLogout}>Salir</button>
               </>
             )}
@@ -119,6 +132,9 @@ export default function App(){
             {isAuthed && (
               <>
                 <button className="text-left hover:underline" onClick={()=>{ setView('subjects'); setMenuOpen(false); }}>Asignaturas</button>
+                {role === 'ADMIN' && (
+                  <button className="text-left hover:underline" onClick={()=>{ setView('settings'); setMenuOpen(false); }}>Configuración</button>
+                )}
                 <button className="text-left border border-slate-600 rounded px-2 py-1 w-fit" onClick={()=>{ onLogout(); setMenuOpen(false); }}>Salir</button>
               </>
             )}
@@ -210,6 +226,10 @@ export default function App(){
               <button className="px-3 py-2 rounded bg-indigo-600" onClick={()=>{ setResult(null); setView('subjects'); }}>Volver a asignaturas</button>
             </div>
           </div>
+        )}
+
+        {view === 'settings' && role === 'ADMIN' && (
+          <Settings token={token} />
         )}
       </main>
     </div>

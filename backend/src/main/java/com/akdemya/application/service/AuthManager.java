@@ -49,7 +49,7 @@ public class AuthManager implements AuthUseCase {
     users.save(user);
     String token = tokenProvider.generate(user.getEmail(),
         Map.of("uid", user.getId().toString(), "role", user.getRole()));
-    return AuthResponse.success(token);
+    return AuthResponse.success(token, user.getRole());
   }
 
   @Override
@@ -60,6 +60,6 @@ public class AuthManager implements AuthUseCase {
     }
     String token = tokenProvider.generate(user.getEmail(),
         Map.of("uid", user.getId().toString(), "role", user.getRole()));
-    return AuthResponse.success(token);
+    return AuthResponse.success(token, user.getRole());
   }
 }

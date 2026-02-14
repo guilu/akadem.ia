@@ -48,6 +48,9 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Admin only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         // Resto autenticado
                         .anyRequest().authenticated());
 
@@ -103,7 +106,9 @@ public class SecurityConfig {
                 try {
                     var jws = jwt.parse(token);
                     String email = jws.getBody().getSubject();
-                    UserDetails principal = User.withUsername(email).password("").authorities("USER").build();
+                    String role = String.valueOf(jws.getBody().get("role"));
+                    String authority = "ROLE_" + role;
+                    UserDetails principal = User.withUsername(email).password("").authorities(authority).build();
                     var auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception ignored) {
