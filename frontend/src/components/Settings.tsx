@@ -137,8 +137,8 @@ export default function Settings({ token }: { token: string }) {
                       <td className="p-2 hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
                       <td className="p-2">
                         <div className="flex gap-2">
-                          <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                          <button className="text-red-400" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
                         </div>
                       </td>
                     </tr>
