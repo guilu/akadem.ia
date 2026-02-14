@@ -16,6 +16,7 @@ import com.akdemya.domain.port.out.QuestionRepository;
 public class QuestionPersistenceAdapter implements QuestionRepository {
   private final SpringDataQuestionRepository repository;
   private final QuestionMapper mapper;
+  @jakarta.persistence.PersistenceContext
   private jakarta.persistence.EntityManager entityManager;
 
   public QuestionPersistenceAdapter(SpringDataQuestionRepository repository, QuestionMapper mapper) {
