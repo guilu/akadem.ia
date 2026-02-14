@@ -8,6 +8,7 @@ export async function apiJson<T>(url: string, options: RequestInit = {}): Promis
     err.body = await res.json().catch(() => ({}));
     throw err;
   }
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
@@ -22,5 +23,6 @@ export async function apiAuthJson<T>(url: string, token: string, options: Reques
     err.body = await res.json().catch(() => ({}));
     throw err;
   }
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
