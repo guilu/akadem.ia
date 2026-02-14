@@ -1,4 +1,4 @@
-export const apiBase = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8080`;
+export const apiBase = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
 export async function apiJson<T>(url: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(url, options);
