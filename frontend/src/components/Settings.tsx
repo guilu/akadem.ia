@@ -17,6 +17,7 @@ export default function Settings({ token }: { token: string }) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [form, setForm] = useState<AdminUser>({ id: '', email: '', role: 'STUDENT' });
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const isEditing = useMemo(() => Boolean(form.id), [form.id]);
 
   function resetForm() {
@@ -137,7 +138,7 @@ export default function Settings({ token }: { token: string }) {
                       <td className="p-2">
                         <div className="flex gap-2">
                           <button className="text-cyan-400" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                          <button className="text-red-400" onClick={()=>removeUser(u.id)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          <button className="text-red-400" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -149,6 +150,27 @@ export default function Settings({ token }: { token: string }) {
           </div>
         )}
       </section>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
+            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
+            <div className="flex gap-2 justify-end">
+              <button className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
+              <button
+                className="px-3 py-2 rounded bg-red-600"
+                onClick={async () => {
+                  await removeUser(confirmDelete.id);
+                  setConfirmDelete(null);
+                }}
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
