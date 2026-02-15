@@ -131,7 +131,7 @@ export default function App(){
           <Route path="/register" element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
           <Route path="/subjects" element={
             <ProtectedRoute allow={isAuthed}>
-              <SubjectsPage subjects={subjects} />
+              <SubjectsPage subjects={subjects} activeAttemptId={activeAttemptId} />
             </ProtectedRoute>
           } />
           <Route path="/subjects/:subjectId/builder" element={
