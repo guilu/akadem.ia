@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface SpringDataExamAttemptAnswerRepository extends JpaRepository<ExamAttemptAnswerEntity, UUID> {
     List<ExamAttemptAnswerEntity> findByAttemptId(UUID attemptId);
+
+    java.util.Optional<ExamAttemptAnswerEntity> findByAttemptIdAndQuestionId(UUID attemptId, UUID questionId);
 }

@@ -2,6 +2,7 @@ package com.akdemya.domain.port.out;
 
 import com.akdemya.domain.model.ExamAttemptAnswer;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ExamAttemptAnswerRepository {
@@ -10,4 +11,6 @@ public interface ExamAttemptAnswerRepository {
   void saveAll(List<ExamAttemptAnswer> answers);
 
   List<ExamAttemptAnswer> findByAttemptId(UUID attemptId);
+
+  Optional<ExamAttemptAnswer> findByAttemptIdAndQuestionId(UUID attemptId, UUID questionId);
 }
