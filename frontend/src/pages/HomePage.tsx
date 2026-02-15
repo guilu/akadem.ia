@@ -32,7 +32,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         <div className="border border-slate-700 rounded-xl p-4">
-          <div className="text-2xl font-bold">+20</div>
+          <div className="text-2xl font-bold">+200</div>
           <div className="text-sm text-slate-400">Preguntas por materia</div>
         </div>
         <div className="border border-slate-700 rounded-xl p-4">
