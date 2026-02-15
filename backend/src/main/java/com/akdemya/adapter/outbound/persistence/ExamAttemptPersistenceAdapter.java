@@ -34,7 +34,7 @@ public class ExamAttemptPersistenceAdapter implements ExamAttemptRepository {
 
   @Override
   public List<ExamAttempt> findByUserEmail(String userEmail) {
-    return repository.findByUserEmail(userEmail).stream()
+    return repository.findByUserEmailOrderByStartedAtDesc(userEmail).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }

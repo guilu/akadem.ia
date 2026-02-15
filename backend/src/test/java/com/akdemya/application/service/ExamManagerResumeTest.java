@@ -27,10 +27,15 @@ class ExamManagerResumeTest {
     Answer a2 = new Answer(UUID.randomUUID(), q1Id, "A2", false);
     Answer b1 = new Answer(UUID.randomUUID(), q2Id, "B1", true);
 
+    Subject subject = new Subject(UUID.randomUUID(), "Matematicas", null);
+    Unit unit = new Unit(unitId, subject.getId(), "Unit", null, 1);
+
     InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
     InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
     InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(q1, q2));
     InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of(a1, a2, b1));
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
 
     ExamAttempt attempt = new ExamAttempt(attemptId, "test@akdemya.com", OffsetDateTime.now(), null, 120, null);
     attemptRepo.save(attempt);
@@ -40,7 +45,7 @@ class ExamManagerResumeTest {
         new ExamAttemptAnswer(UUID.randomUUID(), attemptId, q2Id, null)
     ));
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
 
     var initial = manager.getAttempt(attemptId);
     assertEquals(0, initial.nextQuestionIndex());
@@ -61,6 +66,54 @@ class ExamManagerResumeTest {
     assertTrue(resumed.questions().stream().anyMatch(q -> a1.getId().equals(q.selectedAnswerId())));
   }
 
+
+
+  @Test
+  void listAttemptsReturnsSummariesOrdered() {
+    UUID subjectId = UUID.randomUUID();
+    Subject subject = new Subject(subjectId, "Matematicas", null);
+    UUID unitId = UUID.randomUUID();
+    Unit unit = new Unit(unitId, subjectId, "Unit", null, 1);
+
+    UUID q1Id = UUID.randomUUID();
+    UUID q2Id = UUID.randomUUID();
+    Question q1 = new Question(q1Id, unitId, "Q1", null, Question.Difficulty.EASY);
+    Question q2 = new Question(q2Id, unitId, "Q2", null, Question.Difficulty.EASY);
+
+    Answer a1 = new Answer(UUID.randomUUID(), q1Id, "A1", true);
+    Answer a2 = new Answer(UUID.randomUUID(), q1Id, "A2", false);
+    Answer b1 = new Answer(UUID.randomUUID(), q2Id, "B1", false);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(q1, q2));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of(a1, a2, b1));
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
+
+    ExamAttempt attemptOld = new ExamAttempt(UUID.randomUUID(), "user@akdemya.com",
+        OffsetDateTime.now().minusHours(2), OffsetDateTime.now().minusHours(1), 120, 0);
+    ExamAttempt attemptNew = new ExamAttempt(UUID.randomUUID(), "user@akdemya.com",
+        OffsetDateTime.now().minusHours(1), null, 120, null);
+
+    attemptRepo.save(attemptOld);
+    attemptRepo.save(attemptNew);
+
+    attemptAnswerRepo.saveAll(List.of(
+        new ExamAttemptAnswer(UUID.randomUUID(), attemptOld.getId(), q1Id, a1.getId()),
+        new ExamAttemptAnswer(UUID.randomUUID(), attemptOld.getId(), q2Id, b1.getId()),
+        new ExamAttemptAnswer(UUID.randomUUID(), attemptNew.getId(), q1Id, a2.getId())
+    ));
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var summaries = manager.listAttempts("user@akdemya.com");
+    assertEquals(2, summaries.size());
+    assertEquals(attemptNew.getId(), summaries.get(0).attemptId());
+    assertEquals("Matematicas", summaries.get(0).subjectName());
+    assertEquals(1, summaries.get(0).totalQuestions());
+    assertEquals(2, summaries.get(1).totalQuestions());
+  }
   static class InMemoryAttemptRepo implements ExamAttemptRepository {
     private final Map<UUID, ExamAttempt> data = new ConcurrentHashMap<>();
 
@@ -183,6 +236,64 @@ class ExamManagerResumeTest {
     @Override
     public void deleteByQuestionId(UUID questionId) {
       data.values().removeIf(a -> a.getQuestionId().equals(questionId));
+    }
+  }
+
+  static class InMemoryUnitRepo implements UnitRepository {
+    private final Map<UUID, Unit> data = new ConcurrentHashMap<>();
+
+    InMemoryUnitRepo(List<Unit> units) {
+      for (Unit u : units) data.put(u.getId(), u);
+    }
+
+    @Override
+    public List<Unit> findBySubjectId(UUID subjectId) {
+      return data.values().stream().filter(u -> u.getSubjectId().equals(subjectId)).toList();
+    }
+
+    @Override
+    public Optional<Unit> findById(UUID id) {
+      return Optional.ofNullable(data.get(id));
+    }
+
+    @Override
+    public Unit save(Unit unit) {
+      data.put(unit.getId(), unit);
+      return unit;
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+      data.remove(id);
+    }
+  }
+
+  static class InMemorySubjectRepo implements SubjectRepository {
+    private final Map<UUID, Subject> data = new ConcurrentHashMap<>();
+
+    InMemorySubjectRepo(List<Subject> subjects) {
+      for (Subject s : subjects) data.put(s.getId(), s);
+    }
+
+    @Override
+    public List<Subject> findAll() {
+      return new ArrayList<>(data.values());
+    }
+
+    @Override
+    public Optional<Subject> findById(UUID id) {
+      return Optional.ofNullable(data.get(id));
+    }
+
+    @Override
+    public Subject save(Subject subject) {
+      data.put(subject.getId(), subject);
+      return subject;
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+      data.remove(id);
     }
   }
 }

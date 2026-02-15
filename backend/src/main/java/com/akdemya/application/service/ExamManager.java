@@ -17,15 +17,19 @@ public class ExamManager implements ExamUseCase {
   private final ExamAttemptAnswerRepository attemptAnsRepo;
   private final QuestionRepository questionRepo;
   private final AnswerRepository answerRepo;
+  private final UnitRepository unitRepo;
+  private final SubjectRepository subjectRepo;
   private final Random rnd = new Random();
   private final ExamScoringCalculator scoringCalculator = new ExamScoringCalculator();
 
   public ExamManager(ExamAttemptRepository attemptRepo, ExamAttemptAnswerRepository attemptAnsRepo,
-      QuestionRepository questionRepo, AnswerRepository answerRepo) {
+      QuestionRepository questionRepo, AnswerRepository answerRepo, UnitRepository unitRepo, SubjectRepository subjectRepo) {
     this.attemptRepo = attemptRepo;
     this.attemptAnsRepo = attemptAnsRepo;
     this.questionRepo = questionRepo;
     this.answerRepo = answerRepo;
+    this.unitRepo = unitRepo;
+    this.subjectRepo = subjectRepo;
   }
 
   @Override
@@ -159,6 +163,60 @@ public class ExamManager implements ExamUseCase {
     boolean finished = attempt.getFinishedAt() != null;
     return new AttemptResponse(attempt.getId(), attempt.getTotalTimeSeconds() == null ? 0 : attempt.getTotalTimeSeconds(),
         questions, nextIndex, finished);
+  }
+
+  @Override
+  public List<AttemptSummary> listAttempts(String userEmail) {
+    List<ExamAttempt> attempts = new ArrayList<>(attemptRepo.findByUserEmail(userEmail));
+    attempts.sort(Comparator.comparing(ExamAttempt::getStartedAt).reversed());
+
+    List<AttemptSummary> summaries = new ArrayList<>();
+    for (ExamAttempt attempt : attempts) {
+      List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attempt.getId());
+      int total = entries.size();
+      int correct = 0;
+      int wrong = 0;
+      for (ExamAttemptAnswer e : entries) {
+        if (e.getAnswerId() == null)
+          continue;
+        Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
+        if (ans != null && ans.isCorrect()) {
+          correct++;
+        } else if (ans != null) {
+          wrong++;
+        }
+      }
+      ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
+
+      String subjectName = "Desconocida";
+      if (!entries.isEmpty()) {
+        Question q = questionRepo.findById(entries.get(0).getQuestionId()).orElse(null);
+        if (q != null) {
+          var unit = unitRepo.findById(q.getUnitId()).orElse(null);
+          if (unit != null) {
+            var subject = subjectRepo.findById(unit.getSubjectId()).orElse(null);
+            if (subject != null) {
+              subjectName = subject.getName();
+            }
+          }
+        }
+      }
+
+      summaries.add(new AttemptSummary(
+          attempt.getId(),
+          subjectName,
+          attempt.getStartedAt(),
+          attempt.getFinishedAt(),
+          attempt.getTotalTimeSeconds() == null ? 0 : attempt.getTotalTimeSeconds(),
+          attempt.getScore(),
+          total,
+          correct,
+          wrong,
+          scoring.percentage()
+      ));
+    }
+
+    return summaries;
   }
 
   @Override
