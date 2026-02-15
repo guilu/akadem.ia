@@ -23,6 +23,13 @@ export default function App(){
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
   const [result, setResult] = useState<ExamResult|null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const stored = localStorage.getItem('ak_theme');
+    if (stored === 'dark' || stored === 'light') return stored;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark';
+  });
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
   const role = useMemo(() => {
@@ -53,6 +60,13 @@ export default function App(){
       .then(setSubjects)
       .catch(() => setSubjects([]));
   }, [token, apiBase]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-dark', 'theme-light');
+    root.classList.add(`theme-${theme}`);
+    localStorage.setItem('ak_theme', theme);
+  }, [theme]);
 
   function onToken(t:string){
     setToken(t);
@@ -98,6 +112,8 @@ export default function App(){
         onLogout={onLogout}
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
+        theme={theme}
+        onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
       />
 
       <main className="max-w-4xl mx-auto p-6">

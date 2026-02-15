@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html.theme-dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+html.theme-light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.theme-light .bg-slate-950\/80 {
+  background-color: rgba(248, 250, 252, 0.9) !important;
+}
+
+html.theme-light .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .bg-slate-900\/50 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.theme-light .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+}
+
+html.theme-light .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+}
+
+html.theme-light .border-slate-800,
+html.theme-light .border-slate-700,
+html.theme-light .border-slate-600 {
+  border-color: #e2e8f0 !important;
+}
+
+html.theme-light .text-slate-100,
+html.theme-light .text-slate-200 {
+  color: #0f172a !important;
+}
+
+html.theme-light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.theme-light .bg-cyan-950\/40 {
+  background-color: rgba(14, 116, 144, 0.08) !important;
+}

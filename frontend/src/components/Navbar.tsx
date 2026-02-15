@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 
-export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen }: {
+export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen, theme, onToggleTheme }: {
   isAuthed: boolean;
   isAdmin: boolean;
   onLogout: () => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }) {
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
@@ -28,6 +30,9 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
               {isAdmin && (
                 <Link className="hover:underline" to="/settings">Configuración</Link>
               )}
+              <button className="text-sm border border-slate-600 rounded px-2 py-1" onClick={onToggleTheme}>
+                {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+              </button>
               <button className="text-sm border border-slate-600 rounded px-2 py-1" onClick={onLogout}>Salir</button>
             </>
           )}
@@ -55,6 +60,12 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
               {isAdmin && (
                 <Link className="text-left hover:underline" to="/settings" onClick={()=>setMenuOpen(false)}>Configuración</Link>
               )}
+              <button
+                className="text-left border border-slate-600 rounded px-2 py-1 w-fit"
+                onClick={()=>{ onToggleTheme(); setMenuOpen(false); }}
+              >
+                {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+              </button>
               <button className="text-left border border-slate-600 rounded px-2 py-1 w-fit" onClick={()=>{ onLogout(); setMenuOpen(false); }}>Salir</button>
             </>
           )}
