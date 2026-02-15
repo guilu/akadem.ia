@@ -5,7 +5,7 @@ export default function SubjectsPage({ subjects, activeAttemptId }: { subjects: 
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold">Asignaturas</h2>
+        <h2 className="text-xl font-semibold">Exámenes</h2>
         {activeAttemptId && (
           <Link className="px-3 py-2 rounded-xl bg-indigo-600 inline-flex" to={`/exams/attempts/${activeAttemptId}`}>
             Reanudar examen
@@ -19,7 +19,7 @@ export default function SubjectsPage({ subjects, activeAttemptId }: { subjects: 
             <div className="text-sm text-slate-400">{s.description}</div>
             <div className="mt-3">
               <Link className="px-3 py-2 rounded-xl bg-cyan-600 inline-flex" to={`/subjects/${s.id}/builder`}>
-                Crear simulacro
+                Crear examen
               </Link>
             </div>
           </div>

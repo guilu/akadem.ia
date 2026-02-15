@@ -26,7 +26,7 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
           )}
           {isAuthed && (
             <>
-              <Link className="hover:underline" to="/subjects">Asignaturas</Link>
+              <Link className="hover:underline" to="/subjects">Exámenes</Link>
               {isAdmin && (
                 <Link className="hover:underline" to="/settings">Configuración</Link>
               )}
@@ -66,7 +66,7 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
           )}
           {isAuthed && (
             <>
-              <Link className="text-left hover:underline" to="/subjects" onClick={()=>setMenuOpen(false)}>Asignaturas</Link>
+              <Link className="text-left hover:underline" to="/subjects" onClick={()=>setMenuOpen(false)}>Exámenes</Link>
               {isAdmin && (
                 <Link className="text-left hover:underline" to="/settings" onClick={()=>setMenuOpen(false)}>Configuración</Link>
               )}

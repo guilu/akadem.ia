@@ -30,7 +30,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Configura tu simulacro</h1>
+      <h1 className="text-2xl font-bold mb-4">Configura tu examen</h1>
       <div className="grid gap-3">
         {units.map(u => (
           <div key={u.id} className="flex items-center justify-between border border-slate-600 rounded-xl p-3">

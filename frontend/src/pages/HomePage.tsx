@@ -4,7 +4,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
   return (
     <section className="mt-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-3">Prepárate con simulacros reales</h1>
+        <h1 className="text-4xl font-bold mb-3">Prepárate con exámenes reales</h1>
         <p className="text-slate-400 max-w-2xl mx-auto">
           Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
         </p>
@@ -12,7 +12,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           {isAuthed && (
             <>
               <Link className="px-5 py-3 rounded-xl bg-cyan-600" to="/subjects">
-                Crear simulacro
+                Crear examen
               </Link>
               {activeAttemptId && (
                 <Link className="px-5 py-3 rounded-xl bg-indigo-600" to={`/exams/attempts/${activeAttemptId}`}>
@@ -36,7 +36,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           <div className="text-sm text-slate-400">Preguntas por materia</div>
         </div>
         <div className="border border-slate-700 rounded-xl p-4">
-          <div className="text-2xl font-bold">Simulacros</div>
+          <div className="text-2xl font-bold">Exámenes</div>
           <div className="text-sm text-slate-400">Con tiempo real</div>
         </div>
         <div className="border border-slate-700 rounded-xl p-4">
