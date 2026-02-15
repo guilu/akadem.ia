@@ -3,14 +3,17 @@ import { useEffect, useMemo, useState } from 'react';
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
 
-export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
+export default function ExamRunner({ questions, totalTimeSeconds, onFinish, initialSelections, initialIndex, onSelect }:{
   questions: Question[];
   totalTimeSeconds: number;
   onFinish: (payload: { selections: Record<string,string|undefined>; timeSpentSeconds: number }) => void;
+  initialSelections?: Record<string,string|undefined>;
+  initialIndex?: number;
+  onSelect?: (questionId: string, answerId: string | undefined) => void;
 }){
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(initialIndex ?? 0);
   const [remaining, setRemaining] = useState(totalTimeSeconds);
-  const [selections, setSelections] = useState<Record<string,string|undefined>>({});
+  const [selections, setSelections] = useState<Record<string,string|undefined>>(initialSelections || {});
   const [finished, setFinished] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
 
@@ -63,7 +66,14 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
     );
   }
 
-  function choose(ansId: string){ setSelections(prev => ({ ...prev, [q.id]: prev[q.id] === ansId ? undefined : ansId })); }
+  function choose(ansId: string){
+    setSelections(prev => {
+      const next = prev[q.id] === ansId ? undefined : ansId;
+      if (prev[q.id] === next) return prev;
+      onSelect?.(q.id, next);
+      return { ...prev, [q.id]: next };
+    });
+  }
   function next(){ setIndex(i => Math.min(i+1, shuffled.length-1)); }
   function prev(){ setIndex(i => Math.max(i-1, 0)); }
   function finish(){

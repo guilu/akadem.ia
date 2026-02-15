@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function HomePage({ isAuthed }: { isAuthed: boolean }) {
+export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
   return (
     <section className="mt-6">
       <div className="text-center">
@@ -10,9 +10,16 @@ export default function HomePage({ isAuthed }: { isAuthed: boolean }) {
         </p>
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           {isAuthed && (
-            <Link className="px-5 py-3 rounded-xl bg-cyan-600" to="/subjects">
-              Crear simulacro
-            </Link>
+            <>
+              <Link className="px-5 py-3 rounded-xl bg-cyan-600" to="/subjects">
+                Crear simulacro
+              </Link>
+              {activeAttemptId && (
+                <Link className="px-5 py-3 rounded-xl bg-indigo-600" to={`/exams/attempts/${activeAttemptId}`}>
+                  Reanudar examen
+                </Link>
+              )}
+            </>
           )}
           {!isAuthed && (
             <div className="flex gap-2 justify-center">

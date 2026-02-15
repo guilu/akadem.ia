@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import SubjectsPage from './pages/SubjectsPage';
 import ExamBuilderPage from './pages/ExamBuilderPage';
 import ExamRunnerPage from './pages/ExamRunnerPage';
+import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './pages/ProtectedRoute';
@@ -23,6 +24,7 @@ export default function App(){
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
   const [result, setResult] = useState<ExamResult|null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const stored = localStorage.getItem('ak_theme');
     if (stored === 'dark' || stored === 'light') return stored;
@@ -76,6 +78,8 @@ export default function App(){
 
   function onLogout(){
     localStorage.removeItem('ak_token');
+    sessionStorage.removeItem('akdmia.activeAttemptId');
+    setActiveAttemptId('');
     setToken('');
     navigate('/');
   }
@@ -89,7 +93,9 @@ export default function App(){
     setAttemptId(data.attemptId);
     setMinutes(Math.round(data.totalTimeSeconds / 60));
     setQuestions(data.questions);
-    navigate('/exam');
+    sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
+    setActiveAttemptId(data.attemptId);
+    navigate(`/exams/attempts/${data.attemptId}`);
   }
 
   async function finishExam(payload:{ selections: Record<string,string|undefined> }){
@@ -100,6 +106,8 @@ export default function App(){
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ selections })
     });
+    sessionStorage.removeItem('akdmia.activeAttemptId');
+    setActiveAttemptId('');
     setResult(data);
     navigate('/result');
   }
@@ -118,7 +126,7 @@ export default function App(){
 
       <main className="max-w-4xl mx-auto p-6">
         <Routes>
-          <Route path="/" element={<HomePage isAuthed={isAuthed} />} />
+          <Route path="/" element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path="/login" element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
           <Route path="/register" element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
           <Route path="/subjects" element={
@@ -134,6 +142,15 @@ export default function App(){
           <Route path="/exam" element={
             <ProtectedRoute allow={isAuthed}>
               <ExamRunnerPage questions={questions} minutes={minutes} onFinish={finishExam} />
+            </ProtectedRoute>
+          } />
+          <Route path="/exams/attempts/:attemptId" element={
+            <ProtectedRoute allow={isAuthed}>
+              <ExamAttemptPage token={token} onUnauthorized={onLogout} onFinish={(res) => {
+                sessionStorage.removeItem('akdmia.activeAttemptId');
+                setActiveAttemptId('');
+                setResult(res);
+              }} />
             </ProtectedRoute>
           } />
           <Route path="/result" element={
