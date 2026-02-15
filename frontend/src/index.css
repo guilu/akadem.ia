@@ -1,3 +1,129 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html.theme-dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+html.theme-light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.theme-light .bg-slate-950\/80 {
+  background-color: rgba(248, 250, 252, 0.9) !important;
+}
+
+html.theme-light .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .bg-slate-900\/50 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.theme-light .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+}
+
+html.theme-light .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+}
+
+html.theme-light .border-slate-800,
+html.theme-light .border-slate-700,
+html.theme-light .border-slate-600 {
+  border-color: #e2e8f0 !important;
+}
+
+html.theme-light .text-slate-100,
+html.theme-light .text-slate-200 {
+  color: #0f172a !important;
+}
+
+html.theme-light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.theme-light .bg-cyan-950\/40 {
+  background-color: rgba(14, 116, 144, 0.08) !important;
+}
+
+html.theme-light .bg-cyan-600 {
+  background-color: #7dd3fc !important;
+  color: #0f172a !important;
+}
+
+html.theme-light .bg-indigo-600 {
+  background-color: #c7d2fe !important;
+  color: #0f172a !important;
+}
+
+html.theme-light .bg-amber-500 {
+  background-color: #fde68a !important;
+  color: #0f172a !important;
+}
+
+.theme-toggle {
+  position: relative;
+  width: 86px;
+  height: 38px;
+  border-radius: 999px;
+  padding: 0 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.theme-toggle .theme-icon {
+  width: 32px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+  color: #cbd5f5;
+}
+
+.theme-toggle .theme-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #1f2937;
+  transition: transform 220ms ease, background 220ms ease;
+}
+
+.theme-toggle.light {
+  background: #e2e8f0;
+  border-color: #cbd5f5;
+}
+
+.theme-toggle.light .theme-thumb {
+  transform: translateX(46px);
+  background: #94a3b8;
+}
+
+html.theme-light .theme-toggle {
+  background: #e2e8f0;
+  border-color: #cbd5f5;
+}
+
+html.theme-light .theme-toggle .theme-icon {
+  color: #475569;
+}
+
+html.theme-light .theme-toggle .theme-thumb {
+  background: #94a3b8;
+}

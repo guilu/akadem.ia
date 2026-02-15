@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 
-export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen }: {
+export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen, theme, onToggleTheme }: {
   isAuthed: boolean;
   isAdmin: boolean;
   onLogout: () => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }) {
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
@@ -32,13 +34,26 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
             </>
           )}
         </nav>
-        <button
-          className="md:hidden text-sm border border-slate-600 rounded px-2 py-1"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="menu"
-        >
-          {menuOpen ? 'Cerrar' : 'Menu'}
-        </button>
+        <div className="flex items-center gap-2">
+          {isAuthed && (
+            <button
+              className={`theme-toggle ${theme}`}
+              onClick={onToggleTheme}
+              aria-label="cambiar tema"
+            >
+              <span className="theme-thumb" />
+              <span className="theme-icon" aria-hidden>☀︎</span>
+              <span className="theme-icon" aria-hidden>☾</span>
+            </button>
+          )}
+          <button
+            className="md:hidden text-sm border border-slate-600 rounded px-2 py-1"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="menu"
+          >
+            {menuOpen ? 'Cerrar' : 'Menu'}
+          </button>
+        </div>
       </div>
       {menuOpen && (
         <div className="md:hidden border-t border-slate-800 px-6 py-3 flex flex-col gap-2">
