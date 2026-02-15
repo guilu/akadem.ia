@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface SpringDataExamAttemptRepository extends JpaRepository<ExamAttemptEntity, UUID> {
   List<ExamAttemptEntity> findByUserEmail(String email);
+
+  List<ExamAttemptEntity> findByUserEmailOrderByStartedAtDesc(String email);
 }

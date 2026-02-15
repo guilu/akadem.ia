@@ -112,6 +112,26 @@ export default function App(){
     navigate('/result');
   }
 
+  async function viewResult(attempt: string) {
+    const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ selections: {} })
+    });
+    if (activeAttemptId === attempt) {
+      sessionStorage.removeItem('akdmia.activeAttemptId');
+      setActiveAttemptId('');
+    }
+    setResult(data);
+    navigate('/result');
+  }
+
+  function resumeAttempt(attempt: string) {
+    sessionStorage.setItem('akdmia.activeAttemptId', attempt);
+    setActiveAttemptId(attempt);
+    navigate(`/exams/attempts/${attempt}`);
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar
@@ -131,7 +151,14 @@ export default function App(){
           <Route path="/register" element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
           <Route path="/subjects" element={
             <ProtectedRoute allow={isAuthed}>
-              <SubjectsPage subjects={subjects} activeAttemptId={activeAttemptId} />
+              <SubjectsPage
+                subjects={subjects}
+                activeAttemptId={activeAttemptId}
+                token={token}
+                onUnauthorized={onLogout}
+                onViewResult={viewResult}
+                onResumeAttempt={resumeAttempt}
+              />
             </ProtectedRoute>
           } />
           <Route path="/subjects/:subjectId/builder" element={

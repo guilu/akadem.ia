@@ -60,4 +60,11 @@ public class ExamController {
         var result = examUseCase.getAttempt(attemptId);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/attempts")
+    public ResponseEntity<?> listAttempts(@AuthenticationPrincipal User principal) {
+        String email = principal != null ? principal.getUsername() : "guest@akdemya";
+        var result = examUseCase.listAttempts(email);
+        return ResponseEntity.ok(result);
+    }
 }

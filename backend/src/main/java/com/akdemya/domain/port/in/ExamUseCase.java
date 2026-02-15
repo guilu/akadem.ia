@@ -11,6 +11,8 @@ public interface ExamUseCase {
 
   AttemptResponse getAttempt(UUID attemptId);
 
+  List<AttemptSummary> listAttempts(String userEmail);
+
   void updateAnswer(UpdateAnswerCommand command);
 
   record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes) {
@@ -36,6 +38,11 @@ public interface ExamUseCase {
 
   record AttemptResponse(UUID attemptId, int totalTimeSeconds, List<AttemptQuestionData> questions,
       int nextQuestionIndex, boolean finished) {
+  }
+
+  record AttemptSummary(UUID attemptId, String subjectName, java.time.OffsetDateTime startedAt,
+      java.time.OffsetDateTime finishedAt, int totalTimeSeconds, Integer score, int totalQuestions,
+      int correctCount, int wrongCount, double percent) {
   }
 
   record UpdateAnswerCommand(UUID attemptId, UUID questionId, UUID selectedAnswerId) {
