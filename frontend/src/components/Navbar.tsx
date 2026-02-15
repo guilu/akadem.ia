@@ -12,7 +12,7 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
       <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link className="text-2xl font-bold flex items-center gap-3" to="/">
           <img src="/assets/icons/akdmia-icon-32x32.png" alt="AKDMIA" className="w-8 h-8" />
-          Akdemya
+          akadem.ia
         </Link>
         <nav className="hidden md:flex gap-4 items-center">
           <Link className="hover:underline" to="/">Home</Link>

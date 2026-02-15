@@ -24,6 +24,6 @@ public interface ExamUseCase {
   record SubmitCommand(UUID attemptId, Map<UUID, UUID> selections) {
   }
 
-  record SubmitResult(int total, int correct, double percentage) {
+  record SubmitResult(int total, int correct, int wrong, int penalty, int net, double percentage) {
   }
 }

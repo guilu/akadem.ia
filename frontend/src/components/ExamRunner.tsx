@@ -12,6 +12,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
   const [remaining, setRemaining] = useState(totalTimeSeconds);
   const [selections, setSelections] = useState<Record<string,string|undefined>>({});
   const [finished, setFinished] = useState(false);
+  const [confirmFinish, setConfirmFinish] = useState(false);
 
   const shuffled = useMemo(() => (
     questions.map(q => ({ ...q, answers: [...q.answers].sort(() => Math.random() - 0.5) }))
@@ -68,6 +69,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
   function finish(){
     if (finished) return;
     setFinished(true);
+    setConfirmFinish(false);
     onFinish({ selections, timeSpentSeconds: totalTimeSeconds - remaining });
   }
 
@@ -97,11 +99,46 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish }:{
 
       <footer className="mt-6 flex gap-2 justify-between">
         <div className="flex gap-2">
-          <button onClick={prev} className="px-4 py-2 rounded-xl border border-slate-600">Anterior</button>
-          <button onClick={next} className="px-4 py-2 rounded-xl bg-indigo-600">Siguiente</button>
+          <button
+            onClick={prev}
+            disabled={safeIndex === 0}
+            className={`px-4 py-2 rounded-xl border border-slate-600 ${safeIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+          >
+            Anterior
+          </button>
+          <button
+            onClick={next}
+            disabled={safeIndex === shuffled.length - 1}
+            className={`px-4 py-2 rounded-xl bg-indigo-600 ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+          >
+            Siguiente
+          </button>
         </div>
-        <button onClick={finish} className="px-4 py-2 rounded-xl bg-amber-500">Finalizar</button>
+        <button onClick={() => setConfirmFinish(true)} className="px-4 py-2 rounded-xl bg-amber-500">Finalizar</button>
       </footer>
+
+      {confirmFinish && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-2">¿Finalizar examen?</h3>
+            <p className="text-slate-400 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmFinish(false)}
+                className="px-3 py-2 rounded border border-slate-600"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={finish}
+                className="px-3 py-2 rounded bg-amber-500"
+              >
+                Finalizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
