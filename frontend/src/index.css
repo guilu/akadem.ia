@@ -69,3 +69,59 @@ html.theme-light .bg-amber-500 {
   background-color: #fde68a !important;
   color: #0f172a !important;
 }
+
+.theme-toggle {
+  position: relative;
+  width: 86px;
+  height: 38px;
+  border-radius: 999px;
+  padding: 0 10px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.theme-toggle .theme-icon {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.75;
+}
+
+.theme-toggle .theme-thumb {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #6d28d9;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  transition: transform 220ms ease, background 220ms ease;
+}
+
+.theme-toggle.light {
+  background: #e2e8f0;
+  border-color: #cbd5f5;
+}
+
+.theme-toggle.light .theme-thumb {
+  transform: translateX(44px);
+  background: #94a3b8;
+}
+
+html.theme-light .theme-toggle {
+  background: #e2e8f0;
+  border-color: #cbd5f5;
+}
+
+html.theme-light .theme-toggle .theme-thumb {
+  background: #a78bfa;
+}
+
+html.theme-light .theme-toggle .theme-icon {
+  opacity: 0.85;
+}

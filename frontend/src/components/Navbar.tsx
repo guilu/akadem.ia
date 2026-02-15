@@ -30,20 +30,30 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
               {isAdmin && (
                 <Link className="hover:underline" to="/settings">Configuración</Link>
               )}
-              <button className="text-sm border border-slate-600 rounded px-2 py-1" onClick={onToggleTheme}>
-                {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
-              </button>
               <button className="text-sm border border-slate-600 rounded px-2 py-1" onClick={onLogout}>Salir</button>
             </>
           )}
         </nav>
-        <button
-          className="md:hidden text-sm border border-slate-600 rounded px-2 py-1"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="menu"
-        >
-          {menuOpen ? 'Cerrar' : 'Menu'}
-        </button>
+        <div className="flex items-center gap-2">
+          {isAuthed && (
+            <button
+              className={`theme-toggle ${theme}`}
+              onClick={onToggleTheme}
+              aria-label="cambiar tema"
+            >
+              <span className="theme-thumb" />
+              <span className="theme-icon" aria-hidden>☀️</span>
+              <span className="theme-icon" aria-hidden>🌙</span>
+            </button>
+          )}
+          <button
+            className="md:hidden text-sm border border-slate-600 rounded px-2 py-1"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="menu"
+          >
+            {menuOpen ? 'Cerrar' : 'Menu'}
+          </button>
+        </div>
       </div>
       {menuOpen && (
         <div className="md:hidden border-t border-slate-800 px-6 py-3 flex flex-col gap-2">
@@ -60,12 +70,6 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
               {isAdmin && (
                 <Link className="text-left hover:underline" to="/settings" onClick={()=>setMenuOpen(false)}>Configuración</Link>
               )}
-              <button
-                className="text-left border border-slate-600 rounded px-2 py-1 w-fit"
-                onClick={()=>{ onToggleTheme(); setMenuOpen(false); }}
-              >
-                {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
-              </button>
               <button className="text-left border border-slate-600 rounded px-2 py-1 w-fit" onClick={()=>{ onLogout(); setMenuOpen(false); }}>Salir</button>
             </>
           )}
