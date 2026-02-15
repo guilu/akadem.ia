@@ -18,6 +18,7 @@ public class ExamManager implements ExamUseCase {
   private final QuestionRepository questionRepo;
   private final AnswerRepository answerRepo;
   private final Random rnd = new Random();
+  private final ExamScoringCalculator scoringCalculator = new ExamScoringCalculator();
 
   public ExamManager(ExamAttemptRepository attemptRepo, ExamAttemptAnswerRepository attemptAnsRepo,
       QuestionRepository questionRepo, AnswerRepository answerRepo) {
@@ -107,6 +108,7 @@ public class ExamManager implements ExamUseCase {
     // Compute score
     int total = updatedEntries.size();
     int correct = 0;
+    int wrong = 0;
     for (ExamAttemptAnswer e : updatedEntries) {
       if (e.getAnswerId() == null)
         continue;
@@ -116,13 +118,17 @@ public class ExamManager implements ExamUseCase {
       Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
       if (ans != null && ans.isCorrect()) {
         correct++;
+      } else if (ans != null) {
+        wrong++;
       }
     }
 
-    attempt.finish(attempt.getTotalTimeSeconds(), correct); // Update attempt state
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
+
+    attempt.finish(attempt.getTotalTimeSeconds(), scoring.net()); // Update attempt state
     attemptRepo.save(attempt);
 
-    double pct = total == 0 ? 0.0 : (correct * 100.0 / total);
-    return new SubmitResult(total, correct, pct);
+    return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),
+        scoring.percentage());
   }
 }
