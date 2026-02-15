@@ -12,7 +12,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
       <div className="mb-4 rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-center">
         <div className="text-slate-400 text-sm uppercase tracking-wide">Nota final</div>
         <div className="text-5xl font-extrabold text-cyan-300">{score10.toFixed(2)}</div>
-        <div className="text-slate-400 text-sm">/ 10</div>
+        <div className="text-slate-400 text-sm">sobre 10</div>
       </div>
 
       <div className="space-y-1">
