@@ -42,8 +42,8 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
               aria-label="cambiar tema"
             >
               <span className="theme-thumb" />
-              <span className="theme-icon" aria-hidden>☀️</span>
-              <span className="theme-icon" aria-hidden>🌙</span>
+              <span className="theme-icon" aria-hidden>☀︎</span>
+              <span className="theme-icon" aria-hidden>☾</span>
             </button>
           )}
           <button

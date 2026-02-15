@@ -76,7 +76,7 @@ html.theme-light .bg-amber-500 {
   height: 38px;
   border-radius: 999px;
   padding: 0 10px;
-  border: 1px solid #475569;
+  border: 1px solid #334155;
   background: #0f172a;
   display: inline-flex;
   align-items: center;
@@ -88,7 +88,8 @@ html.theme-light .bg-amber-500 {
 .theme-toggle .theme-icon {
   font-size: 16px;
   line-height: 1;
-  opacity: 0.75;
+  opacity: 0.65;
+  color: #cbd5f5;
 }
 
 .theme-toggle .theme-thumb {
@@ -98,8 +99,7 @@ html.theme-light .bg-amber-500 {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: #6d28d9;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  background: #1f2937;
   transition: transform 220ms ease, background 220ms ease;
 }
 
@@ -118,10 +118,10 @@ html.theme-light .theme-toggle {
   border-color: #cbd5f5;
 }
 
-html.theme-light .theme-toggle .theme-thumb {
-  background: #a78bfa;
+html.theme-light .theme-toggle .theme-icon {
+  color: #475569;
 }
 
-html.theme-light .theme-toggle .theme-icon {
-  opacity: 0.85;
+html.theme-light .theme-toggle .theme-thumb {
+  background: #94a3b8;
 }
