@@ -54,3 +54,18 @@ html.theme-light .text-slate-400 {
 html.theme-light .bg-cyan-950\/40 {
   background-color: rgba(14, 116, 144, 0.08) !important;
 }
+
+html.theme-light .bg-cyan-600 {
+  background-color: #7dd3fc !important;
+  color: #0f172a !important;
+}
+
+html.theme-light .bg-indigo-600 {
+  background-color: #c7d2fe !important;
+  color: #0f172a !important;
+}
+
+html.theme-light .bg-amber-500 {
+  background-color: #fde68a !important;
+  color: #0f172a !important;
+}
