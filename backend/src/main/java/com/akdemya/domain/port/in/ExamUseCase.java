@@ -9,6 +9,10 @@ public interface ExamUseCase {
 
   SubmitResult submitExam(SubmitCommand command);
 
+  AttemptResponse getAttempt(UUID attemptId);
+
+  void updateAnswer(UpdateAnswerCommand command);
+
   record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes) {
   }
 
@@ -25,5 +29,15 @@ public interface ExamUseCase {
   }
 
   record SubmitResult(int total, int correct, int wrong, int penalty, int net, double percentage) {
+  }
+
+  record AttemptQuestionData(UUID id, String text, List<AnswerData> answers, UUID selectedAnswerId) {
+  }
+
+  record AttemptResponse(UUID attemptId, int totalTimeSeconds, List<AttemptQuestionData> questions,
+      int nextQuestionIndex, boolean finished) {
+  }
+
+  record UpdateAnswerCommand(UUID attemptId, UUID questionId, UUID selectedAnswerId) {
   }
 }

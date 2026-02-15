@@ -88,33 +88,30 @@ public class ExamManager implements ExamUseCase {
 
     List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(command.attemptId());
 
-    // Update selections
-    List<ExamAttemptAnswer> updatedEntries = new ArrayList<>();
-    for (ExamAttemptAnswer e : entries) {
-      UUID sel = command.selections().get(e.getQuestionId());
-      if (sel != null) {
-        // Determine if we need to create a new instance or if we can mutate.
-        // Domain objects are ideally immutable.
-        // ExamAttemptAnswer fields are final.
-        // So create new instance with updated answerId.
-        ExamAttemptAnswer updated = new ExamAttemptAnswer(e.getId(), e.getExamAttemptId(), e.getQuestionId(), sel);
-        updatedEntries.add(updated);
-      } else {
-        updatedEntries.add(e);
+    if (attempt.getFinishedAt() == null) {
+      // Update selections
+      List<ExamAttemptAnswer> updatedEntries = new ArrayList<>();
+      for (ExamAttemptAnswer e : entries) {
+        UUID sel = command.selections().get(e.getQuestionId());
+        if (sel != null) {
+          // Domain objects are immutable → create new instance with updated answerId.
+          ExamAttemptAnswer updated = new ExamAttemptAnswer(e.getId(), e.getExamAttemptId(), e.getQuestionId(), sel);
+          updatedEntries.add(updated);
+        } else {
+          updatedEntries.add(e);
+        }
       }
+      attemptAnsRepo.saveAll(updatedEntries);
+      entries = updatedEntries;
     }
-    attemptAnsRepo.saveAll(updatedEntries);
 
     // Compute score
-    int total = updatedEntries.size();
+    int total = entries.size();
     int correct = 0;
     int wrong = 0;
-    for (ExamAttemptAnswer e : updatedEntries) {
+    for (ExamAttemptAnswer e : entries) {
       if (e.getAnswerId() == null)
         continue;
-      // Fetch answer to check correctness.
-      // Optimized: could fetch all answers involved or use a map.
-      // For now simple loop.
       Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
       if (ans != null && ans.isCorrect()) {
         correct++;
@@ -125,10 +122,59 @@ public class ExamManager implements ExamUseCase {
 
     ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
 
-    attempt.finish(attempt.getTotalTimeSeconds(), scoring.net()); // Update attempt state
-    attemptRepo.save(attempt);
+    if (attempt.getFinishedAt() == null) {
+      attempt.finish(attempt.getTotalTimeSeconds(), scoring.net());
+      attemptRepo.save(attempt);
+    }
 
     return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),
         scoring.percentage());
+  }
+
+  @Override
+  public AttemptResponse getAttempt(UUID attemptId) {
+    ExamAttempt attempt = attemptRepo.findById(attemptId)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid attempt ID"));
+
+    List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attemptId);
+
+    List<AttemptQuestionData> questions = entries.stream().map(e -> {
+      Question q = questionRepo.findById(e.getQuestionId())
+          .orElseThrow(() -> new IllegalArgumentException("Invalid question ID"));
+      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+          .map(a -> new AnswerData(a.getId(), a.getText()))
+          .collect(Collectors.toList());
+      return new AttemptQuestionData(q.getId(), q.getText(), answers, e.getAnswerId());
+    }).toList();
+
+    int nextIndex = 0;
+    for (int i = 0; i < entries.size(); i++) {
+      if (entries.get(i).getAnswerId() == null) {
+        nextIndex = i;
+        break;
+      }
+      nextIndex = entries.size();
+    }
+
+    boolean finished = attempt.getFinishedAt() != null;
+    return new AttemptResponse(attempt.getId(), attempt.getTotalTimeSeconds() == null ? 0 : attempt.getTotalTimeSeconds(),
+        questions, nextIndex, finished);
+  }
+
+  @Override
+  public void updateAnswer(UpdateAnswerCommand command) {
+    ExamAttempt attempt = attemptRepo.findById(command.attemptId())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid attempt ID"));
+
+    if (attempt.getFinishedAt() != null) {
+      return;
+    }
+
+    ExamAttemptAnswer existing = attemptAnsRepo.findByAttemptIdAndQuestionId(command.attemptId(), command.questionId())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid question ID"));
+
+    ExamAttemptAnswer updated = new ExamAttemptAnswer(existing.getId(), existing.getExamAttemptId(),
+        existing.getQuestionId(), command.selectedAnswerId());
+    attemptAnsRepo.save(updated);
   }
 }

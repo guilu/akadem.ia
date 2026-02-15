@@ -34,13 +34,30 @@ public class ExamController {
     @PostMapping("/attempts/{attemptId}/submit")
     public ResponseEntity<?> submit(@PathVariable UUID attemptId, @RequestBody ExamUseCase.SubmitCommand req,
             @AuthenticationPrincipal User principal) {
-        // Ensure attemptId matches request? Or just pass it.
-        // Command has attemptId.
         if (req.attemptId() != null && !req.attemptId().equals(attemptId)) {
-            // mismatch? just ignore path var or override
+            // ignore mismatch and use path param
         }
         ExamUseCase.SubmitCommand command = new ExamUseCase.SubmitCommand(attemptId, req.selections());
         var result = examUseCase.submitExam(command);
+        return ResponseEntity.ok(result);
+    }
+
+    public record UpdateAnswerRequest(UUID selectedAnswerId) {
+    }
+
+    @PutMapping("/attempts/{attemptId}/answers/{questionId}")
+    public ResponseEntity<?> updateAnswer(@PathVariable UUID attemptId, @PathVariable UUID questionId,
+            @RequestBody UpdateAnswerRequest req) {
+        if (req == null || req.selectedAnswerId() == null) {
+            return ResponseEntity.badRequest().body("selectedAnswerId requerido");
+        }
+        examUseCase.updateAnswer(new ExamUseCase.UpdateAnswerCommand(attemptId, questionId, req.selectedAnswerId()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/attempts/{attemptId}")
+    public ResponseEntity<?> getAttempt(@PathVariable UUID attemptId) {
+        var result = examUseCase.getAttempt(attemptId);
         return ResponseEntity.ok(result);
     }
 }

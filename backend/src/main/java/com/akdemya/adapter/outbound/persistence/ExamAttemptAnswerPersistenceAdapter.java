@@ -41,4 +41,9 @@ public class ExamAttemptAnswerPersistenceAdapter implements ExamAttemptAnswerRep
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public java.util.Optional<ExamAttemptAnswer> findByAttemptIdAndQuestionId(UUID attemptId, UUID questionId) {
+    return repository.findByAttemptIdAndQuestionId(attemptId, questionId).map(mapper::toDomain);
+  }
 }
