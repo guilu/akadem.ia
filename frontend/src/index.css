@@ -97,7 +97,7 @@ html.theme-light .bg-amber-500 {
 .theme-toggle .theme-thumb {
   position: absolute;
   top: 2px;
-  left: 2px;
+  left: 4px;
   width: 32px;
   height: 32px;
   border-radius: 999px;
