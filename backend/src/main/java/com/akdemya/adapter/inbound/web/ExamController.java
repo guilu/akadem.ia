@@ -1,6 +1,8 @@
 package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.domain.port.in.ExamUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class ExamController {
 
+    private static final Logger log = LoggerFactory.getLogger(ExamController.class);
     private final ExamUseCase examUseCase;
 
     public ExamController(ExamUseCase examUseCase) {
@@ -45,8 +48,10 @@ public class ExamController {
             var result = examUseCase.submitExam(command, principal.getUsername());
             return ResponseEntity.ok(result);
         } catch (java.util.NoSuchElementException e) {
+            log.warn("Submit attempt not found: {} by {}", attemptId, principal.getUsername());
             return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
+            log.warn("Forbidden submit attempt: {} by {}", attemptId, principal.getUsername());
             return ResponseEntity.status(403).build();
         }
     }
@@ -68,8 +73,11 @@ public class ExamController {
                     principal.getUsername());
             return ResponseEntity.noContent().build();
         } catch (java.util.NoSuchElementException e) {
+            log.warn("Update answer not found: attempt {} question {} by {}", attemptId, questionId,
+                    principal.getUsername());
             return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
+            log.warn("Forbidden update answer: attempt {} by {}", attemptId, principal.getUsername());
             return ResponseEntity.status(403).build();
         }
     }
@@ -83,8 +91,10 @@ public class ExamController {
             var result = examUseCase.getAttempt(attemptId, principal.getUsername());
             return ResponseEntity.ok(result);
         } catch (java.util.NoSuchElementException e) {
+            log.warn("Attempt not found: {} by {}", attemptId, principal.getUsername());
             return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
+            log.warn("Forbidden get attempt: {} by {}", attemptId, principal.getUsername());
             return ResponseEntity.status(403).build();
         }
     }
