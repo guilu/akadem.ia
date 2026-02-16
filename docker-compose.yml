@@ -19,7 +19,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ak_user
       SPRING_DATASOURCE_PASSWORD: ak_pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-      JWT_SECRET: "cambia-esto-por-una-clave-larga-local"
+      JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
     depends_on:
       - db
     ports:
