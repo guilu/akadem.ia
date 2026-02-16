@@ -3,7 +3,7 @@ import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [units, setUnits] = useState<UnitAvailability[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
 
