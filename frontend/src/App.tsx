@@ -23,7 +23,6 @@ export default function App(){
   const [attemptId, setAttemptId] = useState<string>('');
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
   const [result, setResult] = useState<ExamResult|null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
@@ -124,8 +123,6 @@ export default function App(){
         isAuthed={isAuthed}
         isAdmin={role === 'ADMIN'}
         onLogout={onLogout}
-        menuOpen={menuOpen}
-        setMenuOpen={setMenuOpen}
       />
 
       <main className="max-w-4xl mx-auto p-6">
