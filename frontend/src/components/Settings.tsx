@@ -323,8 +323,59 @@ export default function Settings({ token }: { token: string }) {
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
         <div className="text-xs text-slate-400 mb-2">Administración</div>
         <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Materias</h2>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <TextInput placeholder="nombre" value={subjectForm.name} onChange={e=>setSubjectForm(f=>({ ...f, name: e.target.value }))} />
+                <TextInput placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveSubject} disabled={subjectLoading} className="btn btn-primary">
+                  {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
+                </Button>
+                {isSubjectEditing && (
+                  <Button onClick={resetSubjectForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Materia</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {subjects.map(s => (
+                      <TableRow key={s.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{s.name}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
+                            <button
+                              type="button"
+                              className="text-red-400 cursor-pointer"
+                              onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
+                              aria-label="Eliminar"
+                              title="Eliminar"
+                            >🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+{tab === 'units' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
         <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
       </aside>
 
