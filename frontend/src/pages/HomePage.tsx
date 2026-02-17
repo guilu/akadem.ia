@@ -2,30 +2,32 @@ import { Link } from 'react-router-dom';
 
 export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
   return (
-    <section className="mt-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-3">Prepárate con exámenes reales</h1>
-        <p className="text-text/70 max-w-2xl mx-auto">
+    <section className="mt-10">
+      <div className="text-center max-w-3xl mx-auto">
+        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight">
+          Prepárate con <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">exámenes</span> reales
+        </h1>
+        <p className="text-text/70 mt-4">
           Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
         </p>
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           {isAuthed && (
             <>
-              <Link className="btn btn-primary" to="/subjects">
+              <Link className="btn btn-primary rounded-full px-6" to="/subjects">
                 Crear examen
               </Link>
               {activeAttemptId && (
-                <Link className="btn btn-secondary" to={`/exams/attempts/${activeAttemptId}`}>
+                <Link className="btn btn-secondary rounded-full px-6" to={`/exams/attempts/${activeAttemptId}`}>
                   Reanudar examen
                 </Link>
               )}
             </>
           )}
           {!isAuthed && (
-            <div className="flex gap-2 justify-center">
-              <Link className="px-3 py-2 rounded-full border border-slate-600 text-sm" to="/login">Login</Link>
-              <Link className="px-3 py-2 rounded-full border border-slate-600 text-sm" to="/register">Register</Link>
-            </div>
+            <>
+              <Link className="btn btn-secondary rounded-full px-6" to="/register">How does it work?</Link>
+              <Link className="btn btn-primary rounded-full px-6" to="/login">Get Started</Link>
+            </>
           )}
         </div>
       </div>
