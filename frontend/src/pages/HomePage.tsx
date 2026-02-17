@@ -6,7 +6,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
       <div className="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
         <div className="mr-auto place-self-center lg:col-span-6 text-center lg:text-left">
           <h1 className="max-w-2xl mb-4 text-5xl sm:text-6xl font-extrabold leading-tight">
-            Prepárate con <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">exámenes</span> reales
+            Estudia la <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">Constitución</span> con exámenes.
           </h1>
           <p className="max-w-2xl mb-6 text-text/70 md:text-lg lg:text-xl">
             Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
