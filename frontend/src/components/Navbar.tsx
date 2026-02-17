@@ -59,7 +59,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
             {isAdmin && (
               <NavbarLink href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
             )}
-            <button className="text-sm border border-secondary/60 rounded px-2 py-1" onClick={onLogout}>Salir</button>
+            <button className="btn btn-outline" onClick={onLogout}>Salir</button>
           </>
         )}
       </NavbarCollapse>

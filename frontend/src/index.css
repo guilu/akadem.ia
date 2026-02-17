@@ -5,6 +5,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-opacity hover:opacity-90;
+  }
+  .btn-primary {
+    @apply bg-primary text-bg;
+  }
+  .btn-secondary {
+    @apply bg-secondary text-bg;
+  }
+  .btn-outline {
+    @apply border border-secondary/60 text-text;
+  }
+}
+
 html, body {
   background: rgb(var(--bg));
   color: rgb(var(--text));
