@@ -91,7 +91,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
       </header>
 
       <div className="w-full bg-slate-700 h-2 rounded mb-6">
-        <div className="h-2 bg-cyan-400 rounded" style={{ width: `${progress}%` }} />
+        <div className="h-2 bg-primary rounded" style={{ width: `${progress}%` }} />
       </div>
 
       <h2 className="text-2xl font-bold mb-3">{q.text}</h2>
@@ -100,7 +100,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           const selected = selections[q.id] === a.id;
           return (
             <button key={a.id} onClick={() => choose(a.id)}
-              className={`text-left border rounded-xl p-3 transition hover:scale-[1.01] ${selected ? 'border-cyan-400 bg-cyan-950/40' : 'border-slate-600 hover:border-slate-400'}`}>
+              className={`text-left border rounded-xl p-3 transition hover:scale-[1.01] ${selected ? 'border-accent bg-accent/10' : 'border-slate-600 hover:border-slate-400'}`}>
               {a.text}
             </button>
           );
