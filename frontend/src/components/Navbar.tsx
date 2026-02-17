@@ -57,7 +57,13 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
             {isAdmin && (
               <NavbarLink className="flex items-center" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
             )}
-            <button className="btn btn-outline h-9" onClick={onLogout}>Salir</button>
+            <NavbarLink
+              href="#"
+              className="flex items-center"
+              onClick={(event) => { event.preventDefault(); onLogout(); }}
+            >
+              <span className="btn btn-outline h-9">Salir</span>
+            </NavbarLink>
           </>
         )}
       </NavbarCollapse>
