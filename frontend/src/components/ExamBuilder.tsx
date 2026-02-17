@@ -41,7 +41,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) - 1)}
-                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                className="btn btn-secondary w-8 h-8"
                 aria-label="disminuir">
                 −
               </button>
@@ -55,7 +55,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
               />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
-                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                className="btn btn-secondary w-8 h-8"
                 aria-label="aumentar">
                 +
               </button>
@@ -72,7 +72,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
       <div className="mt-4 flex items-center justify-between">
         <div>Total preguntas: <strong>{total()}</strong></div>
-        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-secondary">Empezar</button>
+        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-primary">Empezar</button>
       </div>
     </div>
   );
