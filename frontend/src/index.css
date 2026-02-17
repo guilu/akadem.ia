@@ -18,8 +18,9 @@
   .btn-outline {
     @apply border border-secondary/60 text-text;
   }
-  nav[role="navigation"] ul {
+  nav[role="navigation"] [data-testid="flowbite-navbar-collapse"] ul {
     line-height: 2.25rem;
+    align-items: center;
   }
 }
 
