@@ -9,3 +9,42 @@ html, body {
   background: rgb(var(--bg));
   color: rgb(var(--text));
 }
+
+.theme-toggle {
+  position: relative;
+  width: 86px;
+  height: 38px;
+  border-radius: 999px;
+  padding: 0 2px;
+  border: 1px solid rgb(var(--secondary) / 0.5);
+  background: rgb(var(--bg));
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.theme-toggle .theme-icon {
+  width: 32px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+  color: rgb(var(--text));
+}
+
+.theme-toggle .theme-thumb {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgb(var(--secondary));
+  transition: transform 220ms ease, background 220ms ease;
+}
+
+.theme-toggle.light .theme-thumb {
+  transform: translateX(46px);
+}

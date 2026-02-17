@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen }: {
   isAuthed: boolean;
@@ -7,10 +8,17 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
 }) {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
   function toggleTheme() {
     document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const next = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+    setIsDark(next);
   }
   return (
     <header className="border-b border-secondary/40 bg-bg/90 backdrop-blur">
@@ -40,11 +48,13 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
         <div className="flex items-center gap-2">
           {isAuthed && (
             <button
+              className={`theme-toggle ${isDark ? 'dark' : 'light'}`}
               onClick={toggleTheme}
-              className="px-3 py-2 rounded-lg bg-secondary text-bg hover:opacity-90"
               aria-label="cambiar tema"
             >
-              Cambiar tema
+              <span className="theme-thumb" />
+              <span className="theme-icon" aria-hidden>☾</span>
+              <span className="theme-icon" aria-hidden>☀︎</span>
             </button>
           )}
           <button
