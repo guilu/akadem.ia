@@ -643,7 +643,7 @@ export default function Settings({ token }: { token: string }) {
             )}
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <input
-                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                className="w-full rounded px-3 py-2 mb-3"
                 placeholder='Escribe "eliminar" para confirmar'
                 value={subjectDeleteText}
                 onChange={e=>setSubjectDeleteText(e.target.value)}
@@ -688,7 +688,7 @@ export default function Settings({ token }: { token: string }) {
             )}
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
               <input
-                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                className="w-full rounded px-3 py-2 mb-3"
                 placeholder='Escribe "eliminar" para confirmar'
                 value={unitDeleteText}
                 onChange={e=>setUnitDeleteText(e.target.value)}
