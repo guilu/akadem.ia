@@ -43,7 +43,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         </button>
         <NavbarToggle />
       </div>
-      <NavbarCollapse className="items-center" style={{ lineHeight: '2.25rem' }}>
+      <NavbarCollapse className="md:flex md:items-center md:space-x-6">
         <NavbarLink className="flex items-center" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
         {!isAuthed && (
           <>
