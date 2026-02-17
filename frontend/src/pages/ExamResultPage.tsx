@@ -25,7 +25,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
       </div>
       <p className="text-slate-400 mt-3">Cada 3 fallos restan 1 acierto.</p>
       <div className="mt-4">
-        <Link className="px-3 py-2 rounded bg-indigo-600 inline-flex" to="/subjects">Volver a exámenes</Link>
+        <Link className="btn btn-secondary" to="/subjects">Volver a exámenes</Link>
       </div>
     </div>
   );

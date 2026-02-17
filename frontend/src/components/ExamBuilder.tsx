@@ -72,7 +72,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
       <div className="mt-4 flex items-center justify-between">
         <div>Total preguntas: <strong>{total()}</strong></div>
-        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="px-4 py-2 rounded-xl bg-indigo-600">Empezar</button>
+        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-secondary">Empezar</button>
       </div>
     </div>
   );

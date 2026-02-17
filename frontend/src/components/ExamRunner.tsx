@@ -119,7 +119,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`px-4 py-2 rounded-xl bg-indigo-600 ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
           </button>
