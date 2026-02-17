@@ -322,10 +322,10 @@ export default function Settings({ token }: { token: string }) {
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
         <div className="text-xs text-slate-400 mb-2">Administración</div>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
       </aside>
 
       <section className="grid gap-6">
