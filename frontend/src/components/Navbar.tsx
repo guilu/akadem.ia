@@ -1,16 +1,19 @@
 import { Link } from 'react-router-dom';
 
-export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen, theme, onToggleTheme }: {
+export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuOpen }: {
   isAuthed: boolean;
   isAdmin: boolean;
   onLogout: () => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
-  theme: 'dark' | 'light';
-  onToggleTheme: () => void;
 }) {
+  function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
   return (
-    <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+    <header className="border-b border-secondary/40 bg-bg/90 backdrop-blur">
       <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link className="text-2xl font-bold flex items-center gap-3" to="/">
           <img src="/assets/icons/akdmia-icon-32x32.png" alt="AKDMIA" className="w-8 h-8" />
@@ -37,13 +40,11 @@ export default function Navbar({ isAuthed, isAdmin, onLogout, menuOpen, setMenuO
         <div className="flex items-center gap-2">
           {isAuthed && (
             <button
-              className={`theme-toggle ${theme}`}
-              onClick={onToggleTheme}
+              onClick={toggleTheme}
+              className="px-3 py-2 rounded-lg bg-secondary text-bg hover:opacity-90"
               aria-label="cambiar tema"
             >
-              <span className="theme-thumb" />
-              <span className="theme-icon" aria-hidden>☾</span>
-              <span className="theme-icon" aria-hidden>☀︎</span>
+              Cambiar tema
             </button>
           )}
           <button
