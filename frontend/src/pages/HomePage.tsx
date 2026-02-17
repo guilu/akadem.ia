@@ -13,11 +13,11 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           {isAuthed && (
             <>
-              <Link className="btn btn-primary rounded-full px-6" to="/subjects">
+              <Link className="btn btn-primary rounded-full px-8 py-3 text-base" to="/subjects">
                 Crear examen
               </Link>
               {activeAttemptId && (
-                <Link className="btn btn-secondary rounded-full px-6" to={`/exams/attempts/${activeAttemptId}`}>
+                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base" to={`/exams/attempts/${activeAttemptId}`}>
                   Reanudar examen
                 </Link>
               )}
@@ -25,8 +25,8 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           )}
           {!isAuthed && (
             <>
-              <Link className="btn btn-secondary rounded-full px-6" to="/register">Register</Link>
-              <Link className="btn btn-primary rounded-full px-6" to="/login">Login</Link>
+              <Link className="btn btn-secondary rounded-full px-8 py-3 text-base" to="/register">Register</Link>
+              <Link className="btn btn-primary rounded-full px-8 py-3 text-base" to="/login">Login</Link>
             </>
           )}
         </div>
