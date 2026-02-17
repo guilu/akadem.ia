@@ -32,17 +32,15 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         akadem.ia
       </NavbarBrand>
       <div className="flex md:order-2 items-center gap-2">
-        {isAuthed && (
-          <button
-            className={`theme-toggle ${isDark ? 'dark' : 'light'}`}
-            onClick={toggleTheme}
-            aria-label="cambiar tema"
-          >
-            <span className="theme-thumb" />
-            <span className="theme-icon" aria-hidden>☾</span>
-            <span className="theme-icon" aria-hidden>☀︎</span>
-          </button>
-        )}
+        <button
+          className={`theme-toggle ${isDark ? 'dark' : 'light'}`}
+          onClick={toggleTheme}
+          aria-label="cambiar tema"
+        >
+          <span className="theme-thumb" />
+          <span className="theme-icon" aria-hidden>☾</span>
+          <span className="theme-icon" aria-hidden>☀︎</span>
+        </button>
         <NavbarToggle />
       </div>
       <NavbarCollapse className="items-center" style={{ lineHeight: '2.25rem' }}>
