@@ -321,7 +321,7 @@ export default function Settings({ token }: { token: string }) {
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
-        <div className="text-xs text-slate-400 mb-2">Administración</div>
+        <div className="text-xs text-text/70 mb-2">Administración</div>
         <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
         <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
         <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
@@ -601,9 +601,9 @@ export default function Settings({ token }: { token: string }) {
       </section>
 {confirmDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
+            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
             {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
@@ -633,9 +633,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmSubjectDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
-            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <div className="text-sm text-red-400 mb-3">
                 Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
@@ -678,9 +678,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmUnitDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar unidad</h3>
-            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
               <div className="text-sm text-red-400 mb-3">
                 Esta unidad tiene preguntas asociadas, si la eliminas se eliminarán todas sus preguntas y respuestas asociadas. Esta acción es irreversible.
@@ -723,9 +723,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmQuestionDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar pregunta</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
+            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
             {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmQuestionDelete(null)}>Cancelar</button>

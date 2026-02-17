@@ -43,7 +43,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">Tiempo inválido</h2>
-        <p className="text-slate-400">Configura un tiempo válido para empezar.</p>
+        <p className="text-text/70">Configura un tiempo válido para empezar.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">No hay preguntas disponibles</h2>
-        <p className="text-slate-400">Selecciona otra configuración y vuelve a intentarlo.</p>
+        <p className="text-text/70">Selecciona otra configuración y vuelve a intentarlo.</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">No se pudo cargar la pregunta</h2>
-        <p className="text-slate-400">Vuelve a intentarlo.</p>
+        <p className="text-text/70">Vuelve a intentarlo.</p>
       </div>
     );
   }
@@ -129,9 +129,9 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
 
       {confirmFinish && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-sm w-full">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 max-w-sm w-full">
             <h3 className="text-lg font-semibold mb-2">¿Finalizar examen?</h3>
-            <p className="text-slate-400 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
+            <p className="text-text/70 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmFinish(false)}
