@@ -119,12 +119,12 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`btn btn-primary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
           </button>
         </div>
-        <button onClick={() => setConfirmFinish(true)} className="px-4 py-2 rounded-xl bg-amber-500">Finalizar</button>
+        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
       </footer>
 
       {confirmFinish && (
@@ -135,13 +135,13 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmFinish(false)}
-                className="px-3 py-2 rounded border border-slate-600"
+                className="btn btn-outline"
               >
                 Cancelar
               </button>
               <button
                 onClick={finish}
-                className="px-3 py-2 rounded bg-amber-500"
+                className="btn btn-primary"
               >
                 Finalizar
               </button>
