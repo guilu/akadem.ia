@@ -46,18 +46,18 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         <NavbarToggle />
       </div>
       <NavbarCollapse className="items-center">
-        <NavbarLink className="flex items-center" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
+        <NavbarLink className="flex items-center leading-none" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
         {!isAuthed && (
           <>
-            <NavbarLink className="flex items-center" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>Login</NavbarLink>
-            <NavbarLink className="flex items-center" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>Register</NavbarLink>
+            <NavbarLink className="flex items-center leading-none" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>Login</NavbarLink>
+            <NavbarLink className="flex items-center leading-none" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>Register</NavbarLink>
           </>
         )}
         {isAuthed && (
           <>
-            <NavbarLink className="flex items-center" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>Exámenes</NavbarLink>
+            <NavbarLink className="flex items-center leading-none" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>Exámenes</NavbarLink>
             {isAdmin && (
-              <NavbarLink className="flex items-center" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
+              <NavbarLink className="flex items-center leading-none" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
             )}
             <button className="btn btn-outline h-9" onClick={onLogout}>Salir</button>
           </>
