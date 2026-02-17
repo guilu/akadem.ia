@@ -91,7 +91,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
       </header>
 
       <div className="w-full bg-slate-700 h-2 rounded mb-6">
-        <div className="h-2 bg-primary rounded" style={{ width: `${progress}%` }} />
+        <div className="h-2 bg-accent rounded" style={{ width: `${progress}%` }} />
       </div>
 
       <h2 className="text-2xl font-bold mb-3">{q.text}</h2>
@@ -119,7 +119,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-primary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
           </button>
