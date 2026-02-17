@@ -4,7 +4,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
   return (
     <section className="mt-6">
       <div className="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-        <div className="mr-auto place-self-center lg:col-span-7 text-center lg:text-left">
+        <div className="mr-auto place-self-center lg:col-span-6 text-center lg:text-left">
           <h1 className="max-w-2xl mb-4 text-5xl sm:text-6xl font-extrabold leading-tight">
             Prepárate con <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">exámenes</span> reales
           </h1>
@@ -32,11 +32,11 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             )}
           </div>
         </div>
-        <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
+        <div className="hidden lg:mt-0 lg:col-span-6 lg:flex">
           <img
             src="/assets/landing/constitution-books.png"
             alt="Constitución española"
-            className="w-full h-auto rounded-2xl border border-gray-400 object-cover"
+            className="w-full h-auto rounded-2xl object-cover"
           />
         </div>
       </div>
