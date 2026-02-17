@@ -47,7 +47,7 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
         <TextInput placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
         <TextInput placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
         {err && <div className="text-red-400 text-sm">{err}</div>}
-        <div className="flex gap-2">
+        <div className="flex justify-end">
           <Button onClick={login} disabled={loading} className="btn btn-primary">
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>

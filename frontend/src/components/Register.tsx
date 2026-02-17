@@ -71,7 +71,7 @@ export default function Register({ onToken }:{ onToken: (t:string)=>void }){
           <option value="OTHER">Otro</option>
         </Select>
         {err && <div className="text-red-400 text-sm">{err}</div>}
-        <div className="flex gap-2">
+        <div className="flex justify-end">
           <Button onClick={register} disabled={loading} className="btn btn-primary">
             {loading ? 'Creando...' : 'Crear cuenta'}
           </Button>
