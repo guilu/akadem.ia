@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Button, Card, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -438,61 +439,61 @@ export default function Settings({ token }: { token: string }) {
         {tab === 'users' && (
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold">Usuarios</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email: e.target.value }))} />
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={form.role} onChange={e=>setForm(f=>({ ...f, role: e.target.value as AdminUser['role'] }))}>
-                <option value="ADMIN">ADMIN</option>
-                <option value="TEACHER">TEACHER</option>
-                <option value="STUDENT">STUDENT</option>
-              </select>
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={form.firstName || ''} onChange={e=>setForm(f=>({ ...f, firstName: e.target.value }))} />
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="apellidos" value={form.lastName || ''} onChange={e=>setForm(f=>({ ...f, lastName: e.target.value }))} />
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={form.occupation || ''} onChange={e=>setForm(f=>({ ...f, occupation: e.target.value }))}>
-                <option value="">ocupación (opcional)</option>
-                <option value="STUDENT">Estudiante</option>
-                <option value="TEACHER">Profesor</option>
-                <option value="OPOSITOR">Opositor</option>
-                <option value="OTHER">Otro</option>
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={saveUser} disabled={loading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
-                {isEditing ? 'Guardar cambios' : 'Crear usuario'}
-              </button>
-              {isEditing && (
-                <button onClick={resetForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
-              )}
-            </div>
-
-            <div className="border border-slate-700 rounded-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                <thead className="bg-slate-900">
-                  <tr>
-                    <th className="text-left p-2">Email</th>
-                    <th className="text-left p-2 hidden sm:table-cell">Rol</th>
-                    <th className="text-left p-2 hidden sm:table-cell">Nombre</th>
-                    <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.id} className="border-t border-slate-800">
-                      <td className="p-2">{u.email}</td>
-                      <td className="p-2 hidden sm:table-cell">{u.role}</td>
-                      <td className="p-2 hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
-                      <td className="p-2">
-                        <div className="flex gap-2">
-                          <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                </table>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <TextInput placeholder="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email: e.target.value }))} />
+                <Select value={form.role} onChange={e=>setForm(f=>({ ...f, role: e.target.value as AdminUser['role'] }))}>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="TEACHER">TEACHER</option>
+                  <option value="STUDENT">STUDENT</option>
+                </Select>
+                <TextInput placeholder="nombre" value={form.firstName || ''} onChange={e=>setForm(f=>({ ...f, firstName: e.target.value }))} />
+                <TextInput placeholder="apellidos" value={form.lastName || ''} onChange={e=>setForm(f=>({ ...f, lastName: e.target.value }))} />
+                <Select value={form.occupation || ''} onChange={e=>setForm(f=>({ ...f, occupation: e.target.value }))}>
+                  <option value="">ocupación (opcional)</option>
+                  <option value="STUDENT">Estudiante</option>
+                  <option value="TEACHER">Profesor</option>
+                  <option value="OPOSITOR">Opositor</option>
+                  <option value="OTHER">Otro</option>
+                </Select>
               </div>
-            </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveUser} disabled={loading} className="btn btn-primary">
+                  {isEditing ? 'Guardar cambios' : 'Crear usuario'}
+                </Button>
+                {isEditing && (
+                  <Button onClick={resetForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Email</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Rol</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Nombre</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {users.map(u => (
+                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.role}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
           </div>
         )}
 
