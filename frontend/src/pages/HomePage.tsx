@@ -25,8 +25,8 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           )}
           {!isAuthed && (
             <>
-              <Link className="btn btn-secondary rounded-full px-6" to="/register">How does it work?</Link>
-              <Link className="btn btn-primary rounded-full px-6" to="/login">Get Started</Link>
+              <Link className="btn btn-secondary rounded-full px-6" to="/register">Register</Link>
+              <Link className="btn btn-primary rounded-full px-6" to="/login">Login</Link>
             </>
           )}
         </div>
