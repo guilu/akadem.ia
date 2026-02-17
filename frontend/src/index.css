@@ -18,6 +18,9 @@
   .btn-outline {
     @apply border border-secondary/60 text-text;
   }
+  nav[role="navigation"] ul {
+    line-height: 2.25rem;
+  }
 }
 
 html, body {
