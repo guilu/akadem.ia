@@ -33,7 +33,11 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           </div>
         </div>
         <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-          <div className="w-full h-full min-h-[280px] rounded-2xl border border-gray-400 bg-secondary/10" />
+          <img
+            src="/assets/landing/constitution-books.jpg"
+            alt="Constitución española"
+            className="w-full h-auto rounded-2xl border border-gray-400 object-cover"
+          />
         </div>
       </div>
 
