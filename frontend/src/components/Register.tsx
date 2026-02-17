@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button, Select, TextInput } from 'flowbite-react';
 import { apiBase } from '../api';
 
 export default function Register({ onToken }:{ onToken: (t:string)=>void }){
@@ -57,28 +58,23 @@ export default function Register({ onToken }:{ onToken: (t:string)=>void }){
     <div className="max-w-sm mx-auto p-4 border border-slate-700 rounded-xl">
       <h2 className="text-xl font-semibold mb-3">Registro</h2>
       <div className="grid gap-2">
-        <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="email"
-               value={email} onChange={e=>setEmail(e.target.value)} />
-        <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="password" type="password"
-               value={password} onChange={e=>setPassword(e.target.value)} />
-        <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="confirmar password" type="password"
-               value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
-        <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre (opcional)"
-               value={firstName} onChange={e=>setFirstName(e.target.value)} />
-        <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="apellidos (opcional)"
-               value={lastName} onChange={e=>setLastName(e.target.value)} />
-        <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={occupation} onChange={e=>setOccupation(e.target.value)}>
+        <TextInput placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
+        <TextInput placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+        <TextInput placeholder="confirmar password" type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
+        <TextInput placeholder="nombre (opcional)" value={firstName} onChange={e=>setFirstName(e.target.value)} />
+        <TextInput placeholder="apellidos (opcional)" value={lastName} onChange={e=>setLastName(e.target.value)} />
+        <Select value={occupation} onChange={e=>setOccupation(e.target.value)}>
           <option value="">ocupación (opcional)</option>
           <option value="STUDENT">Estudiante</option>
           <option value="TEACHER">Profesor</option>
           <option value="OPOSITOR">Opositor</option>
           <option value="OTHER">Otro</option>
-        </select>
+        </Select>
         {err && <div className="text-red-400 text-sm">{err}</div>}
-        <div className="flex gap-2">
-          <button onClick={register} disabled={loading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
+        <div className="flex justify-end">
+          <Button onClick={register} disabled={loading} className="btn btn-primary">
             {loading ? 'Creando...' : 'Crear cuenta'}
-          </button>
+          </Button>
         </div>
         <div className="text-xs text-slate-400">Email obligatorio. Password mínimo 8 caracteres.</div>
       </div>

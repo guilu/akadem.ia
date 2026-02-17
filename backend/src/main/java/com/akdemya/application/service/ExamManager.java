@@ -86,9 +86,12 @@ public class ExamManager implements ExamUseCase {
   }
 
   @Override
-  public SubmitResult submitExam(SubmitCommand command) {
+  public SubmitResult submitExam(SubmitCommand command, String userEmail) {
     ExamAttempt attempt = attemptRepo.findById(command.attemptId())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid attempt ID"));
+        .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+    if (!attempt.getUserEmail().equals(userEmail)) {
+      throw new SecurityException("Forbidden");
+    }
 
     List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(command.attemptId());
 
@@ -136,9 +139,12 @@ public class ExamManager implements ExamUseCase {
   }
 
   @Override
-  public AttemptResponse getAttempt(UUID attemptId) {
+  public AttemptResponse getAttempt(UUID attemptId, String userEmail) {
     ExamAttempt attempt = attemptRepo.findById(attemptId)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid attempt ID"));
+        .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+    if (!attempt.getUserEmail().equals(userEmail)) {
+      throw new SecurityException("Forbidden");
+    }
 
     List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attemptId);
 
@@ -170,6 +176,11 @@ public class ExamManager implements ExamUseCase {
     List<ExamAttempt> attempts = new ArrayList<>(attemptRepo.findByUserEmail(userEmail));
     attempts.sort(Comparator.comparing(ExamAttempt::getStartedAt).reversed());
 
+    Map<UUID, Answer> answerCache = new HashMap<>();
+    Map<UUID, Question> questionCache = new HashMap<>();
+    Map<UUID, Unit> unitCache = new HashMap<>();
+    Map<UUID, Subject> subjectCache = new HashMap<>();
+
     List<AttemptSummary> summaries = new ArrayList<>();
     for (ExamAttempt attempt : attempts) {
       List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attempt.getId());
@@ -179,7 +190,7 @@ public class ExamManager implements ExamUseCase {
       for (ExamAttemptAnswer e : entries) {
         if (e.getAnswerId() == null)
           continue;
-        Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
+        Answer ans = answerCache.computeIfAbsent(e.getAnswerId(), id -> answerRepo.findById(id).orElse(null));
         if (ans != null && ans.isCorrect()) {
           correct++;
         } else if (ans != null) {
@@ -190,11 +201,12 @@ public class ExamManager implements ExamUseCase {
 
       String subjectName = "Desconocida";
       if (!entries.isEmpty()) {
-        Question q = questionRepo.findById(entries.get(0).getQuestionId()).orElse(null);
+        Question q = questionCache.computeIfAbsent(entries.get(0).getQuestionId(),
+            id -> questionRepo.findById(id).orElse(null));
         if (q != null) {
-          var unit = unitRepo.findById(q.getUnitId()).orElse(null);
+          Unit unit = unitCache.computeIfAbsent(q.getUnitId(), id -> unitRepo.findById(id).orElse(null));
           if (unit != null) {
-            var subject = subjectRepo.findById(unit.getSubjectId()).orElse(null);
+            Subject subject = subjectCache.computeIfAbsent(unit.getSubjectId(), id -> subjectRepo.findById(id).orElse(null));
             if (subject != null) {
               subjectName = subject.getName();
             }
@@ -220,9 +232,12 @@ public class ExamManager implements ExamUseCase {
   }
 
   @Override
-  public void updateAnswer(UpdateAnswerCommand command) {
+  public void updateAnswer(UpdateAnswerCommand command, String userEmail) {
     ExamAttempt attempt = attemptRepo.findById(command.attemptId())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid attempt ID"));
+        .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+    if (!attempt.getUserEmail().equals(userEmail)) {
+      throw new SecurityException("Forbidden");
+    }
 
     if (attempt.getFinishedAt() != null) {
       return;

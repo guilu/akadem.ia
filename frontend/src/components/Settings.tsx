@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Button, Card, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -320,100 +321,263 @@ export default function Settings({ token }: { token: string }) {
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
-        <div className="text-xs text-slate-400 mb-2">Administración</div>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
+        <div className="text-xs text-text/70 mb-2">Administración</div>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
+        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
       </aside>
 
-      <section className="border border-slate-800 rounded-xl p-4">
+      <section className="grid gap-6">
+        {tab === 'users' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Usuarios</h2>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <TextInput placeholder="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email: e.target.value }))} />
+                <Select value={form.role} onChange={e=>setForm(f=>({ ...f, role: e.target.value as AdminUser['role'] }))}>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="TEACHER">TEACHER</option>
+                  <option value="STUDENT">STUDENT</option>
+                </Select>
+                <TextInput placeholder="nombre" value={form.firstName || ''} onChange={e=>setForm(f=>({ ...f, firstName: e.target.value }))} />
+                <TextInput placeholder="apellidos" value={form.lastName || ''} onChange={e=>setForm(f=>({ ...f, lastName: e.target.value }))} />
+                <Select value={form.occupation || ''} onChange={e=>setForm(f=>({ ...f, occupation: e.target.value }))}>
+                  <option value="">ocupación (opcional)</option>
+                  <option value="STUDENT">Estudiante</option>
+                  <option value="TEACHER">Profesor</option>
+                  <option value="OPOSITOR">Opositor</option>
+                  <option value="OTHER">Otro</option>
+                </Select>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveUser} disabled={loading} className="btn btn-primary">
+                  {isEditing ? 'Guardar cambios' : 'Crear usuario'}
+                </Button>
+                {isEditing && (
+                  <Button onClick={resetForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Email</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Rol</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Nombre</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {users.map(u => (
+                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.role}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {tab === 'subjects' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Materias</h2>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <TextInput placeholder="nombre" value={subjectForm.name} onChange={e=>setSubjectForm(f=>({ ...f, name: e.target.value }))} />
+                <TextInput placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveSubject} disabled={subjectLoading} className="btn btn-primary">
+                  {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
+                </Button>
+                {isSubjectEditing && (
+                  <Button onClick={resetSubjectForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Materia</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {subjects.map(s => (
+                      <TableRow key={s.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{s.name}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
+                            <button
+                              type="button"
+                              className="text-red-400 cursor-pointer"
+                              onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
+                              aria-label="Eliminar"
+                              title="Eliminar"
+                            >🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {tab === 'units' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Unidades</h2>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Select value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
+                  <option value="">Selecciona materia</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </Select>
+                <TextInput placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
+                <TextInput placeholder="descripción (opcional)" value={unitForm.description || ''} onChange={e=>setUnitForm(f=>({ ...f, description: e.target.value }))} />
+                <TextInput type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveUnit} disabled={unitLoading} className="btn btn-primary">
+                  {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
+                </Button>
+                {isUnitEditing && (
+                  <Button onClick={resetUnitForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Materia</TableHeadCell>
+                    <TableHeadCell>Unidad</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Orden</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {units.map(u => (
+                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{subjects.find(s => s.id === u.subjectId)?.name || '-'}</TableCell>
+                        <TableCell>{u.name}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.description || '-'}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </div>
+        )}
+
         {tab === 'questions' && (
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold">Preguntas</h2>
-            <div className="grid gap-2 md:grid-cols-2">
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionSubjectId} onChange={e=>{ setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }}>
-                <option value="">Selecciona materia</option>
-                {subjects.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Select value={questionSubjectId} onChange={e=>setQuestionSubjectId(e.target.value)}>
+                  <option value="">Selecciona materia</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </Select>
+                <Select value={questionUnitId} onChange={e=>setQuestionUnitId(e.target.value)}>
+                  <option value="">Selecciona unidad</option>
+                  {units.map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </Select>
+                <TextInput placeholder="enunciado" value={questionForm.text} onChange={e=>setQuestionForm(f=>({ ...f, text: e.target.value }))} />
+                <TextInput placeholder="explicación (opcional)" value={questionForm.explanation || ''} onChange={e=>setQuestionForm(f=>({ ...f, explanation: e.target.value }))} />
+                <Select value={questionForm.difficulty} onChange={e=>setQuestionForm(f=>({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
+                  <option value="EASY">Fácil</option>
+                  <option value="MEDIUM">Media</option>
+                  <option value="HARD">Difícil</option>
+                </Select>
+              </div>
+
+              <div className="mt-4 grid gap-2">
+                {questionForm.answers.map((a, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <input
+                      type="radio"
+                      name="correct"
+                      checked={a.correct}
+                      onChange={() => setQuestionForm(f => ({
+                        ...f,
+                        answers: f.answers.map((ans, i) => ({ ...ans, correct: i === idx }))
+                      }))}
+                    />
+                    <TextInput
+                      placeholder={`Respuesta ${idx + 1}`}
+                      value={a.text}
+                      onChange={e => setQuestionForm(f => ({
+                        ...f,
+                        answers: f.answers.map((ans, i) => i === idx ? { ...ans, text: e.target.value } : ans)
+                      }))}
+                      className="flex-1"
+                    />
+                  </div>
                 ))}
-              </select>
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={questionUnitId} onChange={e=>setQuestionUnitId(e.target.value)}>
-                <option value="">Selecciona unidad</option>
-                {units.map(u => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
+              </div>
 
-            <div className="grid gap-2">
-              <textarea className="bg-slate-900 border border-slate-700 rounded px-3 py-2" rows={3} placeholder="enunciado" value={questionForm.text} onChange={e=>setQuestionForm(f=>({ ...f, text: e.target.value }))} />
-              <textarea className="bg-slate-900 border border-slate-700 rounded px-3 py-2" rows={2} placeholder="explicación (opcional)" value={questionForm.explanation || ''} onChange={e=>setQuestionForm(f=>({ ...f, explanation: e.target.value }))} />
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2 w-full md:w-48" value={questionForm.difficulty} onChange={e=>setQuestionForm(f=>({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
-                <option value="EASY">EASY</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="HARD">HARD</option>
-              </select>
-            </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveQuestion} disabled={questionLoading} className="btn btn-primary">
+                  {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
+                </Button>
+                {isQuestionEditing && (
+                  <Button onClick={resetQuestionForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
 
-            <div className="grid gap-2">
-              <div className="text-sm text-slate-400">Respuestas (marca la correcta)</div>
-              {questionForm.answers.map((a, idx) => (
-                <label key={idx} className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="correct"
-                    checked={a.correct}
-                    onChange={() => setQuestionForm(f => ({
-                      ...f,
-                      answers: f.answers.map((ans, i) => ({ ...ans, correct: i === idx }))
-                    }))}
-                  />
-                  <input
-                    className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2"
-                    placeholder={`respuesta ${idx + 1}`}
-                    value={a.text}
-                    onChange={e => setQuestionForm(f => ({
-                      ...f,
-                      answers: f.answers.map((ans, i) => i === idx ? { ...ans, text: e.target.value } : ans)
-                    }))}
-                  />
-                </label>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={saveQuestion} disabled={questionLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
-                {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
-              </button>
-              {isQuestionEditing && (
-                <button onClick={resetQuestionForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
-              )}
-            </div>
-
-            <div className="border border-slate-700 rounded-xl">
+            <Card className="border border-secondary/40 bg-bg">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-900">
-                    <tr>
-                      <th className="text-left p-2">Unidad</th>
-                      <th className="text-left p-2">Pregunta</th>
-                      <th className="text-left p-2 hidden sm:table-cell">Dificultad</th>
-                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Pregunta</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Dificultad</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Respuestas</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
                     {questions.map(q => (
-                      <tr key={q.id} className="border-t border-slate-800">
-                        <td className="p-2">{units.find(u => u.id === q.unitId)?.name || '-'}</td>
-                        <td className="p-2">{q.text}</td>
-                        <td className="p-2 hidden sm:table-cell">{q.difficulty}</td>
-                        <td className="p-2">
+                      <TableRow key={q.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{q.text}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{q.difficulty}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{q.answers.map(a => a.text).join(', ')}</TableCell>
+                        <TableCell>
                           <div className="flex gap-2">
-                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>{
-                              const unit = units.find(u => u.id === q.unitId);
-                              if (unit) setQuestionSubjectId(unit.subjectId);
-                              setQuestionUnitId(q.unitId);
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>{
                               setQuestionForm({
                                 id: q.id,
                                 unitId: q.unitId,
@@ -425,192 +589,21 @@ export default function Settings({ token }: { token: string }) {
                             }} aria-label="Editar" title="Editar">✏️</button>
                             <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'users' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Usuarios</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email: e.target.value }))} />
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={form.role} onChange={e=>setForm(f=>({ ...f, role: e.target.value as AdminUser['role'] }))}>
-                <option value="ADMIN">ADMIN</option>
-                <option value="TEACHER">TEACHER</option>
-                <option value="STUDENT">STUDENT</option>
-              </select>
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={form.firstName || ''} onChange={e=>setForm(f=>({ ...f, firstName: e.target.value }))} />
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="apellidos" value={form.lastName || ''} onChange={e=>setForm(f=>({ ...f, lastName: e.target.value }))} />
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={form.occupation || ''} onChange={e=>setForm(f=>({ ...f, occupation: e.target.value }))}>
-                <option value="">ocupación (opcional)</option>
-                <option value="STUDENT">Estudiante</option>
-                <option value="TEACHER">Profesor</option>
-                <option value="OPOSITOR">Opositor</option>
-                <option value="OTHER">Otro</option>
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={saveUser} disabled={loading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
-                {isEditing ? 'Guardar cambios' : 'Crear usuario'}
-              </button>
-              {isEditing && (
-                <button onClick={resetForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
-              )}
-            </div>
-
-            <div className="border border-slate-700 rounded-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                <thead className="bg-slate-900">
-                  <tr>
-                    <th className="text-left p-2">Email</th>
-                    <th className="text-left p-2 hidden sm:table-cell">Rol</th>
-                    <th className="text-left p-2 hidden sm:table-cell">Nombre</th>
-                    <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.id} className="border-t border-slate-800">
-                      <td className="p-2">{u.email}</td>
-                      <td className="p-2 hidden sm:table-cell">{u.role}</td>
-                      <td className="p-2 hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</td>
-                      <td className="p-2">
-                        <div className="flex gap-2">
-                          <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'subjects' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Materias</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={subjectForm.name} onChange={e=>setSubjectForm(f=>({ ...f, name: e.target.value }))} />
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
-            </div>
-            <div className="flex gap-2">
-              <button onClick={saveSubject} disabled={subjectLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
-                {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
-              </button>
-              {isSubjectEditing && (
-                <button onClick={resetSubjectForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
-              )}
-            </div>
-
-            <div className="border border-slate-700 rounded-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-900">
-                    <tr>
-                      <th className="text-left p-2">Materia</th>
-                      <th className="text-left p-2 hidden sm:table-cell">Descripción</th>
-                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {subjects.map(s => (
-                      <tr key={s.id} className="border-t border-slate-800">
-                        <td className="p-2">{s.name}</td>
-                        <td className="p-2 hidden sm:table-cell">{s.description || '-'}</td>
-                        <td className="p-2">
-                          <div className="flex gap-2">
-                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
-                            <button
-                              type="button"
-                              className="text-red-400 cursor-pointer"
-                              onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
-                              aria-label="Eliminar"
-                              title="Eliminar"
-                            >🗑️</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'units' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Unidades</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <select className="bg-slate-900 border border-slate-700 rounded px-3 py-2" value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
-                <option value="">Selecciona materia</option>
-                {subjects.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" placeholder="descripción (opcional)" value={unitForm.description || ''} onChange={e=>setUnitForm(f=>({ ...f, description: e.target.value }))} />
-              <input className="bg-slate-900 border border-slate-700 rounded px-3 py-2" type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
-            </div>
-            <div className="flex gap-2">
-              <button onClick={saveUnit} disabled={unitLoading} className="px-3 py-2 rounded bg-indigo-600 disabled:opacity-60">
-                {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
-              </button>
-              {isUnitEditing && (
-                <button onClick={resetUnitForm} className="px-3 py-2 rounded border border-slate-600">Cancelar</button>
-              )}
-            </div>
-
-            <div className="border border-slate-700 rounded-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-900">
-                    <tr>
-                      <th className="text-left p-2">Materia</th>
-                      <th className="text-left p-2">Unidad</th>
-                      <th className="text-left p-2 hidden sm:table-cell">Descripción</th>
-                      <th className="text-left p-2 hidden sm:table-cell">Orden</th>
-                      <th className="text-left p-2 w-12"><span className="sr-only">Acciones</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {units.map(u => (
-                      <tr key={u.id} className="border-t border-slate-800">
-                        <td className="p-2">{subjects.find(s => s.id === u.subjectId)?.name || '-'}</td>
-                        <td className="p-2">{u.name}</td>
-                        <td className="p-2 hidden sm:table-cell">{u.description || '-'}</td>
-                        <td className="p-2 hidden sm:table-cell">{u.orderIndex}</td>
-                        <td className="p-2">
-                          <div className="flex gap-2">
-                            <button type="button" className="text-cyan-400 cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            </Card>
           </div>
         )}
       </section>
-
-      {confirmDelete && (
+{confirmDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
+            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
             {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
@@ -640,9 +633,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmSubjectDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
-            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <div className="text-sm text-red-400 mb-3">
                 Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
@@ -650,7 +643,7 @@ export default function Settings({ token }: { token: string }) {
             )}
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
               <input
-                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                className="w-full rounded px-3 py-2 mb-3"
                 placeholder='Escribe "eliminar" para confirmar'
                 value={subjectDeleteText}
                 onChange={e=>setSubjectDeleteText(e.target.value)}
@@ -685,9 +678,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmUnitDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar unidad</h3>
-            <p className="text-sm text-slate-400 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
               <div className="text-sm text-red-400 mb-3">
                 Esta unidad tiene preguntas asociadas, si la eliminas se eliminarán todas sus preguntas y respuestas asociadas. Esta acción es irreversible.
@@ -695,7 +688,7 @@ export default function Settings({ token }: { token: string }) {
             )}
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
               <input
-                className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 mb-3"
+                className="w-full rounded px-3 py-2 mb-3"
                 placeholder='Escribe "eliminar" para confirmar'
                 value={unitDeleteText}
                 onChange={e=>setUnitDeleteText(e.target.value)}
@@ -730,9 +723,9 @@ export default function Settings({ token }: { token: string }) {
 
       {confirmQuestionDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 w-full max-w-sm">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar pregunta</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
+            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
             {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmQuestionDelete(null)}>Cancelar</button>

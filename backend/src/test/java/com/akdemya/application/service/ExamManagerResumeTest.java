@@ -47,13 +47,14 @@ class ExamManagerResumeTest {
 
     ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
 
-    var initial = manager.getAttempt(attemptId);
+    var initial = manager.getAttempt(attemptId, "test@akdemya.com");
     assertEquals(0, initial.nextQuestionIndex());
     assertNull(initial.questions().get(0).selectedAnswerId());
 
-    manager.updateAnswer(new com.akdemya.domain.port.in.ExamUseCase.UpdateAnswerCommand(attemptId, q1Id, a1.getId()));
+    manager.updateAnswer(new com.akdemya.domain.port.in.ExamUseCase.UpdateAnswerCommand(attemptId, q1Id, a1.getId()),
+        "test@akdemya.com");
 
-    var resumed = manager.getAttempt(attemptId);
+    var resumed = manager.getAttempt(attemptId, "test@akdemya.com");
     int expectedNext = 0;
     for (int i = 0; i < resumed.questions().size(); i++) {
       if (resumed.questions().get(i).selectedAnswerId() == null) {

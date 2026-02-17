@@ -1,0 +1,8 @@
+:root {
+  /* light theme (realtimecolors) */
+  --text: 35 58 77; /* #233a4d */
+  --bg: 245 239 223; /* #f5efdf */
+  --primary: 196 54 56; /* #c43638 */
+  --secondary: 116 139 139; /* #748b8b */
+  --accent: 241 194 75; /* #f1c24b */
+}

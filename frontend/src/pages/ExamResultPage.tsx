@@ -9,10 +9,10 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
     <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
       <h2 className="text-2xl font-bold mb-3">Resultados</h2>
 
-      <div className="mb-4 rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-center">
-        <div className="text-slate-400 text-sm uppercase tracking-wide">Nota final</div>
-        <div className="text-5xl font-extrabold text-cyan-300">{score10.toFixed(2)}</div>
-        <div className="text-slate-400 text-sm">sobre 10</div>
+      <div className="mb-4 rounded-xl border border-secondary/40 bg-secondary/20 p-4 text-center">
+        <div className="text-text/70 text-sm uppercase tracking-wide">Nota final</div>
+        <div className={`text-6xl font-extrabold ${score10 >= 5 ? 'text-lime-400' : 'text-red-500'}`}>{score10.toFixed(2)}</div>
+        <div className="text-text/70 text-sm">sobre 10</div>
       </div>
 
       <div className="space-y-1">
@@ -25,7 +25,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
       </div>
       <p className="text-slate-400 mt-3">Cada 3 fallos restan 1 acierto.</p>
       <div className="mt-4">
-        <Link className="px-3 py-2 rounded bg-indigo-600 inline-flex" to="/subjects">Volver a exámenes</Link>
+        <Link className="btn btn-secondary" to="/subjects">Volver a exámenes</Link>
       </div>
     </div>
   );

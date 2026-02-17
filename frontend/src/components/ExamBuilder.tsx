@@ -3,7 +3,7 @@ import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [units, setUnits] = useState<UnitAvailability[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
 
@@ -41,7 +41,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) - 1)}
-                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                className="btn btn-secondary w-8 h-8"
                 aria-label="disminuir">
                 −
               </button>
@@ -51,11 +51,11 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
                 max={u.available}
                 value={rules[u.id] || 0}
                 onChange={e => setCount(u.id, Number(e.target.value))}
-                className="w-16 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1"
+                className="w-16 text-center rounded px-2 py-1"
               />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
-                className="w-8 h-8 rounded bg-slate-800 border border-slate-600"
+                className="btn btn-secondary w-8 h-8"
                 aria-label="aumentar">
                 +
               </button>
@@ -67,12 +67,12 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
       <div className="mt-4 flex items-center gap-3">
         <label>Tiempo total (min)</label>
         <input type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
-          className="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1"/>
+          className="w-24 rounded px-2 py-1"/>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
         <div>Total preguntas: <strong>{total()}</strong></div>
-        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="px-4 py-2 rounded-xl bg-indigo-600">Empezar</button>
+        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-primary">Empezar</button>
       </div>
     </div>
   );

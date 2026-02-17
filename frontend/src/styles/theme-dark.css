@@ -1,0 +1,8 @@
+.dark {
+  /* dark theme (realtimecolors) */
+  --text: 178 201 220; /* #b2c9dc */
+  --bg: 22 35 47; /* #16232f */
+  --primary: 180 133 14; /* #b4850e */
+  --secondary: 105 154 195; /* #699ac3 */
+  --accent: 201 59 61; /* #c93b3d */
+}

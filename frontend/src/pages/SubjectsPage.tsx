@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Card } from 'flowbite-react';
 import { apiAuthJson, apiBase } from '../api';
-import type { Subject, ExamAttemptSummary, ExamResult } from '../types';
+import type { Subject, ExamAttemptSummary } from '../types';
 
 export default function SubjectsPage({ subjects, activeAttemptId, token, onUnauthorized, onViewResult, onResumeAttempt }: {
   subjects: Subject[];
@@ -40,7 +41,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Exámenes</h2>
         {activeAttemptId && (
-          <Link className="px-3 py-2 rounded-xl bg-indigo-600 inline-flex" to={`/exams/attempts/${activeAttemptId}`}>
+          <Link className="btn btn-secondary" to={`/exams/attempts/${activeAttemptId}`}>
             Reanudar examen
           </Link>
         )}
@@ -48,28 +49,28 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
 
       <div className="grid sm:grid-cols-2 gap-4">
         {subjects.map(s => (
-          <div key={s.id} className="border border-slate-700 rounded-xl p-4">
+          <Card key={s.id} className="border border-secondary/40 bg-bg">
             <div className="text-lg font-semibold">{s.name}</div>
-            <div className="text-sm text-slate-400">{s.description}</div>
+            <div className="text-sm text-text/70">{s.description}</div>
             <div className="mt-3">
-              <Link className="px-3 py-2 rounded-xl bg-cyan-600 inline-flex" to={`/subjects/${s.id}/builder`}>
+              <Link className="btn btn-primary" to={`/subjects/${s.id}/builder`}>
                 Crear examen
               </Link>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
       <div className="mt-10">
         <h3 className="text-lg font-semibold mb-3">Historial de exámenes</h3>
         {loading && (
-          <div className="text-slate-400">Cargando historial...</div>
+          <div className="text-text/70">Cargando historial...</div>
         )}
         {!loading && error && (
-          <div className="text-slate-400">{error}</div>
+          <div className="text-text/70">{error}</div>
         )}
         {!loading && !error && history.length === 0 && (
-          <div className="text-slate-400">Aún no tienes exámenes realizados.</div>
+          <div className="text-text/70">Aún no tienes exámenes realizados.</div>
         )}
         {!loading && !error && history.length > 0 && (
           <div className="grid gap-3">
@@ -79,10 +80,10 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                 ? Math.max(0, Math.floor((new Date(h.finishedAt).getTime() - new Date(h.startedAt).getTime()) / 1000))
                 : 0;
               return (
-                <div key={h.attemptId} className="border border-slate-700 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <Card key={h.attemptId} className="border border-secondary/40 bg-bg flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <div className="font-semibold">{h.subjectName || 'Materia'}</div>
-                    <div className="text-sm text-slate-400">{new Date(h.startedAt).toLocaleString()}</div>
+                    <div className="text-sm text-text/70">{new Date(h.startedAt).toLocaleString()}</div>
                     <div className="text-sm mt-1">Estado: <strong>{finished ? 'Finalizado' : 'En curso'}</strong></div>
                     <div className="text-sm">Resultado: <strong>{(h.score ?? 0)} ({h.percent.toFixed(1)}%)</strong></div>
                     <div className="text-sm">Tiempo empleado: <strong>{finished ? formatDuration(timeSpent) : formatDuration(h.totalTimeSeconds)}</strong></div>
@@ -90,21 +91,21 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                   <div className="flex gap-2">
                     {finished ? (
                       <button
-                        className="px-3 py-2 rounded bg-indigo-600"
+                        className="btn btn-secondary"
                         onClick={() => onViewResult(h.attemptId)}
                       >
                         Ver resultados
                       </button>
                     ) : (
                       <button
-                        className="px-3 py-2 rounded bg-cyan-600"
+                        className="btn btn-primary"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
                         Reanudar
                       </button>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>

@@ -7,13 +7,13 @@ import java.util.UUID;
 public interface ExamUseCase {
   StartResponse startExam(StartCommand command);
 
-  SubmitResult submitExam(SubmitCommand command);
+  SubmitResult submitExam(SubmitCommand command, String userEmail);
 
-  AttemptResponse getAttempt(UUID attemptId);
+  AttemptResponse getAttempt(UUID attemptId, String userEmail);
 
   List<AttemptSummary> listAttempts(String userEmail);
 
-  void updateAnswer(UpdateAnswerCommand command);
+  void updateAnswer(UpdateAnswerCommand command, String userEmail);
 
   record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes) {
   }

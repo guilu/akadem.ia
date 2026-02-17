@@ -43,7 +43,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">Tiempo inválido</h2>
-        <p className="text-slate-400">Configura un tiempo válido para empezar.</p>
+        <p className="text-text/70">Configura un tiempo válido para empezar.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">No hay preguntas disponibles</h2>
-        <p className="text-slate-400">Selecciona otra configuración y vuelve a intentarlo.</p>
+        <p className="text-text/70">Selecciona otra configuración y vuelve a intentarlo.</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     return (
       <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
         <h2 className="text-xl font-semibold mb-2">No se pudo cargar la pregunta</h2>
-        <p className="text-slate-400">Vuelve a intentarlo.</p>
+        <p className="text-text/70">Vuelve a intentarlo.</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
       </header>
 
       <div className="w-full bg-slate-700 h-2 rounded mb-6">
-        <div className="h-2 bg-cyan-400 rounded" style={{ width: `${progress}%` }} />
+        <div className="h-2 bg-accent rounded" style={{ width: `${progress}%` }} />
       </div>
 
       <h2 className="text-2xl font-bold mb-3">{q.text}</h2>
@@ -100,7 +100,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           const selected = selections[q.id] === a.id;
           return (
             <button key={a.id} onClick={() => choose(a.id)}
-              className={`text-left border rounded-xl p-3 transition hover:scale-[1.01] ${selected ? 'border-cyan-400 bg-cyan-950/40' : 'border-slate-600 hover:border-slate-400'}`}>
+              className={`text-left border rounded-xl p-3 transition hover:scale-[1.01] ${selected ? 'border-accent bg-accent/10' : 'border-slate-600 hover:border-slate-400'}`}>
               {a.text}
             </button>
           );
@@ -119,29 +119,29 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`px-4 py-2 rounded-xl bg-indigo-600 ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
           </button>
         </div>
-        <button onClick={() => setConfirmFinish(true)} className="px-4 py-2 rounded-xl bg-amber-500">Finalizar</button>
+        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
       </footer>
 
       {confirmFinish && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-sm w-full">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 max-w-sm w-full">
             <h3 className="text-lg font-semibold mb-2">¿Finalizar examen?</h3>
-            <p className="text-slate-400 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
+            <p className="text-text/70 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmFinish(false)}
-                className="px-3 py-2 rounded border border-slate-600"
+                className="btn btn-outline"
               >
                 Cancelar
               </button>
               <button
                 onClick={finish}
-                className="px-3 py-2 rounded bg-amber-500"
+                className="btn btn-primary"
               >
                 Finalizar
               </button>
