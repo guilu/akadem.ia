@@ -375,8 +375,64 @@ export default function Settings({ token }: { token: string }) {
           </div>
         )}
 
-{tab === 'units' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
+{tab === 'units' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Unidades</h2>
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Select value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
+                  <option value="">Selecciona materia</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </Select>
+                <TextInput placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
+                <TextInput placeholder="descripción (opcional)" value={unitForm.description || ''} onChange={e=>setUnitForm(f=>({ ...f, description: e.target.value }))} />
+                <TextInput type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button onClick={saveUnit} disabled={unitLoading} className="btn btn-primary">
+                  {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
+                </Button>
+                {isUnitEditing && (
+                  <Button onClick={resetUnitForm} color="light" className="btn btn-outline">Cancelar</Button>
+                )}
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableHeadCell>Materia</TableHeadCell>
+                    <TableHeadCell>Unidad</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
+                    <TableHeadCell className="hidden sm:table-cell">Orden</TableHeadCell>
+                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
+                  </TableHead>
+                  <TableBody className="divide-y">
+                    {units.map(u => (
+                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+                        <TableCell>{subjects.find(s => s.id === u.subjectId)?.name || '-'}</TableCell>
+                        <TableCell>{u.name}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.description || '-'}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+{tab === 'questions' ? 'bg-slate-800' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
       </aside>
 
       <section className="border border-slate-800 rounded-xl p-4">
