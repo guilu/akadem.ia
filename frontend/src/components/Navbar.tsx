@@ -22,7 +22,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
   }
 
   return (
-    <Navbar fluid className="border-b border-secondary/40 bg-bg/90 backdrop-blur">
+    <Navbar fluid className="border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
       <NavbarBrand
         href="/"
         onClick={(event) => { event.preventDefault(); navigate('/'); }}
@@ -45,21 +45,21 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         )}
         <NavbarToggle />
       </div>
-      <NavbarCollapse>
-        <NavbarLink href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
+      <NavbarCollapse className="items-center">
+        <NavbarLink className="flex items-center" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
         {!isAuthed && (
           <>
-            <NavbarLink href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>Login</NavbarLink>
-            <NavbarLink href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>Register</NavbarLink>
+            <NavbarLink className="flex items-center" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>Login</NavbarLink>
+            <NavbarLink className="flex items-center" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>Register</NavbarLink>
           </>
         )}
         {isAuthed && (
           <>
-            <NavbarLink href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>Exámenes</NavbarLink>
+            <NavbarLink className="flex items-center" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>Exámenes</NavbarLink>
             {isAdmin && (
-              <NavbarLink href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
+              <NavbarLink className="flex items-center" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
             )}
-            <button className="btn btn-outline" onClick={onLogout}>Salir</button>
+            <button className="btn btn-outline h-9" onClick={onLogout}>Salir</button>
           </>
         )}
       </NavbarCollapse>
