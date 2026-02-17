@@ -11,7 +11,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
 
       <div className="mb-4 rounded-xl border border-secondary/40 bg-secondary/20 p-4 text-center">
         <div className="text-text/70 text-sm uppercase tracking-wide">Nota final</div>
-        <div className={`text-5xl font-extrabold ${score10 >= 5 ? 'text-lime-400' : 'text-rose-400'}`}>{score10.toFixed(2)}</div>
+        <div className={`text-6xl font-extrabold ${score10 >= 5 ? 'text-lime-400' : 'text-red-500'}`}>{score10.toFixed(2)}</div>
         <div className="text-text/70 text-sm">sobre 10</div>
       </div>
 
