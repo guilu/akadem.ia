@@ -3,8 +3,8 @@ import { Button, TextInput } from 'flowbite-react';
 import { apiBase } from '../api';
 
 export default function Login({ onToken }:{ onToken: (t:string)=>void }){
-  const [email, setEmail] = useState('demo@akdemya.com');
-  const [password, setPassword] = useState('demo1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
