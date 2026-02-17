@@ -41,7 +41,7 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
   }
 
   return (
-    <div className="max-w-sm mx-auto p-4 border border-slate-700 rounded-xl">
+    <div className="max-w-sm mx-auto p-4 border border-stone-700 rounded-xl">
       <h2 className="text-xl font-semibold mb-3">Acceso</h2>
       <div className="grid gap-2">
         <TextInput placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />

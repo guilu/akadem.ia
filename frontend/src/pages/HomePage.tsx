@@ -33,15 +33,15 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
       </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-        <div className="border border-slate-700 rounded-xl p-4">
+        <div className="border border-stone-700 rounded-xl p-4">
           <div className="text-2xl font-bold">+200</div>
           <div className="text-sm text-text/70">Preguntas por materia</div>
         </div>
-        <div className="border border-slate-700 rounded-xl p-4">
+        <div className="border border-stone-700 rounded-xl p-4">
           <div className="text-2xl font-bold">Exámenes</div>
           <div className="text-sm text-text/70">Con tiempo real</div>
         </div>
-        <div className="border border-slate-700 rounded-xl p-4">
+        <div className="border border-stone-700 rounded-xl p-4">
           <div className="text-2xl font-bold">Progreso</div>
           <div className="text-sm text-text/70">Resultados inmediatos</div>
         </div>
