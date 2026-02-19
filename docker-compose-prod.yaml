@@ -34,7 +34,7 @@ services:
     container_name: akademia-prod-web
     image: akademia-web:1.0.0
     environment:
-      VITE_API_URL: http://localhost:8082
+      VITE_API_URL: http://192.168.1.175:8082
     ports:
       - "5173:3000"
     depends_on:
