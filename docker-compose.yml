@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: akademia-dev-db
     image: postgres:18
     environment:
       POSTGRES_DB: akdemya
@@ -13,6 +14,7 @@ services:
       - cluster_network 
 
   api:
+    container_name: akademia-dev-api
     build: ./backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/akdemya
@@ -28,6 +30,7 @@ services:
       - cluster_network
 
   web:
+    container_name: akademia-dev-web
     build: ./frontend
     environment:
       VITE_API_URL: http://localhost:8080
