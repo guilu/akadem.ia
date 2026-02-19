@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_DB: akdemya
-      POSTGRES_USER: ak_user
-      POSTGRES_PASSWORD: ak_pass
+      POSTGRES_DB: akademia
+      POSTGRES_USER: ${AKADEMIA_DB_USER}
+      POSTGRES_PASSWORD: ${AKADEMIA_DB_PASSWORD}
     ports:
       - "6543:5432"
     volumes:
@@ -15,9 +15,9 @@ services:
   api:
     image: akademia-api:1.0.0
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/akdemya
-      SPRING_DATASOURCE_USERNAME: ak_user
-      SPRING_DATASOURCE_PASSWORD: ak_pass
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/akademia
+      SPRING_DATASOURCE_USERNAME: ${AKADEMIA_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AKADEMIA_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
