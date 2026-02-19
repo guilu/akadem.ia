@@ -12,6 +12,7 @@ pnpm-debug.log*
 
 # Env files
 .env
+/dist/
 .env.*
 
 # OS / IDE
