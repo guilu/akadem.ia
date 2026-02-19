@@ -70,6 +70,9 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
                 "http://192.168.1.175:5173",
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://192.168.1.175:3000",
                 "https://akademia.diegobarrioh.dev"
         ));
         // Si usas otras URLs (puertos distintos, etc.), añádelas aquí
