@@ -6,10 +6,10 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
       <div className="grid max-w-screen-2xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
         <div className="mr-auto place-self-center lg:col-span-5 text-center lg:text-left">
           <h1 className="max-w-2xl mb-4 text-5xl sm:text-6xl font-extrabold leading-tight">
-            Estudia la <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">Constitución</span> con exámenes.
+            Aprueba la <span className="bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">Constitución</span> sin improvisar.
           </h1>
           <p className="max-w-2xl mb-6 text-text/70 md:text-lg lg:text-xl">
-            Practica con tests cronometrados, sigue tu progreso y mejora tus resultados.
+            Entrena con exámenes reales, controla el tiempo y convierte cada intento en puntos el día de la oposición.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             {isAuthed && (
@@ -43,16 +43,16 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3 max-w-screen-xl mx-auto px-4">
         <div className="border border-gray-400 rounded-xl p-4">
-          <div className="text-2xl font-bold">+200</div>
-          <div className="text-sm text-text/70">Preguntas por materia</div>
+          <div className="text-2xl font-bold">Simulacros cronometrados</div>
+          <div className="text-sm text-text/70">Entrena exactamente como el día del examen.</div>
         </div>
         <div className="border border-gray-400 rounded-xl p-4">
-          <div className="text-2xl font-bold">Exámenes</div>
-          <div className="text-sm text-text/70">Con tiempo real</div>
+          <div className="text-2xl font-bold">Resultados que importan</div>
+          <div className="text-sm text-text/70">Nota, tiempo y evolución guardados automáticamente.</div>
         </div>
         <div className="border border-gray-400 rounded-xl p-4">
-          <div className="text-2xl font-bold">Progreso</div>
-          <div className="text-sm text-text/70">Resultados inmediatos</div>
+          <div className="text-2xl font-bold">Reanuda cuando quieras</div>
+          <div className="text-sm text-text/70">Empieza hoy. Continúa mañana. Sin perder nada.</div>
         </div>
       </div>
     </section>
