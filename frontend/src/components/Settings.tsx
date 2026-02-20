@@ -556,8 +556,8 @@ export default function Settings({ token }: { token: string }) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-xl font-semibold">Preguntas</h2>
               <div className="flex gap-2">
-                <Button onClick={() => handleExport('json')} disabled={exportLoading} className="btn btn-outline">Exportar JSON</Button>
-                <Button onClick={() => handleExport('csv')} disabled={exportLoading} className="btn btn-outline">Exportar CSV</Button>
+                <Button onClick={() => handleExport('json')} disabled={exportLoading} className="btn btn-outline text-primary">Exportar JSON</Button>
+                <Button onClick={() => handleExport('csv')} disabled={exportLoading} className="btn btn-outline text-primary">Exportar CSV</Button>
                 <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary">Importar</Button>
               </div>
             </div>
