@@ -335,8 +335,11 @@ export default function Settings({ token }: { token: string }) {
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+      const subjectName = subjects.find(s => s.id === questionSubjectId)?.name || 'preguntas';
+      const unitName = units.find(u => u.id === questionUnitId)?.name || 'preguntas';
+      const fileName = `${subjectName}-${unitName}.${format}`;
       a.href = url;
-      a.download = `questions.${format}`;
+      a.download = fileName;
       a.click();
       window.URL.revokeObjectURL(url);
     } finally {
@@ -556,8 +559,8 @@ export default function Settings({ token }: { token: string }) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-xl font-semibold">Preguntas</h2>
               <div className="flex gap-2">
-                <Button onClick={() => handleExport('json')} disabled={exportLoading} className="btn btn-outline text-primary">Exportar JSON</Button>
-                <Button onClick={() => handleExport('csv')} disabled={exportLoading} className="btn btn-outline text-primary">Exportar CSV</Button>
+                <Button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar JSON</Button>
+                <Button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar CSV</Button>
                 <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary">Importar</Button>
               </div>
             </div>
