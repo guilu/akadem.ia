@@ -59,14 +59,15 @@ public class ExamManager implements ExamUseCase {
       } catch (IllegalArgumentException ignored) {
       }
     }
+    final Question.Difficulty selectedDifficulty = difficulty;
 
     List<Question> pool = new ArrayList<>();
     for (Map.Entry<UUID, Integer> entry : command.unitCounts().entrySet()) {
       UUID unitId = entry.getKey();
       int count = entry.getValue() != null ? entry.getValue() : 0;
       List<Question> qs = questionRepo.findByUnitId(unitId);
-      if (difficulty != null) {
-        qs = qs.stream().filter(q -> q.getDifficulty() == difficulty).collect(Collectors.toList());
+      if (selectedDifficulty != null) {
+        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
       }
       Collections.shuffle(qs, rnd);
       if (count > 0 && count < qs.size()) {
