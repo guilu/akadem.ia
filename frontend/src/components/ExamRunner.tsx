@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Button, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react';
-import { ArrowLeft, ArrowRight, CheckCircle } from 'flowbite-react-icons/outline';
+import { ArrowLeft, ArrowRight, CheckCircle, CircleMinus } from 'flowbite-react-icons/outline';
 
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
@@ -143,8 +143,14 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <p className="text-text/70">Se enviarán tus respuestas y se calculará la nota.</p>
         </ModalBody>
         <ModalFooter className="border-t border-secondary/40">
-          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline shadow-none">Cancelar</Button>
-          <Button onClick={finish} className="btn btn-primary">Finalizar</Button>
+          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline shadow-none flex items-center gap-2">
+            <CircleMinus className="w-4 h-4" />
+            Cancelar
+          </Button>
+          <Button onClick={finish} className="btn btn-primary flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            Finalizar
+          </Button>
         </ModalFooter>
       </Modal>
     </div>
