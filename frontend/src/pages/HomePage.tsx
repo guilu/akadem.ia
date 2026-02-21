@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Play, ArrowsRepeat, ArrowRightToBracket, UserAdd } from 'flowbite-react-icons/outline';
 
 export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
   return (
@@ -14,11 +15,13 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             {isAuthed && (
               <>
-                <Link className="btn btn-primary rounded-full px-8 py-3 text-base" to="/subjects">
+                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/subjects">
+                  <Play className="w-4 h-4" />
                   Crear examen
                 </Link>
                 {activeAttemptId && (
-                  <Link className="btn btn-secondary rounded-full px-8 py-3 text-base" to={`/exams/attempts/${activeAttemptId}`}>
+                  <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={`/exams/attempts/${activeAttemptId}`}>
+                    <ArrowsRepeat className="w-4 h-4" />
                     Reanudar examen
                   </Link>
                 )}
@@ -26,8 +29,14 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             )}
             {!isAuthed && (
               <>
-                <Link className="btn btn-primary rounded-full px-8 py-3 text-base" to="/login">Login</Link>
-                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base" to="/register">Register</Link>
+                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/login">
+                  <ArrowRightToBracket className="w-4 h-4" />
+                  Login
+                </Link>
+                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/register">
+                  <UserAdd className="w-4 h-4" />
+                  Register
+                </Link>
               </>
             )}
           </div>
