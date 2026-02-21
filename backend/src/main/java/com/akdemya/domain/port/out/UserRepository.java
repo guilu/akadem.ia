@@ -15,5 +15,7 @@ public interface UserRepository {
 
   java.util.List<AppUser> findAll();
 
+  org.springframework.data.domain.Page<AppUser> findPage(int page, int size);
+
   void deleteById(UUID id);
 }

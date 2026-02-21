@@ -46,6 +46,12 @@ public class UserPersistenceAdapter implements UserRepository {
   }
 
   @Override
+  public org.springframework.data.domain.Page<AppUser> findPage(int page, int size) {
+    return repository.findAll(org.springframework.data.domain.PageRequest.of(page, size))
+        .map(mapper::toDomain);
+  }
+
+  @Override
   public void deleteById(UUID id) {
     repository.deleteById(id);
   }

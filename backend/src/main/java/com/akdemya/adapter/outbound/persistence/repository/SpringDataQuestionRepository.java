@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface SpringDataQuestionRepository extends JpaRepository<QuestionEntity, UUID> {
     List<QuestionEntity> findByUnit_Id(UUID unitId);
+    org.springframework.data.domain.Page<QuestionEntity> findByUnit_Id(UUID unitId, org.springframework.data.domain.Pageable pageable);
     long countByUnit_Id(UUID unitId);
 }

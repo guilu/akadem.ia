@@ -190,6 +190,19 @@ class ExamManagerResumeTest {
     }
 
     @Override
+    public org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size) {
+      var list = data.values().stream().filter(q -> q.getUnitId().equals(unitId)).toList();
+      int from = Math.min(page * size, list.size());
+      int to = Math.min(from + size, list.size());
+      return new org.springframework.data.domain.PageImpl<>(list.subList(from, to), org.springframework.data.domain.PageRequest.of(page, size), list.size());
+    }
+
+    @Override
+    public java.util.List<Question> findAll() {
+      return data.values().stream().toList();
+    }
+
+    @Override
     public Question save(Question question) {
       data.put(question.getId(), question);
       return question;

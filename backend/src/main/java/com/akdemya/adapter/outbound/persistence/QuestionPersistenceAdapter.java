@@ -32,6 +32,12 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   }
 
   @Override
+  public org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size) {
+    return repository.findByUnit_Id(unitId, org.springframework.data.domain.PageRequest.of(page, size))
+        .map(mapper::toDomain);
+  }
+
+  @Override
   public Optional<Question> findById(UUID id) {
     return repository.findById(id).map(mapper::toDomain);
   }
