@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Card } from 'flowbite-react';
+import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
 
@@ -41,7 +42,8 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Exámenes</h2>
         {activeAttemptId && (
-          <Link className="btn btn-secondary" to={`/exams/attempts/${activeAttemptId}`}>
+          <Link className="btn btn-secondary flex items-center gap-2" to={`/exams/attempts/${activeAttemptId}`}>
+            <ArrowsRepeat className="w-4 h-4" />
             Reanudar examen
           </Link>
         )}
@@ -53,7 +55,8 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
             <div className="text-lg font-semibold">{s.name}</div>
             <div className="text-sm text-text/70">{s.description}</div>
             <div className="mt-3">
-              <Link className="btn btn-primary" to={`/subjects/${s.id}/builder`}>
+              <Link className="btn btn-primary flex items-center gap-2" to={`/subjects/${s.id}/builder`}>
+                <Plus className="w-4 h-4" />
                 Crear examen
               </Link>
             </div>
@@ -91,16 +94,18 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                   <div className="flex gap-2">
                     {finished ? (
                       <button
-                        className="btn btn-secondary"
+                        className="btn btn-secondary flex items-center gap-2"
                         onClick={() => onViewResult(h.attemptId)}
                       >
+                        <ClipboardCheck className="w-4 h-4" />
                         Ver resultados
                       </button>
                     ) : (
                       <button
-                        className="btn btn-primary"
+                        className="btn btn-primary flex items-center gap-2"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
+                        <ArrowsRepeat className="w-4 h-4" />
                         Reanudar
                       </button>
                     )}

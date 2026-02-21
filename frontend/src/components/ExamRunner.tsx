@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Button, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react';
+import { ArrowLeft, ArrowRight, CheckCircle } from 'flowbite-react-icons/outline';
 
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
@@ -113,19 +114,24 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={prev}
             disabled={safeIndex === 0}
-            className={`px-4 py-2 rounded-xl border border-slate-600 ${safeIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`px-4 py-2 rounded-xl border border-slate-600 flex items-center gap-2 ${safeIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
+            <ArrowLeft className="w-4 h-4" />
             Anterior
           </button>
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-secondary flex items-center gap-2 ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
+        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          Finalizar
+        </button>
       </footer>
 
       <Modal show={confirmFinish} onClose={() => setConfirmFinish(false)} theme={{

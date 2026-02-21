@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, FileInput, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
+import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -392,10 +393,22 @@ export default function Settings({ token }: { token: string }) {
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
         <div className="text-xs text-text/70 mb-2">Administración</div>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>Usuarios</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>Materias</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>Unidades</button>
-        <button className={`w-full text-left px-3 py-2 rounded ${tab === 'questions' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('questions')}>Preguntas</button>
+        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>
+          <Users className="w-4 h-4" />
+          Usuarios
+        </button>
+        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>
+          <BookOpen className="w-4 h-4" />
+          Materias
+        </button>
+        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>
+          <FolderOpen className="w-4 h-4" />
+          Unidades
+        </button>
+        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'questions' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('questions')}>
+          <FileLines className="w-4 h-4" />
+          Preguntas
+        </button>
       </aside>
 
       <section className="grid gap-6">
@@ -421,11 +434,15 @@ export default function Settings({ token }: { token: string }) {
                 </Select>
               </div>
               <div className="flex gap-2 mt-3">
-                <Button onClick={saveUser} disabled={loading} className="btn btn-primary">
+                <Button onClick={saveUser} disabled={loading} className="btn btn-primary flex items-center gap-2">
+                  {isEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isEditing ? 'Guardar cambios' : 'Crear usuario'}
                 </Button>
                 {isEditing && (
-                  <Button onClick={resetForm} color="light" className="btn btn-outline">Cancelar</Button>
+                  <Button onClick={resetForm} color="light" className="btn btn-outline flex items-center gap-2">
+                    <CircleMinus className="w-4 h-4" />
+                    Cancelar
+                  </Button>
                 )}
               </div>
             </Card>
@@ -447,8 +464,12 @@ export default function Settings({ token }: { token: string }) {
                         <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">
+                              <Pen className="w-4 h-4" />
+                            </button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">
+                              <TrashBin className="w-4 h-4" />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -479,11 +500,15 @@ export default function Settings({ token }: { token: string }) {
                 <TextInput placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
               </div>
               <div className="flex gap-2 mt-3">
-                <Button onClick={saveSubject} disabled={subjectLoading} className="btn btn-primary">
+                <Button onClick={saveSubject} disabled={subjectLoading} className="btn btn-primary flex items-center gap-2">
+                  {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
                 </Button>
                 {isSubjectEditing && (
-                  <Button onClick={resetSubjectForm} color="light" className="btn btn-outline">Cancelar</Button>
+                  <Button onClick={resetSubjectForm} color="light" className="btn btn-outline flex items-center gap-2">
+                    <CircleMinus className="w-4 h-4" />
+                    Cancelar
+                  </Button>
                 )}
               </div>
             </Card>
@@ -503,14 +528,18 @@ export default function Settings({ token }: { token: string }) {
                         <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">✏️</button>
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">
+                              <Pen className="w-4 h-4" />
+                            </button>
                             <button
                               type="button"
                               className="text-red-400 cursor-pointer"
                               onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
                               aria-label="Eliminar"
                               title="Eliminar"
-                            >🗑️</button>
+                            >
+                              <TrashBin className="w-4 h-4" />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -538,11 +567,15 @@ export default function Settings({ token }: { token: string }) {
                 <TextInput type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
               </div>
               <div className="flex gap-2 mt-3">
-                <Button onClick={saveUnit} disabled={unitLoading} className="btn btn-primary">
+                <Button onClick={saveUnit} disabled={unitLoading} className="btn btn-primary flex items-center gap-2">
+                  {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
                 </Button>
                 {isUnitEditing && (
-                  <Button onClick={resetUnitForm} color="light" className="btn btn-outline">Cancelar</Button>
+                  <Button onClick={resetUnitForm} color="light" className="btn btn-outline flex items-center gap-2">
+                    <CircleMinus className="w-4 h-4" />
+                    Cancelar
+                  </Button>
                 )}
               </div>
             </Card>
@@ -566,8 +599,12 @@ export default function Settings({ token }: { token: string }) {
                         <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">
+                              <Pen className="w-4 h-4" />
+                            </button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">
+                              <TrashBin className="w-4 h-4" />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -584,9 +621,18 @@ export default function Settings({ token }: { token: string }) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-xl font-semibold">Preguntas</h2>
               <div className="flex gap-2">
-                <Button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar JSON</Button>
-                <Button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar CSV</Button>
-                <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary">Importar</Button>
+                <Button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary flex items-center gap-2">
+                  <FileExport className="w-4 h-4" />
+                  Exportar JSON
+                </Button>
+                <Button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary flex items-center gap-2">
+                  <FileCsv className="w-4 h-4" />
+                  Exportar CSV
+                </Button>
+                <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary flex items-center gap-2">
+                  <FileImport className="w-4 h-4" />
+                  Importar
+                </Button>
               </div>
             </div>
             <Card className="border border-secondary/40 bg-bg">
@@ -638,11 +684,15 @@ export default function Settings({ token }: { token: string }) {
               </div>
 
               <div className="flex gap-2 mt-3">
-                <Button onClick={saveQuestion} disabled={questionLoading} className="btn btn-primary">
+                <Button onClick={saveQuestion} disabled={questionLoading} className="btn btn-primary flex items-center gap-2">
+                  {isQuestionEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
                 </Button>
                 {isQuestionEditing && (
-                  <Button onClick={resetQuestionForm} color="light" className="btn btn-outline">Cancelar</Button>
+                  <Button onClick={resetQuestionForm} color="light" className="btn btn-outline flex items-center gap-2">
+                    <CircleMinus className="w-4 h-4" />
+                    Cancelar
+                  </Button>
                 )}
               </div>
             </Card>
@@ -673,8 +723,12 @@ export default function Settings({ token }: { token: string }) {
                                 difficulty: q.difficulty,
                                 answers: q.answers.map(a => ({ text: a.text, correct: a.correct }))
                               });
-                            }} aria-label="Editar" title="Editar">✏️</button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">🗑️</button>
+                            }} aria-label="Editar" title="Editar">
+                              <Pen className="w-4 h-4" />
+                            </button>
+                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">
+                              <TrashBin className="w-4 h-4" />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -710,8 +764,12 @@ export default function Settings({ token }: { token: string }) {
               {importMessage && <div className="text-sm text-text/70">{importMessage}</div>}
             </div>
             <div className="flex gap-2 justify-end mt-4">
-              <Button color="light" className="btn btn-outline" onClick={() => setImportOpen(false)}>Cancelar</Button>
-              <Button className="btn btn-primary" onClick={handleImport} disabled={importLoading}>
+              <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setImportOpen(false)}>
+                <CircleMinus className="w-4 h-4" />
+                Cancelar
+              </Button>
+              <Button className="btn btn-primary flex items-center gap-2" onClick={handleImport} disabled={importLoading}>
+                <FileImport className="w-4 h-4" />
                 {importLoading ? 'Importando...' : 'Importar'}
               </Button>
             </div>
@@ -726,10 +784,13 @@ export default function Settings({ token }: { token: string }) {
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
             {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
             <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmDelete(null)}>Cancelar</button>
+              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmDelete(null)}>
+                <CircleMinus className="w-4 h-4" />
+                Cancelar
+              </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
                 disabled={deleteLoading}
                 onClick={async () => {
                   setDeleteError('');
@@ -744,6 +805,7 @@ export default function Settings({ token }: { token: string }) {
                   }
                 }}
               >
+                <TrashBin className="w-4 h-4" />
                 {deleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
@@ -771,10 +833,13 @@ export default function Settings({ token }: { token: string }) {
             )}
             {subjectDeleteError && <div className="text-sm text-red-400 mb-2">{subjectDeleteError}</div>}
             <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmSubjectDelete(null)}>Cancelar</button>
+              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmSubjectDelete(null)}>
+                <CircleMinus className="w-4 h-4" />
+                Cancelar
+              </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
                 disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
                 onClick={async () => {
                   setSubjectDeleteError('');
@@ -789,6 +854,7 @@ export default function Settings({ token }: { token: string }) {
                   }
                 }}
               >
+                <TrashBin className="w-4 h-4" />
                 {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
@@ -816,10 +882,13 @@ export default function Settings({ token }: { token: string }) {
             )}
             {unitDeleteError && <div className="text-sm text-red-400 mb-2">{unitDeleteError}</div>}
             <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmUnitDelete(null)}>Cancelar</button>
+              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmUnitDelete(null)}>
+                <CircleMinus className="w-4 h-4" />
+                Cancelar
+              </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
                 disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
                 onClick={async () => {
                   setUnitDeleteError('');
@@ -834,6 +903,7 @@ export default function Settings({ token }: { token: string }) {
                   }
                 }}
               >
+                <TrashBin className="w-4 h-4" />
                 {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
@@ -848,10 +918,13 @@ export default function Settings({ token }: { token: string }) {
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
             {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
             <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600" onClick={() => setConfirmQuestionDelete(null)}>Cancelar</button>
+              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmQuestionDelete(null)}>
+                <CircleMinus className="w-4 h-4" />
+                Cancelar
+              </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60"
+                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
                 disabled={questionDeleteLoading}
                 onClick={async () => {
                   setQuestionDeleteError('');
@@ -866,6 +939,7 @@ export default function Settings({ token }: { token: string }) {
                   }
                 }}
               >
+                <TrashBin className="w-4 h-4" />
                 {questionDeleteLoading ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Minus, Plus, Play } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
 
@@ -41,9 +42,9 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) - 1)}
-                className="btn btn-secondary w-8 h-8"
+                className="btn btn-secondary w-8 h-8 flex items-center justify-center"
                 aria-label="disminuir">
-                −
+                <Minus className="w-4 h-4" />
               </button>
               <input
                 type="number"
@@ -55,9 +56,9 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
               />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
-                className="btn btn-secondary w-8 h-8"
+                className="btn btn-secondary w-8 h-8 flex items-center justify-center"
                 aria-label="aumentar">
-                +
+                <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -72,7 +73,10 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
       <div className="mt-4 flex items-center justify-between">
         <div>Total preguntas: <strong>{total()}</strong></div>
-        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-primary">Empezar</button>
+        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-primary flex items-center gap-2">
+          <Play className="w-4 h-4" />
+          Empezar
+        </button>
       </div>
     </div>
   );
