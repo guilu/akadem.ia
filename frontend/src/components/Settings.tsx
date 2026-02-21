@@ -635,7 +635,9 @@ export default function Settings({ token }: { token: string }) {
                 </Button>
               </div>
             </div>
+
             <Card className="border border-secondary/40 bg-bg">
+              <div className="text-sm text-text/70 mb-2">Filtros</div>
               <div className="grid gap-2 sm:grid-cols-2">
                 <Select value={questionSubjectId} onChange={e=>setQuestionSubjectId(e.target.value)}>
                   <option value="">Selecciona materia</option>
@@ -649,6 +651,14 @@ export default function Settings({ token }: { token: string }) {
                     <option key={u.id} value={u.id}>{u.name}</option>
                   ))}
                 </Select>
+              </div>
+            </Card>
+
+            <Card className="border border-secondary/40 bg-bg">
+              {!questionUnitId && (
+                <div className="text-sm text-text/70 mb-3">Selecciona materia y unidad para crear preguntas.</div>
+              )}
+              <div className="grid gap-2 sm:grid-cols-2">
                 <TextInput placeholder="enunciado" value={questionForm.text} onChange={e=>setQuestionForm(f=>({ ...f, text: e.target.value }))} />
                 <TextInput placeholder="explicación (opcional)" value={questionForm.explanation || ''} onChange={e=>setQuestionForm(f=>({ ...f, explanation: e.target.value }))} />
                 <Select value={questionForm.difficulty} onChange={e=>setQuestionForm(f=>({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
@@ -715,6 +725,11 @@ export default function Settings({ token }: { token: string }) {
                         <TableCell>
                           <div className="flex gap-2">
                             <button type="button" className="text-accent cursor-pointer" onClick={()=>{
+                              const unit = units.find(u => u.id === q.unitId);
+                              if (unit?.subjectId) {
+                                setQuestionSubjectId(unit.subjectId);
+                              }
+                              setQuestionUnitId(q.unitId);
                               setQuestionForm({
                                 id: q.id,
                                 unitId: q.unitId,
