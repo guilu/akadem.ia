@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Minus, Plus, Play } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
-import { TextInput } from 'flowbite-react';
+import { Select, TextInput } from 'flowbite-react';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' })=>void; onUnauthorized: ()=>void }){
   const [units, setUnits] = useState<UnitAvailability[]>([]);
@@ -40,21 +40,22 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
       <h1 className="text-2xl font-bold mb-4">Configura tu examen</h1>
 
       <div className="grid gap-3 mb-4">
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 items-center gap-3">
           <label>Dificultad</label>
-          <select
-            value={difficulty}
-            onChange={e=>setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
-            className="rounded px-2 py-1 border border-secondary/40 bg-bg text-text"
-          >
-            <option value="ALL">Todas</option>
-            <option value="EASY">Fácil</option>
-            <option value="MEDIUM">Media</option>
-            <option value="HARD">Difícil</option>
-          </select>
-          {availabilityLoading && <span className="text-xs text-text/60">Actualizando...</span>}
+          <div className="flex items-center gap-2">
+            <Select
+              value={difficulty}
+              onChange={e=>setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
+            >
+              <option value="ALL">Todas</option>
+              <option value="EASY">Fácil</option>
+              <option value="MEDIUM">Media</option>
+              <option value="HARD">Difícil</option>
+            </Select>
+            {availabilityLoading && <span className="text-xs text-text/60">Actualizando...</span>}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 items-center gap-3">
           <label>Tiempo total (min)</label>
           <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
             className="w-24"/>
