@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Minus, Plus, Play } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
+import { TextInput } from 'flowbite-react';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
   const [units, setUnits] = useState<UnitAvailability[]>([]);
@@ -46,13 +47,13 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
                 aria-label="disminuir">
                 <Minus className="w-4 h-4" />
               </button>
-              <input
+              <TextInput
                 type="number"
                 min={0}
                 max={u.available}
                 value={rules[u.id] || 0}
                 onChange={e => setCount(u.id, Number(e.target.value))}
-                className="w-16 text-center rounded px-2 py-1 text-text bg-bg"
+                className="w-16 text-center"
               />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
@@ -67,8 +68,8 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
       <div className="mt-4 flex items-center gap-3">
         <label>Tiempo total (min)</label>
-        <input type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
-          className="w-24 rounded px-2 py-1 text-text bg-bg"/>
+        <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
+          className="w-24"/>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
