@@ -116,73 +116,73 @@ INSERT INTO answers(id, question_id, text, correct) VALUES ('a6f4d643-a7a2-4c00-
 INSERT INTO answers(id, question_id, text, correct) VALUES ('419d8074-74f9-4eac-980d-1cc627750653','cd538984-661a-4aea-a0cf-dbde0e846107','Dirigir la política exterior',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('be5d16cb-16b1-4534-992c-2ba46e7942e1','cd538984-661a-4aea-a0cf-dbde0e846107','Administrar justicia',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('5f3f39d5-e352-4f82-909c-ae03b04628ac','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 14?','Art. 14','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('5f3f39d5-e352-4f82-909c-ae03b04628ac','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 14?','Art. 14','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('b908fcdb-9850-4a31-bdb5-65df1d1fe775','5f3f39d5-e352-4f82-909c-ae03b04628ac','La libertad de empresa',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('af5814fd-436c-4d2b-ad17-e7979eac0abc','5f3f39d5-e352-4f82-909c-ae03b04628ac','La igualdad ante la ley',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('10fa5fd2-c0dc-4b9d-8deb-d85dfb3ffaa2','5f3f39d5-e352-4f82-909c-ae03b04628ac','El derecho a la huelga',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('fe5ff996-6b3d-4518-ac95-e492bc49ac9a','5f3f39d5-e352-4f82-909c-ae03b04628ac','El derecho a la propiedad',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('dabb1f80-83ac-446e-b253-045ffceff713','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 15?','Art. 15','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('dabb1f80-83ac-446e-b253-045ffceff713','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 15?','Art. 15','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('99a03758-b617-45b3-be04-74dac17d4aac','dabb1f80-83ac-446e-b253-045ffceff713','Derecho a la educación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('32c098c7-0534-442b-9060-e46fd84f6010','dabb1f80-83ac-446e-b253-045ffceff713','Derecho a la vida e integridad física',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('66a6578c-059f-4953-9d0f-ec2fb13525b8','dabb1f80-83ac-446e-b253-045ffceff713','Derecho al trabajo',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('5d6b6f82-8a33-400d-bb1f-1371feccef7a','dabb1f80-83ac-446e-b253-045ffceff713','Derecho a la vivienda',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('9ab19f20-9471-4b5d-a5a2-30aaafc31380','11111111-1111-1111-1111-111111111112','¿Qué establece el artículo 16 sobre la confesión del Estado?','Art. 16','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('9ab19f20-9471-4b5d-a5a2-30aaafc31380','11111111-1111-1111-1111-111111111112','¿Qué establece el artículo 16 sobre la confesión del Estado?','Art. 16','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('326f4bc0-2622-4818-b90e-fbc0e0b1a530','9ab19f20-9471-4b5d-a5a2-30aaafc31380','El Estado es confesional',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('1556f627-3438-434b-a589-b4b1c90e5c37','9ab19f20-9471-4b5d-a5a2-30aaafc31380','Ninguna confesión tendrá carácter estatal',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('ffdf1b68-bccb-4f6e-a3d8-d2e9fbb92741','9ab19f20-9471-4b5d-a5a2-30aaafc31380','El Estado es laico estricto',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('014125fa-1715-4ae0-9399-4d26091be14a','9ab19f20-9471-4b5d-a5a2-30aaafc31380','La religión oficial es la católica',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('06b79247-0728-4171-a35e-5d0f2932d6fc','11111111-1111-1111-1111-111111111112','¿Qué derecho protege el artículo 18?','Art. 18','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('06b79247-0728-4171-a35e-5d0f2932d6fc','11111111-1111-1111-1111-111111111112','¿Qué derecho protege el artículo 18?','Art. 18','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('bf22c907-0b05-4f56-9c37-393045bf8940','06b79247-0728-4171-a35e-5d0f2932d6fc','Huelga',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('8ffa94c8-2675-4ae2-94d9-d971643e0afc','06b79247-0728-4171-a35e-5d0f2932d6fc','Honor, intimidad y propia imagen',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('23f9e8bb-da6d-46b7-8ea4-ee26edc462f5','06b79247-0728-4171-a35e-5d0f2932d6fc','Educación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('ba6c657c-4855-46ff-9c77-e6446a282163','06b79247-0728-4171-a35e-5d0f2932d6fc','Participación política',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('2727fa2a-98a8-4116-adc0-ab47c91425be','11111111-1111-1111-1111-111111111112','¿Qué derecho regula el artículo 20?','Art. 20','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('2727fa2a-98a8-4116-adc0-ab47c91425be','11111111-1111-1111-1111-111111111112','¿Qué derecho regula el artículo 20?','Art. 20','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('89e1ba6e-fff0-42bd-b4fc-2c308fe689a5','2727fa2a-98a8-4116-adc0-ab47c91425be','Libertad sindical',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('b2de6fd1-8497-427b-87c6-2ee0c0235487','2727fa2a-98a8-4116-adc0-ab47c91425be','Libertad de expresión',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('58ba6adf-f531-47e6-81d6-ef7679e22468','2727fa2a-98a8-4116-adc0-ab47c91425be','Libertad de circulación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('2fd9d51b-1cbd-45b1-aad3-2743868fe1a6','2727fa2a-98a8-4116-adc0-ab47c91425be','Libertad de empresa',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('f8eb8aec-f85f-4e31-addd-75e85deeace3','11111111-1111-1111-1111-111111111112','¿Qué derecho recoge el artículo 21?','Art. 21','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('f8eb8aec-f85f-4e31-addd-75e85deeace3','11111111-1111-1111-1111-111111111112','¿Qué derecho recoge el artículo 21?','Art. 21','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('c5714e74-4d0b-45a8-b908-2d34012b9af2','f8eb8aec-f85f-4e31-addd-75e85deeace3','Derecho de reunión pacífica',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('edb173e4-ca47-442c-822b-a4e9ec4ddae6','f8eb8aec-f85f-4e31-addd-75e85deeace3','Derecho a la vivienda',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('cbdbaa10-1786-43c1-8398-484450a6bcd1','f8eb8aec-f85f-4e31-addd-75e85deeace3','Derecho al trabajo',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('60ef4091-8344-4d68-9222-3fd0d1328306','f8eb8aec-f85f-4e31-addd-75e85deeace3','Derecho a la propiedad',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('b296e6a5-36df-4c96-8807-8925cf3e678f','11111111-1111-1111-1111-111111111112','¿Qué derecho regula el artículo 22?','Art. 22','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('b296e6a5-36df-4c96-8807-8925cf3e678f','11111111-1111-1111-1111-111111111112','¿Qué derecho regula el artículo 22?','Art. 22','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('07143d12-150e-4bd5-8a63-452a76c5d21f','b296e6a5-36df-4c96-8807-8925cf3e678f','Derecho de asociación',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('38f850e8-6012-4d12-ab14-cb90e3294bfe','b296e6a5-36df-4c96-8807-8925cf3e678f','Derecho a la educación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('d6467a0c-e076-480b-95c5-ed8cb78ba672','b296e6a5-36df-4c96-8807-8925cf3e678f','Derecho al honor',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('4882abe5-9e34-4163-a61f-c4efc2e0ce75','b296e6a5-36df-4c96-8807-8925cf3e678f','Derecho a la tutela judicial',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 23?','Art. 23','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','11111111-1111-1111-1111-111111111112','¿Qué derecho reconoce el artículo 23?','Art. 23','MEDIUM');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('e9fe466a-77df-43a9-8cec-afd459eb7e28','6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','Propiedad privada',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('bf99d9ef-aa8f-4c34-b00b-2ee96d8f360c','6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','Participar en los asuntos públicos',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('a6f3b6ca-37a3-4f7e-8ab4-c8b96bfb5bc7','6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','Educación obligatoria',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('7441010f-0509-4e18-b678-759283298376','6c941b2f-b3cc-44f1-a148-4db75e2b1f4a','Libertad de empresa',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('c7bd91fd-9785-4b31-b930-2bf8becc3a6f','11111111-1111-1111-1111-111111111112','¿Qué garantiza el artículo 24?','Art. 24','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('c7bd91fd-9785-4b31-b930-2bf8becc3a6f','11111111-1111-1111-1111-111111111112','¿Qué garantiza el artículo 24?','Art. 24','HARD');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('4660b282-e24e-4cee-982c-3229317d78d7','c7bd91fd-9785-4b31-b930-2bf8becc3a6f','Tutela judicial efectiva',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('c6ed598a-0190-406f-95af-bfd64d86f610','c7bd91fd-9785-4b31-b930-2bf8becc3a6f','Libertad de empresa',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('84c3997b-3c8d-4347-9e16-dd9d6ca59d42','c7bd91fd-9785-4b31-b930-2bf8becc3a6f','Libertad de circulación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('6afec254-08ec-480d-b5f2-13c9a4c09226','c7bd91fd-9785-4b31-b930-2bf8becc3a6f','Derecho de huelga',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','11111111-1111-1111-1111-111111111112','¿Qué reconoce el artículo 27?','Art. 27','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','11111111-1111-1111-1111-111111111112','¿Qué reconoce el artículo 27?','Art. 27','HARD');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('93c53a70-c272-44f9-bdfe-42fa41dcdc61','a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','Derecho a la educación',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('d888252f-860b-44bd-8ec4-359fe7e9fc0d','a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','Derecho a la vivienda',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('719be3a9-4e81-4216-8df6-df14e842e066','a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','Derecho al trabajo',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('23ca9755-258e-4593-8c4e-2ea81abc2c31','a2b3b55e-2805-4fc0-94f1-a2c5d9c31741','Derecho a la salud',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('7fc81d3d-0040-448e-89c6-f8be5905136e','11111111-1111-1111-1111-111111111112','¿Qué establece el artículo 30?','Art. 30','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('7fc81d3d-0040-448e-89c6-f8be5905136e','11111111-1111-1111-1111-111111111112','¿Qué establece el artículo 30?','Art. 30','HARD');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('a8119a2e-466f-4d7c-91e5-9a4c49cd1a89','7fc81d3d-0040-448e-89c6-f8be5905136e','Derecho y deber de defender España',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('396d9c2f-1696-4172-9290-a98e440d9fdc','7fc81d3d-0040-448e-89c6-f8be5905136e','Derecho a la vivienda',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('9a213c49-bc1a-4ff4-8808-a1704b8fd006','7fc81d3d-0040-448e-89c6-f8be5905136e','Derecho a la educación',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('22cd9f5e-2cf8-42fe-ac49-0df792799d8e','7fc81d3d-0040-448e-89c6-f8be5905136e','Derecho al trabajo',false);
 
-INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('46e7c0be-5f5e-400f-a0e0-952122d42c2e','11111111-1111-1111-1111-111111111112','¿Qué reconoce el artículo 35?','Art. 35','EASY');
+INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES ('46e7c0be-5f5e-400f-a0e0-952122d42c2e','11111111-1111-1111-1111-111111111112','¿Qué reconoce el artículo 35?','Art. 35','HARD');
 INSERT INTO answers(id, question_id, text, correct) VALUES ('254a8eba-1e9b-4b4b-8274-3b2b9f4e8547','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho al trabajo',true);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('db01f914-ed42-484d-95ff-415492c07fcb','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho a la vivienda',false);
 INSERT INTO answers(id, question_id, text, correct) VALUES ('3deef2f2-29b4-4e6c-acdb-74e940c4642f','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho a la educación',false);
