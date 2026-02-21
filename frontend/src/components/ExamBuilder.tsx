@@ -67,21 +67,25 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <label>Tiempo total (min)</label>
-        <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
-          className="w-24"/>
-        <label className="ml-0 sm:ml-4">Dificultad</label>
-        <select
-          value={difficulty}
-          onChange={e=>setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
-          className="rounded px-2 py-1 border border-secondary/40 bg-bg text-text"
-        >
-          <option value="ALL">Todas</option>
-          <option value="EASY">Fácil</option>
-          <option value="MEDIUM">Media</option>
-          <option value="HARD">Difícil</option>
-        </select>
+      <div className="mt-4 grid gap-3">
+        <div className="flex items-center gap-3">
+          <label>Tiempo total (min)</label>
+          <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
+            className="w-24"/>
+        </div>
+        <div className="flex items-center gap-3">
+          <label>Dificultad</label>
+          <select
+            value={difficulty}
+            onChange={e=>setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
+            className="rounded px-2 py-1 border border-secondary/40 bg-bg text-text"
+          >
+            <option value="ALL">Todas</option>
+            <option value="EASY">Fácil</option>
+            <option value="MEDIUM">Media</option>
+            <option value="HARD">Difícil</option>
+          </select>
+        </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
