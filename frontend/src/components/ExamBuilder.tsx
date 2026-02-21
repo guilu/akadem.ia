@@ -4,10 +4,11 @@ import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
 import { TextInput } from 'flowbite-react';
 
-export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number })=>void; onUnauthorized: ()=>void }){
+export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ subjectId: string; onStart: (cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' })=>void; onUnauthorized: ()=>void }){
   const [units, setUnits] = useState<UnitAvailability[]>([]);
   const [rules, setRules] = useState<Record<string, number>>({});
   const [time, setTime] = useState(20);
+  const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD' | 'ALL'>('ALL');
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
@@ -66,15 +67,26 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
         ))}
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <label>Tiempo total (min)</label>
         <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
           className="w-24"/>
+        <label className="ml-0 sm:ml-4">Dificultad</label>
+        <select
+          value={difficulty}
+          onChange={e=>setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
+          className="rounded px-2 py-1 border border-secondary/40 bg-bg text-text"
+        >
+          <option value="ALL">Todas</option>
+          <option value="EASY">Fácil</option>
+          <option value="MEDIUM">Media</option>
+          <option value="HARD">Difícil</option>
+        </select>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
         <div>Total preguntas: <strong>{total()}</strong></div>
-        <button onClick={()=>onStart({ unitCounts: rules, minutes: time })} className="btn btn-primary flex items-center gap-2">
+        <button onClick={()=>onStart({ unitCounts: rules, minutes: time, difficulty: difficulty === 'ALL' ? undefined : difficulty })} className="btn btn-primary flex items-center gap-2">
           <Play className="w-4 h-4" />
           Empezar
         </button>

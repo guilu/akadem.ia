@@ -69,7 +69,7 @@ export default function App(){
     navigate('/');
   }
 
-  async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number }){
+  async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }){
     const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
