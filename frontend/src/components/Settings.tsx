@@ -100,6 +100,120 @@ export default function Settings({ token }: { token: string }) {
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState('');
 
+  const subjectById = useMemo(() => {
+    return subjects.reduce((acc, subject) => {
+      acc[subject.id] = subject;
+      return acc;
+    }, {} as Record<string, AdminSubject>);
+  }, [subjects]);
+
+  const unitById = useMemo(() => {
+    return units.reduce((acc, unit) => {
+      acc[unit.id] = unit;
+      return acc;
+    }, {} as Record<string, AdminUnit>);
+  }, [units]);
+
+  const subjectOptions = useMemo(() => (
+    subjects.map(s => ({ value: s.id, label: s.name }))
+  ), [subjects]);
+
+  const unitOptions = useMemo(() => (
+    units.map(u => ({ value: u.id, label: u.name }))
+  ), [units]);
+
+  const userRows = useMemo(() => users.map(u => (
+    <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+      <TableCell>{u.email}</TableCell>
+      <TableCell className="hidden sm:table-cell">{u.role}</TableCell>
+      <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">
+            <Pen className="w-4 h-4" />
+          </button>
+          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">
+            <TrashBin className="w-4 h-4" />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )), [users]);
+
+  const subjectRows = useMemo(() => subjects.map(s => (
+    <TableRow key={s.id} className="border-secondary/30 bg-transparent">
+      <TableCell>{s.name}</TableCell>
+      <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">
+            <Pen className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            className="text-red-400 cursor-pointer"
+            onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
+            aria-label="Eliminar"
+            title="Eliminar"
+          >
+            <TrashBin className="w-4 h-4" />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )), [subjects]);
+
+  const unitRows = useMemo(() => units.map(u => (
+    <TableRow key={u.id} className="border-secondary/30 bg-transparent">
+      <TableCell>{subjectById[u.subjectId]?.name || '-'}</TableCell>
+      <TableCell>{u.name}</TableCell>
+      <TableCell className="hidden sm:table-cell">{u.description || '-'}</TableCell>
+      <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">
+            <Pen className="w-4 h-4" />
+          </button>
+          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">
+            <TrashBin className="w-4 h-4" />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )), [units, subjectById]);
+
+  const questionRows = useMemo(() => questions.map(q => (
+    <TableRow key={q.id} className="border-secondary/30 bg-transparent">
+      <TableCell>{q.text}</TableCell>
+      <TableCell className="hidden sm:table-cell">{q.difficulty}</TableCell>
+      <TableCell className="hidden sm:table-cell">{q.answers.map(a => a.text).join(', ')}</TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <button type="button" className="text-accent cursor-pointer" onClick={()=>{
+            const unit = unitById[q.unitId];
+            if (unit?.subjectId) {
+              setQuestionSubjectId(unit.subjectId);
+            }
+            setQuestionUnitId(q.unitId);
+            setQuestionForm({
+              id: q.id,
+              unitId: q.unitId,
+              text: q.text,
+              explanation: q.explanation || '',
+              difficulty: q.difficulty,
+              answers: q.answers.map(a => ({ text: a.text, correct: a.correct }))
+            });
+          }} aria-label="Editar" title="Editar">
+            <Pen className="w-4 h-4" />
+          </button>
+          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">
+            <TrashBin className="w-4 h-4" />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )), [questions, unitById]);
+
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
   }
@@ -457,23 +571,7 @@ export default function Settings({ token }: { token: string }) {
                     <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
                   </TableHead>
                   <TableBody className="divide-y">
-                    {users.map(u => (
-                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{u.role}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">
-                              <Pen className="w-4 h-4" />
-                            </button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">
-                              <TrashBin className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {userRows}
                   </TableBody>
                 </Table>
               </div>
@@ -522,28 +620,7 @@ export default function Settings({ token }: { token: string }) {
                     <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
                   </TableHead>
                   <TableBody className="divide-y">
-                    {subjects.map(s => (
-                      <TableRow key={s.id} className="border-secondary/30 bg-transparent">
-                        <TableCell>{s.name}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">
-                              <Pen className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              className="text-red-400 cursor-pointer"
-                              onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
-                              aria-label="Eliminar"
-                              title="Eliminar"
-                            >
-                              <TrashBin className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {subjectRows}
                   </TableBody>
                 </Table>
               </div>
@@ -558,8 +635,8 @@ export default function Settings({ token }: { token: string }) {
               <div className="grid gap-2 sm:grid-cols-2">
                 <Select value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
                   <option value="">Selecciona materia</option>
-                  {subjects.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                  {subjectOptions.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </Select>
                 <TextInput placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
@@ -591,24 +668,7 @@ export default function Settings({ token }: { token: string }) {
                     <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
                   </TableHead>
                   <TableBody className="divide-y">
-                    {units.map(u => (
-                      <TableRow key={u.id} className="border-secondary/30 bg-transparent">
-                        <TableCell>{subjects.find(s => s.id === u.subjectId)?.name || '-'}</TableCell>
-                        <TableCell>{u.name}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{u.description || '-'}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">
-                              <Pen className="w-4 h-4" />
-                            </button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">
-                              <TrashBin className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {unitRows}
                   </TableBody>
                 </Table>
               </div>
@@ -641,14 +701,14 @@ export default function Settings({ token }: { token: string }) {
               <div className="grid gap-2 sm:grid-cols-2">
                 <Select value={questionSubjectId} onChange={e=>setQuestionSubjectId(e.target.value)}>
                   <option value="">Selecciona materia</option>
-                  {subjects.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                  {subjectOptions.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </Select>
                 <Select value={questionUnitId} onChange={e=>setQuestionUnitId(e.target.value)}>
                   <option value="">Selecciona unidad</option>
-                  {units.map(u => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
+                  {unitOptions.map(u => (
+                    <option key={u.value} value={u.value}>{u.label}</option>
                   ))}
                 </Select>
               </div>
@@ -717,37 +777,7 @@ export default function Settings({ token }: { token: string }) {
                     <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
                   </TableHead>
                   <TableBody className="divide-y">
-                    {questions.map(q => (
-                      <TableRow key={q.id} className="border-secondary/30 bg-transparent">
-                        <TableCell>{q.text}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{q.difficulty}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{q.answers.map(a => a.text).join(', ')}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <button type="button" className="text-accent cursor-pointer" onClick={()=>{
-                              const unit = units.find(u => u.id === q.unitId);
-                              if (unit?.subjectId) {
-                                setQuestionSubjectId(unit.subjectId);
-                              }
-                              setQuestionUnitId(q.unitId);
-                              setQuestionForm({
-                                id: q.id,
-                                unitId: q.unitId,
-                                text: q.text,
-                                explanation: q.explanation || '',
-                                difficulty: q.difficulty,
-                                answers: q.answers.map(a => ({ text: a.text, correct: a.correct }))
-                              });
-                            }} aria-label="Editar" title="Editar">
-                              <Pen className="w-4 h-4" />
-                            </button>
-                            <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">
-                              <TrashBin className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {questionRows}
                   </TableBody>
                 </Table>
               </div>
