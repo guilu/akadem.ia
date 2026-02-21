@@ -128,12 +128,15 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
         <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
       </footer>
 
-      <Modal show={confirmFinish} onClose={() => setConfirmFinish(false)}>
-        <ModalHeader>¿Finalizar examen?</ModalHeader>
+      <Modal show={confirmFinish} onClose={() => setConfirmFinish(false)} theme={{
+        root: { base: 'fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto overflow-x-hidden md:inset-0 md:h-full' },
+        content: { base: 'relative h-full w-full p-4 md:h-auto', inner: 'relative flex max-h-[90dvh] flex-col rounded-lg bg-bg text-text shadow border border-secondary/40' }
+      }}>
+        <ModalHeader className="border-b border-secondary/40">¿Finalizar examen?</ModalHeader>
         <ModalBody>
           <p className="text-text/70">Se enviarán tus respuestas y se calculará la nota.</p>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="border-t border-secondary/40">
           <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline">Cancelar</Button>
           <Button onClick={finish} className="btn btn-primary">Finalizar</Button>
         </ModalFooter>
