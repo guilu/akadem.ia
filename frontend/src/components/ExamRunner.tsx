@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Modal, Button } from 'flowbite-react';
 
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
@@ -127,28 +128,16 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
         <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
       </footer>
 
-      {confirmFinish && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-2">¿Finalizar examen?</h3>
-            <p className="text-text/70 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setConfirmFinish(false)}
-                className="btn btn-outline"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={finish}
-                className="btn btn-primary"
-              >
-                Finalizar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal show={confirmFinish} onClose={() => setConfirmFinish(false)}>
+        <Modal.Header>¿Finalizar examen?</Modal.Header>
+        <Modal.Body>
+          <p className="text-text/70">Se enviarán tus respuestas y se calculará la nota.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline">Cancelar</Button>
+          <Button onClick={finish} className="btn btn-primary">Finalizar</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
