@@ -1,4 +1,5 @@
 import { Navbar, NavbarBrand, NavbarCollapse, NavbarLink, NavbarToggle } from 'flowbite-react';
+import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket } from 'flowbite-react-icons/outline';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,7 +23,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
   }
 
   return (
-    <Navbar fluid className="border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
+    <Navbar fluid className="fixed top-0 left-0 w-full z-50 border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
       <NavbarBrand
         href="/"
         onClick={(event) => { event.preventDefault(); navigate('/'); }}
@@ -43,26 +44,44 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         </button>
         <NavbarToggle />
       </div>
-      <NavbarCollapse className="md:flex md:items-center [&>ul]:md:flex [&>ul]:md:items-center [&>ul]:md:gap-6">
-        <NavbarLink className="flex items-center" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>Home</NavbarLink>
+      <NavbarCollapse className="md:flex md:items-center [&>ul]:md:flex [&>ul]:md:items-center [&>ul]:md:gap-6 [&>ul>li>a]:justify-center [&>ul>li>a]:text-center">
+        <NavbarLink className="flex items-center gap-2" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>
+          <Home className="w-4 h-4" />
+          Home
+        </NavbarLink>
         {!isAuthed && (
           <>
-            <NavbarLink className="flex items-center" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>Login</NavbarLink>
-            <NavbarLink className="flex items-center" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>Register</NavbarLink>
+            <NavbarLink className="flex items-center gap-2" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>
+              <ArrowRightToBracket className="w-4 h-4" />
+              Login
+            </NavbarLink>
+            <NavbarLink className="flex items-center gap-2" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>
+              <UserAdd className="w-4 h-4" />
+              Register
+            </NavbarLink>
           </>
         )}
         {isAuthed && (
           <>
-            <NavbarLink className="flex items-center" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>Exámenes</NavbarLink>
+            <NavbarLink className="flex items-center gap-2" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>
+              <BookOpen className="w-4 h-4" />
+              Exámenes
+            </NavbarLink>
             {isAdmin && (
-              <NavbarLink className="flex items-center" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>Configuración</NavbarLink>
+              <NavbarLink className="flex items-center gap-2" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>
+                <Cog className="w-4 h-4" />
+                Configuración
+              </NavbarLink>
             )}
             <NavbarLink
               href="#"
               className="flex items-center"
               onClick={(event) => { event.preventDefault(); onLogout(); }}
             >
-              <span className="btn btn-outline h-9">Salir</span>
+              <span className="btn btn-outline h-9 flex items-center gap-2">
+                <ArrowLeftToBracket className="w-4 h-4" />
+                Salir
+              </span>
             </NavbarLink>
           </>
         )}

@@ -125,7 +125,7 @@ export default function App(){
         onLogout={onLogout}
       />
 
-      <main className="max-w-4xl mx-auto p-6">
+      <main className="max-w-4xl mx-auto p-6 pt-24">
         <Routes>
           <Route path="/" element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path="/login" element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />

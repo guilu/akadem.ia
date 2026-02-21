@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Modal, Button, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react';
+import { ArrowLeft, ArrowRight, CheckCircle, CircleMinus } from 'flowbite-react-icons/outline';
 
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
@@ -112,43 +114,45 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={prev}
             disabled={safeIndex === 0}
-            className={`px-4 py-2 rounded-xl border border-slate-600 ${safeIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`px-4 py-2 rounded-xl border border-slate-600 flex items-center gap-2 ${safeIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
+            <ArrowLeft className="w-4 h-4" />
             Anterior
           </button>
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className={`btn btn-secondary ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            className={`btn btn-secondary flex items-center gap-2 ${safeIndex === shuffled.length - 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             Siguiente
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary">Finalizar</button>
+        <button onClick={() => setConfirmFinish(true)} className="btn btn-primary flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          Finalizar
+        </button>
       </footer>
 
-      {confirmFinish && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-2">¿Finalizar examen?</h3>
-            <p className="text-text/70 mb-4">Se enviarán tus respuestas y se calculará la nota.</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setConfirmFinish(false)}
-                className="btn btn-outline"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={finish}
-                className="btn btn-primary"
-              >
-                Finalizar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal show={confirmFinish} onClose={() => setConfirmFinish(false)} theme={{
+        root: { base: 'fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto overflow-x-hidden md:inset-0 md:h-full' },
+        content: { base: 'relative h-full w-full p-4 md:h-auto', inner: 'relative flex max-h-[90dvh] flex-col rounded-lg bg-bg text-text shadow border border-secondary/40' }
+      }}>
+        <ModalHeader className="border-b border-secondary/40">¿Finalizar examen?</ModalHeader>
+        <ModalBody>
+          <p className="text-text/70">Se enviarán tus respuestas y se calculará la nota.</p>
+        </ModalBody>
+        <ModalFooter className="border-t border-secondary/40">
+          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline shadow-none flex items-center gap-2">
+            <CircleMinus className="w-4 h-4" />
+            Cancelar
+          </Button>
+          <Button onClick={finish} className="btn btn-primary flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            Finalizar
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }
