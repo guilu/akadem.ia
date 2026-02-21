@@ -52,7 +52,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
                 max={u.available}
                 value={rules[u.id] || 0}
                 onChange={e => setCount(u.id, Number(e.target.value))}
-                className="w-16 text-center rounded px-2 py-1"
+                className="w-16 text-center rounded px-2 py-1 text-text bg-bg"
               />
               <button
                 onClick={() => setCount(u.id, (rules[u.id] || 0) + 1)}
@@ -68,7 +68,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
       <div className="mt-4 flex items-center gap-3">
         <label>Tiempo total (min)</label>
         <input type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
-          className="w-24 rounded px-2 py-1"/>
+          className="w-24 rounded px-2 py-1 text-text bg-bg"/>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
