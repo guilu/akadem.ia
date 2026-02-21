@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, TextInput } from 'flowbite-react';
+import { Alert, Button, TextInput } from 'flowbite-react';
 import { ArrowRightToBracket } from 'flowbite-react-icons/outline';
 import { apiBase } from '../api';
 
@@ -47,7 +47,7 @@ export default function Login({ onToken }:{ onToken: (t:string)=>void }){
       <div className="grid gap-2">
         <TextInput placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} />
         <TextInput placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-        {err && <div className="text-red-400 text-sm">{err}</div>}
+        {err && <Alert color="failure" className="text-sm">{err}</Alert>}
         <div className="flex justify-end">
           <Button onClick={login} disabled={loading} className="btn btn-primary flex items-center gap-2">
             <ArrowRightToBracket className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Card } from 'flowbite-react';
+import { Alert, Card } from 'flowbite-react';
 import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
@@ -70,7 +70,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
           <div className="text-text/70">Cargando historial...</div>
         )}
         {!loading && error && (
-          <div className="text-text/70">{error}</div>
+          <Alert color="failure" className="text-sm">{error}</Alert>
         )}
         {!loading && !error && history.length === 0 && (
           <div className="text-text/70">Aún no tienes exámenes realizados.</div>

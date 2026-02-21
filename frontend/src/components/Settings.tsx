@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, FileInput, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
+import { Alert, Button, Card, FileInput, Modal, ModalBody, ModalFooter, ModalHeader, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 
@@ -793,173 +793,187 @@ export default function Settings({ token }: { token: string }) {
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
-            <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
+        <Modal
+          show
+          onClose={() => setConfirmDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
+          <ModalHeader className="border-b border-secondary/40">Eliminar usuario</ModalHeader>
+          <ModalBody>
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
-            {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
-            <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmDelete(null)}>
-                <CircleMinus className="w-4 h-4" />
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
-                disabled={deleteLoading}
-                onClick={async () => {
-                  setDeleteError('');
-                  setDeleteLoading(true);
-                  try {
-                    await removeUser(confirmDelete.id);
-                    setConfirmDelete(null);
-                  } catch {
-                    setDeleteError('No se pudo eliminar');
-                  } finally {
-                    setDeleteLoading(false);
-                  }
-                }}
-              >
-                <TrashBin className="w-4 h-4" />
-                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
+            {deleteError && <Alert color="failure" className="text-sm">{deleteError}</Alert>}
+          </ModalBody>
+          <ModalFooter className="justify-end gap-2">
+            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmDelete(null)}>
+              <CircleMinus className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button
+              color="failure"
+              className={`flex items-center gap-2 ${deleteLoading ? 'btn btn-danger' : 'btn btn-primary'}`}
+              disabled={deleteLoading}
+              onClick={async () => {
+                setDeleteError('');
+                setDeleteLoading(true);
+                try {
+                  await removeUser(confirmDelete.id);
+                  setConfirmDelete(null);
+                } catch {
+                  setDeleteError('No se pudo eliminar');
+                } finally {
+                  setDeleteLoading(false);
+                }
+              }}
+            >
+              <TrashBin className="w-4 h-4" />
+              {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
 
       {confirmSubjectDelete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
-            <h3 className="text-lg font-semibold mb-2">Eliminar materia</h3>
+        <Modal
+          show
+          onClose={() => setConfirmSubjectDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
+          <ModalHeader className="border-b border-secondary/40">Eliminar materia</ModalHeader>
+          <ModalBody>
             <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
-              <div className="text-sm text-red-400 mb-3">
+              <Alert color="failure" className="text-sm mb-3">
                 Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
-              </div>
+              </Alert>
             )}
             {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
-              <input
-                className="w-full rounded px-3 py-2 mb-3"
+              <TextInput
                 placeholder='Escribe "eliminar" para confirmar'
                 value={subjectDeleteText}
                 onChange={e=>setSubjectDeleteText(e.target.value)}
               />
             )}
-            {subjectDeleteError && <div className="text-sm text-red-400 mb-2">{subjectDeleteError}</div>}
-            <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmSubjectDelete(null)}>
-                <CircleMinus className="w-4 h-4" />
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
-                disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
-                onClick={async () => {
-                  setSubjectDeleteError('');
-                  setSubjectDeleteLoading(true);
-                  try {
-                    await removeSubject(confirmSubjectDelete.id);
-                    setConfirmSubjectDelete(null);
-                  } catch {
-                    setSubjectDeleteError('No se pudo eliminar');
-                  } finally {
-                    setSubjectDeleteLoading(false);
-                  }
-                }}
-              >
-                <TrashBin className="w-4 h-4" />
-                {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
+            {subjectDeleteError && <Alert color="failure" className="text-sm mt-3">{subjectDeleteError}</Alert>}
+          </ModalBody>
+          <ModalFooter className="justify-end gap-2">
+            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmSubjectDelete(null)}>
+              <CircleMinus className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button
+              color="failure"
+              className={`flex items-center gap-2 ${subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
+              disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
+              onClick={async () => {
+                setSubjectDeleteError('');
+                setSubjectDeleteLoading(true);
+                try {
+                  await removeSubject(confirmSubjectDelete.id);
+                  setConfirmSubjectDelete(null);
+                } catch {
+                  setSubjectDeleteError('No se pudo eliminar');
+                } finally {
+                  setSubjectDeleteLoading(false);
+                }
+              }}
+            >
+              <TrashBin className="w-4 h-4" />
+              {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
 
       {confirmUnitDelete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
-            <h3 className="text-lg font-semibold mb-2">Eliminar unidad</h3>
+        <Modal
+          show
+          onClose={() => setConfirmUnitDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
+          <ModalHeader className="border-b border-secondary/40">Eliminar unidad</ModalHeader>
+          <ModalBody>
             <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
-              <div className="text-sm text-red-400 mb-3">
+              <Alert color="failure" className="text-sm mb-3">
                 Esta unidad tiene preguntas asociadas, si la eliminas se eliminarán todas sus preguntas y respuestas asociadas. Esta acción es irreversible.
-              </div>
+              </Alert>
             )}
             {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
-              <input
-                className="w-full rounded px-3 py-2 mb-3"
+              <TextInput
                 placeholder='Escribe "eliminar" para confirmar'
                 value={unitDeleteText}
                 onChange={e=>setUnitDeleteText(e.target.value)}
               />
             )}
-            {unitDeleteError && <div className="text-sm text-red-400 mb-2">{unitDeleteError}</div>}
-            <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmUnitDelete(null)}>
-                <CircleMinus className="w-4 h-4" />
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
-                disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
-                onClick={async () => {
-                  setUnitDeleteError('');
-                  setUnitDeleteLoading(true);
-                  try {
-                    await removeUnit(confirmUnitDelete.id);
-                    setConfirmUnitDelete(null);
-                  } catch {
-                    setUnitDeleteError('No se pudo eliminar');
-                  } finally {
-                    setUnitDeleteLoading(false);
-                  }
-                }}
-              >
-                <TrashBin className="w-4 h-4" />
-                {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
+            {unitDeleteError && <Alert color="failure" className="text-sm mt-3">{unitDeleteError}</Alert>}
+          </ModalBody>
+          <ModalFooter className="justify-end gap-2">
+            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmUnitDelete(null)}>
+              <CircleMinus className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button
+              color="failure"
+              className={`flex items-center gap-2 ${unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
+              disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
+              onClick={async () => {
+                setUnitDeleteError('');
+                setUnitDeleteLoading(true);
+                try {
+                  await removeUnit(confirmUnitDelete.id);
+                  setConfirmUnitDelete(null);
+                } catch {
+                  setUnitDeleteError('No se pudo eliminar');
+                } finally {
+                  setUnitDeleteLoading(false);
+                }
+              }}
+            >
+              <TrashBin className="w-4 h-4" />
+              {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
 
       {confirmQuestionDelete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
-            <h3 className="text-lg font-semibold mb-2">Eliminar pregunta</h3>
+        <Modal
+          show
+          onClose={() => setConfirmQuestionDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
+          <ModalHeader className="border-b border-secondary/40">Eliminar pregunta</ModalHeader>
+          <ModalBody>
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
-            {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
-            <div className="flex gap-2 justify-end">
-              <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmQuestionDelete(null)}>
-                <CircleMinus className="w-4 h-4" />
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-red-600 disabled:opacity-60 flex items-center gap-2"
-                disabled={questionDeleteLoading}
-                onClick={async () => {
-                  setQuestionDeleteError('');
-                  setQuestionDeleteLoading(true);
-                  try {
-                    await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId);
-                    setConfirmQuestionDelete(null);
-                  } catch {
-                    setQuestionDeleteError('No se pudo eliminar');
-                  } finally {
-                    setQuestionDeleteLoading(false);
-                  }
-                }}
-              >
-                <TrashBin className="w-4 h-4" />
-                {questionDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
+            {questionDeleteError && <Alert color="failure" className="text-sm">{questionDeleteError}</Alert>}
+          </ModalBody>
+          <ModalFooter className="justify-end gap-2">
+            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmQuestionDelete(null)}>
+              <CircleMinus className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button
+              color="failure"
+              className={`flex items-center gap-2 ${questionDeleteLoading ? 'btn btn-danger' : 'btn btn-primary'}`}
+              disabled={questionDeleteLoading}
+              onClick={async () => {
+                setQuestionDeleteError('');
+                setQuestionDeleteLoading(true);
+                try {
+                  await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId);
+                  setConfirmQuestionDelete(null);
+                } catch {
+                  setQuestionDeleteError('No se pudo eliminar');
+                } finally {
+                  setQuestionDeleteLoading(false);
+                }
+              }}
+            >
+              <TrashBin className="w-4 h-4" />
+              {questionDeleteLoading ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
     </div>
   );
