@@ -137,7 +137,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <p className="text-text/70">Se enviarán tus respuestas y se calculará la nota.</p>
         </ModalBody>
         <ModalFooter className="border-t border-secondary/40">
-          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline">Cancelar</Button>
+          <Button color="light" onClick={() => setConfirmFinish(false)} className="btn btn-outline shadow-none">Cancelar</Button>
           <Button onClick={finish} className="btn btn-primary">Finalizar</Button>
         </ModalFooter>
       </Modal>
