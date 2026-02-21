@@ -19,4 +19,6 @@ public interface QuestionRepository {
   void deleteById(UUID id);
 
   long countByUnitId(UUID unitId);
+
+  long countByUnitIdAndDifficulty(UUID unitId, Question.Difficulty difficulty);
 }

@@ -12,7 +12,8 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
-    apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}`, token)
+    const diffQuery = difficulty === 'ALL' ? '' : `&difficulty=${difficulty}`;
+    apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}${diffQuery}`, token)
       .then(us => {
         const mapped = us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }));
         setUnits(mapped);
@@ -21,7 +22,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
         if (err?.status === 401) onUnauthorized();
         setUnits([]);
       });
-  }, [subjectId, apiBase]);
+  }, [subjectId, apiBase, difficulty]);
 
   function setCount(id: string, count: number){
     const unit = units.find(u => u.id === id);
