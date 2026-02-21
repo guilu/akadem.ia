@@ -829,7 +829,11 @@ export default function Settings({ token }: { token: string }) {
       )}
 
       {confirmSubjectDelete && (
-        <Modal show onClose={() => setConfirmSubjectDelete(null)}>
+        <Modal
+          show
+          onClose={() => setConfirmSubjectDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
           <ModalHeader className="border-b border-secondary/40">Eliminar materia</ModalHeader>
           <ModalBody>
             <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
@@ -877,7 +881,11 @@ export default function Settings({ token }: { token: string }) {
       )}
 
       {confirmUnitDelete && (
-        <Modal show onClose={() => setConfirmUnitDelete(null)}>
+        <Modal
+          show
+          onClose={() => setConfirmUnitDelete(null)}
+          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
+        >
           <ModalHeader className="border-b border-secondary/40">Eliminar unidad</ModalHeader>
           <ModalBody>
             <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
