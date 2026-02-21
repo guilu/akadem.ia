@@ -20,5 +20,5 @@ public interface QuestionRepository {
 
   long countByUnitId(UUID unitId);
 
-  long countByUnitIdAndDifficulty(UUID unitId, Question.Difficulty difficulty);
+  long countByUnitIdAndDifficulty(UUID unitId, String difficulty);
 }

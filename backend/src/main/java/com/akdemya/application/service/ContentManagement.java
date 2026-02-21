@@ -48,7 +48,7 @@ public class ContentManagement {
     return unitRepo.findBySubjectId(subjectId).stream()
         .map(u -> new UnitAvailability(u.getId(), u.getName(),
             difficulty == null ? questionRepo.countByUnitId(u.getId())
-                : questionRepo.countByUnitIdAndDifficulty(u.getId(), difficulty)))
+                : questionRepo.countByUnitIdAndDifficulty(u.getId(), difficulty.name())))
         .toList();
   }
 

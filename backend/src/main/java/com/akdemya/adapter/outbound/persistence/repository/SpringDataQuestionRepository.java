@@ -9,5 +9,5 @@ public interface SpringDataQuestionRepository extends JpaRepository<QuestionEnti
     List<QuestionEntity> findByUnit_Id(UUID unitId);
     org.springframework.data.domain.Page<QuestionEntity> findByUnit_Id(UUID unitId, org.springframework.data.domain.Pageable pageable);
     long countByUnit_Id(UUID unitId);
-    long countByUnit_IdAndDifficulty(UUID unitId, com.akdemya.domain.model.Question.Difficulty difficulty);
+    long countByUnit_IdAndDifficulty(UUID unitId, String difficulty);
 }
