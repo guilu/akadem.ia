@@ -70,11 +70,6 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
 
       <div className="mt-4 grid gap-3">
         <div className="flex items-center gap-3">
-          <label>Tiempo total (min)</label>
-          <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
-            className="w-24"/>
-        </div>
-        <div className="flex items-center gap-3">
           <label>Dificultad</label>
           <select
             value={difficulty}
@@ -86,6 +81,11 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }:{ sub
             <option value="MEDIUM">Media</option>
             <option value="HARD">Difícil</option>
           </select>
+        </div>
+        <div className="flex items-center gap-3">
+          <label>Tiempo total (min)</label>
+          <TextInput type="number" min={1} value={time} onChange={e=>setTime(Number(e.target.value))}
+            className="w-24"/>
         </div>
       </div>
 
