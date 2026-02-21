@@ -41,6 +41,8 @@ public class UnitController {
             } catch (IllegalArgumentException ignored) {
             }
         }
+        org.slf4j.LoggerFactory.getLogger(UnitController.class)
+            .info("Availability for subject {} difficulty {}", subjectId, difficulty);
         return contentService.getUnitAvailability(subjectId, diff);
     }
 
