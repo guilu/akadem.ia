@@ -28,7 +28,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         onClick={(event) => { event.preventDefault(); navigate('/'); }}
         className="flex items-center gap-3 text-2xl font-bold"
       >
-        <img src="/assets/icons/akdmia-icon-32x32.png" alt="AKDMIA" className="w-8 h-8" />
+        <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-16 h-16" />
         akadem.ia
       </NavbarBrand>
       <div className="flex md:order-2 items-center gap-2">

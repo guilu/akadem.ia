@@ -24,6 +24,11 @@
   }
 }
 
+input[type="radio"] {
+  accent-color: rgb(var(--primary)) !important;
+  color: rgb(var(--primary)) !important;
+}
+
 html, body {
   background: rgb(var(--bg));
   color: rgb(var(--text));

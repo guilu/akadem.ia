@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface QuestionRepository {
   List<Question> findByUnitId(UUID unitId);
 
+  List<Question> findAll();
+
   Optional<Question> findById(UUID id);
 
   Question save(Question question);

@@ -37,6 +37,13 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   }
 
   @Override
+  public List<Question> findAll() {
+    return repository.findAll().stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public Question save(Question question) {
     var entity = mapper.toEntity(question);
     if (question.getUnitId() != null) {

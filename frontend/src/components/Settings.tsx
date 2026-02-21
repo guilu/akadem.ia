@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
+import { Button, Card, FileInput, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -88,6 +88,12 @@ export default function Settings({ token }: { token: string }) {
   const isQuestionEditing = useMemo(() => Boolean(questionForm.id), [questionForm.id]);
   const [questionSubjectId, setQuestionSubjectId] = useState('');
   const [questionUnitId, setQuestionUnitId] = useState('');
+  const [exportLoading, setExportLoading] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importFormat, setImportFormat] = useState<'csv' | 'json'>('csv');
+  const [importLoading, setImportLoading] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
 
   function resetForm() {
     setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
@@ -318,6 +324,55 @@ export default function Settings({ token }: { token: string }) {
     await loadUnits(questionSubjectId);
   }
 
+  async function handleExport(format: 'csv' | 'json') {
+    setExportLoading(true);
+    try {
+      const query = questionUnitId ? `?unitId=${questionUnitId}&format=${format}` : `?format=${format}`;
+      const res = await fetch(`${apiBase}/api/admin/questions/export${query}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('export_failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const subjectName = subjects.find(s => s.id === questionSubjectId)?.name || 'preguntas';
+      const unitName = units.find(u => u.id === questionUnitId)?.name || 'preguntas';
+      const fileName = `${subjectName}-${unitName}.${format}`;
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setExportLoading(false);
+    }
+  }
+
+  async function handleImport() {
+    if (!importFile) {
+      setImportMessage('Selecciona un archivo');
+      return;
+    }
+    setImportLoading(true);
+    setImportMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', importFile);
+      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'import_failed');
+      setImportMessage(`Importadas: ${data.created || 0}. Errores: ${data.errors || 0}`);
+      await loadQuestions(questionUnitId);
+    } catch {
+      setImportMessage('No se pudo importar');
+    } finally {
+      setImportLoading(false);
+    }
+  }
+
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-6">
       <aside className="border border-slate-800 rounded-xl p-3 h-fit">
@@ -501,7 +556,14 @@ export default function Settings({ token }: { token: string }) {
 
         {tab === 'questions' && (
           <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Preguntas</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xl font-semibold">Preguntas</h2>
+              <div className="flex gap-2">
+                <Button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar JSON</Button>
+                <Button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary">Exportar CSV</Button>
+                <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary">Importar</Button>
+              </div>
+            </div>
             <Card className="border border-secondary/40 bg-bg">
               <div className="grid gap-2 sm:grid-cols-2">
                 <Select value={questionSubjectId} onChange={e=>setQuestionSubjectId(e.target.value)}>
@@ -599,7 +661,30 @@ export default function Settings({ token }: { token: string }) {
           </div>
         )}
       </section>
-{confirmDelete && (
+
+      {importOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-2">Importar preguntas</h3>
+            <div className="grid gap-3">
+              <Select value={importFormat} onChange={e=>setImportFormat(e.target.value as 'csv' | 'json')}>
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </Select>
+              <FileInput accept={importFormat === 'csv' ? '.csv' : '.json'} onChange={e=>setImportFile(e.target.files?.[0] || null)} />
+              {importMessage && <div className="text-sm text-text/70">{importMessage}</div>}
+            </div>
+            <div className="flex gap-2 justify-end mt-4">
+              <Button color="light" className="btn btn-outline" onClick={() => setImportOpen(false)}>Cancelar</Button>
+              <Button className="btn btn-primary" onClick={handleImport} disabled={importLoading}>
+                {importLoading ? 'Importando...' : 'Importar'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
