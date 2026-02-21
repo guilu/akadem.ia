@@ -23,7 +23,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
   }
 
   return (
-    <Navbar fluid className="border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
+    <Navbar fluid className="fixed top-0 left-0 w-full z-50 border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
       <NavbarBrand
         href="/"
         onClick={(event) => { event.preventDefault(); navigate('/'); }}
