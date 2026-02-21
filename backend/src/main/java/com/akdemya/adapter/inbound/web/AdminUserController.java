@@ -21,8 +21,10 @@ public class AdminUserController {
   }
 
   @GetMapping
-  public List<UserResponse> list() {
-    return users.findAll().stream().map(UserResponse::from).toList();
+  public PageResponse<UserResponse> list(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size) {
+    var data = users.findPage(page, size);
+    return PageResponse.from(data, UserResponse::from);
   }
 
   @PostMapping
@@ -53,6 +55,18 @@ public class AdminUserController {
   record UserResponse(UUID id, String email, String firstName, String lastName, String occupation, String role) {
     static UserResponse from(AppUser u) {
       return new UserResponse(u.getId(), u.getEmail(), u.getFirstName(), u.getLastName(), u.getOccupation(), u.getRole());
+    }
+  }
+
+  record PageResponse<T>(java.util.List<T> items, int page, int size, long total, int totalPages) {
+    static <T, R> PageResponse<R> from(org.springframework.data.domain.Page<T> data, java.util.function.Function<T, R> mapper) {
+      return new PageResponse<>(
+          data.getContent().stream().map(mapper).toList(),
+          data.getNumber(),
+          data.getSize(),
+          data.getTotalElements(),
+          data.getTotalPages()
+      );
     }
   }
 }

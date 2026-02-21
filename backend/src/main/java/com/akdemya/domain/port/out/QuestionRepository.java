@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface QuestionRepository {
   List<Question> findByUnitId(UUID unitId);
 
+  org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size);
+
   List<Question> findAll();
 
   Optional<Question> findById(UUID id);

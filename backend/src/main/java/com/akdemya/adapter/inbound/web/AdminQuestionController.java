@@ -25,10 +25,11 @@ public class AdminQuestionController {
   }
 
   @GetMapping
-  public List<QuestionResponse> list(@RequestParam UUID unitId) {
-    return questions.findByUnitId(unitId).stream()
-        .map(q -> QuestionResponse.from(q, answers.findByQuestionId(q.getId())))
-        .toList();
+  public PageResponse<QuestionResponse> list(@RequestParam UUID unitId,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size) {
+    var data = questions.findPageByUnitId(unitId, page, size);
+    return PageResponse.from(data, q -> QuestionResponse.from(q, answers.findByQuestionId(q.getId())));
   }
 
   @GetMapping("/export")
@@ -255,6 +256,18 @@ public class AdminQuestionController {
     static QuestionResponse from(Question q, List<Answer> answers) {
       return new QuestionResponse(q.getId(), q.getUnitId(), q.getText(), q.getExplanation(), q.getDifficulty(),
           answers.stream().map(AnswerResponse::from).toList());
+    }
+  }
+
+  record PageResponse<T>(java.util.List<T> items, int page, int size, long total, int totalPages) {
+    static <T, R> PageResponse<R> from(org.springframework.data.domain.Page<T> data, java.util.function.Function<T, R> mapper) {
+      return new PageResponse<>(
+          data.getContent().stream().map(mapper).toList(),
+          data.getNumber(),
+          data.getSize(),
+          data.getTotalElements(),
+          data.getTotalPages()
+      );
     }
   }
 }

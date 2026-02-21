@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, FileInput, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
+import { Button, Card, FileInput, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -42,6 +42,8 @@ type Tab = 'users' | 'subjects' | 'units' | 'questions';
 export default function Settings({ token }: { token: string }) {
   const [tab, setTab] = useState<Tab>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userPage, setUserPage] = useState(1);
+  const [userTotalPages, setUserTotalPages] = useState(1);
   const [form, setForm] = useState<AdminUser>({ id: '', email: '', role: 'STUDENT' });
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
@@ -68,6 +70,8 @@ export default function Settings({ token }: { token: string }) {
   const isUnitEditing = useMemo(() => Boolean(unitForm.id), [unitForm.id]);
 
   const [questions, setQuestions] = useState<AdminQuestion[]>([]);
+  const [questionPage, setQuestionPage] = useState(1);
+  const [questionTotalPages, setQuestionTotalPages] = useState(1);
   const [questionForm, setQuestionForm] = useState<AdminQuestion>({
     id: '',
     unitId: '',
@@ -123,9 +127,14 @@ export default function Settings({ token }: { token: string }) {
     });
   }
 
-  async function loadUsers() {
-    const data = await apiAuthJson<AdminUser[]>(`${apiBase}/api/admin/users`, token);
-    setUsers(data);
+  async function loadUsers(page = userPage) {
+    const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(
+      `${apiBase}/api/admin/users?page=${page - 1}&size=10`,
+      token
+    );
+    setUsers(data.items);
+    setUserPage(data.page + 1);
+    setUserTotalPages(data.totalPages || 1);
   }
 
   async function loadSubjects() {
@@ -142,17 +151,23 @@ export default function Settings({ token }: { token: string }) {
     setUnits(data);
   }
 
-  async function loadQuestions(unitId: string) {
+  async function loadQuestions(unitId: string, page = questionPage) {
     if (!unitId) {
       setQuestions([]);
+      setQuestionTotalPages(1);
       return;
     }
-    const data = await apiAuthJson<AdminQuestion[]>(`${apiBase}/api/admin/questions?unitId=${unitId}`, token);
-    setQuestions(data);
+    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(
+      `${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`,
+      token
+    );
+    setQuestions(data.items);
+    setQuestionPage(data.page + 1);
+    setQuestionTotalPages(data.totalPages || 1);
   }
 
   useEffect(() => {
-    loadUsers().catch(() => setUsers([]));
+    loadUsers(1).catch(() => setUsers([]));
     loadSubjects().catch(() => setSubjects([]));
   }, []);
 
@@ -165,7 +180,7 @@ export default function Settings({ token }: { token: string }) {
   useEffect(() => {
     if (tab === 'questions') {
       loadUnits(questionSubjectId).catch(() => setUnits([]));
-      loadQuestions(questionUnitId).catch(() => setQuestions([]));
+      loadQuestions(questionUnitId, 1).catch(() => setQuestions([]));
     }
   }, [tab, questionSubjectId, questionUnitId]);
 
@@ -199,7 +214,7 @@ export default function Settings({ token }: { token: string }) {
         });
       }
       resetForm();
-      await loadUsers();
+      await loadUsers(1);
     } finally {
       setLoading(false);
     }
@@ -237,7 +252,7 @@ export default function Settings({ token }: { token: string }) {
 
   async function removeUser(id: string) {
     await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' });
-    await loadUsers();
+    await loadUsers(userPage);
   }
 
   async function removeSubject(id: string) {
@@ -311,7 +326,7 @@ export default function Settings({ token }: { token: string }) {
         });
       }
       resetQuestionForm();
-      await loadQuestions(unitId);
+      await loadQuestions(unitId, 1);
       await loadUnits(questionSubjectId);
     } finally {
       setQuestionLoading(false);
@@ -320,7 +335,7 @@ export default function Settings({ token }: { token: string }) {
 
   async function removeQuestion(id: string, unitId: string) {
     await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' });
-    await loadQuestions(unitId);
+    await loadQuestions(unitId, questionPage);
     await loadUnits(questionSubjectId);
   }
 
@@ -441,6 +456,16 @@ export default function Settings({ token }: { token: string }) {
                   </TableBody>
                 </Table>
               </div>
+              {userTotalPages > 1 && (
+                <div className="flex justify-center mt-4">
+                  <Pagination
+                    currentPage={userPage}
+                    totalPages={userTotalPages}
+                    onPageChange={(page) => loadUsers(page)}
+                    showIcons
+                  />
+                </div>
+              )}
             </Card>
           </div>
         )}
@@ -657,6 +682,16 @@ export default function Settings({ token }: { token: string }) {
                   </TableBody>
                 </Table>
               </div>
+              {questionTotalPages > 1 && (
+                <div className="flex justify-center mt-4">
+                  <Pagination
+                    currentPage={questionPage}
+                    totalPages={questionTotalPages}
+                    onPageChange={(page) => loadQuestions(questionUnitId, page)}
+                    showIcons
+                  />
+                </div>
+              )}
             </Card>
           </div>
         )}
