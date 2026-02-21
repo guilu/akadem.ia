@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, FileInput, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
+import { Alert, Button, Card, FileInput, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 
@@ -797,7 +797,7 @@ export default function Settings({ token }: { token: string }) {
           <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar usuario</h3>
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
-            {deleteError && <div className="text-sm text-red-400 mb-2">{deleteError}</div>}
+            {deleteError && <Alert color="failure" className="text-sm mb-2">{deleteError}</Alert>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmDelete(null)}>
                 <CircleMinus className="w-4 h-4" />
@@ -846,7 +846,7 @@ export default function Settings({ token }: { token: string }) {
                 onChange={e=>setSubjectDeleteText(e.target.value)}
               />
             )}
-            {subjectDeleteError && <div className="text-sm text-red-400 mb-2">{subjectDeleteError}</div>}
+            {subjectDeleteError && <Alert color="failure" className="text-sm mb-2">{subjectDeleteError}</Alert>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmSubjectDelete(null)}>
                 <CircleMinus className="w-4 h-4" />
@@ -895,7 +895,7 @@ export default function Settings({ token }: { token: string }) {
                 onChange={e=>setUnitDeleteText(e.target.value)}
               />
             )}
-            {unitDeleteError && <div className="text-sm text-red-400 mb-2">{unitDeleteError}</div>}
+            {unitDeleteError && <Alert color="failure" className="text-sm mb-2">{unitDeleteError}</Alert>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmUnitDelete(null)}>
                 <CircleMinus className="w-4 h-4" />
@@ -931,7 +931,7 @@ export default function Settings({ token }: { token: string }) {
           <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-2">Eliminar pregunta</h3>
             <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
-            {questionDeleteError && <div className="text-sm text-red-400 mb-2">{questionDeleteError}</div>}
+            {questionDeleteError && <Alert color="failure" className="text-sm mb-2">{questionDeleteError}</Alert>}
             <div className="flex gap-2 justify-end">
               <button type="button" className="px-3 py-2 rounded border border-slate-600 flex items-center gap-2" onClick={() => setConfirmQuestionDelete(null)}>
                 <CircleMinus className="w-4 h-4" />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Select, TextInput } from 'flowbite-react';
+import { Alert, Button, Select, TextInput } from 'flowbite-react';
 import { UserAdd } from 'flowbite-react-icons/outline';
 import { apiBase } from '../api';
 
@@ -71,7 +71,7 @@ export default function Register({ onToken }:{ onToken: (t:string)=>void }){
           <option value="OPOSITOR">Opositor</option>
           <option value="OTHER">Otro</option>
         </Select>
-        {err && <div className="text-red-400 text-sm">{err}</div>}
+        {err && <Alert color="failure" className="text-sm">{err}</Alert>}
         <div className="flex justify-end">
           <Button onClick={register} disabled={loading} className="btn btn-primary flex items-center gap-2">
             <UserAdd className="w-4 h-4" />
