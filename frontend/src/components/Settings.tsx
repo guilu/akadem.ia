@@ -854,7 +854,7 @@ export default function Settings({ token }: { token: string }) {
             </Button>
             <Button
               color="failure"
-              className="btn btn-danger flex items-center gap-2"
+              className={`flex items-center gap-2 ${subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
               disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
               onClick={async () => {
                 setSubjectDeleteError('');
@@ -902,7 +902,7 @@ export default function Settings({ token }: { token: string }) {
             </Button>
             <Button
               color="failure"
-              className="btn btn-danger flex items-center gap-2"
+              className={`flex items-center gap-2 ${unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
               disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
               onClick={async () => {
                 setUnitDeleteError('');
