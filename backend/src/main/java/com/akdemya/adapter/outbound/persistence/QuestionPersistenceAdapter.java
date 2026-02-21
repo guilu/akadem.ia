@@ -70,4 +70,9 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   public long countByUnitId(UUID unitId) {
     return repository.countByUnit_Id(unitId);
   }
+
+  @Override
+  public long countByUnitIdAndDifficulty(UUID unitId, String difficulty) {
+    return repository.countByUnit_IdAndDifficulty(unitId, difficulty);
+  }
 }

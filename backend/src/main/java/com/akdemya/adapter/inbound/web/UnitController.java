@@ -32,8 +32,18 @@ public class UnitController {
     }
 
     @GetMapping("/availability")
-    public List<ContentManagement.UnitAvailability> getAvailability(@RequestParam UUID subjectId) {
-        return contentService.getUnitAvailability(subjectId);
+    public List<ContentManagement.UnitAvailability> getAvailability(@RequestParam UUID subjectId,
+            @RequestParam(required = false) String difficulty) {
+        com.akdemya.domain.model.Question.Difficulty diff = null;
+        if (difficulty != null && !difficulty.isBlank()) {
+            try {
+                diff = com.akdemya.domain.model.Question.Difficulty.valueOf(difficulty);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        org.slf4j.LoggerFactory.getLogger(UnitController.class)
+            .info("Availability for subject {} difficulty {}", subjectId, difficulty);
+        return contentService.getUnitAvailability(subjectId, diff);
     }
 
     @PostMapping

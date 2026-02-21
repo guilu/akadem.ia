@@ -52,11 +52,23 @@ public class ExamManager implements ExamUseCase {
 
     attemptRepo.save(attempt);
 
+    Question.Difficulty difficulty = null;
+    if (command.difficulty() != null && !command.difficulty().isBlank()) {
+      try {
+        difficulty = Question.Difficulty.valueOf(command.difficulty());
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+    final Question.Difficulty selectedDifficulty = difficulty;
+
     List<Question> pool = new ArrayList<>();
     for (Map.Entry<UUID, Integer> entry : command.unitCounts().entrySet()) {
       UUID unitId = entry.getKey();
       int count = entry.getValue() != null ? entry.getValue() : 0;
       List<Question> qs = questionRepo.findByUnitId(unitId);
+      if (selectedDifficulty != null) {
+        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
+      }
       Collections.shuffle(qs, rnd);
       if (count > 0 && count < qs.size()) {
         qs = qs.subList(0, count);

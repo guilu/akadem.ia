@@ -22,14 +22,14 @@ public class ExamController {
         this.examUseCase = examUseCase;
     }
 
-    public record StartRequest(java.util.Map<UUID, Integer> unitCounts, int minutes) {
+    public record StartRequest(java.util.Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
     }
 
     @PostMapping("/attempts/start")
     public ResponseEntity<?> start(@RequestBody StartRequest req, @AuthenticationPrincipal User principal) {
         String email = principal != null ? principal.getUsername() : "guest@akdemya";
         // Construct Command with email
-        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(email, req.unitCounts(), req.minutes());
+        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(email, req.unitCounts(), req.minutes(), req.difficulty());
         var response = examUseCase.startExam(command);
         return ResponseEntity.ok(response);
     }
