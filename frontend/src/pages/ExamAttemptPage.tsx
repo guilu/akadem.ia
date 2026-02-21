@@ -22,6 +22,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [attempt, setAttempt] = useState<AttemptResponse | null>(null);
+  const timeoutMessage = 'La solicitud está tardando demasiado. Inténtalo de nuevo.';
 
   const selections = useMemo(() => {
     if (!attempt) return {} as Record<string, string | undefined>;
@@ -34,10 +35,14 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     if (!attemptId) return;
     setLoading(true);
     setError('');
-    apiAuthJson<AttemptResponse>(`${apiBase}/api/exams/attempts/${attemptId}`, token)
+    apiAuthJson<AttemptResponse>(`${apiBase}/api/exams/attempts/${attemptId}`, token, { timeoutMs: 15000 })
       .then(data => setAttempt(data))
       .catch(err => {
         if (err?.status === 401) onUnauthorized();
+        if (err?.code === 'timeout') {
+          setError(timeoutMessage);
+          return;
+        }
         setError('No se pudo cargar el intento');
       })
       .finally(() => setLoading(false));
@@ -72,10 +77,15 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
       await apiAuthJson(`${apiBase}/api/exams/attempts/${attemptId}/answers/${questionId}`, token, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selectedAnswerId: answerId })
+        body: JSON.stringify({ selectedAnswerId: answerId }),
+        timeoutMs: 15000
       });
     } catch (err: any) {
       if (err?.status === 401) onUnauthorized();
+      if (err?.code === 'timeout') {
+        alert(timeoutMessage);
+        return;
+      }
       alert('No se pudo guardar la respuesta.');
     }
   }
@@ -87,13 +97,18 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
       const result = await apiAuthJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, token, {
         method: 'POST',
         headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ selections: filtered })
+        body: JSON.stringify({ selections: filtered }),
+        timeoutMs: 15000
       });
       sessionStorage.removeItem('akdmia.activeAttemptId');
       onFinish(result);
       navigate('/result');
     } catch (err: any) {
       if (err?.status === 401) onUnauthorized();
+      if (err?.code === 'timeout') {
+        alert(timeoutMessage);
+        return;
+      }
       alert('No se pudo finalizar el examen.');
     }
   }

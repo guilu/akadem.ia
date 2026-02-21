@@ -36,7 +36,7 @@ export default function App(){
     }
   }, [token]);
 
-  async function authedJson<T>(url: string, options: RequestInit = {}) {
+  async function authedJson<T>(url: string, options: RequestInit & { timeoutMs?: number } = {}) {
     try {
       return await apiAuthJson<T>(url, token, options);
     } catch (err: any) {
@@ -69,46 +69,75 @@ export default function App(){
     navigate('/');
   }
 
+  const timeoutMessage = 'La solicitud está tardando demasiado. Inténtalo de nuevo.';
+
   async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }){
-    const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify(cfg)
-    });
-    setAttemptId(data.attemptId);
-    setMinutes(Math.round(data.totalTimeSeconds / 60));
-    setQuestions(data.questions);
-    sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
-    setActiveAttemptId(data.attemptId);
-    navigate(`/exams/attempts/${data.attemptId}`);
+    try {
+      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(cfg),
+        timeoutMs: 15000
+      });
+      setAttemptId(data.attemptId);
+      setMinutes(Math.round(data.totalTimeSeconds / 60));
+      setQuestions(data.questions);
+      sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
+      setActiveAttemptId(data.attemptId);
+      navigate(`/exams/attempts/${data.attemptId}`);
+    } catch (err: any) {
+      if (err?.code === 'timeout') {
+        alert(timeoutMessage);
+        return;
+      }
+      throw err;
+    }
   }
 
   async function finishExam(payload:{ selections: Record<string,string|undefined> }){
     const selections: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) selections[q] = a; });
-    const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ selections })
-    });
-    sessionStorage.removeItem('akdmia.activeAttemptId');
-    setActiveAttemptId('');
-    setResult(data);
-    navigate('/result');
+    try {
+      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ selections }),
+        timeoutMs: 15000
+      });
+      sessionStorage.removeItem('akdmia.activeAttemptId');
+      setActiveAttemptId('');
+      setResult(data);
+      navigate('/result');
+    } catch (err: any) {
+      if (err?.code === 'timeout') {
+        alert(timeoutMessage);
+        return;
+      }
+      throw err;
+    }
   }
 
   async function viewResult(attempt: string) {
-    const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ selections: {} })
-    });
-    if (activeAttemptId === attempt) {
-      sessionStorage.removeItem('akdmia.activeAttemptId');
-      setActiveAttemptId('');
+    try {
+      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ selections: {} }),
+        timeoutMs: 15000
+      });
+      if (activeAttemptId === attempt) {
+        sessionStorage.removeItem('akdmia.activeAttemptId');
+        setActiveAttemptId('');
+      }
+      setResult(data);
+      navigate('/result');
+    } catch (err: any) {
+      if (err?.code === 'timeout') {
+        alert(timeoutMessage);
+        return;
+      }
+      throw err;
     }
-    setResult(data);
-    navigate('/result');
   }
 
   function resumeAttempt(attempt: string) {
