@@ -1,4 +1,5 @@
 # Akdemya — MVP (Spring Boot + React + Tailwind + Postgres)
+Version: 1.1.0
 
 MVP para creación y ejecución de simulacros. Incluye:
 - **Frontend** React + Vite + Tailwind

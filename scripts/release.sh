@@ -126,7 +126,9 @@ node -e "const fs=require('fs'); const p='frontend/package.json'; const data=JSO
 perl -0777 -i -pe "s/akademia-api:\d+\.\d+\.\d+/akademia-api:${VERSION}/" dist/docker-compose-prod.yaml
 perl -0777 -i -pe "s/akademia-web:\d+\.\d+\.\d+/akademia-web:${VERSION}/" dist/docker-compose-prod.yaml
 
-git add CHANGELOG.md README.md backend/build.gradle frontend/package.json dist/docker-compose-prod.yaml
+git add CHANGELOG.md README.md backend/build.gradle frontend/package.json
+
+git add -f dist/docker-compose-prod.yaml
 
 git commit -m "chore(release): v${VERSION}"
 
