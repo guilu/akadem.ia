@@ -4,6 +4,7 @@ import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
 import { apiBase, apiAuthJson } from './api';
 import type { Subject, ExamResult, ExamStartResponse } from './types';
+import { timeoutMessage } from './utils/messages';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -69,8 +70,7 @@ export default function App(){
     navigate('/');
   }
 
-  const timeoutMessage = 'La solicitud está tardando demasiado. Inténtalo de nuevo.';
-
+  // timeoutMessage from utils
   async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }){
     try {
       const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
