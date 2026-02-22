@@ -22,7 +22,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-core:12.0.0'
     implementation "org.postgresql:postgresql:${postgresql_version}"
 
     implementation "io.jsonwebtoken:jjwt-api:${jwt_version}"

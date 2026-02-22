@@ -1,7 +1,7 @@
 services:
   db:
     container_name: akademia-dev-db
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_DB: akdemya
       POSTGRES_USER: ak_user
