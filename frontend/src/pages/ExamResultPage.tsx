@@ -7,13 +7,20 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
   if (!result) return <Navigate to={ROUTES.subjects} replace />;
   const score10 = result.total === 0 ? 0 : (result.net / result.total) * 10;
 
+  const scoreColor = () => {
+    if (score10 < 5) return 'text-red-500';
+    if (score10 <= 6) return 'text-orange-400';
+    if (score10 <= 8) return 'text-yellow-300';
+    return 'text-green-400';
+  };
+
   return (
     <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
       <h2 className="text-2xl font-bold mb-3">Resultados</h2>
 
       <div className="mb-4 rounded-xl border border-secondary/40 bg-secondary/20 p-4 text-center">
         <div className="text-text/70 text-sm uppercase tracking-wide">Nota final</div>
-        <div className={`text-6xl font-extrabold ${score10 >= 5 ? 'text-lime-400' : 'text-red-500'}`}>{score10.toFixed(2)}</div>
+        <div className={`text-6xl font-extrabold ${scoreColor()}`}>{score10.toFixed(2)}</div>
         <div className="text-text/70 text-sm">sobre 10</div>
       </div>
 
