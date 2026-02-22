@@ -47,13 +47,13 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div id="subjects" className="grid sm:grid-cols-2 gap-4">
         {subjects.map(s => (
           <Card key={s.id} className="border border-secondary/40 bg-bg">
             <div className="text-lg font-semibold">{s.name}</div>
             <div className="text-sm text-text/70">{s.description}</div>
             <div className="mt-3">
-              <Link className="btn btn-primary flex items-center gap-2" to={ROUTES.subjectBuilder(s.id)}>
+              <Link className="btn btn-primary inline-flex items-center gap-2 w-auto" to={ROUTES.subjectBuilder(s.id)}>
                 <Plus className="w-4 h-4" />
                 Crear examen
               </Link>
@@ -71,7 +71,10 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
           <Alert color="failure" className="text-sm">{error}</Alert>
         )}
         {!loading && !error && history.length === 0 && (
-          <div className="text-text/70">Aún no tienes exámenes realizados.</div>
+          <Card className="border border-secondary/40 bg-bg">
+            <div className="text-lg font-semibold">Aún no tienes exámenes realizados</div>
+            <div className="text-sm text-text/70">Empieza tu primer simulacro para ver tu progreso aquí.</div>
+          </Card>
         )}
         {!loading && !error && history.length > 0 && (
           <div className="grid gap-3">
