@@ -9,9 +9,9 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
 
   const scoreColor = () => {
     if (score10 < 5) return 'text-red-500';
-    if (score10 <= 6) return 'text-orange-400';
-    if (score10 <= 8) return 'text-yellow-300';
-    return 'text-green-400';
+    if (score10 <= 6) return 'text-orange-500';
+    if (score10 <= 8) return 'text-yellow-500';
+    return 'text-lime-500';
   };
 
   return (
