@@ -147,10 +147,38 @@ com.akdemya
   - `SPRING_DATASOURCE_USERNAME`
   - `SPRING_DATASOURCE_PASSWORD`
   - `SPRING_JPA_HIBERNATE_DDL_AUTO`
+  - `SPRING_PROFILES_ACTIVE` (dev/prod)
 
 ### Base de datos
-- `data.sql` se carga en arranque
+- Seeds de desarrollo en `data-dev.sql` (solo en profile `dev`)
 - `ddl-auto` por defecto en `create-drop` cuando se usa docker
+
+---
+
+## 🚚 Despliegue mínimo (prod)
+
+1. **Crear red Docker (solo primera vez)**
+   ```bash
+   docker network create prod_network
+   ```
+
+2. **Preparar variables de entorno** (archivo `.env` o variables del sistema)
+   ```env
+   AKADEMIA_DB_USER=...
+   AKADEMIA_DB_PASSWORD=...
+   JWT_SECRET=...
+   ```
+
+3. **Levantar stack de producción**
+   ```bash
+   docker compose -f dist/docker-compose-prod.yaml up -d
+   ```
+
+4. **Verificar servicios**
+   - API: http://localhost:8082
+   - Web: http://localhost:5173
+
+> En prod **no** se cargan seeds (SQL init en `never`).
 
 ---
 
