@@ -15,6 +15,7 @@ import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './pages/ProtectedRoute';
+import { ROUTES } from './constants/routes';
 
 export default function App(){
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export default function App(){
   function onToken(t:string){
     setToken(t);
     localStorage.setItem('ak_token', t);
-    navigate('/subjects');
+    navigate(ROUTES.subjects);
   }
 
   function onLogout(){
@@ -67,7 +68,7 @@ export default function App(){
     sessionStorage.removeItem('akdmia.activeAttemptId');
     setActiveAttemptId('');
     setToken('');
-    navigate('/');
+    navigate(ROUTES.home);
   }
 
   // timeoutMessage from utils
@@ -84,7 +85,7 @@ export default function App(){
       setQuestions(data.questions);
       sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
       setActiveAttemptId(data.attemptId);
-      navigate(`/exams/attempts/${data.attemptId}`);
+      navigate(ROUTES.examAttempt(data.attemptId));
     } catch (err: any) {
       if (err?.code === 'timeout') {
         alert(timeoutMessage);
@@ -107,7 +108,7 @@ export default function App(){
       sessionStorage.removeItem('akdmia.activeAttemptId');
       setActiveAttemptId('');
       setResult(data);
-      navigate('/result');
+      navigate(ROUTES.examResult);
     } catch (err: any) {
       if (err?.code === 'timeout') {
         alert(timeoutMessage);
@@ -130,7 +131,7 @@ export default function App(){
         setActiveAttemptId('');
       }
       setResult(data);
-      navigate('/result');
+      navigate(ROUTES.examResult);
     } catch (err: any) {
       if (err?.code === 'timeout') {
         alert(timeoutMessage);
@@ -143,7 +144,7 @@ export default function App(){
   function resumeAttempt(attempt: string) {
     sessionStorage.setItem('akdmia.activeAttemptId', attempt);
     setActiveAttemptId(attempt);
-    navigate(`/exams/attempts/${attempt}`);
+    navigate(ROUTES.examAttempt(attempt));
   }
 
   return (
@@ -156,10 +157,10 @@ export default function App(){
 
       <main className="max-w-4xl mx-auto p-6 pt-24">
         <Routes>
-          <Route path="/" element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
-          <Route path="/login" element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
-          <Route path="/register" element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
-          <Route path="/subjects" element={
+          <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
+          <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
+          <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
+          <Route path={ROUTES.subjects} element={
             <ProtectedRoute allow={isAuthed}>
               <SubjectsPage
                 subjects={subjects}
@@ -176,7 +177,7 @@ export default function App(){
               <ExamBuilderPage onStart={startExam} onUnauthorized={onLogout} />
             </ProtectedRoute>
           } />
-          <Route path="/exam" element={
+          <Route path={ROUTES.examRunner} element={
             <ProtectedRoute allow={isAuthed}>
               <ExamRunnerPage questions={questions} minutes={minutes} onFinish={finishExam} />
             </ProtectedRoute>
@@ -190,13 +191,13 @@ export default function App(){
               }} />
             </ProtectedRoute>
           } />
-          <Route path="/result" element={
+          <Route path={ROUTES.examResult} element={
             <ProtectedRoute allow={isAuthed}>
               <ExamResultPage result={result} />
             </ProtectedRoute>
           } />
-          <Route path="/settings" element={<SettingsPage isAdmin={role === 'ADMIN'} token={token} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path={ROUTES.settings} element={<SettingsPage isAdmin={role === 'ADMIN'} token={token} />} />
+          <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
         </Routes>
       </main>
     </div>

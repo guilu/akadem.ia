@@ -2,6 +2,7 @@ import { Navbar, NavbarBrand, NavbarCollapse, NavbarLink, NavbarToggle } from 'f
 import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket } from 'flowbite-react-icons/outline';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
   isAuthed: boolean;
@@ -25,8 +26,8 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
   return (
     <Navbar fluid className="fixed top-0 left-0 w-full z-50 border-b border-secondary/40 bg-bg/90 backdrop-blur" style={{ alignItems: 'center' }}>
       <NavbarBrand
-        href="/"
-        onClick={(event) => { event.preventDefault(); navigate('/'); }}
+        href={ROUTES.home}
+        onClick={(event) => { event.preventDefault(); navigate(ROUTES.home); }}
         className="flex items-center gap-3 text-2xl font-bold"
       >
         <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-16 h-16" />
@@ -45,17 +46,17 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         <NavbarToggle />
       </div>
       <NavbarCollapse className="md:flex md:items-center [&>ul]:md:flex [&>ul]:md:items-center [&>ul]:md:gap-6 [&>ul>li>a]:justify-center [&>ul>li>a]:text-center">
-        <NavbarLink className="flex items-center gap-2" href="/" onClick={(event) => { event.preventDefault(); navigate('/'); }}>
+        <NavbarLink className="flex items-center gap-2" href={ROUTES.home} onClick={(event) => { event.preventDefault(); navigate(ROUTES.home); }}>
           <Home className="w-4 h-4" />
           Home
         </NavbarLink>
         {!isAuthed && (
           <>
-            <NavbarLink className="flex items-center gap-2" href="/login" onClick={(event) => { event.preventDefault(); navigate('/login'); }}>
+            <NavbarLink className="flex items-center gap-2" href={ROUTES.login} onClick={(event) => { event.preventDefault(); navigate(ROUTES.login); }}>
               <ArrowRightToBracket className="w-4 h-4" />
               Login
             </NavbarLink>
-            <NavbarLink className="flex items-center gap-2" href="/register" onClick={(event) => { event.preventDefault(); navigate('/register'); }}>
+            <NavbarLink className="flex items-center gap-2" href={ROUTES.register} onClick={(event) => { event.preventDefault(); navigate(ROUTES.register); }}>
               <UserAdd className="w-4 h-4" />
               Register
             </NavbarLink>
@@ -63,12 +64,12 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         )}
         {isAuthed && (
           <>
-            <NavbarLink className="flex items-center gap-2" href="/subjects" onClick={(event) => { event.preventDefault(); navigate('/subjects'); }}>
+            <NavbarLink className="flex items-center gap-2" href={ROUTES.subjects} onClick={(event) => { event.preventDefault(); navigate(ROUTES.subjects); }}>
               <BookOpen className="w-4 h-4" />
               Exámenes
             </NavbarLink>
             {isAdmin && (
-              <NavbarLink className="flex items-center gap-2" href="/settings" onClick={(event) => { event.preventDefault(); navigate('/settings'); }}>
+              <NavbarLink className="flex items-center gap-2" href={ROUTES.settings} onClick={(event) => { event.preventDefault(); navigate(ROUTES.settings); }}>
                 <Cog className="w-4 h-4" />
                 Configuración
               </NavbarLink>

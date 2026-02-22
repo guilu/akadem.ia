@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import ExamRunner, { Question } from '../components/ExamRunner';
 import { apiAuthJson, apiBase } from '../api';
 import { timeoutMessage } from '../utils/messages';
+import { ROUTES } from '../constants/routes';
 import type { ExamResult } from '../types';
 
 type AttemptResponse = {
@@ -49,7 +50,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
       .finally(() => setLoading(false));
   }, [attemptId, token, apiBase]);
 
-  if (!attemptId) return <Navigate to="/subjects" replace />;
+  if (!attemptId) return <Navigate to={ROUTES.subjects} replace />;
 
   if (loading) {
     return (
@@ -103,7 +104,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
       });
       sessionStorage.removeItem('akdmia.activeAttemptId');
       onFinish(result);
-      navigate('/result');
+      navigate(ROUTES.examResult);
     } catch (err: any) {
       if (err?.status === 401) onUnauthorized();
       if (err?.code === 'timeout') {
