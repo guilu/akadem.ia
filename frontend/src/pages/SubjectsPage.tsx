@@ -53,7 +53,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
             <div className="text-lg font-semibold">{s.name}</div>
             <div className="text-sm text-text/70">{s.description}</div>
             <div className="mt-3">
-              <Link className="btn btn-primary flex items-center gap-2" to={ROUTES.subjectBuilder(s.id)}>
+              <Link className="btn btn-primary inline-flex items-center gap-2 w-auto" to={ROUTES.subjectBuilder(s.id)}>
                 <Plus className="w-4 h-4" />
                 Crear examen
               </Link>
@@ -75,7 +75,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
             <div className="text-lg font-semibold">Aún no tienes exámenes realizados</div>
             <div className="text-sm text-text/70">Empieza tu primer simulacro para ver tu progreso aquí.</div>
             <div className="mt-3">
-              <Link className="btn btn-primary flex items-center gap-2" to={`${ROUTES.subjects}#subjects`}>
+              <Link className="btn btn-primary inline-flex items-center gap-2 w-auto" to={`${ROUTES.subjects}#subjects`}>
                 <Plus className="w-4 h-4" />
                 Crear examen
               </Link>
