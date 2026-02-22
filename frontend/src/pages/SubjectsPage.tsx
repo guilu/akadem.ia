@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Alert, Card } from 'flowbite-react';
+import { formatDuration } from '../utils/format';
 import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
@@ -31,11 +32,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
       .finally(() => setLoading(false));
   }, [token, apiBase]);
 
-  function formatDuration(seconds: number) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${String(secs).padStart(2,'0')}s`;
-  }
+  // formatDuration moved to utils
 
   return (
     <section className="mb-8">

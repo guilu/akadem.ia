@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import ExamRunner, { Question } from '../components/ExamRunner';
 import { apiAuthJson, apiBase } from '../api';
+import { timeoutMessage } from '../utils/messages';
 import type { ExamResult } from '../types';
 
 type AttemptResponse = {
@@ -22,7 +23,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [attempt, setAttempt] = useState<AttemptResponse | null>(null);
-  const timeoutMessage = 'La solicitud está tardando demasiado. Inténtalo de nuevo.';
+  // timeoutMessage from utils
 
   const selections = useMemo(() => {
     if (!attempt) return {} as Record<string, string | undefined>;
