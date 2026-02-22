@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Play, ArrowsRepeat, ArrowRightToBracket, UserAdd } from 'flowbite-react-icons/outline';
+import { ROUTES } from '../constants/routes';
 
 export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
   return (
@@ -15,12 +16,12 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             {isAuthed && (
               <>
-                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/subjects">
+                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.subjects}>
                   <Play className="w-4 h-4" />
                   Crear examen
                 </Link>
                 {activeAttemptId && (
-                  <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={`/exams/attempts/${activeAttemptId}`}>
+                  <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.examAttempt(activeAttemptId)}>
                     <ArrowsRepeat className="w-4 h-4" />
                     Reanudar examen
                   </Link>
@@ -29,11 +30,11 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             )}
             {!isAuthed && (
               <>
-                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/login">
+                <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.login}>
                   <ArrowRightToBracket className="w-4 h-4" />
                   Login
                 </Link>
-                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to="/register">
+                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.register}>
                   <UserAdd className="w-4 h-4" />
                   Register
                 </Link>

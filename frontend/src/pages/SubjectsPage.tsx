@@ -5,6 +5,7 @@ import { formatDuration } from '../utils/format';
 import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
+import { ROUTES } from '../constants/routes';
 
 export default function SubjectsPage({ subjects, activeAttemptId, token, onUnauthorized, onViewResult, onResumeAttempt }: {
   subjects: Subject[];
@@ -39,7 +40,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Exámenes</h2>
         {activeAttemptId && (
-          <Link className="btn btn-secondary flex items-center gap-2" to={`/exams/attempts/${activeAttemptId}`}>
+          <Link className="btn btn-secondary flex items-center gap-2" to={ROUTES.examAttempt(activeAttemptId)}>
             <ArrowsRepeat className="w-4 h-4" />
             Reanudar examen
           </Link>
@@ -52,7 +53,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
             <div className="text-lg font-semibold">{s.name}</div>
             <div className="text-sm text-text/70">{s.description}</div>
             <div className="mt-3">
-              <Link className="btn btn-primary flex items-center gap-2" to={`/subjects/${s.id}/builder`}>
+              <Link className="btn btn-primary flex items-center gap-2" to={ROUTES.subjectBuilder(s.id)}>
                 <Plus className="w-4 h-4" />
                 Crear examen
               </Link>

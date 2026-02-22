@@ -1,9 +1,10 @@
 import { Navigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'flowbite-react-icons/outline';
 import type { ExamResult } from '../types';
+import { ROUTES } from '../constants/routes';
 
 export default function ExamResultPage({ result }: { result: ExamResult | null }) {
-  if (!result) return <Navigate to="/subjects" replace />;
+  if (!result) return <Navigate to={ROUTES.subjects} replace />;
   const score10 = result.total === 0 ? 0 : (result.net / result.total) * 10;
 
   return (
@@ -26,7 +27,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
       </div>
       <p className="text-slate-400 mt-3">Cada 3 fallos restan 1 acierto.</p>
       <div className="mt-4">
-        <Link className="btn btn-secondary flex items-center gap-2" to="/subjects">
+        <Link className="btn btn-secondary flex items-center gap-2" to={ROUTES.subjects}>
           <ArrowLeft className="w-4 h-4" />
           Volver a exámenes
         </Link>
