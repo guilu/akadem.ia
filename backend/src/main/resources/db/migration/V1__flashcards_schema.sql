@@ -1,6 +1,36 @@
+create extension if not exists "pgcrypto";
+
+create table if not exists subjects (
+    id uuid primary key,
+    name varchar(255) not null,
+    description text
+);
+
+create table if not exists users (
+    id uuid primary key,
+    email varchar(255) not null,
+    password_hash varchar(255) not null,
+    role varchar(50) not null,
+    first_name varchar(255),
+    last_name varchar(255),
+    occupation varchar(255),
+    constraint uq_users_email unique (email)
+);
+
+create table if not exists units (
+    id uuid primary key,
+    name varchar(255) not null,
+    description text,
+    order_index integer not null default 0,
+    subject_id uuid not null,
+    constraint fk_units_subject
+        foreign key (subject_id) references subjects(id)
+        on delete cascade
+);
+
 create table if not exists flashcards (
-    id bigserial primary key,
-    unit_id bigint not null,
+    id uuid primary key default gen_random_uuid(),
+    unit_id uuid not null,
     front text not null,
     back text not null,
     created_at timestamp not null default now(),
@@ -11,9 +41,9 @@ create table if not exists flashcards (
 );
 
 create table if not exists flashcard_reviews (
-    id bigserial primary key,
-    user_id bigint not null,
-    flashcard_id bigint not null,
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null,
+    flashcard_id uuid not null,
     state varchar(20) not null,
     ease_factor numeric(4,2) not null,
     interval_days integer not null,
@@ -35,9 +65,9 @@ create table if not exists flashcard_reviews (
 );
 
 create table if not exists flashcard_review_log (
-    id bigserial primary key,
-    user_id bigint not null,
-    flashcard_id bigint not null,
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null,
+    flashcard_id uuid not null,
     grade varchar(10) not null,
     reviewed_at timestamp not null,
     interval_before integer,
