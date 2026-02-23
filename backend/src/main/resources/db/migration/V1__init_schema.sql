@@ -85,6 +85,43 @@ create table if not exists flashcard_review_log (
         check (grade in ('AGAIN', 'HARD', 'GOOD', 'EASY'))
 );
 
+create table if not exists questions (
+    id uuid primary key,
+    unit_id uuid not null,
+    text text not null,
+    explanation text,
+    difficulty varchar(255),
+    constraint fk_questions_unit
+        foreign key (unit_id) references units(id)
+        on delete cascade
+);
+
+create table if not exists answers (
+    id uuid primary key,
+    question_id uuid not null,
+    text text not null,
+    correct boolean not null default false,
+    constraint fk_answers_question
+        foreign key (question_id) references questions(id)
+        on delete cascade
+);
+
+create table if not exists exam_attempts (
+    id uuid primary key,
+    user_email varchar(255) not null,
+    started_at timestamp,
+    finished_at timestamp,
+    total_time_seconds integer,
+    score integer
+);
+
+create table if not exists exam_attempt_answers (
+    id uuid primary key,
+    attempt_id uuid not null,
+    question_id uuid not null,
+    selected_answer_id uuid
+);
+
 create index if not exists idx_flashcard_reviews_user_due_at
     on flashcard_reviews (user_id, due_at);
 
