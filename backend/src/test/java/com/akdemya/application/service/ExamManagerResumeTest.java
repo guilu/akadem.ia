@@ -217,6 +217,14 @@ class ExamManagerResumeTest {
     public long countByUnitId(UUID unitId) {
       return data.values().stream().filter(q -> q.getUnitId().equals(unitId)).count();
     }
+
+    @Override
+    public long countByUnitIdAndDifficulty(UUID unitId, String difficulty) {
+      return data.values().stream()
+          .filter(q -> q.getUnitId().equals(unitId) && q.getDifficulty() != null
+              && q.getDifficulty().name().equals(difficulty))
+          .count();
+    }
   }
 
   static class InMemoryAnswerRepo implements AnswerRepository {
