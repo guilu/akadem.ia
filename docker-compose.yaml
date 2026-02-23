@@ -1,7 +1,7 @@
 services:
   db:
     container_name: akademia-dev-db
-    image: postgres:18
+    image: postgres:16
     environment:
       POSTGRES_DB: akdemya
       POSTGRES_USER: ak_user
@@ -20,9 +20,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/akdemya
       SPRING_DATASOURCE_USERNAME: ak_user
       SPRING_DATASOURCE_PASSWORD: ak_pass
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_SQL_INIT_MODE: always
+      SPRING_SQL_INIT_MODE: never
       JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
     depends_on:
       - db
