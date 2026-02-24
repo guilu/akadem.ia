@@ -14,5 +14,12 @@ public interface FlashcardReviewRepository {
   /** Returns up to {@code limit} cards due for {@code userId} at or before {@code upTo}, ordered by dueAt asc. */
   List<FlashcardReview> findDueByUserId(UUID userId, LocalDateTime upTo, int limit);
 
+  /** Returns up to {@code limit} cards due for {@code userId} and {@code unitId} at or before {@code upTo}, ordered by dueAt asc. */
+  List<FlashcardReview> findDueByUserIdAndUnitId(UUID userId, UUID unitId, LocalDateTime upTo, int limit);
+
+  long countDueByUserIdAndUnitIdUpTo(UUID userId, UUID unitId, LocalDateTime upTo);
+
+  long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive, LocalDateTime toInclusive);
+
   FlashcardReview save(FlashcardReview review);
 }

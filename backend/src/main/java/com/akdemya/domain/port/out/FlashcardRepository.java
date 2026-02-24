@@ -12,6 +12,12 @@ public interface FlashcardRepository {
 
   List<Flashcard> findByUnitId(UUID unitId);
 
+  List<Flashcard> findByIds(List<UUID> ids);
+
+  List<Flashcard> findNewByUserIdAndUnitId(UUID userId, UUID unitId, int limit);
+
+  long countNewByUserIdAndUnitId(UUID userId, UUID unitId);
+
   Flashcard save(Flashcard flashcard);
 
   void deleteById(UUID id);
