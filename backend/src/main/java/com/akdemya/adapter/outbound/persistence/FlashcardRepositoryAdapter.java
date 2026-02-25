@@ -4,6 +4,7 @@ import com.akdemya.adapter.outbound.persistence.mapper.FlashcardJpaMapper;
 import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardRepository;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.port.out.FlashcardRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,6 +30,25 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   @Override
   public List<Flashcard> findByUnitId(UUID unitId) {
     return jpa.findByUnitId(unitId).stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public List<Flashcard> findByIds(List<UUID> ids) {
+    if (ids == null || ids.isEmpty()) return List.of();
+    return jpa.findByIdIn(ids).stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public List<Flashcard> findNewByUserIdAndUnitId(UUID userId, UUID unitId, int limit) {
+    int pageSize = Math.max(0, limit);
+    if (pageSize == 0) return List.of();
+    return jpa.findNewByUserIdAndUnitId(userId, unitId, PageRequest.of(0, pageSize))
+        .stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public long countNewByUserIdAndUnitId(UUID userId, UUID unitId) {
+    return jpa.countNewByUserIdAndUnitId(userId, unitId);
   }
 
   @Override

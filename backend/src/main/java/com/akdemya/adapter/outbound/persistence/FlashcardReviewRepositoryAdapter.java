@@ -41,6 +41,30 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
         .toList();
   }
 
+  @Override
+  public List<FlashcardReview> findDueByUserIdAndUnitId(UUID userId, UUID unitId, LocalDateTime upTo, int limit) {
+    return jpa.findDueByUserIdAndUnitId(
+            userId,
+            unitId,
+            upTo.toInstant(ZoneOffset.UTC),
+            PageRequest.of(0, limit))
+        .stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public long countDueByUserIdAndUnitIdUpTo(UUID userId, UUID unitId, LocalDateTime upTo) {
+    return jpa.countDueByUserIdAndUnitIdUpTo(userId, unitId, upTo.toInstant(ZoneOffset.UTC));
+  }
+
+  @Override
+  public long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId,
+                                               LocalDateTime fromExclusive, LocalDateTime toInclusive) {
+    return jpa.countDueByUserIdAndUnitIdBetween(
+        userId, unitId, fromExclusive.toInstant(ZoneOffset.UTC), toInclusive.toInstant(ZoneOffset.UTC));
+  }
+
   /**
    * Upsert: if a review already exists for (userId, flashcardId) patch its SRS fields;
    * otherwise insert a new row. This avoids unique-constraint violations on re-saves.

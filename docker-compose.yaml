@@ -10,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ak_user -d akdemya -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks: 
       - cluster_network 
 
@@ -25,7 +30,8 @@ services:
       SPRING_SQL_INIT_MODE: never
       JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
