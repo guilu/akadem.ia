@@ -9,5 +9,8 @@ public interface FlashcardReviewLogRepository {
 
   FlashcardReviewLog save(FlashcardReviewLog log);
 
+  java.util.Optional<FlashcardReviewLog> findByUserIdAndFlashcardIdAndReviewedAt(UUID userId, UUID flashcardId,
+                                                                                java.time.LocalDateTime reviewedAt);
+
   List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit);
 }
