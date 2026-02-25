@@ -24,7 +24,7 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
       className="w-full text-left rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm transition hover:shadow-md hover:scale-[1.01] dark:border-slate-700 dark:bg-slate-800"
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-secondary">
           <BookOpen className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -32,7 +32,7 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
             <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
             <div className="text-sm font-semibold text-slate-500">{cta}</div>
           </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/80">
             <div className="flex h-full">
               <div className="bg-red-400" style={{ width: segment(due) }} />
               <div className="bg-yellow-300" style={{ width: segment(learning) }} />
