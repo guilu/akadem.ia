@@ -14,6 +14,9 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
   const segment = (count: number) =>
     totalForBar === 0 ? '0%' : `${Math.max((count / totalForBar) * 100, 4)}%`;
 
+  const pending = due + learning + created;
+  const cta = pending > 0 ? `Estudiar ${pending} tarjetas` : 'Sin pendientes';
+
   return (
     <button
       type="button"
@@ -25,7 +28,10 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
           <BookOpen className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
+            <div className="text-sm font-semibold text-slate-500">{cta}</div>
+          </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div className="flex h-full">
               <div className="bg-red-400" style={{ width: segment(due) }} />
@@ -39,10 +45,10 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500">
-        <span>🔴 {due}</span>
-        <span>🟡 {learning}</span>
-        <span>🟢 {review}</span>
-        <span>🆕 {created}</span>
+        <span>🔴 {due} falladas</span>
+        <span>🟡 {learning} en repaso</span>
+        <span>🟢 {review} dominadas</span>
+        <span>🆕 {created} nuevas</span>
       </div>
     </button>
   );
