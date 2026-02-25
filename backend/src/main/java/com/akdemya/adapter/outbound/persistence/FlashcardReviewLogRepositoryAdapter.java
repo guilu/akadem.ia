@@ -7,7 +7,10 @@ import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -25,6 +28,14 @@ public class FlashcardReviewLogRepositoryAdapter implements FlashcardReviewLogRe
   @Override
   public FlashcardReviewLog save(FlashcardReviewLog log) {
     return mapper.toDomain(jpa.save(mapper.toEntity(log)));
+  }
+
+  @Override
+  public Optional<FlashcardReviewLog> findByUserIdAndFlashcardIdAndReviewedAt(UUID userId, UUID flashcardId,
+                                                                              LocalDateTime reviewedAt) {
+    return jpa.findByUserIdAndFlashcardIdAndReviewedAt(
+            userId, flashcardId, reviewedAt.toInstant(ZoneOffset.UTC))
+        .map(mapper::toDomain);
   }
 
   @Override
