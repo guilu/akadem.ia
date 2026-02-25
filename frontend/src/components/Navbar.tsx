@@ -64,6 +64,10 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         )}
         {isAuthed && (
           <>
+            <NavbarLink className="flex items-center gap-2" href={ROUTES.flashcards} onClick={(event) => { event.preventDefault(); navigate(ROUTES.flashcards); }}>
+              <BookOpen className="w-4 h-4" />
+              Flashcards
+            </NavbarLink>
             <NavbarLink className="flex items-center gap-2" href={ROUTES.subjects} onClick={(event) => { event.preventDefault(); navigate(ROUTES.subjects); }}>
               <BookOpen className="w-4 h-4" />
               Exámenes

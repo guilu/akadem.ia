@@ -14,6 +14,7 @@ import ExamRunnerPage from './pages/ExamRunnerPage';
 import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
+import FlashcardsPage from './pages/FlashcardsPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
@@ -197,6 +198,11 @@ export default function App(){
             </ProtectedRoute>
           } />
           <Route path={ROUTES.settings} element={<SettingsPage isAdmin={role === 'ADMIN'} token={token} />} />
+          <Route path={ROUTES.flashcards} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsPage />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
         </Routes>
       </main>

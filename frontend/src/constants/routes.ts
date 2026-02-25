@@ -7,5 +7,6 @@ export const ROUTES = {
   examRunner: '/exam',
   examAttempt: (attemptId: string) => `/exams/attempts/${attemptId}`,
   examResult: '/result',
-  settings: '/settings'
+  settings: '/settings',
+  flashcards: '/flashcards'
 } as const;
