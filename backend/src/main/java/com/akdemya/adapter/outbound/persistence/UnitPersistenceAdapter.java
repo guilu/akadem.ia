@@ -35,6 +35,13 @@ public class UnitPersistenceAdapter implements UnitRepository {
   }
 
   @Override
+  public List<Unit> findAll() {
+    return repository.findAll().stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public Optional<Unit> findById(UUID id) {
     return repository.findById(id).map(mapper::toDomain);
   }

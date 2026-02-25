@@ -274,6 +274,11 @@ class ExamManagerResumeTest {
     }
 
     @Override
+    public List<Unit> findAll() {
+      return new ArrayList<>(data.values());
+    }
+
+    @Override
     public Optional<Unit> findById(UUID id) {
       return Optional.ofNullable(data.get(id));
     }
