@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface UnitRepository {
   List<Unit> findBySubjectId(UUID subjectId); // Simplified name, implementation can sort
 
+  List<Unit> findAll();
+
   Optional<Unit> findById(UUID id);
 
   Unit save(Unit unit);
