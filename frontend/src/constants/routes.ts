@@ -8,5 +8,6 @@ export const ROUTES = {
   examAttempt: (attemptId: string) => `/exams/attempts/${attemptId}`,
   examResult: '/result',
   settings: '/settings',
-  flashcards: '/flashcards'
+  flashcards: '/flashcards',
+  flashcardsStudy: '/flashcards/study'
 } as const;
