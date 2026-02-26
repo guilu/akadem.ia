@@ -85,12 +85,7 @@ export default function FlashcardsStudyPage() {
         </div>
       </div>
 
-      {showAnswer && (
-        <div className="flex items-center justify-between">
-          <button className="btn btn-primary">↺ Volver a ver</button>
-          <button className="btn btn-primary">Terminar</button>
-        </div>
-      )}
+      {/* actions are inside the card */}
     </div>
   );
 }
