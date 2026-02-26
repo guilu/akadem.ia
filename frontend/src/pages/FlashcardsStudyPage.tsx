@@ -37,7 +37,7 @@ export default function FlashcardsStudyPage() {
       </header>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="flex items-center justify-between text-xs text-secondary">
           <span>{currentLabel}</span>
           <span>⏱ {progressPct}%</span>
         </div>
@@ -49,7 +49,7 @@ export default function FlashcardsStudyPage() {
       <div className="relative">
         <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90" />
         <div className="relative rounded-3xl bg-white p-6 shadow-lg">
-          <div className="text-sm text-slate-500">{sample.unitName}</div>
+          <div className="text-sm text-secondary">{sample.unitName}</div>
           {!showAnswer ? (
             <div className="mt-4 text-xl font-semibold text-slate-800">
               Artículo 1.1:
@@ -70,13 +70,13 @@ export default function FlashcardsStudyPage() {
             </button>
 
             <div className="flex items-center gap-2">
-              <button className="flex-1 rounded-xl bg-yellow-300 px-4 py-2 text-sm font-semibold text-slate-800">Difícil</button>
-              <button className="flex-1 rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">Dudoso</button>
-              <button className="flex-1 rounded-xl bg-green-300 px-4 py-2 text-sm font-semibold text-slate-800">Fácil</button>
+              <button className="flex-1 rounded-xl bg-primary/20 text-primary px-4 py-2 text-sm font-semibold">Difícil</button>
+              <button className="flex-1 rounded-xl bg-secondary/15 text-secondary px-4 py-2 text-sm font-semibold">Dudoso</button>
+              <button className="flex-1 rounded-xl bg-secondary/30 text-secondary px-4 py-2 text-sm font-semibold">Fácil</button>
             </div>
 
             {showAnswer && (
-              <div className="mt-2 flex items-center justify-between text-sm text-slate-500">
+              <div className="mt-2 flex items-center justify-between text-sm text-secondary">
                 <button className="flex items-center gap-1">↺ Volver a ver</button>
                 <button className="flex items-center gap-1">✓ Terminar</button>
               </div>
