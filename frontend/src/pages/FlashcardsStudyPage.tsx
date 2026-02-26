@@ -41,22 +41,22 @@ export default function FlashcardsStudyPage() {
           <span>{currentLabel}</span>
           <span>⏱ {progressPct}%</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-white/80">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
           <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
       </div>
 
       <div className="relative">
-        <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90" />
-        <div className="relative rounded-3xl bg-white p-6 shadow-lg">
+        <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90 dark:bg-secondary/70" />
+        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg">
           <div className="text-sm text-secondary">{sample.unitName}</div>
           {!showAnswer ? (
-            <div className="mt-4 text-xl font-semibold text-slate-800">
+            <div className="mt-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
               Artículo 1.1:
               <div className="mt-2 text-2xl font-bold">¿Qué dice sobre la soberanía nacional?</div>
             </div>
           ) : (
-            <div className="mt-4 text-xl font-semibold text-slate-800">
+            <div className="mt-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
               La soberanía nacional reside en el pueblo español, del que emanan los poderes del Estado.
             </div>
           )}
@@ -70,9 +70,9 @@ export default function FlashcardsStudyPage() {
             </button>
 
             <div className="flex items-center gap-2">
-              <button className="flex-1 rounded-xl bg-primary/20 text-primary px-4 py-2 text-sm font-semibold">Difícil</button>
-              <button className="flex-1 rounded-xl bg-secondary/15 text-secondary px-4 py-2 text-sm font-semibold">Dudoso</button>
-              <button className="flex-1 rounded-xl bg-secondary/30 text-secondary px-4 py-2 text-sm font-semibold">Fácil</button>
+              <button className="flex-1 rounded-xl bg-primary/20 dark:bg-primary/30 text-primary px-4 py-2 text-sm font-semibold">Difícil</button>
+              <button className="flex-1 rounded-xl bg-secondary/15 dark:bg-secondary/25 text-secondary px-4 py-2 text-sm font-semibold">Dudoso</button>
+              <button className="flex-1 rounded-xl bg-secondary/30 dark:bg-secondary/35 text-secondary px-4 py-2 text-sm font-semibold">Fácil</button>
             </div>
 
             {showAnswer && (
