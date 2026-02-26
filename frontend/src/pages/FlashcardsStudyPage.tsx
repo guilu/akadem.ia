@@ -77,8 +77,8 @@ export default function FlashcardsStudyPage() {
 
             {showAnswer && (
               <div className="mt-2 flex items-center justify-between text-sm text-secondary">
-                <button className="flex items-center gap-1">↺ Volver a ver</button>
-                <button className="flex items-center gap-1">✓ Terminar</button>
+                <button className="btn btn-primary">↺ Volver a ver</button>
+                <button className="btn btn-primary">✓ Terminar</button>
               </div>
             )}
           </div>
@@ -87,7 +87,7 @@ export default function FlashcardsStudyPage() {
 
       {showAnswer && (
         <div className="flex items-center justify-between">
-          <button className="btn btn-outline">↺ Volver a ver</button>
+          <button className="btn btn-primary">↺ Volver a ver</button>
           <button className="btn btn-primary">Terminar</button>
         </div>
       )}
