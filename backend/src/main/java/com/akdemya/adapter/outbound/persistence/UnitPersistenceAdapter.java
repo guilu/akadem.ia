@@ -35,8 +35,22 @@ public class UnitPersistenceAdapter implements UnitRepository {
   }
 
   @Override
+  public List<Unit> findBySubjectIdWithFlashcards(UUID subjectId) {
+    return repository.findBySubjectIdWithFlashcards(subjectId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<Unit> findAll() {
     return repository.findAll().stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Unit> findAllWithFlashcards() {
+    return repository.findAllWithFlashcards().stream()
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }

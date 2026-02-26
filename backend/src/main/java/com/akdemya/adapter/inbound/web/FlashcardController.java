@@ -156,7 +156,7 @@ public class FlashcardController {
   public List<FlashcardDto.UnitSummary> getUnitSummary(@AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);
     LocalDateTime now = LocalDateTime.now();
-    return unitRepo.findAll().stream()
+    return unitRepo.findAllWithFlashcards().stream()
         .map(unit -> {
           long totalCards = flashcardRepo.findByUnitId(unit.getId()).size();
           long newCards = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());

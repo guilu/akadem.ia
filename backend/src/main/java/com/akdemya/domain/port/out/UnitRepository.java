@@ -8,7 +8,11 @@ import java.util.UUID;
 public interface UnitRepository {
   List<Unit> findBySubjectId(UUID subjectId); // Simplified name, implementation can sort
 
+  List<Unit> findBySubjectIdWithFlashcards(UUID subjectId);
+
   List<Unit> findAll();
+
+  List<Unit> findAllWithFlashcards();
 
   Optional<Unit> findById(UUID id);
 
