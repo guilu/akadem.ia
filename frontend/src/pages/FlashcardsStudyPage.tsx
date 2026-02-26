@@ -162,7 +162,7 @@ export default function FlashcardsStudyPage() {
 
       <div className="relative">
         <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90 dark:bg-secondary/70" />
-        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg">
+        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg min-h-[260px] flex flex-col">
           {!showAnswer ? (
             <div className="mt-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
               {currentItem?.front || 'Sin tarjetas disponibles.'}
@@ -173,7 +173,7 @@ export default function FlashcardsStudyPage() {
             </div>
           )}
 
-          <div className="mt-6 flex flex-col gap-3">
+          <div className="mt-auto pt-6 flex flex-col gap-3">
             {!showAnswer && (
               <button
                 onClick={() => setShowAnswer(true)}
