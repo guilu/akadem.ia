@@ -15,6 +15,7 @@ import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import FlashcardsPage from './pages/FlashcardsPage';
+import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
@@ -201,6 +202,11 @@ export default function App(){
           <Route path={ROUTES.flashcards} element={
             <ProtectedRoute allow={isAuthed}>
               <FlashcardsPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.flashcardsStudy} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsStudyPage />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to={ROUTES.home} replace />} />

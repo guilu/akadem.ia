@@ -279,6 +279,16 @@ class ExamManagerResumeTest {
     }
 
     @Override
+    public List<Unit> findBySubjectIdWithFlashcards(UUID subjectId) {
+      return findBySubjectId(subjectId);
+    }
+
+    @Override
+    public List<Unit> findAllWithFlashcards() {
+      return findAll();
+    }
+
+    @Override
     public Optional<Unit> findById(UUID id) {
       return Optional.ofNullable(data.get(id));
     }
