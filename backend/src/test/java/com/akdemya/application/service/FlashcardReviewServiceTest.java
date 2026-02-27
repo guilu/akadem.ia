@@ -1,5 +1,6 @@
 package com.akdemya.application.service;
 
+import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.*;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -28,7 +29,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
     var resp = service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
 
     assertNotNull(resp.review());
@@ -45,7 +46,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
     service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
     var resp2 = service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
 
@@ -62,7 +63,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
 
     assertThrows(RuntimeException.class, () -> service.registerReview(
         new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now)));

@@ -26,11 +26,16 @@ public class FlashcardDto {
   public record StudyQueueResponse(List<StudyQueueItem> items) {
   }
 
+  public record StudyNextResponse(UUID flashcardId, UUID unitId, String front, String back,
+                                  ReviewState state, LocalDateTime dueAt) {
+  }
+
   public record ReviewRequest(UUID flashcardId, ReviewGrade grade, LocalDateTime reviewedAt) {
   }
 
   public record Review(UUID id, UUID userId, UUID flashcardId, ReviewState state,
-                       double easeFactor, int intervalDays, int repetitions, int lapses,
+                       double easeFactor, int intervalDays, int learningStep,
+                       int repetitions, int lapses,
                        LocalDateTime dueAt, LocalDateTime lastReviewedAt) {
   }
 

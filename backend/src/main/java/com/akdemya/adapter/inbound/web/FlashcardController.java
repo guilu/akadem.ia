@@ -124,6 +124,21 @@ public class FlashcardController {
     return ResponseEntity.ok(new FlashcardDto.StudyQueueResponse(items));
   }
 
+  @GetMapping("/study/next")
+  public ResponseEntity<FlashcardDto.StudyNextResponse> getStudyNext(@RequestParam UUID unitId,
+                                                                     @AuthenticationPrincipal User principal) {
+    UUID userId = requireUserId(principal);
+    var response = studyUseCase.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(
+        userId, unitId, null));
+    if (response == null) {
+      return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(new FlashcardDto.StudyNextResponse(
+        response.flashcardId(), response.unitId(), response.front(), response.back(),
+        response.state(), response.dueAt()
+    ));
+  }
+
   @PostMapping("/study/review")
   public ResponseEntity<FlashcardDto.ReviewResponse> registerReview(@RequestBody FlashcardDto.ReviewRequest req,
                                                                     @AuthenticationPrincipal User principal) {
@@ -205,8 +220,8 @@ public class FlashcardController {
     return new FlashcardDto.ReviewResponse(
         new FlashcardDto.Review(
             review.getId(), review.getUserId(), review.getFlashcardId(), review.getState(),
-            review.getEaseFactor(), review.getIntervalDays(), review.getRepetitions(),
-            review.getLapses(), review.getDueAt(), review.getLastReviewedAt()),
+            review.getEaseFactor(), review.getIntervalDays(), review.getLearningStep(),
+            review.getRepetitions(), review.getLapses(), review.getDueAt(), review.getLastReviewedAt()),
         new FlashcardDto.ReviewLog(
             log.getId(), log.getFlashcardId(), log.getGrade(), log.getReviewedAt(),
             log.getIntervalBefore(), log.getIntervalAfter(), log.getEaseBefore(), log.getEaseAfter())

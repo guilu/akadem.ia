@@ -103,6 +103,26 @@ class FlashcardStudyServiceTest {
   }
 
   @Test
+  void studyNextPrioritizesDue() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    Flashcard dueCard = flashcard("due", unitId);
+    Flashcard newCard = flashcard("new", unitId);
+    flashcardRepo.save(dueCard);
+    flashcardRepo.save(newCard);
+
+    reviewRepo.save(review(dueCard.getId(), now.minusMinutes(5)));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
+
+    assertNotNull(next);
+    assertEquals(dueCard.getId(), next.flashcardId());
+  }
+
+  @Test
   void dashboardCountsAreCoherent() {
     InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
     InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
@@ -141,7 +161,7 @@ class FlashcardStudyServiceTest {
 
   private FlashcardReview review(UUID flashcardId, LocalDateTime dueAt) {
     return new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
-        ReviewState.LEARNING, 2.5, 1, 1, 0, dueAt, now.minusDays(1), now.minusDays(10), now.minusDays(1));
+        ReviewState.LEARNING, 2.5, 1, 0, 1, 0, dueAt, now.minusDays(1), now.minusDays(10), now.minusDays(1));
   }
 
   static class InMemoryFlashcardRepo implements FlashcardRepository {

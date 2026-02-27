@@ -71,7 +71,7 @@ class FlashcardControllerTest {
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
     FlashcardReview review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
-        ReviewState.LEARNING, 2.5, 3, 2, 0, LocalDateTime.now(),
+        ReviewState.LEARNING, 2.5, 3, 0, 2, 0, LocalDateTime.now(),
         LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
     FlashcardReviewLog log = FlashcardReviewLog.create(userId, flashcardId, ReviewGrade.GOOD,
         LocalDateTime.now(), 1, 3, 2.5, 2.6);

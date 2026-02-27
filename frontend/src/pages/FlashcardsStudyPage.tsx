@@ -8,9 +8,7 @@ type StudyItem = {
   back: string;
 };
 
-type StudyQueueResponse = {
-  items: StudyItem[];
-};
+type StudyNextResponse = StudyItem;
 
 type ReviewRequest = {
   flashcardId: string;
@@ -33,6 +31,14 @@ export default function FlashcardsStudyPage() {
 
   const token = localStorage.getItem('ak_token') || '';
 
+  const fetchNext = async () => {
+    const data = await apiAuthJson<StudyNextResponse | undefined>(
+      `${apiBase}/api/flashcards/study/next?unitId=${unitId}`,
+      token
+    );
+    return data || null;
+  };
+
   useEffect(() => {
     if (!unitId) {
       setError('Falta el unitId.');
@@ -42,10 +48,15 @@ export default function FlashcardsStudyPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    apiAuthJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}&limit=50`, token)
+    fetchNext()
       .then((data) => {
         if (!mounted) return;
-        setItems(data?.items || []);
+        if (!data) {
+          setItems([]);
+          setFinished(true);
+          return;
+        }
+        setItems([data]);
         setCurrentIndex(0);
       })
       .catch(() => {
@@ -85,6 +96,12 @@ export default function FlashcardsStudyPage() {
         } satisfies ReviewRequest)
       });
       setShowAnswer(false);
+      const next = await fetchNext();
+      if (!next) {
+        setFinished(true);
+        return;
+      }
+      setItems((prev) => [...prev, next]);
       setCurrentIndex((prev) => prev + 1);
     } catch {
       setError('No se pudo registrar la respuesta.');

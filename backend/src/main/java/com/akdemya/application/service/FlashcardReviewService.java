@@ -1,5 +1,6 @@
 package com.akdemya.application.service;
 
+import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
@@ -19,14 +20,20 @@ public class FlashcardReviewService implements FlashcardReviewUseCase {
   private final FlashcardRepository flashcardRepo;
   private final FlashcardReviewRepository reviewRepo;
   private final FlashcardReviewLogRepository logRepo;
-  private final Sm2Scheduler scheduler = new Sm2Scheduler();
+  private final Sm2Scheduler scheduler;
 
   public FlashcardReviewService(FlashcardRepository flashcardRepo,
                                 FlashcardReviewRepository reviewRepo,
-                                FlashcardReviewLogRepository logRepo) {
+                                FlashcardReviewLogRepository logRepo,
+                                FlashcardSchedulerProperties schedulerProperties) {
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
     this.logRepo = logRepo;
+    this.scheduler = new Sm2Scheduler(
+        schedulerProperties.getLearningStepsMinutes(),
+        schedulerProperties.getEasyIntervalDays(),
+        schedulerProperties.getReviewAgainRelearnMinutes()
+    );
   }
 
   @Override
@@ -60,6 +67,7 @@ public class FlashcardReviewService implements FlashcardReviewUseCase {
         result.getState(),
         result.getEaseAfter(),
         result.getIntervalAfter(),
+        result.getLearningStepAfter(),
         result.getRepetitions(),
         result.getLapses(),
         result.getDueAt()

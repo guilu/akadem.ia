@@ -17,6 +17,7 @@ public class FlashcardReview {
   private ReviewState state;
   private double easeFactor;
   private int intervalDays;
+  private int learningStep;
   private int repetitions;
   private int lapses;
   private LocalDateTime dueAt;
@@ -26,7 +27,7 @@ public class FlashcardReview {
 
   public FlashcardReview(UUID id, UUID userId, UUID flashcardId,
                          ReviewState state, double easeFactor, int intervalDays,
-                         int repetitions, int lapses,
+                         int learningStep, int repetitions, int lapses,
                          LocalDateTime dueAt, LocalDateTime lastReviewedAt,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
     if (id == null) throw new IllegalArgumentException("id cannot be null");
@@ -36,6 +37,7 @@ public class FlashcardReview {
     if (easeFactor < MIN_EASE_FACTOR)
       throw new IllegalArgumentException("easeFactor must be >= " + MIN_EASE_FACTOR);
     if (intervalDays < 0) throw new IllegalArgumentException("intervalDays cannot be negative");
+    if (learningStep < 0) throw new IllegalArgumentException("learningStep cannot be negative");
     if (repetitions < 0) throw new IllegalArgumentException("repetitions cannot be negative");
     if (lapses < 0) throw new IllegalArgumentException("lapses cannot be negative");
     if (dueAt == null) throw new IllegalArgumentException("dueAt cannot be null");
@@ -47,6 +49,7 @@ public class FlashcardReview {
     this.state = state;
     this.easeFactor = easeFactor;
     this.intervalDays = intervalDays;
+    this.learningStep = learningStep;
     this.repetitions = repetitions;
     this.lapses = lapses;
     this.dueAt = dueAt;
@@ -60,23 +63,25 @@ public class FlashcardReview {
     LocalDateTime now = LocalDateTime.now();
     return new FlashcardReview(
         UUID.randomUUID(), userId, flashcardId,
-        ReviewState.NEW, 2.5, 0, 0, 0,
+        ReviewState.NEW, 2.5, 0, 0, 0, 0,
         dueAt, null, now, now);
   }
 
   /** Apply the result of an SM-2 calculation (called from the use-case layer). */
   public void update(ReviewState state, double easeFactor, int intervalDays,
-                     int repetitions, int lapses, LocalDateTime dueAt) {
+                     int learningStep, int repetitions, int lapses, LocalDateTime dueAt) {
     if (state == null) throw new IllegalArgumentException("state cannot be null");
     if (easeFactor < MIN_EASE_FACTOR)
       throw new IllegalArgumentException("easeFactor must be >= " + MIN_EASE_FACTOR);
     if (intervalDays < 0) throw new IllegalArgumentException("intervalDays cannot be negative");
+    if (learningStep < 0) throw new IllegalArgumentException("learningStep cannot be negative");
     if (repetitions < 0) throw new IllegalArgumentException("repetitions cannot be negative");
     if (lapses < 0) throw new IllegalArgumentException("lapses cannot be negative");
     if (dueAt == null) throw new IllegalArgumentException("dueAt cannot be null");
     this.state = state;
     this.easeFactor = easeFactor;
     this.intervalDays = intervalDays;
+    this.learningStep = learningStep;
     this.repetitions = repetitions;
     this.lapses = lapses;
     this.dueAt = dueAt;
@@ -90,6 +95,7 @@ public class FlashcardReview {
   public ReviewState getState() { return state; }
   public double getEaseFactor() { return easeFactor; }
   public int getIntervalDays() { return intervalDays; }
+  public int getLearningStep() { return learningStep; }
   public int getRepetitions() { return repetitions; }
   public int getLapses() { return lapses; }
   public LocalDateTime getDueAt() { return dueAt; }

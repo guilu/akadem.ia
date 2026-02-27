@@ -2,6 +2,7 @@ package com.akdemya.application.service;
 
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
+import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
@@ -62,6 +63,37 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
     }
 
     return new StudyQueueResponse(items);
+  }
+
+  @Override
+  public StudyNextResponse getStudyNext(StudyNextCommand command) {
+    if (command == null) throw new IllegalArgumentException("command cannot be null");
+    if (command.userId() == null) throw new IllegalArgumentException("userId cannot be null");
+    if (command.unitId() == null) throw new IllegalArgumentException("unitId cannot be null");
+    LocalDateTime now = command.now() != null ? command.now() : LocalDateTime.now();
+
+    List<FlashcardReview> due = reviewRepo.findDueByUserIdAndUnitId(command.userId(), command.unitId(), now, 1);
+    if (!due.isEmpty()) {
+      FlashcardReview review = due.get(0);
+      Flashcard card = flashcardRepo.findById(review.getFlashcardId()).orElse(null);
+      if (card != null) {
+        return new StudyNextResponse(
+            card.getId(), card.getUnitId(), card.getFront(), card.getBack(),
+            review.getState(), review.getDueAt()
+        );
+      }
+    }
+
+    List<Flashcard> newCards = flashcardRepo.findNewByUserIdAndUnitId(command.userId(), command.unitId(), 1);
+    if (!newCards.isEmpty()) {
+      Flashcard card = newCards.get(0);
+      return new StudyNextResponse(
+          card.getId(), card.getUnitId(), card.getFront(), card.getBack(),
+          ReviewState.NEW, null
+      );
+    }
+
+    return null;
   }
 
   @Override

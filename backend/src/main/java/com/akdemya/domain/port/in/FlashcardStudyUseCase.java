@@ -10,6 +10,8 @@ public interface FlashcardStudyUseCase {
 
   StudyQueueResponse getStudyQueue(StudyQueueCommand command);
 
+  StudyNextResponse getStudyNext(StudyNextCommand command);
+
   DashboardResponse getDashboard(DashboardCommand command);
 
   record StudyQueueCommand(UUID userId, UUID unitId, int limit, LocalDateTime now) {}
@@ -17,6 +19,11 @@ public interface FlashcardStudyUseCase {
   record StudyQueueItem(UUID flashcardId, String front, String back, ReviewState state, LocalDateTime dueAt) {}
 
   record StudyQueueResponse(List<StudyQueueItem> items) {}
+
+  record StudyNextCommand(UUID userId, UUID unitId, LocalDateTime now) {}
+
+  record StudyNextResponse(UUID flashcardId, UUID unitId, String front, String back,
+                           ReviewState state, LocalDateTime dueAt) {}
 
   record DashboardCommand(UUID userId, UUID unitId, LocalDateTime now) {}
 
