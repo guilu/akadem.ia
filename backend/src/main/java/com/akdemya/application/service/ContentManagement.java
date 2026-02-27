@@ -37,7 +37,7 @@ public class ContentManagement {
   }
 
   public List<Unit> getUnitsBySubject(UUID subjectId) {
-    return unitRepo.findBySubjectIdWithFlashcards(subjectId);
+    return unitRepo.findBySubjectId(subjectId);
   }
 
   public List<UnitAvailability> getUnitAvailability(UUID subjectId) {
@@ -45,7 +45,7 @@ public class ContentManagement {
   }
 
   public List<UnitAvailability> getUnitAvailability(UUID subjectId, Question.Difficulty difficulty) {
-    return unitRepo.findBySubjectIdWithFlashcards(subjectId).stream()
+    return unitRepo.findBySubjectId(subjectId).stream()
         .map(u -> new UnitAvailability(u.getId(), u.getName(),
             difficulty == null ? questionRepo.countByUnitId(u.getId())
                 : questionRepo.countByUnitIdAndDifficulty(u.getId(), difficulty.name())))
