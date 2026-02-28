@@ -9,7 +9,6 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
   const dueCount = unit.dueCount ?? 0;
 
   const pending = (unit.dueCount ?? reviewCount) + newCount;
-  const cta = pending > 0 ? `Estudiar ${pending} tarjetas` : 'Sin pendientes';
 
   return (
     <button
@@ -22,9 +21,12 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
           <BookOpen className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
-            <div className="text-sm font-semibold text-slate-500">{cta}</div>
+            <div className="flex flex-col items-end text-slate-400">
+              <div className="text-lg font-semibold text-slate-200">{pending}</div>
+              <div className="text-xs uppercase tracking-wide">cards</div>
+            </div>
           </div>
           {/* metrics bar removed */}
         </div>
