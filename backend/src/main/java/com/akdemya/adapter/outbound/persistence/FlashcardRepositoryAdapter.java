@@ -52,6 +52,11 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   }
 
   @Override
+  public long countNewByUserId(UUID userId) {
+    return jpa.countNewByUserId(userId);
+  }
+
+  @Override
   public Flashcard save(Flashcard flashcard) {
     return mapper.toDomain(jpa.save(mapper.toEntity(flashcard)));
   }

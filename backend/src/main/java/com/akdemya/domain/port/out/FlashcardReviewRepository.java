@@ -27,5 +27,7 @@ public interface FlashcardReviewRepository {
 
   long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive, LocalDateTime toInclusive);
 
+  long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states);
+
   FlashcardReview save(FlashcardReview review);
 }

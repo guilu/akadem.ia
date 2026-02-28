@@ -99,6 +99,11 @@ class FlashcardReviewServiceTest {
     }
 
     @Override
+    public long countNewByUserId(UUID userId) {
+      return 0;
+    }
+
+    @Override
     public Flashcard save(Flashcard flashcard) {
       data.put(flashcard.getId(), flashcard);
       return flashcard;
@@ -149,6 +154,11 @@ class FlashcardReviewServiceTest {
     @Override
     public long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive,
                                                  LocalDateTime toInclusive) {
+      return 0;
+    }
+
+    @Override
+    public long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states) {
       return 0;
     }
 

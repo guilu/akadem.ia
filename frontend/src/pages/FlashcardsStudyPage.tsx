@@ -110,18 +110,6 @@ export default function FlashcardsStudyPage() {
     }
   }, [remaining, loading, currentItem]);
 
-  const decrementQueueCounts = (state?: ReviewState) => {
-    setQueueCounts((prev) => {
-      if (state === 'LEARNING') {
-        return { ...prev, learning: Math.max(prev.learning - 1, 0) };
-      }
-      if (state === 'REVIEW') {
-        return { ...prev, due: Math.max(prev.due - 1, 0) };
-      }
-      return { ...prev, new: Math.max(prev.new - 1, 0) };
-    });
-  };
-
   const handleReview = async (grade: ReviewRequest['grade']) => {
     if (!currentItem || submitting) return;
     setSubmitting(true);
@@ -135,12 +123,11 @@ export default function FlashcardsStudyPage() {
           reviewedAt: new Date().toISOString()
         } satisfies ReviewRequest)
       });
-      decrementQueueCounts(currentItem.state ?? 'NEW');
+      const [newQueue, next] = await Promise.all([fetchQueue(), fetchNext()]);
+      if (newQueue) setQueueCounts(newQueue);
       setAnsweredCount((prev) => prev + 1);
       setShowAnswer(false);
-      const next = await fetchNext();
       if (!next) {
-        setQueueCounts({ new: 0, due: 0, learning: 0 });
         setFinished(true);
         return;
       }
