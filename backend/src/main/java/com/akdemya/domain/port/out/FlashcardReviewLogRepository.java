@@ -13,4 +13,7 @@ public interface FlashcardReviewLogRepository {
                                                                                 java.time.LocalDateTime reviewedAt);
 
   List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit);
+
+  java.util.Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                   java.time.LocalDateTime after);
 }

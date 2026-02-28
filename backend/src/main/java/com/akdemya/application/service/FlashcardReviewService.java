@@ -49,8 +49,8 @@ public class FlashcardReviewService implements FlashcardReviewUseCase {
     flashcardRepo.findById(command.flashcardId())
         .orElseThrow(() -> new NoSuchElementException("Flashcard not found"));
 
-    var existingLog = logRepo.findByUserIdAndFlashcardIdAndReviewedAt(
-        command.userId(), command.flashcardId(), reviewedAt);
+    var existingLog = logRepo.findMostRecentByUserIdAndFlashcardIdAfter(
+        command.userId(), command.flashcardId(), reviewedAt.minusSeconds(60));
     if (existingLog.isPresent()) {
       FlashcardReview existingReview = reviewRepo.findByUserIdAndFlashcardId(
               command.userId(), command.flashcardId())

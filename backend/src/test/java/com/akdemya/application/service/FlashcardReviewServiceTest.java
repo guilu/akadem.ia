@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -181,6 +182,16 @@ class FlashcardReviewServiceTest {
     public List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit) {
       return List.of();
     }
+
+    @Override
+    public Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                  LocalDateTime after) {
+      return data.values().stream()
+          .filter(l -> l.getUserId().equals(userId))
+          .filter(l -> l.getFlashcardId().equals(flashcardId))
+          .filter(l -> l.getReviewedAt().isAfter(after))
+          .max(Comparator.comparing(FlashcardReviewLog::getReviewedAt));
+    }
   }
 
   static class FailingLogRepo implements FlashcardReviewLogRepository {
@@ -198,6 +209,12 @@ class FlashcardReviewServiceTest {
     @Override
     public List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit) {
       return List.of();
+    }
+
+    @Override
+    public Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                  LocalDateTime after) {
+      return Optional.empty();
     }
   }
 }

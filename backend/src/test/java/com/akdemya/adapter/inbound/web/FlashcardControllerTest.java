@@ -8,6 +8,7 @@ import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.Unit;
+import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -18,6 +19,7 @@ import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +36,7 @@ class FlashcardControllerTest {
 
   private final FlashcardStudyUseCase studyUseCase = mock(FlashcardStudyUseCase.class);
   private final FlashcardReviewUseCase reviewUseCase = mock(FlashcardReviewUseCase.class);
+  private final FlashcardManagementUseCase managementUseCase = mock(FlashcardManagementUseCase.class);
   private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
   private final FlashcardReviewRepository reviewRepo = mock(FlashcardReviewRepository.class);
   private final FlashcardReviewLogRepository reviewLogRepo = mock(FlashcardReviewLogRepository.class);
@@ -40,7 +44,7 @@ class FlashcardControllerTest {
   private final UnitRepository unitRepo = mock(UnitRepository.class);
 
   private final FlashcardController controller = new FlashcardController(
-      studyUseCase, reviewUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
+      studyUseCase, reviewUseCase, managementUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
 
   @Test
   void studyQueueReturnsCounts() {
@@ -131,5 +135,22 @@ class FlashcardControllerTest {
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().size());
     verify(reviewLogRepo).findRecentByUserId(userId, 20);
+  }
+
+  @Test
+  void createWithoutAuthReturns401() {
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back");
+    assertThrows(ResponseStatusException.class, () -> controller.create(req, null));
+  }
+
+  @Test
+  void updateWithoutAuthReturns401() {
+    var req = new FlashcardDto.UpdateRequest(null, "front", "back");
+    assertThrows(ResponseStatusException.class, () -> controller.update(UUID.randomUUID(), req, null));
+  }
+
+  @Test
+  void deleteWithoutAuthReturns401() {
+    assertThrows(ResponseStatusException.class, () -> controller.delete(UUID.randomUUID(), null));
   }
 }

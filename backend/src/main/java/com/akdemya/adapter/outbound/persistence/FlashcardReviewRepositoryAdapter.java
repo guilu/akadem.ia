@@ -6,6 +6,7 @@ import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewRep
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -94,6 +95,14 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
     } else {
       entity = mapper.toEntity(review);
     }
-    return mapper.toDomain(jpa.save(entity));
+    try {
+      return mapper.toDomain(jpa.save(entity));
+    } catch (DataIntegrityViolationException e) {
+      FlashcardReviewEntity conflicting = jpa.findByUserIdAndFlashcardId(
+              review.getUserId(), review.getFlashcardId())
+          .orElseThrow(() -> e);
+      mapper.updateEntity(conflicting, review);
+      return mapper.toDomain(jpa.save(conflicting));
+    }
   }
 }

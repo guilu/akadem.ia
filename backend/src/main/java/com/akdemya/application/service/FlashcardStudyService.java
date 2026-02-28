@@ -79,7 +79,7 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
       FlashcardReview review = FlashcardReview.createNew(command.userId(), card.getId(), now);
       return new StudyNextResponse(
           card.getId(), card.getUnitId(), card.getFront(), card.getBack(),
-          ReviewState.NEW, null,
+          ReviewState.NEW, review.getDueAt(),
           toIntervalHints(scheduler.intervalHints(review, now))
       );
     }
