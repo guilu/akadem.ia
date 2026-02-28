@@ -18,6 +18,8 @@ public interface FlashcardRepository {
 
   long countNewByUserIdAndUnitId(UUID userId, UUID unitId);
 
+  long countNewByUserId(UUID userId);
+
   Flashcard save(Flashcard flashcard);
 
   void deleteById(UUID id);

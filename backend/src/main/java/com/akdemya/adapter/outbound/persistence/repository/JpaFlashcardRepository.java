@@ -38,4 +38,13 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
       """)
   long countNewByUserIdAndUnitId(@Param("userId") UUID userId,
                                  @Param("unitId") UUID unitId);
+
+  @Query("""
+      select count(f) from FlashcardEntity f
+      where not exists (
+        select 1 from FlashcardReviewEntity r
+        where r.userId = :userId and r.flashcardId = f.id
+      )
+      """)
+  long countNewByUserId(@Param("userId") UUID userId);
 }

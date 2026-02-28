@@ -72,6 +72,94 @@ class FlashcardStudyServiceTest {
   }
 
   @Test
+  void studyQueueReturnsZerosForUserWithNoCards() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
+
+    assertEquals(0, response.newCount());
+    assertEquals(0, response.dueCount());
+    assertEquals(0, response.learningCount());
+  }
+
+  @Test
+  void studyQueueOnlyNewCards() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    flashcardRepo.save(flashcard("card1", unitId));
+    flashcardRepo.save(flashcard("card2", unitId));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
+
+    assertEquals(2, response.newCount());
+    assertEquals(0, response.dueCount());
+    assertEquals(0, response.learningCount());
+  }
+
+  @Test
+  void studyQueueOnlyLearningDue() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    Flashcard card = flashcard("card1", unitId);
+    flashcardRepo.save(card);
+    reviewRepo.save(review(card.getId(), now.minusMinutes(5), ReviewState.LEARNING));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
+
+    assertEquals(0, response.newCount());
+    assertEquals(0, response.dueCount());
+    assertEquals(1, response.learningCount());
+  }
+
+  @Test
+  void studyQueueGlobalAcrossUnits() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    UUID unitId2 = UUID.randomUUID();
+    flashcardRepo.save(flashcard("card-unit1", unitId));
+    flashcardRepo.save(flashcard("card-unit2", unitId2));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
+
+    assertEquals(2, response.newCount());
+    assertEquals(0, response.dueCount());
+    assertEquals(0, response.learningCount());
+  }
+
+  @Test
+  void studyQueueFutureCardsNotCounted() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    Flashcard learningCard = flashcard("learning-future", unitId);
+    Flashcard reviewCard = flashcard("review-future", unitId);
+    flashcardRepo.save(learningCard);
+    flashcardRepo.save(reviewCard);
+    reviewRepo.save(review(learningCard.getId(), now.plusMinutes(30), ReviewState.LEARNING));
+    reviewRepo.save(review(reviewCard.getId(), now.plusDays(1), ReviewState.REVIEW));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
+
+    assertEquals(0, response.newCount());
+    assertEquals(0, response.dueCount());
+    assertEquals(0, response.learningCount());
+  }
+
+  @Test
   void dashboardCountsAreCoherent() {
     InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
     InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
@@ -158,6 +246,13 @@ class FlashcardStudyServiceTest {
     }
 
     @Override
+    public long countNewByUserId(UUID userId) {
+      return data.values().stream()
+          .filter(f -> reviewRepo.findByUserIdAndFlashcardId(userId, f.getId()).isEmpty())
+          .count();
+    }
+
+    @Override
     public Flashcard save(Flashcard flashcard) {
       data.put(flashcard.getId(), flashcard);
       return flashcard;
@@ -239,6 +334,15 @@ class FlashcardStudyServiceTest {
           .filter(r -> r.getDueAt().isAfter(fromExclusive) && !r.getDueAt().isAfter(toInclusive))
           .filter(r -> flashcardRepo.findById(r.getFlashcardId())
               .map(f -> f.getUnitId().equals(unitId)).orElse(false))
+          .count();
+    }
+
+    @Override
+    public long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states) {
+      return data.values().stream()
+          .filter(r -> r.getUserId().equals(userId))
+          .filter(r -> states.contains(r.getState()))
+          .filter(r -> !r.getDueAt().isAfter(upTo))
           .count();
     }
 

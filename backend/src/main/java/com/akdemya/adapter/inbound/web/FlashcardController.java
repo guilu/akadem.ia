@@ -109,7 +109,7 @@ public class FlashcardController {
   }
 
   @GetMapping("/study/queue")
-  public ResponseEntity<FlashcardDto.StudyQueueResponse> getStudyQueue(@RequestParam UUID unitId,
+  public ResponseEntity<FlashcardDto.StudyQueueResponse> getStudyQueue(@RequestParam(required = false) UUID unitId,
                                                                        @RequestParam(required = false) Integer limit,
                                                                        @AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);

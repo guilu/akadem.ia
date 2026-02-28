@@ -41,14 +41,23 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
   public StudyQueueResponse getStudyQueue(StudyQueueCommand command) {
     if (command == null) throw new IllegalArgumentException("command cannot be null");
     if (command.userId() == null) throw new IllegalArgumentException("userId cannot be null");
-    if (command.unitId() == null) throw new IllegalArgumentException("unitId cannot be null");
     LocalDateTime now = command.now() != null ? command.now() : LocalDateTime.now();
 
-    long learningCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
-        command.userId(), command.unitId(), now, List.of(ReviewState.LEARNING));
-    long dueCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
-        command.userId(), command.unitId(), now, List.of(ReviewState.REVIEW));
-    long newCount = flashcardRepo.countNewByUserIdAndUnitId(command.userId(), command.unitId());
+    long learningCount;
+    long dueCount;
+    long newCount;
+
+    if (command.unitId() == null) {
+      learningCount = reviewRepo.countDueByUserIdAndStateIn(command.userId(), now, List.of(ReviewState.LEARNING));
+      dueCount = reviewRepo.countDueByUserIdAndStateIn(command.userId(), now, List.of(ReviewState.REVIEW));
+      newCount = flashcardRepo.countNewByUserId(command.userId());
+    } else {
+      learningCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
+          command.userId(), command.unitId(), now, List.of(ReviewState.LEARNING));
+      dueCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
+          command.userId(), command.unitId(), now, List.of(ReviewState.REVIEW));
+      newCount = flashcardRepo.countNewByUserIdAndUnitId(command.userId(), command.unitId());
+    }
 
     return new StudyQueueResponse(newCount, dueCount, learningCount);
   }

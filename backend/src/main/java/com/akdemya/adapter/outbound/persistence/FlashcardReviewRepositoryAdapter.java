@@ -79,6 +79,11 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
         userId, unitId, fromExclusive.toInstant(ZoneOffset.UTC), toInclusive.toInstant(ZoneOffset.UTC));
   }
 
+  @Override
+  public long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states) {
+    return jpa.countDueByUserIdAndStateIn(userId, upTo.toInstant(ZoneOffset.UTC), states);
+  }
+
   /**
    * Upsert: if a review already exists for (userId, flashcardId) patch its SRS fields;
    * otherwise insert a new row. This avoids unique-constraint violations on re-saves.
