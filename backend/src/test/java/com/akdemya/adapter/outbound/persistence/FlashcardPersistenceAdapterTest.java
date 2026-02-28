@@ -111,7 +111,7 @@ class FlashcardPersistenceAdapterTest {
     reviewAdapter.save(review);
 
     // apply a fake SM-2 update
-    review.update(ReviewState.LEARNING, 2.3, 1, 1, 0, due.plusDays(1));
+    review.update(ReviewState.LEARNING, 2.3, 1, 0, 1, 0, due.plusDays(1));
     reviewAdapter.save(review);
 
     List<FlashcardReviewEntity> all = reviewRepo.findAll();

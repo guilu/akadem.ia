@@ -35,6 +35,9 @@ public class FlashcardReviewEntity {
   @Column(name = "interval_days", nullable = false)
   private int intervalDays;
 
+  @Column(name = "learning_step", nullable = false)
+  private int learningStep;
+
   @Column(nullable = false)
   private int repetitions;
 
@@ -72,6 +75,9 @@ public class FlashcardReviewEntity {
 
   public int getIntervalDays() { return intervalDays; }
   public void setIntervalDays(int intervalDays) { this.intervalDays = intervalDays; }
+
+  public int getLearningStep() { return learningStep; }
+  public void setLearningStep(int learningStep) { this.learningStep = learningStep; }
 
   public int getRepetitions() { return repetitions; }
   public void setRepetitions(int repetitions) { this.repetitions = repetitions; }

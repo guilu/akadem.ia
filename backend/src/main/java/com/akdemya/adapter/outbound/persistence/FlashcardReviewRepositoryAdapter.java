@@ -4,7 +4,9 @@ import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewEntity;
 import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewJpaMapper;
 import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewRepository;
 import com.akdemya.domain.model.FlashcardReview;
+import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -59,6 +61,18 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
   }
 
   @Override
+  public long countDueByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, LocalDateTime upTo,
+                                                  List<ReviewState> states) {
+    return jpa.countDueByUserIdAndUnitIdAndStateIn(
+        userId, unitId, upTo.toInstant(ZoneOffset.UTC), states);
+  }
+
+  @Override
+  public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
+    return jpa.countByUserIdAndUnitIdAndStateIn(userId, unitId, states);
+  }
+
+  @Override
   public long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId,
                                                LocalDateTime fromExclusive, LocalDateTime toInclusive) {
     return jpa.countDueByUserIdAndUnitIdBetween(
@@ -81,6 +95,14 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
     } else {
       entity = mapper.toEntity(review);
     }
-    return mapper.toDomain(jpa.save(entity));
+    try {
+      return mapper.toDomain(jpa.save(entity));
+    } catch (DataIntegrityViolationException e) {
+      FlashcardReviewEntity conflicting = jpa.findByUserIdAndFlashcardId(
+              review.getUserId(), review.getFlashcardId())
+          .orElseThrow(() -> e);
+      mapper.updateEntity(conflicting, review);
+      return mapper.toDomain(jpa.save(conflicting));
+    }
   }
 }

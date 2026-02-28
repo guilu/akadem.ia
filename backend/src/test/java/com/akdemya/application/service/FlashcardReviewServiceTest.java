@@ -1,5 +1,6 @@
 package com.akdemya.application.service;
 
+import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.*;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +30,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
     var resp = service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
 
     assertNotNull(resp.review());
@@ -45,7 +47,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
     service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
     var resp2 = service.registerReview(new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now));
 
@@ -62,7 +64,7 @@ class FlashcardReviewServiceTest {
 
     flashcardRepo.save(new Flashcard(flashcardId, unitId, "front", "back", now.minusDays(1), now.minusDays(1)));
 
-    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo);
+    FlashcardReviewService service = new FlashcardReviewService(flashcardRepo, reviewRepo, logRepo, new FlashcardSchedulerProperties());
 
     assertThrows(RuntimeException.class, () -> service.registerReview(
         new FlashcardReviewUseCase.RegisterCommand(userId, flashcardId, ReviewGrade.GOOD, now)));
@@ -134,6 +136,17 @@ class FlashcardReviewServiceTest {
     }
 
     @Override
+    public long countDueByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, LocalDateTime upTo,
+                                                    List<ReviewState> states) {
+      return 0;
+    }
+
+    @Override
+    public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
+      return 0;
+    }
+
+    @Override
     public long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive,
                                                  LocalDateTime toInclusive) {
       return 0;
@@ -169,6 +182,16 @@ class FlashcardReviewServiceTest {
     public List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit) {
       return List.of();
     }
+
+    @Override
+    public Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                  LocalDateTime after) {
+      return data.values().stream()
+          .filter(l -> l.getUserId().equals(userId))
+          .filter(l -> l.getFlashcardId().equals(flashcardId))
+          .filter(l -> l.getReviewedAt().isAfter(after))
+          .max(Comparator.comparing(FlashcardReviewLog::getReviewedAt));
+    }
   }
 
   static class FailingLogRepo implements FlashcardReviewLogRepository {
@@ -186,6 +209,12 @@ class FlashcardReviewServiceTest {
     @Override
     public List<FlashcardReviewLog> findRecentByUserId(UUID userId, int limit) {
       return List.of();
+    }
+
+    @Override
+    public Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                  LocalDateTime after) {
+      return Optional.empty();
     }
   }
 }

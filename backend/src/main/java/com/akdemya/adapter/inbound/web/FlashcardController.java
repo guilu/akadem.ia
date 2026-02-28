@@ -5,6 +5,8 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
+import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -25,7 +27,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/flashcards")
-@CrossOrigin(origins = "*")
 public class FlashcardController {
 
   private static final int DEFAULT_LIMIT = 20;
@@ -33,6 +34,7 @@ public class FlashcardController {
 
   private final FlashcardStudyUseCase studyUseCase;
   private final FlashcardReviewUseCase reviewUseCase;
+  private final FlashcardManagementUseCase managementUseCase;
   private final FlashcardRepository flashcardRepo;
   private final FlashcardReviewRepository reviewRepo;
   private final FlashcardReviewLogRepository reviewLogRepo;
@@ -41,6 +43,7 @@ public class FlashcardController {
 
   public FlashcardController(FlashcardStudyUseCase studyUseCase,
                              FlashcardReviewUseCase reviewUseCase,
+                             FlashcardManagementUseCase managementUseCase,
                              FlashcardRepository flashcardRepo,
                              FlashcardReviewRepository reviewRepo,
                              FlashcardReviewLogRepository reviewLogRepo,
@@ -48,6 +51,7 @@ public class FlashcardController {
                              UnitRepository unitRepo) {
     this.studyUseCase = studyUseCase;
     this.reviewUseCase = reviewUseCase;
+    this.managementUseCase = managementUseCase;
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
     this.reviewLogRepo = reviewLogRepo;
@@ -57,19 +61,21 @@ public class FlashcardController {
 
   @GetMapping
   public List<FlashcardDto.FlashcardResponse> listByUnit(@RequestParam UUID unitId) {
-    return flashcardRepo.findByUnitId(unitId).stream()
+    return managementUseCase.listByUnit(unitId).stream()
         .map(this::toFlashcardResponse)
         .toList();
   }
 
   @PostMapping
-  public ResponseEntity<FlashcardDto.FlashcardResponse> create(@RequestBody FlashcardDto.CreateRequest req) {
+  public ResponseEntity<FlashcardDto.FlashcardResponse> create(@RequestBody FlashcardDto.CreateRequest req,
+                                                               @AuthenticationPrincipal User principal) {
+    requireUserId(principal);
     if (req == null || req.unitId() == null) {
       return ResponseEntity.badRequest().build();
     }
     try {
-      Flashcard created = Flashcard.create(req.unitId(), req.front(), req.back());
-      Flashcard saved = flashcardRepo.save(created);
+      Flashcard saved = managementUseCase.createFlashcard(
+          new FlashcardManagementUseCase.CreateCommand(req.unitId(), req.front(), req.back()));
       return ResponseEntity.status(HttpStatus.CREATED).body(toFlashcardResponse(saved));
     } catch (IllegalArgumentException ex) {
       return ResponseEntity.badRequest().build();
@@ -78,31 +84,27 @@ public class FlashcardController {
 
   @PutMapping("/{id}")
   public ResponseEntity<FlashcardDto.FlashcardResponse> update(@PathVariable UUID id,
-                                                               @RequestBody FlashcardDto.UpdateRequest req) {
+                                                               @RequestBody FlashcardDto.UpdateRequest req,
+                                                               @AuthenticationPrincipal User principal) {
+    requireUserId(principal);
     if (req == null) {
       return ResponseEntity.badRequest().build();
     }
-    Optional<Flashcard> existingOpt = flashcardRepo.findById(id);
-    if (existingOpt.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    Flashcard existing = existingOpt.get();
-    UUID unitId = req.unitId() != null ? req.unitId() : existing.getUnitId();
-    String front = req.front() != null ? req.front() : existing.getFront();
-    String back = req.back() != null ? req.back() : existing.getBack();
     try {
-      Flashcard updated = new Flashcard(existing.getId(), unitId, front, back,
-          existing.getCreatedAt(), LocalDateTime.now());
-      Flashcard saved = flashcardRepo.save(updated);
+      Flashcard saved = managementUseCase.updateFlashcard(
+          new FlashcardManagementUseCase.UpdateCommand(id, req.unitId(), req.front(), req.back()));
       return ResponseEntity.ok(toFlashcardResponse(saved));
+    } catch (NoSuchElementException ex) {
+      return ResponseEntity.notFound().build();
     } catch (IllegalArgumentException ex) {
       return ResponseEntity.badRequest().build();
     }
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable UUID id) {
-    flashcardRepo.deleteById(id);
+  public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal User principal) {
+    requireUserId(principal);
+    managementUseCase.deleteFlashcard(id);
     return ResponseEntity.noContent().build();
   }
 
@@ -117,11 +119,30 @@ public class FlashcardController {
     }
     var response = studyUseCase.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(
         userId, unitId, resolvedLimit, null));
-    var items = response.items().stream()
-        .map(item -> new FlashcardDto.StudyQueueItem(
-            item.flashcardId(), item.front(), item.back(), item.state(), item.dueAt()))
-        .toList();
-    return ResponseEntity.ok(new FlashcardDto.StudyQueueResponse(items));
+    return ResponseEntity.ok(new FlashcardDto.StudyQueueResponse(
+        response.newCount(), response.dueCount(), response.learningCount()
+    ));
+  }
+
+  @GetMapping("/study/next")
+  public ResponseEntity<FlashcardDto.StudyNextResponse> getStudyNext(@RequestParam UUID unitId,
+                                                                     @AuthenticationPrincipal User principal) {
+    UUID userId = requireUserId(principal);
+    var response = studyUseCase.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(
+        userId, unitId, null));
+    if (response == null) {
+      return ResponseEntity.noContent().build();
+    }
+    FlashcardDto.IntervalHints hints = response.intervalHints() != null
+        ? new FlashcardDto.IntervalHints(
+            response.intervalHints().again(),
+            response.intervalHints().good(),
+            response.intervalHints().easy())
+        : null;
+    return ResponseEntity.ok(new FlashcardDto.StudyNextResponse(
+        response.flashcardId(), response.unitId(), response.front(), response.back(),
+        response.state(), response.dueAt(), hints
+    ));
   }
 
   @PostMapping("/study/review")
@@ -158,10 +179,11 @@ public class FlashcardController {
     LocalDateTime now = LocalDateTime.now();
     return unitRepo.findAllWithFlashcards().stream()
         .map(unit -> {
-          long totalCards = flashcardRepo.findByUnitId(unit.getId()).size();
-          long newCards = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
-          long dueCards = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
-          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(), totalCards, newCards, dueCards);
+          long newCount = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
+          long reviewCount = reviewRepo.countByUserIdAndUnitIdAndStateIn(userId, unit.getId(),
+              List.of(ReviewState.LEARNING, ReviewState.REVIEW));
+          long dueCount = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
+          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(), newCount, reviewCount, dueCount);
         })
         .toList();
   }
@@ -205,8 +227,8 @@ public class FlashcardController {
     return new FlashcardDto.ReviewResponse(
         new FlashcardDto.Review(
             review.getId(), review.getUserId(), review.getFlashcardId(), review.getState(),
-            review.getEaseFactor(), review.getIntervalDays(), review.getRepetitions(),
-            review.getLapses(), review.getDueAt(), review.getLastReviewedAt()),
+            review.getEaseFactor(), review.getIntervalDays(), review.getLearningStep(),
+            review.getRepetitions(), review.getLapses(), review.getDueAt(), review.getLastReviewedAt()),
         new FlashcardDto.ReviewLog(
             log.getId(), log.getFlashcardId(), log.getGrade(), log.getReviewedAt(),
             log.getIntervalBefore(), log.getIntervalAfter(), log.getEaseBefore(), log.getEaseAfter())

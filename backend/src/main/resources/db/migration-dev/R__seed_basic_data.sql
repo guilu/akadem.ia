@@ -12,66 +12,66 @@ truncate table users cascade;
 
 -- ============ SUBJECTS ============
 INSERT INTO subjects(id, name, description) VALUES
-  ('00000000-0000-0000-0000-000000000001','Matematicas','Algebra y Aritmetica')
-ON CONFLICT DO NOTHING;
+    ('00000000-0000-0000-0000-000000000001','Matematicas','Algebra y Aritmetica')
+    ON CONFLICT DO NOTHING;
 
 -- ============ UNITS ============
 INSERT INTO units(id, subject_id, name, order_index) VALUES
-  ('00000000-0000-0000-0000-000000000101','00000000-0000-0000-0000-000000000001','Fracciones',1),
-  ('00000000-0000-0000-0000-000000000102','00000000-0000-0000-0000-000000000001','Ecuaciones',2)
-ON CONFLICT DO NOTHING;
+                                                         ('00000000-0000-0000-0000-000000000101','00000000-0000-0000-0000-000000000001','Fracciones',1),
+                                                         ('00000000-0000-0000-0000-000000000102','00000000-0000-0000-0000-000000000001','Ecuaciones',2)
+    ON CONFLICT DO NOTHING;
 
 -- ============ QUESTIONS ============
 -- Unidad: Fracciones
 INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES
-  ('00000000-0000-0000-0000-000000000201','00000000-0000-0000-0000-000000000101','Cual es 1/2 + 1/3?','Usa denominador comun 6','EASY'),
-  ('00000000-0000-0000-0000-000000000202','00000000-0000-0000-0000-000000000101','Cual es 3/4 - 1/8?','Convierte ambos a octavos','EASY')
-ON CONFLICT DO NOTHING;
+                                                                      ('00000000-0000-0000-0000-000000000201','00000000-0000-0000-0000-000000000101','Cual es 1/2 + 1/3?','Usa denominador comun 6','EASY'),
+                                                                      ('00000000-0000-0000-0000-000000000202','00000000-0000-0000-0000-000000000101','Cual es 3/4 - 1/8?','Convierte ambos a octavos','EASY')
+    ON CONFLICT DO NOTHING;
 
 -- Unidad: Ecuaciones
 INSERT INTO questions(id, unit_id, text, explanation, difficulty) VALUES
-  ('00000000-0000-0000-0000-000000000203','00000000-0000-0000-0000-000000000102','Resuelve: 2x + 3 = 7','Resta 3 y divide entre 2','EASY'),
-  ('00000000-0000-0000-0000-000000000204','00000000-0000-0000-0000-000000000102','Resuelve: 5x - 10 = 0','Suma 10 y divide entre 5','EASY')
-ON CONFLICT DO NOTHING;
+                                                                      ('00000000-0000-0000-0000-000000000203','00000000-0000-0000-0000-000000000102','Resuelve: 2x + 3 = 7','Resta 3 y divide entre 2','EASY'),
+                                                                      ('00000000-0000-0000-0000-000000000204','00000000-0000-0000-0000-000000000102','Resuelve: 5x - 10 = 0','Suma 10 y divide entre 5','EASY')
+    ON CONFLICT DO NOTHING;
 
 -- ============ USERS ============
 INSERT INTO users(id, email, password_hash, role, first_name, last_name, occupation) VALUES
-  ('22222222-2222-2222-2222-222222222222','admin@akadem.ia','$2b$05$ZQaA2oiJaXCVFN540AU1du73.MrLGBMoacIKQ/.IJaDc2samK3eum','ADMIN',NULL,NULL,NULL),
-  ('33333333-3333-3333-3333-333333333333','student@akadem.ia','$2b$05$ZQaA2oiJaXCVFN540AU1du73.MrLGBMoacIKQ/.IJaDc2samK3eum','STUDENT',NULL,NULL,NULL)
-ON CONFLICT DO NOTHING;
+                                                                                         ('22222222-2222-2222-2222-222222222222','admin@akadem.ia','$2b$05$ZQaA2oiJaXCVFN540AU1du73.MrLGBMoacIKQ/.IJaDc2samK3eum','ADMIN',NULL,NULL,NULL),
+                                                                                         ('33333333-3333-3333-3333-333333333333','student@akadem.ia','$2b$05$ZQaA2oiJaXCVFN540AU1du73.MrLGBMoacIKQ/.IJaDc2samK3eum','STUDENT',NULL,NULL,NULL)
+    ON CONFLICT DO NOTHING;
 
 -- ============ ANSWERS ============
 -- Pregunta 1 (Fracciones)
 INSERT INTO answers(id, question_id, text, correct) VALUES
-  ('00000000-0000-0000-0000-000000000301','00000000-0000-0000-0000-000000000201','5/6',true),
-  ('00000000-0000-0000-0000-000000000302','00000000-0000-0000-0000-000000000201','2/5',false),
-  ('00000000-0000-0000-0000-000000000303','00000000-0000-0000-0000-000000000201','1/6',false),
-  ('00000000-0000-0000-0000-000000000304','00000000-0000-0000-0000-000000000201','1/5',false)
-ON CONFLICT DO NOTHING;
+                                                        ('00000000-0000-0000-0000-000000000301','00000000-0000-0000-0000-000000000201','5/6',true),
+                                                        ('00000000-0000-0000-0000-000000000302','00000000-0000-0000-0000-000000000201','2/5',false),
+                                                        ('00000000-0000-0000-0000-000000000303','00000000-0000-0000-0000-000000000201','1/6',false),
+                                                        ('00000000-0000-0000-0000-000000000304','00000000-0000-0000-0000-000000000201','1/5',false)
+    ON CONFLICT DO NOTHING;
 
 -- Pregunta 2 (Fracciones)
 INSERT INTO answers(id, question_id, text, correct) VALUES
-  ('00000000-0000-0000-0000-000000000305','00000000-0000-0000-0000-000000000202','5/8',true),
-  ('00000000-0000-0000-0000-000000000306','00000000-0000-0000-0000-000000000202','3/8',false),
-  ('00000000-0000-0000-0000-000000000307','00000000-0000-0000-0000-000000000202','1/4',false),
-  ('00000000-0000-0000-0000-000000000308','00000000-0000-0000-0000-000000000202','7/8',false)
-ON CONFLICT DO NOTHING;
+                                                        ('00000000-0000-0000-0000-000000000305','00000000-0000-0000-0000-000000000202','5/8',true),
+                                                        ('00000000-0000-0000-0000-000000000306','00000000-0000-0000-0000-000000000202','3/8',false),
+                                                        ('00000000-0000-0000-0000-000000000307','00000000-0000-0000-0000-000000000202','1/4',false),
+                                                        ('00000000-0000-0000-0000-000000000308','00000000-0000-0000-0000-000000000202','7/8',false)
+    ON CONFLICT DO NOTHING;
 
 -- Pregunta 3 (Ecuaciones)
 INSERT INTO answers(id, question_id, text, correct) VALUES
-  ('00000000-0000-0000-0000-000000000309','00000000-0000-0000-0000-000000000203','x = 2',true),
-  ('00000000-0000-0000-0000-000000000310','00000000-0000-0000-0000-000000000203','x = 1',false),
-  ('00000000-0000-0000-0000-000000000311','00000000-0000-0000-0000-000000000203','x = 3',false),
-  ('00000000-0000-0000-0000-000000000312','00000000-0000-0000-0000-000000000203','x = 0',false)
-ON CONFLICT DO NOTHING;
+                                                        ('00000000-0000-0000-0000-000000000309','00000000-0000-0000-0000-000000000203','x = 2',true),
+                                                        ('00000000-0000-0000-0000-000000000310','00000000-0000-0000-0000-000000000203','x = 1',false),
+                                                        ('00000000-0000-0000-0000-000000000311','00000000-0000-0000-0000-000000000203','x = 3',false),
+                                                        ('00000000-0000-0000-0000-000000000312','00000000-0000-0000-0000-000000000203','x = 0',false)
+    ON CONFLICT DO NOTHING;
 
 -- Pregunta 4 (Ecuaciones)
 INSERT INTO answers(id, question_id, text, correct) VALUES
-  ('00000000-0000-0000-0000-000000000313','00000000-0000-0000-0000-000000000204','x = 2',true),
-  ('00000000-0000-0000-0000-000000000314','00000000-0000-0000-0000-000000000204','x = -2',false),
-  ('00000000-0000-0000-0000-000000000315','00000000-0000-0000-0000-000000000204','x = 0',false),
-  ('00000000-0000-0000-0000-000000000316','00000000-0000-0000-0000-000000000204','x = 5',false)
-ON CONFLICT DO NOTHING;
+                                                        ('00000000-0000-0000-0000-000000000313','00000000-0000-0000-0000-000000000204','x = 2',true),
+                                                        ('00000000-0000-0000-0000-000000000314','00000000-0000-0000-0000-000000000204','x = -2',false),
+                                                        ('00000000-0000-0000-0000-000000000315','00000000-0000-0000-0000-000000000204','x = 0',false),
+                                                        ('00000000-0000-0000-0000-000000000316','00000000-0000-0000-0000-000000000204','x = 5',false)
+    ON CONFLICT DO NOTHING;
 
 
 -- ============ CONSTITUCIÓN ESPAÑOLA ============
@@ -79,25 +79,25 @@ INSERT INTO subjects(id, name, description) VALUES ('11111111-1111-1111-1111-111
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111112','11111111-1111-1111-1111-111111111111','Constitución Española - Básico',1) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111201','11111111-1111-1111-1111-111111111111','Preámbulo',2) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111202','11111111-1111-1111-1111-111111111111','Título Preliminar',3) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111203','11111111-1111-1111-1111-111111111111','Título I · Capítulo I · De los españoles y los extranjeros',4) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111204','11111111-1111-1111-1111-111111111111','Título I · Capítulo II · Sección 1ª · Derechos fundamentales y libertades públicas',5) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111205','11111111-1111-1111-1111-111111111111','Título I · Capítulo II · Sección 2ª · Derechos y deberes de los ciudadanos',6) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111206','11111111-1111-1111-1111-111111111111','Título I · Capítulo III · Principios rectores de la política social y económica',7) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111207','11111111-1111-1111-1111-111111111111','Título I · Capítulo IV · Garantías de las libertades y derechos fundamentales',8) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111208','11111111-1111-1111-1111-111111111111','Título I · Capítulo V · Suspensión de los derechos y libertades',9) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111209','11111111-1111-1111-1111-111111111111','Título II · De la Corona',10) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111210','11111111-1111-1111-1111-111111111111','Título III · Capítulo I · De las Cámaras',11) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111211','11111111-1111-1111-1111-111111111111','Título III · Capítulo II · Elaboración de las leyes',12) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111212','11111111-1111-1111-1111-111111111111','Título III · Capítulo III · Tratados internacionales',13) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111213','11111111-1111-1111-1111-111111111111','Título IV · Del Gobierno y de la Administración',14) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111214','11111111-1111-1111-1111-111111111111','Título V · Relaciones entre Gobierno y Cortes Generales',15) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111215','11111111-1111-1111-1111-111111111111','Título VI · Del Poder Judicial',16) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111216','11111111-1111-1111-1111-111111111111','Título VII · Economía y Hacienda',17) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111217','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo I · Principios generales',18) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111218','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo II · Administración local',19) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111219','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo III · Comunidades Autónomas',20) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111220','11111111-1111-1111-1111-111111111111','Título IX · Del Tribunal Constitucional',21) ON CONFLICT DO NOTHING;
-INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111221','11111111-1111-1111-1111-111111111111','Título X · De la reforma constitucional',22) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111203','11111111-1111-1111-1111-111111111111','Título I · Capítulo I · De los españoles y los extranjeros (Arts. 10–13)',4) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111204','11111111-1111-1111-1111-111111111111','Título I · Capítulo II · Sección 1ª · Derechos fundamentales y libertades públicas (Arts. 14–29)',5) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111205','11111111-1111-1111-1111-111111111111','Título I · Capítulo II · Sección 2ª · Derechos y deberes de los ciudadanos (Arts. 30–38)',6) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111206','11111111-1111-1111-1111-111111111111','Título I · Capítulo III · Principios rectores de la política social y económica (Arts. 39–41)',7) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111207','11111111-1111-1111-1111-111111111111','Título I · Capítulo IV · Garantías de las libertades y derechos fundamentales (Arts. 42–50)',8) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111208','11111111-1111-1111-1111-111111111111','Título I · Capítulo V · Suspensión de los derechos y libertades (Arts. 51–55)',9) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111209','11111111-1111-1111-1111-111111111111','Título II · De la Corona (Arts. 56–65)',10) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111210','11111111-1111-1111-1111-111111111111','Título III · Capítulo I · De las Cámaras (Arts. 66–80)',11) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111211','11111111-1111-1111-1111-111111111111','Título III · Capítulo II · Elaboración de las leyes (Arts. 81–92)',12) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111212','11111111-1111-1111-1111-111111111111','Título III · Capítulo III · Tratados internacionales  (Arts. 93–96)',13) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111213','11111111-1111-1111-1111-111111111111','Título IV · Del Gobierno y de la Administración (Arts. 97–107)',14) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111214','11111111-1111-1111-1111-111111111111','Título V · Relaciones entre Gobierno y Cortes Generales (Arts. 108–116)',15) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111215','11111111-1111-1111-1111-111111111111','Título VI · Del Poder Judicial (Arts. 117–127)',16) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111216','11111111-1111-1111-1111-111111111111','Título VII · Economía y Hacienda (Arts. 128–136)',17) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111217','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo I · Principios generales (Arts. 137–139)',18) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111218','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo II · Administración local (Arts. 140–142)',19) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111219','11111111-1111-1111-1111-111111111111','Título VIII · Capítulo III · Comunidades Autónomas (Arts. 143–158)',20) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111220','11111111-1111-1111-1111-111111111111','Título IX · Del Tribunal Constitucional (Arts. 159–165)',21) ON CONFLICT DO NOTHING;
+INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111221','11111111-1111-1111-1111-111111111111','Título X · De la reforma constitucional (Arts. 166–169)',22) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111222','11111111-1111-1111-1111-111111111111','Disposiciones adicionales',23) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111223','11111111-1111-1111-1111-111111111111','Disposiciones transitorias',24) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111224','11111111-1111-1111-1111-111111111111','Disposición derogatoria',25) ON CONFLICT DO NOTHING;
@@ -222,3 +222,4 @@ INSERT INTO answers(id, question_id, text, correct) VALUES ('254a8eba-1e9b-4b4b-
 INSERT INTO answers(id, question_id, text, correct) VALUES ('db01f914-ed42-484d-95ff-415492c07fcb','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho a la vivienda',false) ON CONFLICT DO NOTHING;
 INSERT INTO answers(id, question_id, text, correct) VALUES ('3deef2f2-29b4-4e6c-acdb-74e940c4642f','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho a la educación',false) ON CONFLICT DO NOTHING;
 INSERT INTO answers(id, question_id, text, correct) VALUES ('aa0e25c5-0536-4b3d-8779-d067b6aaf683','46e7c0be-5f5e-400f-a0e0-952122d42c2e','Derecho a la salud',false) ON CONFLICT DO NOTHING;
+

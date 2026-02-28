@@ -15,4 +15,7 @@ public interface JpaFlashcardReviewLogRepository extends JpaRepository<Flashcard
 
   Optional<FlashcardReviewLogEntity> findByUserIdAndFlashcardIdAndReviewedAt(UUID userId, UUID flashcardId,
                                                                            Instant reviewedAt);
+
+  Optional<FlashcardReviewLogEntity> findFirstByUserIdAndFlashcardIdAndReviewedAtAfterOrderByReviewedAtDesc(
+      UUID userId, UUID flashcardId, Instant after);
 }

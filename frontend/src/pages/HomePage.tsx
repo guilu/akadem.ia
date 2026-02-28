@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Play, ArrowsRepeat, ArrowRightToBracket, UserAdd } from 'flowbite-react-icons/outline';
+import { Play, ArrowsRepeat, ArrowRightToBracket, UserAdd, BookOpen } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
 
 export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
@@ -19,6 +19,10 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
                 <Link className="btn btn-primary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.subjects}>
                   <Play className="w-4 h-4" />
                   Crear examen
+                </Link>
+                <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.flashcards}>
+                  <BookOpen className="w-4 h-4" />
+                  Estudiar
                 </Link>
                 {activeAttemptId && (
                   <Link className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2" to={ROUTES.examAttempt(activeAttemptId)}>

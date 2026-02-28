@@ -1,20 +1,35 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
+
+type IntervalHints = {
+  again: string;
+  good: string;
+  easy: string;
+};
+
+type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
 
 type StudyItem = {
   flashcardId: string;
   front: string;
   back: string;
+  state?: ReviewState;
+  intervalHints?: IntervalHints;
 };
 
+type StudyNextResponse = StudyItem;
+
 type StudyQueueResponse = {
-  items: StudyItem[];
+  new: number;
+  due: number;
+  learning: number;
 };
 
 type ReviewRequest = {
   flashcardId: string;
-  grade: 'AGAIN' | 'HARD' | 'GOOD' | 'EASY';
+  grade: 'AGAIN' | 'GOOD' | 'EASY';
   reviewedAt: string;
 };
 
@@ -30,8 +45,31 @@ export default function FlashcardsStudyPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [answeredCount, setAnsweredCount] = useState(0);
+  const [queueCounts, setQueueCounts] = useState({ new: 0, due: 0, learning: 0 });
 
   const token = localStorage.getItem('ak_token') || '';
+
+  const fetchNext = async () => {
+    const data = await apiAuthJson<StudyNextResponse | undefined>(
+      `${apiBase}/api/flashcards/study/next?unitId=${unitId}`,
+      token
+    );
+    return data || null;
+  };
+
+  const fetchQueue = async () => {
+    const data = await apiAuthJson<StudyQueueResponse>(
+      `${apiBase}/api/flashcards/study/queue?unitId=${unitId}`,
+      token
+    );
+    return data;
+  };
+
+  const currentItem = items[currentIndex];
+  const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
+  const totalInteractions = answeredCount + remaining;
+  const progressPct = totalInteractions ? Math.round((answeredCount / totalInteractions) * 100) : 0;
 
   useEffect(() => {
     if (!unitId) {
@@ -42,10 +80,17 @@ export default function FlashcardsStudyPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    apiAuthJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}&limit=50`, token)
-      .then((data) => {
+    Promise.all([fetchQueue(), fetchNext()])
+      .then(([queue, data]) => {
         if (!mounted) return;
-        setItems(data?.items || []);
+        setQueueCounts(queue);
+        setAnsweredCount(0);
+        if (!data) {
+          setItems([]);
+          setFinished(true);
+          return;
+        }
+        setItems([data]);
         setCurrentIndex(0);
       })
       .catch(() => {
@@ -60,16 +105,22 @@ export default function FlashcardsStudyPage() {
   }, [token, unitId]);
 
   useEffect(() => {
-    if (!loading && items.length > 0 && currentIndex >= items.length) {
+    if (!loading && remaining === 0 && !currentItem) {
       setFinished(true);
     }
-  }, [currentIndex, items.length, loading]);
+  }, [remaining, loading, currentItem]);
 
-  const remaining = Math.max(items.length - currentIndex, 0);
-  const progressPct = items.length ? Math.round((currentIndex / items.length) * 100) : 0;
-  const currentLabel = items.length ? `${Math.min(currentIndex + 1, items.length)} de ${items.length} preguntas` : '0 de 0 preguntas';
-
-  const currentItem = items[currentIndex];
+  const decrementQueueCounts = (state?: ReviewState) => {
+    setQueueCounts((prev) => {
+      if (state === 'LEARNING') {
+        return { ...prev, learning: Math.max(prev.learning - 1, 0) };
+      }
+      if (state === 'REVIEW') {
+        return { ...prev, due: Math.max(prev.due - 1, 0) };
+      }
+      return { ...prev, new: Math.max(prev.new - 1, 0) };
+    });
+  };
 
   const handleReview = async (grade: ReviewRequest['grade']) => {
     if (!currentItem || submitting) return;
@@ -84,7 +135,16 @@ export default function FlashcardsStudyPage() {
           reviewedAt: new Date().toISOString()
         } satisfies ReviewRequest)
       });
+      decrementQueueCounts(currentItem.state ?? 'NEW');
+      setAnsweredCount((prev) => prev + 1);
       setShowAnswer(false);
+      const next = await fetchNext();
+      if (!next) {
+        setQueueCounts({ new: 0, due: 0, learning: 0 });
+        setFinished(true);
+        return;
+      }
+      setItems((prev) => [...prev, next]);
       setCurrentIndex((prev) => prev + 1);
     } catch {
       setError('No se pudo registrar la respuesta.');
@@ -121,16 +181,17 @@ export default function FlashcardsStudyPage() {
         <header className="flex items-center justify-between">
           <button
             onClick={() => navigate('/flashcards')}
-            className="text-slate-500 hover:text-slate-800"
+            className="btn btn-secondary h-10 w-10 rounded-full p-0 flex items-center justify-center"
+            aria-label="Volver"
           >
-            ←
+            <ArrowLeft className="h-5 w-5" />
           </button>
-          <div className="text-sm text-slate-500">Resumen</div>
-          <div />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Resumen</h1>
+          <div className="h-10 w-10" />
         </header>
         <div className="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg">
           <h2 className="text-2xl font-bold">Sesión completada</h2>
-          <p className="mt-2 text-secondary">Has respondido {items.length} tarjetas.</p>
+          <p className="mt-2 text-secondary">Has respondido {answeredCount} tarjetas.</p>
           <button className="btn btn-primary mt-6" onClick={() => navigate('/flashcards')}>Volver a unidades</button>
         </div>
       </div>
@@ -142,17 +203,22 @@ export default function FlashcardsStudyPage() {
       <header className="flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="text-slate-500 hover:text-slate-800"
+          className="btn btn-secondary h-10 w-10 rounded-full p-0 flex items-center justify-center"
+          aria-label="Volver"
         >
-          ←
+          <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="text-sm text-slate-500">Sesión de estudio</div>
-        <button className="text-sm font-semibold text-primary" onClick={handleFinish}>Terminar</button>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Sesión de estudio</h1>
+        <div className="h-10 w-10" />
       </header>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-secondary">
-          <span>{currentLabel}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-red-500">🔴 {queueCounts.learning} learning</span>
+            <span className="text-amber-500">🟡 {queueCounts.due} due</span>
+            <span className="text-emerald-600">🟢 {queueCounts.new} new</span>
+          </div>
           <span>⏱ {progressPct}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
@@ -162,7 +228,7 @@ export default function FlashcardsStudyPage() {
 
       <div className="relative">
         <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90 dark:bg-secondary/70" />
-        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg min-h-[260px] flex flex-col">
+        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg min-h-[55vh] flex flex-col">
           {!showAnswer ? (
             <div className="mt-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
               {currentItem?.front || 'Sin tarjetas disponibles.'}
@@ -186,30 +252,43 @@ export default function FlashcardsStudyPage() {
             {showAnswer && (
               <div className="flex items-center gap-2">
                 <button
-                  className="flex-1 rounded-xl bg-primary/20 dark:bg-primary/30 text-primary px-4 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-xl bg-red-500/20 text-red-700 dark:text-red-200 px-4 py-2 text-sm font-semibold"
                   onClick={() => handleReview('AGAIN')}
                   disabled={submitting}
                 >
-                  🔴 Difícil
+                  <div className="flex flex-col items-center">
+                    <span>Again</span>
+                    <span className="text-xs text-red-700/70 dark:text-red-200/80">{currentItem?.intervalHints?.again}</span>
+                  </div>
                 </button>
                 <button
-                  className="flex-1 rounded-xl bg-secondary/15 dark:bg-secondary/25 text-secondary px-4 py-2 text-sm font-semibold"
-                  onClick={() => handleReview('HARD')}
-                  disabled={submitting}
-                >
-                  🟡 Dudoso
-                </button>
-                <button
-                  className="flex-1 rounded-xl bg-secondary/30 dark:bg-secondary/35 text-secondary px-4 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-xl bg-amber-400/20 text-amber-700 dark:text-amber-100 px-4 py-2 text-sm font-semibold"
                   onClick={() => handleReview('GOOD')}
                   disabled={submitting}
                 >
-                  🟢 Fácil
+                  <div className="flex flex-col items-center">
+                    <span>Good</span>
+                    <span className="text-xs text-amber-700/70 dark:text-amber-100/80">{currentItem?.intervalHints?.good}</span>
+                  </div>
+                </button>
+                <button
+                  className="flex-1 rounded-xl bg-emerald-400/20 text-emerald-700 dark:text-emerald-100 px-4 py-2 text-sm font-semibold"
+                  onClick={() => handleReview('EASY')}
+                  disabled={submitting}
+                >
+                  <div className="flex flex-col items-center">
+                    <span>Easy</span>
+                    <span className="text-xs text-emerald-700/70 dark:text-emerald-100/80">{currentItem?.intervalHints?.easy}</span>
+                  </div>
                 </button>
               </div>
             )}
           </div>
         </div>
+      </div>
+
+      <div className="fixed bottom-6 right-6">
+        <button className="btn btn-primary" onClick={handleFinish}>Terminar</button>
       </div>
 
       {confirmOpen && (

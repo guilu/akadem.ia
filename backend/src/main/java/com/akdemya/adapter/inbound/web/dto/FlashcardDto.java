@@ -2,6 +2,7 @@ package com.akdemya.adapter.inbound.web.dto;
 
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,18 +20,25 @@ public class FlashcardDto {
   public record UpdateRequest(UUID unitId, String front, String back) {
   }
 
-  public record StudyQueueItem(UUID flashcardId, String front, String back,
-                               ReviewState state, LocalDateTime dueAt) {
+  public record StudyQueueResponse(@JsonProperty("new") long newCount,
+                                  @JsonProperty("due") long dueCount,
+                                  @JsonProperty("learning") long learningCount) {
   }
 
-  public record StudyQueueResponse(List<StudyQueueItem> items) {
+  public record IntervalHints(String again, String good, String easy) {
+  }
+
+  public record StudyNextResponse(UUID flashcardId, UUID unitId, String front, String back,
+                                  ReviewState state, LocalDateTime dueAt,
+                                  IntervalHints intervalHints) {
   }
 
   public record ReviewRequest(UUID flashcardId, ReviewGrade grade, LocalDateTime reviewedAt) {
   }
 
   public record Review(UUID id, UUID userId, UUID flashcardId, ReviewState state,
-                       double easeFactor, int intervalDays, int repetitions, int lapses,
+                       double easeFactor, int intervalDays, int learningStep,
+                       int repetitions, int lapses,
                        LocalDateTime dueAt, LocalDateTime lastReviewedAt) {
   }
 
@@ -50,7 +58,7 @@ public class FlashcardDto {
                                   long totalDue) {
   }
 
-  public record UnitSummary(UUID unitId, String unitName, long totalCards, long newCards, long dueCards) {
+  public record UnitSummary(UUID unitId, String unitName, long newCount, long reviewCount, long dueCount) {
   }
 
   public record HistoryItem(UUID id, UUID flashcardId, String front, String back,

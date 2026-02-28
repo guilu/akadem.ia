@@ -1,6 +1,7 @@
 package com.akdemya.adapter.outbound.persistence.repository;
 
 import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewEntity;
+import com.akdemya.domain.model.ReviewState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,6 +43,30 @@ public interface JpaFlashcardReviewRepository extends JpaRepository<FlashcardRev
   long countDueByUserIdAndUnitIdUpTo(@Param("userId") UUID userId,
                                      @Param("unitId") UUID unitId,
                                      @Param("upTo") Instant upTo);
+
+  @Query("""
+      select count(r) from FlashcardReviewEntity r
+      join FlashcardEntity f on f.id = r.flashcardId
+      where r.userId = :userId
+        and f.unitId = :unitId
+        and r.dueAt <= :upTo
+        and r.state in :states
+      """)
+  long countDueByUserIdAndUnitIdAndStateIn(@Param("userId") UUID userId,
+                                          @Param("unitId") UUID unitId,
+                                          @Param("upTo") Instant upTo,
+                                          @Param("states") List<ReviewState> states);
+
+  @Query("""
+      select count(r) from FlashcardReviewEntity r
+      join FlashcardEntity f on f.id = r.flashcardId
+      where r.userId = :userId
+        and f.unitId = :unitId
+        and r.state in :states
+      """)
+  long countByUserIdAndUnitIdAndStateIn(@Param("userId") UUID userId,
+                                       @Param("unitId") UUID unitId,
+                                       @Param("states") List<ReviewState> states);
 
   @Query("""
       select count(r) from FlashcardReviewEntity r

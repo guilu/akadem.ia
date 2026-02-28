@@ -19,6 +19,7 @@ public class FlashcardReviewJpaMapper {
         e.getState(),
         e.getEaseFactor(),
         e.getIntervalDays(),
+        e.getLearningStep(),
         e.getRepetitions(),
         e.getLapses(),
         toLocalDateTime(e.getDueAt()),
@@ -36,6 +37,7 @@ public class FlashcardReviewJpaMapper {
     e.setState(d.getState());
     e.setEaseFactor(d.getEaseFactor());
     e.setIntervalDays(d.getIntervalDays());
+    e.setLearningStep(d.getLearningStep());
     e.setRepetitions(d.getRepetitions());
     e.setLapses(d.getLapses());
     e.setDueAt(toInstant(d.getDueAt()));
@@ -50,6 +52,7 @@ public class FlashcardReviewJpaMapper {
     e.setState(d.getState());
     e.setEaseFactor(d.getEaseFactor());
     e.setIntervalDays(d.getIntervalDays());
+    e.setLearningStep(d.getLearningStep());
     e.setRepetitions(d.getRepetitions());
     e.setLapses(d.getLapses());
     e.setDueAt(toInstant(d.getDueAt()));

@@ -7,6 +7,8 @@ import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Unit;
+import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -17,6 +19,7 @@ import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +36,7 @@ class FlashcardControllerTest {
 
   private final FlashcardStudyUseCase studyUseCase = mock(FlashcardStudyUseCase.class);
   private final FlashcardReviewUseCase reviewUseCase = mock(FlashcardReviewUseCase.class);
+  private final FlashcardManagementUseCase managementUseCase = mock(FlashcardManagementUseCase.class);
   private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
   private final FlashcardReviewRepository reviewRepo = mock(FlashcardReviewRepository.class);
   private final FlashcardReviewLogRepository reviewLogRepo = mock(FlashcardReviewLogRepository.class);
@@ -39,27 +44,27 @@ class FlashcardControllerTest {
   private final UnitRepository unitRepo = mock(UnitRepository.class);
 
   private final FlashcardController controller = new FlashcardController(
-      studyUseCase, reviewUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
+      studyUseCase, reviewUseCase, managementUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
 
   @Test
-  void studyQueueReturnsItems() {
+  void studyQueueReturnsCounts() {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
-    var item = new FlashcardStudyUseCase.StudyQueueItem(UUID.randomUUID(), "front", "back",
-        ReviewState.LEARNING, LocalDateTime.now());
     when(studyUseCase.getStudyQueue(any()))
-        .thenReturn(new FlashcardStudyUseCase.StudyQueueResponse(List.of(item)));
+        .thenReturn(new FlashcardStudyUseCase.StudyQueueResponse(3, 2, 1));
 
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, 5, principal);
 
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().items().size());
+    assertEquals(3, response.getBody().newCount());
+    assertEquals(2, response.getBody().dueCount());
+    assertEquals(1, response.getBody().learningCount());
   }
 
   @Test
@@ -71,7 +76,7 @@ class FlashcardControllerTest {
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
     FlashcardReview review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
-        ReviewState.LEARNING, 2.5, 3, 2, 0, LocalDateTime.now(),
+        ReviewState.LEARNING, 2.5, 3, 0, 2, 0, LocalDateTime.now(),
         LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
     FlashcardReviewLog log = FlashcardReviewLog.create(userId, flashcardId, ReviewGrade.GOOD,
         LocalDateTime.now(), 1, 3, 2.5, 2.6);
@@ -84,6 +89,28 @@ class FlashcardControllerTest {
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().review().flashcardId());
+  }
+
+  @Test
+  void unitSummaryReturnsNewAndReviewCounts() {
+    UUID userId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+
+    Unit unit = new Unit(unitId, UUID.randomUUID(), "Unidad 1", "", 1);
+    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit));
+    when(flashcardRepo.countNewByUserIdAndUnitId(userId, unitId)).thenReturn(5L);
+    when(reviewRepo.countByUserIdAndUnitIdAndStateIn(eq(userId), eq(unitId), anyList())).thenReturn(0L);
+    when(reviewRepo.countDueByUserIdAndUnitIdUpTo(eq(userId), eq(unitId), any())).thenReturn(0L);
+
+    List<FlashcardDto.UnitSummary> response = controller.getUnitSummary(principal);
+
+    assertEquals(1, response.size());
+    assertEquals(5L, response.get(0).newCount());
+    assertEquals(0L, response.get(0).reviewCount());
+    assertEquals(0L, response.get(0).dueCount());
   }
 
   @Test
@@ -108,5 +135,22 @@ class FlashcardControllerTest {
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().size());
     verify(reviewLogRepo).findRecentByUserId(userId, 20);
+  }
+
+  @Test
+  void createWithoutAuthReturns401() {
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back");
+    assertThrows(ResponseStatusException.class, () -> controller.create(req, null));
+  }
+
+  @Test
+  void updateWithoutAuthReturns401() {
+    var req = new FlashcardDto.UpdateRequest(null, "front", "back");
+    assertThrows(ResponseStatusException.class, () -> controller.update(UUID.randomUUID(), req, null));
+  }
+
+  @Test
+  void deleteWithoutAuthReturns401() {
+    assertThrows(ResponseStatusException.class, () -> controller.delete(UUID.randomUUID(), null));
   }
 }

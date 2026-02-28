@@ -45,4 +45,12 @@ public class FlashcardReviewLogRepositoryAdapter implements FlashcardReviewLogRe
         .map(mapper::toDomain)
         .toList();
   }
+
+  @Override
+  public Optional<FlashcardReviewLog> findMostRecentByUserIdAndFlashcardIdAfter(UUID userId, UUID flashcardId,
+                                                                                LocalDateTime after) {
+    return jpa.findFirstByUserIdAndFlashcardIdAndReviewedAtAfterOrderByReviewedAtDesc(
+            userId, flashcardId, after.toInstant(ZoneOffset.UTC))
+        .map(mapper::toDomain);
+  }
 }
