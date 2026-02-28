@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -42,37 +42,15 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
     if (command == null) throw new IllegalArgumentException("command cannot be null");
     if (command.userId() == null) throw new IllegalArgumentException("userId cannot be null");
     if (command.unitId() == null) throw new IllegalArgumentException("unitId cannot be null");
-    int limit = Math.max(0, command.limit());
     LocalDateTime now = command.now() != null ? command.now() : LocalDateTime.now();
 
-    List<FlashcardReview> due = reviewRepo.findDueByUserIdAndUnitId(command.userId(), command.unitId(), now, limit);
-    List<UUID> dueIds = due.stream().map(FlashcardReview::getFlashcardId).toList();
-    Map<UUID, Flashcard> dueFlashcards = flashcardRepo.findByIds(dueIds).stream()
-        .collect(Collectors.toMap(Flashcard::getId, f -> f));
+    long learningCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
+        command.userId(), command.unitId(), now, List.of(ReviewState.LEARNING));
+    long dueCount = reviewRepo.countDueByUserIdAndUnitIdAndStateIn(
+        command.userId(), command.unitId(), now, List.of(ReviewState.REVIEW));
+    long newCount = flashcardRepo.countNewByUserIdAndUnitId(command.userId(), command.unitId());
 
-    List<StudyQueueItem> items = new ArrayList<>();
-    for (FlashcardReview review : due) {
-      Flashcard card = dueFlashcards.get(review.getFlashcardId());
-      if (card == null) continue;
-      items.add(new StudyQueueItem(
-          card.getId(),
-          card.getFront(),
-          card.getBack(),
-          review.getState(),
-          review.getDueAt()
-      ));
-    }
-
-    int remaining = limit - items.size();
-    if (remaining > 0) {
-      int newLimit = Math.min(remaining, NEW_LIMIT);
-      List<Flashcard> newCards = flashcardRepo.findNewByUserIdAndUnitId(command.userId(), command.unitId(), newLimit);
-      for (Flashcard card : newCards) {
-        items.add(new StudyQueueItem(card.getId(), card.getFront(), card.getBack(), null, null));
-      }
-    }
-
-    return new StudyQueueResponse(items);
+    return new StudyQueueResponse(newCount, dueCount, learningCount);
   }
 
   @Override

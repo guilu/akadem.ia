@@ -9,14 +9,23 @@ type IntervalHints = {
   easy: string;
 };
 
+type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
+
 type StudyItem = {
   flashcardId: string;
   front: string;
   back: string;
+  state?: ReviewState;
   intervalHints?: IntervalHints;
 };
 
 type StudyNextResponse = StudyItem;
+
+type StudyQueueResponse = {
+  new: number;
+  due: number;
+  learning: number;
+};
 
 type ReviewRequest = {
   flashcardId: string;
@@ -36,6 +45,8 @@ export default function FlashcardsStudyPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [answeredCount, setAnsweredCount] = useState(0);
+  const [queueCounts, setQueueCounts] = useState({ new: 0, due: 0, learning: 0 });
 
   const token = localStorage.getItem('ak_token') || '';
 
@@ -47,6 +58,19 @@ export default function FlashcardsStudyPage() {
     return data || null;
   };
 
+  const fetchQueue = async () => {
+    const data = await apiAuthJson<StudyQueueResponse>(
+      `${apiBase}/api/flashcards/study/queue?unitId=${unitId}`,
+      token
+    );
+    return data;
+  };
+
+  const currentItem = items[currentIndex];
+  const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
+  const totalInteractions = answeredCount + remaining;
+  const progressPct = totalInteractions ? Math.round((answeredCount / totalInteractions) * 100) : 0;
+
   useEffect(() => {
     if (!unitId) {
       setError('Falta el unitId.');
@@ -56,9 +80,11 @@ export default function FlashcardsStudyPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    fetchNext()
-      .then((data) => {
+    Promise.all([fetchQueue(), fetchNext()])
+      .then(([queue, data]) => {
         if (!mounted) return;
+        setQueueCounts(queue);
+        setAnsweredCount(0);
         if (!data) {
           setItems([]);
           setFinished(true);
@@ -79,16 +105,22 @@ export default function FlashcardsStudyPage() {
   }, [token, unitId]);
 
   useEffect(() => {
-    if (!loading && items.length > 0 && currentIndex >= items.length) {
+    if (!loading && remaining === 0 && !currentItem) {
       setFinished(true);
     }
-  }, [currentIndex, items.length, loading]);
+  }, [remaining, loading, currentItem]);
 
-  const remaining = Math.max(items.length - currentIndex, 0);
-  const progressPct = items.length ? Math.round((currentIndex / items.length) * 100) : 0;
-  const currentLabel = items.length ? `${Math.min(currentIndex + 1, items.length)} de ${items.length} preguntas` : '0 de 0 preguntas';
-
-  const currentItem = items[currentIndex];
+  const decrementQueueCounts = (state?: ReviewState) => {
+    setQueueCounts((prev) => {
+      if (state === 'LEARNING') {
+        return { ...prev, learning: Math.max(prev.learning - 1, 0) };
+      }
+      if (state === 'REVIEW') {
+        return { ...prev, due: Math.max(prev.due - 1, 0) };
+      }
+      return { ...prev, new: Math.max(prev.new - 1, 0) };
+    });
+  };
 
   const handleReview = async (grade: ReviewRequest['grade']) => {
     if (!currentItem || submitting) return;
@@ -103,9 +135,12 @@ export default function FlashcardsStudyPage() {
           reviewedAt: new Date().toISOString()
         } satisfies ReviewRequest)
       });
+      decrementQueueCounts(currentItem.state ?? 'NEW');
+      setAnsweredCount((prev) => prev + 1);
       setShowAnswer(false);
       const next = await fetchNext();
       if (!next) {
+        setQueueCounts({ new: 0, due: 0, learning: 0 });
         setFinished(true);
         return;
       }
@@ -155,7 +190,7 @@ export default function FlashcardsStudyPage() {
         </header>
         <div className="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg">
           <h2 className="text-2xl font-bold">Sesión completada</h2>
-          <p className="mt-2 text-secondary">Has respondido {items.length} tarjetas.</p>
+          <p className="mt-2 text-secondary">Has respondido {answeredCount} tarjetas.</p>
           <button className="btn btn-primary mt-6" onClick={() => navigate('/flashcards')}>Volver a unidades</button>
         </div>
       </div>
@@ -178,7 +213,11 @@ export default function FlashcardsStudyPage() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-secondary">
-          <span>{currentLabel}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-red-500">🔴 {queueCounts.learning} learning</span>
+            <span className="text-amber-500">🟡 {queueCounts.due} due</span>
+            <span className="text-emerald-600">🟢 {queueCounts.new} new</span>
+          </div>
           <span>⏱ {progressPct}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">

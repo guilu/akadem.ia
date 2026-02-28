@@ -2,6 +2,7 @@ package com.akdemya.adapter.inbound.web.dto;
 
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,11 +20,9 @@ public class FlashcardDto {
   public record UpdateRequest(UUID unitId, String front, String back) {
   }
 
-  public record StudyQueueItem(UUID flashcardId, String front, String back,
-                               ReviewState state, LocalDateTime dueAt) {
-  }
-
-  public record StudyQueueResponse(List<StudyQueueItem> items) {
+  public record StudyQueueResponse(@JsonProperty("new") long newCount,
+                                  @JsonProperty("due") long dueCount,
+                                  @JsonProperty("learning") long learningCount) {
   }
 
   public record IntervalHints(String again, String good, String easy) {

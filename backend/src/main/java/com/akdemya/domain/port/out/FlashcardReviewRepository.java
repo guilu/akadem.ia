@@ -20,6 +20,9 @@ public interface FlashcardReviewRepository {
 
   long countDueByUserIdAndUnitIdUpTo(UUID userId, UUID unitId, LocalDateTime upTo);
 
+  long countDueByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, LocalDateTime upTo,
+                                           List<ReviewState> states);
+
   long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states);
 
   long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive, LocalDateTime toInclusive);

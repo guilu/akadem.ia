@@ -43,24 +43,24 @@ class FlashcardControllerTest {
       studyUseCase, reviewUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
 
   @Test
-  void studyQueueReturnsItems() {
+  void studyQueueReturnsCounts() {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
-    var item = new FlashcardStudyUseCase.StudyQueueItem(UUID.randomUUID(), "front", "back",
-        ReviewState.LEARNING, LocalDateTime.now());
     when(studyUseCase.getStudyQueue(any()))
-        .thenReturn(new FlashcardStudyUseCase.StudyQueueResponse(List.of(item)));
+        .thenReturn(new FlashcardStudyUseCase.StudyQueueResponse(3, 2, 1));
 
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, 5, principal);
 
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().items().size());
+    assertEquals(3, response.getBody().newCount());
+    assertEquals(2, response.getBody().dueCount());
+    assertEquals(1, response.getBody().learningCount());
   }
 
   @Test

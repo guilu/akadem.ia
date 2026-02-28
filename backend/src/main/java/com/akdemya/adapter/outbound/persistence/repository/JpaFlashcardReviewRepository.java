@@ -49,6 +49,19 @@ public interface JpaFlashcardReviewRepository extends JpaRepository<FlashcardRev
       join FlashcardEntity f on f.id = r.flashcardId
       where r.userId = :userId
         and f.unitId = :unitId
+        and r.dueAt <= :upTo
+        and r.state in :states
+      """)
+  long countDueByUserIdAndUnitIdAndStateIn(@Param("userId") UUID userId,
+                                          @Param("unitId") UUID unitId,
+                                          @Param("upTo") Instant upTo,
+                                          @Param("states") List<ReviewState> states);
+
+  @Query("""
+      select count(r) from FlashcardReviewEntity r
+      join FlashcardEntity f on f.id = r.flashcardId
+      where r.userId = :userId
+        and f.unitId = :unitId
         and r.state in :states
       """)
   long countByUserIdAndUnitIdAndStateIn(@Param("userId") UUID userId,

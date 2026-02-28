@@ -3,7 +3,6 @@ package com.akdemya.domain.port.in;
 import com.akdemya.domain.model.ReviewState;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public interface FlashcardStudyUseCase {
@@ -16,9 +15,7 @@ public interface FlashcardStudyUseCase {
 
   record StudyQueueCommand(UUID userId, UUID unitId, int limit, LocalDateTime now) {}
 
-  record StudyQueueItem(UUID flashcardId, String front, String back, ReviewState state, LocalDateTime dueAt) {}
-
-  record StudyQueueResponse(List<StudyQueueItem> items) {}
+  record StudyQueueResponse(long newCount, long dueCount, long learningCount) {}
 
   record StudyNextCommand(UUID userId, UUID unitId, LocalDateTime now) {}
 

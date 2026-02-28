@@ -60,6 +60,13 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
   }
 
   @Override
+  public long countDueByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, LocalDateTime upTo,
+                                                  List<ReviewState> states) {
+    return jpa.countDueByUserIdAndUnitIdAndStateIn(
+        userId, unitId, upTo.toInstant(ZoneOffset.UTC), states);
+  }
+
+  @Override
   public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
     return jpa.countByUserIdAndUnitIdAndStateIn(userId, unitId, states);
   }

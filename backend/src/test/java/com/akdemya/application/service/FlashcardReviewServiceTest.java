@@ -135,6 +135,12 @@ class FlashcardReviewServiceTest {
     }
 
     @Override
+    public long countDueByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, LocalDateTime upTo,
+                                                    List<ReviewState> states) {
+      return 0;
+    }
+
+    @Override
     public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
       return 0;
     }

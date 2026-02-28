@@ -118,11 +118,9 @@ public class FlashcardController {
     }
     var response = studyUseCase.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(
         userId, unitId, resolvedLimit, null));
-    var items = response.items().stream()
-        .map(item -> new FlashcardDto.StudyQueueItem(
-            item.flashcardId(), item.front(), item.back(), item.state(), item.dueAt()))
-        .toList();
-    return ResponseEntity.ok(new FlashcardDto.StudyQueueResponse(items));
+    return ResponseEntity.ok(new FlashcardDto.StudyQueueResponse(
+        response.newCount(), response.dueCount(), response.learningCount()
+    ));
   }
 
   @GetMapping("/study/next")
