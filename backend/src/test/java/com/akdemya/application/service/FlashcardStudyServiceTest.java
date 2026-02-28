@@ -257,6 +257,16 @@ class FlashcardStudyServiceTest {
     }
 
     @Override
+    public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
+      return data.values().stream()
+          .filter(r -> r.getUserId().equals(userId))
+          .filter(r -> states.contains(r.getState()))
+          .filter(r -> flashcardRepo.findById(r.getFlashcardId())
+              .map(f -> f.getUnitId().equals(unitId)).orElse(false))
+          .count();
+    }
+
+    @Override
     public long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive,
                                                  LocalDateTime toInclusive) {
       return data.values().stream()

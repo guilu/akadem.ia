@@ -5,6 +5,7 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
+import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -173,10 +174,11 @@ public class FlashcardController {
     LocalDateTime now = LocalDateTime.now();
     return unitRepo.findAllWithFlashcards().stream()
         .map(unit -> {
-          long totalCards = flashcardRepo.findByUnitId(unit.getId()).size();
-          long newCards = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
-          long dueCards = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
-          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(), totalCards, newCards, dueCards);
+          long newCount = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
+          long reviewCount = reviewRepo.countByUserIdAndUnitIdAndStateIn(userId, unit.getId(),
+              List.of(ReviewState.LEARNING, ReviewState.REVIEW));
+          long dueCount = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
+          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(), newCount, reviewCount, dueCount);
         })
         .toList();
   }

@@ -55,7 +55,7 @@ public class FlashcardDto {
                                   long totalDue) {
   }
 
-  public record UnitSummary(UUID unitId, String unitName, long totalCards, long newCards, long dueCards) {
+  public record UnitSummary(UUID unitId, String unitName, long newCount, long reviewCount, long dueCount) {
   }
 
   public record HistoryItem(UUID id, UUID flashcardId, String front, String back,

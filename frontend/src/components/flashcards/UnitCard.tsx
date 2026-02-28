@@ -4,17 +4,11 @@ import type { UnitSummary } from '../../pages/FlashcardsPage';
 
 export default function UnitCard({ unit }: { unit: UnitSummary }) {
   const navigate = useNavigate();
-  const due = unit.dueCards ?? 0;
-  const created = unit.newCards ?? 0;
-  const total = unit.totalCards ?? 0;
-  const review = Math.max(total - due - created, 0);
-  const learning = 0;
+  const reviewCount = unit.reviewCount ?? 0;
+  const newCount = unit.newCount ?? 0;
+  const dueCount = unit.dueCount ?? 0;
 
-  const totalForBar = due + learning + review + created;
-  const segment = (count: number) =>
-    totalForBar === 0 ? '0%' : `${Math.max((count / totalForBar) * 100, 4)}%`;
-
-  const pending = due + learning + created;
+  const pending = (unit.dueCount ?? reviewCount) + newCount;
   const cta = pending > 0 ? `Estudiar ${pending} tarjetas` : 'Sin pendientes';
 
   return (
@@ -32,23 +26,16 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
             <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
             <div className="text-sm font-semibold text-slate-500">{cta}</div>
           </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/80">
-            <div className="flex h-full">
-              <div className="bg-red-400" style={{ width: segment(due) }} />
-              <div className="bg-yellow-300" style={{ width: segment(learning) }} />
-              <div className="bg-green-400" style={{ width: segment(review) }} />
-              <div className="bg-slate-300" style={{ width: segment(created) }} />
-            </div>
-          </div>
+          {/* metrics bar removed */}
         </div>
         <div className="text-slate-400">›</div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500">
-        <span>🔴 {due} falladas</span>
-        <span>🟡 {learning} en repaso</span>
-        <span>🟢 {review} dominadas</span>
-        <span>🆕 {created} nuevas</span>
+        <span>
+          🟡 {reviewCount} en repaso{dueCount > 0 ? ` (${dueCount} pendientes)` : ''}
+        </span>
+        <span>🆕 {newCount} nuevas</span>
       </div>
     </button>
   );

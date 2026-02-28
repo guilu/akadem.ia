@@ -7,6 +7,7 @@ import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
@@ -84,6 +85,28 @@ class FlashcardControllerTest {
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().review().flashcardId());
+  }
+
+  @Test
+  void unitSummaryReturnsNewAndReviewCounts() {
+    UUID userId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+
+    Unit unit = new Unit(unitId, UUID.randomUUID(), "Unidad 1", "", 1);
+    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit));
+    when(flashcardRepo.countNewByUserIdAndUnitId(userId, unitId)).thenReturn(5L);
+    when(reviewRepo.countByUserIdAndUnitIdAndStateIn(eq(userId), eq(unitId), anyList())).thenReturn(0L);
+    when(reviewRepo.countDueByUserIdAndUnitIdUpTo(eq(userId), eq(unitId), any())).thenReturn(0L);
+
+    List<FlashcardDto.UnitSummary> response = controller.getUnitSummary(principal);
+
+    assertEquals(1, response.size());
+    assertEquals(5L, response.get(0).newCount());
+    assertEquals(0L, response.get(0).reviewCount());
+    assertEquals(0L, response.get(0).dueCount());
   }
 
   @Test

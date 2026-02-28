@@ -4,6 +4,7 @@ import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewEntity;
 import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewJpaMapper;
 import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewRepository;
 import com.akdemya.domain.model.FlashcardReview;
+import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -56,6 +57,11 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
   @Override
   public long countDueByUserIdAndUnitIdUpTo(UUID userId, UUID unitId, LocalDateTime upTo) {
     return jpa.countDueByUserIdAndUnitIdUpTo(userId, unitId, upTo.toInstant(ZoneOffset.UTC));
+  }
+
+  @Override
+  public long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states) {
+    return jpa.countByUserIdAndUnitIdAndStateIn(userId, unitId, states);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.akdemya.domain.port.out;
 
 import com.akdemya.domain.model.FlashcardReview;
+import com.akdemya.domain.model.ReviewState;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,8 @@ public interface FlashcardReviewRepository {
   List<FlashcardReview> findDueByUserIdAndUnitId(UUID userId, UUID unitId, LocalDateTime upTo, int limit);
 
   long countDueByUserIdAndUnitIdUpTo(UUID userId, UUID unitId, LocalDateTime upTo);
+
+  long countByUserIdAndUnitIdAndStateIn(UUID userId, UUID unitId, List<ReviewState> states);
 
   long countDueByUserIdAndUnitIdBetween(UUID userId, UUID unitId, LocalDateTime fromExclusive, LocalDateTime toInclusive);
 

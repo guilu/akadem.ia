@@ -8,9 +8,9 @@ import UnitList from '../components/flashcards/UnitList';
 export type UnitSummary = {
   unitId: string;
   unitName: string;
-  totalCards: number;
-  newCards: number;
-  dueCards: number;
+  newCount: number;
+  reviewCount: number;
+  dueCount?: number;
 };
 
 export default function FlashcardsPage(){
