@@ -89,11 +89,13 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
     <div className="max-w-3xl mx-auto p-4">
       <header className="flex items-center justify-between mb-4">
         <div className="text-xl font-semibold">Pregunta {index+1} / {shuffled.length}</div>
-        <div aria-label="Timer" className="font-mono text-lg">⏱ {Math.floor(remaining/60)}:{String(remaining%60).padStart(2,'0')}</div>
+        <div aria-label="Timer" className={`font-mono text-lg font-bold ${remaining < 120 ? 'text-red-500 animate-pulse' : ''}`}>
+          ⏱ {Math.floor(remaining/60)}:{String(remaining%60).padStart(2,'0')}
+        </div>
       </header>
 
-      <div className="w-full bg-slate-700 h-2 rounded mb-6">
-        <div className="h-2 bg-accent rounded" style={{ width: `${progress}%` }} />
+      <div className="w-full h-2 rounded-full overflow-hidden bg-secondary/20 dark:bg-slate-700 mb-6">
+        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
       </div>
 
       <h2 className="text-2xl font-bold mb-3">{q.text}</h2>

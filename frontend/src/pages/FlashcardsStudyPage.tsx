@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'flowbite-react-icons/outline';
+import { Modal, Button, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react';
 import { apiAuthJson, apiBase } from '../api';
 
 type IntervalHints = {
@@ -208,8 +209,8 @@ export default function FlashcardsStudyPage() {
           </div>
           <span>⏱ {progressPct}%</span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
-          <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
+        <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/20 dark:bg-slate-700">
+          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progressPct}%` }} />
         </div>
       </div>
 
@@ -278,18 +279,19 @@ export default function FlashcardsStudyPage() {
         <button className="btn btn-primary" onClick={handleFinish}>Terminar</button>
       </div>
 
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-xl">
-            <h3 className="text-lg font-semibold">Te quedan {remaining} tarjetas</h3>
-            <p className="mt-2 text-sm text-secondary">¿Quieres terminar la sesión?</p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="btn btn-secondary" onClick={() => setConfirmOpen(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={confirmFinish}>Terminar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal show={confirmOpen} onClose={() => setConfirmOpen(false)} theme={{
+        root: { base: 'fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto overflow-x-hidden md:inset-0 md:h-full' },
+        content: { base: 'relative h-full w-full p-4 md:h-auto', inner: 'relative flex max-h-[90dvh] flex-col rounded-lg bg-bg text-text shadow border border-secondary/40' }
+      }}>
+        <ModalHeader className="border-b border-secondary/40">Te quedan {remaining} tarjetas</ModalHeader>
+        <ModalBody>
+          <p className="text-text/70">¿Quieres terminar la sesión?</p>
+        </ModalBody>
+        <ModalFooter className="border-t border-secondary/40">
+          <Button color="light" onClick={() => setConfirmOpen(false)} className="btn btn-outline shadow-none">Cancelar</Button>
+          <Button onClick={confirmFinish} className="btn btn-primary">Terminar</Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }

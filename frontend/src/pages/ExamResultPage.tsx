@@ -1,5 +1,5 @@
 import { Navigate, Link } from 'react-router-dom';
-import { ArrowLeft } from 'flowbite-react-icons/outline';
+import { ArrowLeft, Plus } from 'flowbite-react-icons/outline';
 import type { ExamResult } from '../types';
 import { ROUTES } from '../constants/routes';
 
@@ -33,10 +33,14 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
         <p>Porcentaje neto: <strong>{result.percentage.toFixed(1)}%</strong></p>
       </div>
       <p className="text-slate-400 mt-3">Cada 3 fallos restan 1 acierto.</p>
-      <div className="mt-4">
-        <Link className="btn btn-secondary flex items-center gap-2" to={ROUTES.subjects}>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Link className="btn btn-primary flex items-center gap-2" to={ROUTES.subjects}>
+          <Plus className="w-4 h-4" />
+          Nuevo examen
+        </Link>
+        <Link className="btn btn-outline flex items-center gap-2" to={ROUTES.subjects}>
           <ArrowLeft className="w-4 h-4" />
-          Volver a exámenes
+          Volver
         </Link>
       </div>
     </div>
