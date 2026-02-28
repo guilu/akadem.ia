@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 
 type IntervalHints = {
@@ -166,12 +167,13 @@ export default function FlashcardsStudyPage() {
       <header className="flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="text-slate-500 hover:text-slate-800"
+          className="btn btn-secondary h-10 w-10 rounded-full p-0 flex items-center justify-center"
+          aria-label="Volver"
         >
-          ←
+          <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="text-sm text-slate-500">Sesión de estudio</div>
-        <button className="text-sm font-semibold text-primary" onClick={handleFinish}>Terminar</button>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Sesión de estudio</h1>
+        <div className="h-10 w-10" />
       </header>
 
       <div className="space-y-2">
@@ -186,7 +188,7 @@ export default function FlashcardsStudyPage() {
 
       <div className="relative">
         <div className="absolute -left-2 -bottom-2 h-full w-full rounded-3xl bg-secondary/90 dark:bg-secondary/70" />
-        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg min-h-[260px] flex flex-col">
+        <div className="relative rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg min-h-[80vh] flex flex-col">
           {!showAnswer ? (
             <div className="mt-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
               {currentItem?.front || 'Sin tarjetas disponibles.'}
@@ -243,6 +245,10 @@ export default function FlashcardsStudyPage() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="fixed bottom-6 right-6">
+        <button className="btn btn-primary" onClick={handleFinish}>Terminar</button>
       </div>
 
       {confirmOpen && (
