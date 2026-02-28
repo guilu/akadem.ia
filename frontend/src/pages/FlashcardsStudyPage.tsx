@@ -181,12 +181,13 @@ export default function FlashcardsStudyPage() {
         <header className="flex items-center justify-between">
           <button
             onClick={() => navigate('/flashcards')}
-            className="text-slate-500 hover:text-slate-800"
+            className="btn btn-secondary h-10 w-10 rounded-full p-0 flex items-center justify-center"
+            aria-label="Volver"
           >
-            ←
+            <ArrowLeft className="h-5 w-5" />
           </button>
-          <div className="text-sm text-slate-500">Resumen</div>
-          <div />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Resumen</h1>
+          <div className="h-10 w-10" />
         </header>
         <div className="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-lg">
           <h2 className="text-2xl font-bold">Sesión completada</h2>
