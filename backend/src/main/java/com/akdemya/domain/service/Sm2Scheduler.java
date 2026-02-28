@@ -138,6 +138,26 @@ public class Sm2Scheduler {
     );
   }
 
+  public IntervalHints intervalHints(FlashcardReview review, LocalDateTime reviewedAt) {
+    Result again = schedule(review, ReviewGrade.AGAIN, reviewedAt);
+    Result good = schedule(review, ReviewGrade.GOOD, reviewedAt);
+    Result easy = schedule(review, ReviewGrade.EASY, reviewedAt);
+    return new IntervalHints(
+        formatHint(again, reviewedAt),
+        formatHint(good, reviewedAt),
+        formatHint(easy, reviewedAt)
+    );
+  }
+
+  private String formatHint(Result result, LocalDateTime reviewedAt) {
+    if (result.getState() == ReviewState.LEARNING) {
+      long minutes = Math.max(1, java.time.Duration.between(reviewedAt, result.getDueAt()).toMinutes());
+      return "<" + minutes + "m";
+    }
+    int days = Math.max(1, result.getIntervalAfter());
+    return days + "d";
+  }
+
   private LocalDateTime computeDueAt(ReviewState stateBefore,
                                     ReviewGrade grade,
                                     ReviewState stateAfter,
@@ -163,6 +183,8 @@ public class Sm2Scheduler {
   private double clampEase(double ease) {
     return Math.max(ease, MIN_EASE_FACTOR);
   }
+
+  public record IntervalHints(String again, String good, String easy) {}
 
   public static class Result {
     private final ReviewState state;

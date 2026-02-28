@@ -17,6 +17,17 @@ class Sm2SchedulerTest {
   private final LocalDateTime now = LocalDateTime.of(2026, 2, 24, 12, 0);
 
   @Test
+  void intervalHintsForNewCard() {
+    var review = FlashcardReview.createNew(userId, flashcardId, now);
+
+    var hints = new Sm2Scheduler().intervalHints(review, now);
+
+    assertEquals("<1m", hints.again());
+    assertEquals("<10m", hints.good());
+    assertEquals("4d", hints.easy());
+  }
+
+  @Test
   void newAgainSchedulesFirstLearningStep() {
     var review = FlashcardReview.createNew(userId, flashcardId, now);
 

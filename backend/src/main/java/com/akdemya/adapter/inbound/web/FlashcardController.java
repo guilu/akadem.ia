@@ -134,9 +134,15 @@ public class FlashcardController {
     if (response == null) {
       return ResponseEntity.noContent().build();
     }
+    FlashcardDto.IntervalHints hints = response.intervalHints() != null
+        ? new FlashcardDto.IntervalHints(
+            response.intervalHints().again(),
+            response.intervalHints().good(),
+            response.intervalHints().easy())
+        : null;
     return ResponseEntity.ok(new FlashcardDto.StudyNextResponse(
         response.flashcardId(), response.unitId(), response.front(), response.back(),
-        response.state(), response.dueAt()
+        response.state(), response.dueAt(), hints
     ));
   }
 

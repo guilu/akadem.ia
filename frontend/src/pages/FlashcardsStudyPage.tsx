@@ -2,17 +2,24 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiAuthJson, apiBase } from '../api';
 
+type IntervalHints = {
+  again: string;
+  good: string;
+  easy: string;
+};
+
 type StudyItem = {
   flashcardId: string;
   front: string;
   back: string;
+  intervalHints?: IntervalHints;
 };
 
 type StudyNextResponse = StudyItem;
 
 type ReviewRequest = {
   flashcardId: string;
-  grade: 'AGAIN' | 'HARD' | 'GOOD' | 'EASY';
+  grade: 'AGAIN' | 'GOOD' | 'EASY';
   reviewedAt: string;
 };
 
@@ -203,25 +210,34 @@ export default function FlashcardsStudyPage() {
             {showAnswer && (
               <div className="flex items-center gap-2">
                 <button
-                  className="flex-1 rounded-xl bg-primary/20 dark:bg-primary/30 text-primary px-4 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-xl bg-red-500/20 text-red-200 px-4 py-2 text-sm font-semibold"
                   onClick={() => handleReview('AGAIN')}
                   disabled={submitting}
                 >
-                  🔴 Difícil
+                  <div className="flex flex-col items-center">
+                    <span>Again</span>
+                    <span className="text-xs text-red-200/80">{currentItem?.intervalHints?.again}</span>
+                  </div>
                 </button>
                 <button
-                  className="flex-1 rounded-xl bg-secondary/15 dark:bg-secondary/25 text-secondary px-4 py-2 text-sm font-semibold"
-                  onClick={() => handleReview('HARD')}
-                  disabled={submitting}
-                >
-                  🟡 Dudoso
-                </button>
-                <button
-                  className="flex-1 rounded-xl bg-secondary/30 dark:bg-secondary/35 text-secondary px-4 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-xl bg-amber-400/20 text-amber-100 px-4 py-2 text-sm font-semibold"
                   onClick={() => handleReview('GOOD')}
                   disabled={submitting}
                 >
-                  🟢 Fácil
+                  <div className="flex flex-col items-center">
+                    <span>Good</span>
+                    <span className="text-xs text-amber-100/80">{currentItem?.intervalHints?.good}</span>
+                  </div>
+                </button>
+                <button
+                  className="flex-1 rounded-xl bg-emerald-400/20 text-emerald-100 px-4 py-2 text-sm font-semibold"
+                  onClick={() => handleReview('EASY')}
+                  disabled={submitting}
+                >
+                  <div className="flex flex-col items-center">
+                    <span>Easy</span>
+                    <span className="text-xs text-emerald-100/80">{currentItem?.intervalHints?.easy}</span>
+                  </div>
                 </button>
               </div>
             )}

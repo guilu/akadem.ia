@@ -22,8 +22,11 @@ public interface FlashcardStudyUseCase {
 
   record StudyNextCommand(UUID userId, UUID unitId, LocalDateTime now) {}
 
+  record IntervalHints(String again, String good, String easy) {}
+
   record StudyNextResponse(UUID flashcardId, UUID unitId, String front, String back,
-                           ReviewState state, LocalDateTime dueAt) {}
+                           ReviewState state, LocalDateTime dueAt,
+                           IntervalHints intervalHints) {}
 
   record DashboardCommand(UUID userId, UUID unitId, LocalDateTime now) {}
 

@@ -1,11 +1,13 @@
 package com.akdemya.application.service;
 
+import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.service.Sm2Scheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +23,18 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
 
   private final FlashcardRepository flashcardRepo;
   private final FlashcardReviewRepository reviewRepo;
+  private final Sm2Scheduler scheduler;
 
-  public FlashcardStudyService(FlashcardRepository flashcardRepo, FlashcardReviewRepository reviewRepo) {
+  public FlashcardStudyService(FlashcardRepository flashcardRepo,
+                               FlashcardReviewRepository reviewRepo,
+                               FlashcardSchedulerProperties schedulerProperties) {
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
+    this.scheduler = new Sm2Scheduler(
+        schedulerProperties.getLearningStepsMinutes(),
+        schedulerProperties.getEasyIntervalDays(),
+        schedulerProperties.getReviewAgainRelearnMinutes()
+    );
   }
 
   @Override
@@ -79,7 +89,8 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
       if (card != null) {
         return new StudyNextResponse(
             card.getId(), card.getUnitId(), card.getFront(), card.getBack(),
-            review.getState(), review.getDueAt()
+            review.getState(), review.getDueAt(),
+            toIntervalHints(scheduler.intervalHints(review, now))
         );
       }
     }
@@ -87,13 +98,19 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
     List<Flashcard> newCards = flashcardRepo.findNewByUserIdAndUnitId(command.userId(), command.unitId(), 1);
     if (!newCards.isEmpty()) {
       Flashcard card = newCards.get(0);
+      FlashcardReview review = FlashcardReview.createNew(command.userId(), card.getId(), now);
       return new StudyNextResponse(
           card.getId(), card.getUnitId(), card.getFront(), card.getBack(),
-          ReviewState.NEW, null
+          ReviewState.NEW, null,
+          toIntervalHints(scheduler.intervalHints(review, now))
       );
     }
 
     return null;
+  }
+
+  private IntervalHints toIntervalHints(Sm2Scheduler.IntervalHints hints) {
+    return new IntervalHints(hints.again(), hints.good(), hints.easy());
   }
 
   @Override

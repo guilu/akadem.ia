@@ -1,5 +1,6 @@
 package com.akdemya.application.service;
 
+import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
@@ -20,6 +21,7 @@ class FlashcardStudyServiceTest {
   private final UUID userId = UUID.randomUUID();
   private final UUID unitId = UUID.randomUUID();
   private final LocalDateTime now = LocalDateTime.of(2026, 2, 24, 10, 0);
+  private final FlashcardSchedulerProperties schedulerProperties = new FlashcardSchedulerProperties();
 
   @Test
   void dueCardsReturnedBeforeNew() {
@@ -34,7 +36,7 @@ class FlashcardStudyServiceTest {
 
     reviewRepo.save(review(dueCard.getId(), now.minusDays(1)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 2, now));
 
     assertEquals(2, response.items().size());
@@ -52,7 +54,7 @@ class FlashcardStudyServiceTest {
       flashcardRepo.save(flashcard("Card " + i, unitId));
     }
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 20, now));
 
     assertEquals(10, response.items().size());
@@ -71,7 +73,7 @@ class FlashcardStudyServiceTest {
 
     reviewRepo.save(review(dueCard.getId(), now.minusDays(2)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
 
     Set<UUID> ids = response.items().stream().map(FlashcardStudyUseCase.StudyQueueItem::flashcardId)
@@ -95,7 +97,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(c2.getId(), now.minusDays(1)));
     reviewRepo.save(review(c1.getId(), now.minusDays(3)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
 
     assertEquals(c1.getId(), response.items().get(0).flashcardId());
@@ -115,7 +117,7 @@ class FlashcardStudyServiceTest {
 
     reviewRepo.save(review(dueCard.getId(), now.minusMinutes(5)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
 
     assertNotNull(next);
@@ -144,7 +146,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(in5.getId(), now.plusDays(5)));
     reviewRepo.save(review(in10.getId(), now.plusDays(10)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
     var dashboard = service.getDashboard(new FlashcardStudyUseCase.DashboardCommand(userId, unitId, now));
 
     assertEquals(1, dashboard.dueToday());
