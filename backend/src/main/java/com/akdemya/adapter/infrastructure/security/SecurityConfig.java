@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtService jwt;
@@ -69,10 +71,8 @@ public class SecurityConfig {
         cfg.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "http://192.168.1.175:5173",
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
-                "http://192.168.1.175:3000",
                 "https://akademia.diegobarrioh.dev"
         ));
         // Si usas otras URLs (puertos distintos, etc.), añádelas aquí
@@ -115,7 +115,8 @@ public class SecurityConfig {
                     UserDetails principal = User.withUsername(email).password("").authorities(authority).build();
                     var auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(JwtAuthFilter.class).warn("JWT validation failed: {}", e.getMessage());
                 }
             }
             chain.doFilter(req, res);

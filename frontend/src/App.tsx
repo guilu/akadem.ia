@@ -28,6 +28,12 @@ export default function App(){
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
   const [result, setResult] = useState<ExamResult|null>(null);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
+  const [toastError, setToastError] = useState<string>('');
+
+  function showError(msg: string) {
+    setToastError(msg);
+    setTimeout(() => setToastError(''), 5000);
+  }
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
   const role = useMemo(() => {
@@ -90,7 +96,7 @@ export default function App(){
       navigate(ROUTES.examAttempt(data.attemptId));
     } catch (err: any) {
       if (err?.code === 'timeout') {
-        alert(timeoutMessage);
+        showError(timeoutMessage);
         return;
       }
       throw err;
@@ -113,7 +119,7 @@ export default function App(){
       navigate(ROUTES.examResult);
     } catch (err: any) {
       if (err?.code === 'timeout') {
-        alert(timeoutMessage);
+        showError(timeoutMessage);
         return;
       }
       throw err;
@@ -136,7 +142,7 @@ export default function App(){
       navigate(ROUTES.examResult);
     } catch (err: any) {
       if (err?.code === 'timeout') {
-        alert(timeoutMessage);
+        showError(timeoutMessage);
         return;
       }
       throw err;
@@ -157,6 +163,11 @@ export default function App(){
         onLogout={onLogout}
       />
 
+      {toastError && (
+        <div role="alert" className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+          {toastError}
+        </div>
+      )}
       <main className="max-w-4xl mx-auto p-6 pt-24">
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
@@ -198,7 +209,11 @@ export default function App(){
               <ExamResultPage result={result} />
             </ProtectedRoute>
           } />
-          <Route path={ROUTES.settings} element={<SettingsPage isAdmin={role === 'ADMIN'} token={token} />} />
+          <Route path={ROUTES.settings} element={
+            <ProtectedRoute allow={isAuthed}>
+              <SettingsPage isAdmin={role === 'ADMIN'} token={token} />
+            </ProtectedRoute>
+          } />
           <Route path={ROUTES.flashcards} element={
             <ProtectedRoute allow={isAuthed}>
               <FlashcardsPage />

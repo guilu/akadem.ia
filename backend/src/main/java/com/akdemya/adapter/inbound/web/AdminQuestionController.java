@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/questions")
-@CrossOrigin(origins = "*")
 public class AdminQuestionController {
   private final QuestionRepository questions;
   private final AnswerRepository answers;
@@ -49,11 +48,23 @@ public class AdminQuestionController {
     return ResponseEntity.ok(payload);
   }
 
+  private static final long MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10 MB
+  private static final java.util.Set<String> ALLOWED_CONTENT_TYPES = java.util.Set.of(
+      "application/json", "text/csv", "application/octet-stream", "text/plain"
+  );
+
   @PostMapping(value = "/import", consumes = "multipart/form-data")
   public ResponseEntity<?> importQuestions(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
                                            @RequestParam(defaultValue = "json") String format) throws Exception {
     if (file.isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "file_required"));
+    }
+    if (file.getSize() > MAX_UPLOAD_SIZE) {
+      return ResponseEntity.badRequest().body(java.util.Map.of("error", "file_too_large"));
+    }
+    String contentType = file.getContentType();
+    if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.split(";")[0].trim())) {
+      return ResponseEntity.badRequest().body(java.util.Map.of("error", "invalid_content_type"));
     }
     int created = 0;
     int errors = 0;
@@ -151,6 +162,10 @@ public class AdminQuestionController {
 
   private String escape(String value) {
     String v = value == null ? "" : value;
+    // Prevent CSV injection: prefix formula-triggering characters with a single quote
+    if (!v.isEmpty() && (v.charAt(0) == '=' || v.charAt(0) == '+' || v.charAt(0) == '-' || v.charAt(0) == '@')) {
+      v = "'" + v;
+    }
     if (v.contains(",") || v.contains("\"") || v.contains("\n")) {
       return "\"" + v.replace("\"", "\"\"") + "\"";
     }

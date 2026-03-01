@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/subjects")
-@CrossOrigin(origins = "*")
 public class AdminSubjectController {
   private final SubjectRepository subjects;
   private final UnitRepository units;

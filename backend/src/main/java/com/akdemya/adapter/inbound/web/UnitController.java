@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/units")
-@CrossOrigin(origins = "*")
 public class UnitController {
 
     private final ContentManagement contentService;
@@ -46,11 +46,13 @@ public class UnitController {
         return contentService.getUnitAvailability(subjectId, diff);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Unit create(@RequestBody Unit u) {
         return contentService.createUnit(u);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         contentService.deleteUnit(id);
