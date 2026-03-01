@@ -18,6 +18,12 @@
   .btn-outline {
     @apply border border-secondary/60 text-text;
   }
+  .btn-sm {
+    @apply px-2 py-1 text-xs rounded-md;
+  }
+  .btn-lg {
+    @apply px-5 py-3 text-base rounded-xl;
+  }
   nav[role="navigation"] [data-testid="flowbite-navbar-collapse"] ul {
     line-height: 2.25rem;
     align-items: center;

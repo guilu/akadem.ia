@@ -19,6 +19,16 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
   const [history, setHistory] = useState<ExamAttemptSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const INITIAL_SHOW = 5;
+
+  function scoreColor(percent: number) {
+    if (percent < 50) return 'text-red-500';
+    if (percent <= 60) return 'text-orange-500';
+    if (percent <= 80) return 'text-yellow-500';
+    return 'text-lime-500';
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -78,7 +88,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
         )}
         {!loading && !error && history.length > 0 && (
           <div className="grid gap-3">
-            {history.map(h => {
+            {(showAll ? history : history.slice(0, INITIAL_SHOW)).map(h => {
               const finished = Boolean(h.finishedAt);
               const timeSpent = finished && h.startedAt && h.finishedAt
                 ? Math.max(0, Math.floor((new Date(h.finishedAt).getTime() - new Date(h.startedAt).getTime()) / 1000))
@@ -89,7 +99,12 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                     <div className="font-semibold">{h.subjectName || 'Materia'}</div>
                     <div className="text-sm text-text/70">{new Date(h.startedAt).toLocaleString()}</div>
                     <div className="text-sm mt-1">Estado: <strong>{finished ? 'Finalizado' : 'En curso'}</strong></div>
-                    <div className="text-sm">Resultado: <strong>{(h.score ?? 0)} ({h.percent.toFixed(1)}%)</strong></div>
+                    <div className="text-sm">
+                      Resultado:{' '}
+                      <strong className={finished ? scoreColor(h.percent) : ''}>
+                        {(h.score ?? 0).toFixed(2)} ({h.percent.toFixed(1)}%)
+                      </strong>
+                    </div>
                     <div className="text-sm">Tiempo empleado: <strong>{finished ? formatDuration(timeSpent) : formatDuration(h.totalTimeSeconds)}</strong></div>
                   </div>
                   <div className="flex gap-2">
@@ -114,6 +129,14 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                 </Card>
               );
             })}
+            {history.length > INITIAL_SHOW && (
+              <button
+                className="btn btn-outline w-full"
+                onClick={() => setShowAll(v => !v)}
+              >
+                {showAll ? 'Ver menos' : `Ver ${history.length - INITIAL_SHOW} más`}
+              </button>
+            )}
           </div>
         )}
       </div>

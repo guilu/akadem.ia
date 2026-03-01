@@ -30,8 +30,9 @@ export default function UnitList({
 
   if (!units.length) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
-        No hay unidades disponibles.
+      <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay unidades con tarjetas</p>
+        <p className="mt-1 text-sm text-slate-500">Ve a <strong>Ajustes</strong> para añadir flashcards a tus unidades.</p>
       </div>
     );
   }

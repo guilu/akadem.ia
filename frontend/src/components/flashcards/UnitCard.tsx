@@ -14,7 +14,7 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
     <button
       type="button"
       onClick={() => navigate(`/flashcards/study?unitId=${unit.unitId}`)}
-      className="w-full text-left rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm transition hover:shadow-md hover:scale-[1.01] dark:border-slate-700 dark:bg-slate-800"
+      className="w-full text-left rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm transition hover:shadow-md hover:scale-[1.01] dark:border-slate-700 dark:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-secondary dark:bg-slate-700/70">
