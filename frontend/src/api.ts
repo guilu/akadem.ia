@@ -21,7 +21,7 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
 
 export async function apiJson<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs, ...fetchOptions } = options;
-  const { signal, clear } = mergeSignal(fetchOptions.signal, timeoutMs);
+  const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
   try {
     const res = await fetch(url, { ...fetchOptions, signal });
     if (!res.ok) {
@@ -48,7 +48,7 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
 
 export async function apiAuthJson<T>(url: string, token: string, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs, ...fetchOptions } = options;
-  const { signal, clear } = mergeSignal(fetchOptions.signal, timeoutMs);
+  const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
   try {
     const res = await fetch(url, {
       ...fetchOptions,
