@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/units")
-@CrossOrigin(origins = "*")
 public class AdminUnitController {
   private final UnitRepository units;
   private final SubjectRepository subjects;

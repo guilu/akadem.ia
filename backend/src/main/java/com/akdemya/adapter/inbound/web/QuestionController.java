@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/questions")
-@CrossOrigin(origins = "*")
 public class QuestionController {
 
     private final ContentManagement contentService;
@@ -40,11 +40,13 @@ public class QuestionController {
         }).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Question create(@RequestBody Question q) {
         return contentService.createQuestion(q);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         contentService.deleteAnswersByQuestion(id);
@@ -52,6 +54,7 @@ public class QuestionController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{qid}/answers")
     public Answer addAnswer(@PathVariable UUID qid, @RequestBody Answer a) {
         // Ensure question match?

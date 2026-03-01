@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/exams")
-@CrossOrigin(origins = "*")
 public class ExamController {
 
     private static final Logger log = LoggerFactory.getLogger(ExamController.class);
@@ -27,9 +26,10 @@ public class ExamController {
 
     @PostMapping("/attempts/start")
     public ResponseEntity<?> start(@RequestBody StartRequest req, @AuthenticationPrincipal User principal) {
-        String email = principal != null ? principal.getUsername() : "guest@akdemya";
-        // Construct Command with email
-        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(email, req.unitCounts(), req.minutes(), req.difficulty());
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(principal.getUsername(), req.unitCounts(), req.minutes(), req.difficulty());
         var response = examUseCase.startExam(command);
         return ResponseEntity.ok(response);
     }

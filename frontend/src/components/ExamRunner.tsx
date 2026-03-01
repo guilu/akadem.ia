@@ -19,9 +19,19 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
   const [finished, setFinished] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
 
-  const shuffled = useMemo(() => (
-    questions.map(q => ({ ...q, answers: [...q.answers].sort(() => Math.random() - 0.5) }))
-  ), [questions]);
+  const shuffled = useMemo(() => {
+    function secureShuffleArray<T>(arr: T[]): T[] {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        const j = buf[0] % (i + 1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    return questions.map(q => ({ ...q, answers: secureShuffleArray(q.answers) }));
+  }, [questions]);
 
   useEffect(() => {
     if (totalTimeSeconds <= 0 || finished) return;

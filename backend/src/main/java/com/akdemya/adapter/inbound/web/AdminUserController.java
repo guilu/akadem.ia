@@ -3,21 +3,34 @@ package com.akdemya.adapter.inbound.web;
 import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.out.PasswordHasher;
 import com.akdemya.domain.port.out.UserRepository;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/users")
-@CrossOrigin(origins = "*")
 public class AdminUserController {
+  private static final String TEMP_PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+  private static final int TEMP_PASSWORD_LENGTH = 16;
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
   private final UserRepository users;
   private final PasswordHasher hasher;
 
   public AdminUserController(UserRepository users, PasswordHasher hasher) {
     this.users = users;
     this.hasher = hasher;
+  }
+
+  private String generateTemporaryPassword() {
+    StringBuilder sb = new StringBuilder(TEMP_PASSWORD_LENGTH);
+    for (int i = 0; i < TEMP_PASSWORD_LENGTH; i++) {
+      sb.append(TEMP_PASSWORD_CHARS.charAt(SECURE_RANDOM.nextInt(TEMP_PASSWORD_CHARS.length())));
+    }
+    return sb.toString();
   }
 
   @GetMapping
@@ -30,11 +43,13 @@ public class AdminUserController {
   @PostMapping
   public ResponseEntity<?> create(@RequestBody UserRequest req) {
     if (users.existsByEmail(req.email())) {
-      return ResponseEntity.badRequest().body(java.util.Map.of("error", "email_in_use"));
+      return ResponseEntity.badRequest().body(Map.of("error", "email_in_use"));
     }
-    String passwordHash = hasher.encode("demo1234");
+    String temporaryPassword = generateTemporaryPassword();
+    String passwordHash = hasher.encode(temporaryPassword);
     AppUser user = AppUser.create(req.email(), passwordHash, req.role(), req.firstName(), req.lastName(), req.occupation());
-    return ResponseEntity.ok(UserResponse.from(users.save(user)));
+    UserResponse saved = UserResponse.from(users.save(user));
+    return ResponseEntity.ok(Map.of("user", saved, "temporaryPassword", temporaryPassword));
   }
 
   @PutMapping("/{id}")
