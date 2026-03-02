@@ -65,73 +65,87 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden px-6 py-24 sm:py-32 text-center">
+      <section className="relative overflow-hidden px-6 py-24 sm:py-32">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/15" />
         <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
-        <div className="relative max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-semibold tracking-wide">
-            <span aria-hidden>★</span>
-            <span>Preparación inteligente para opositores</span>
-          </div>
+        <div className="relative max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-6 tracking-tight">
-            Aprueba la{' '}
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Constitución
-            </span>
-            <br />sin improvisar
-          </h1>
+          {/* Text */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-semibold tracking-wide">
+              <span aria-hidden>★</span>
+              <span>Preparación inteligente para opositores</span>
+            </div>
 
-          <p className="text-lg sm:text-xl text-text/65 mb-10 max-w-xl mx-auto leading-relaxed">
-            Simulacros cronometrados, flashcards y análisis de progreso, todo en una plataforma diseñada para convertir tu esfuerzo en resultados.
-          </p>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-6 tracking-tight">
+              Aprueba la{' '}
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                Constitución
+              </span>
+              <br />sin improvisar
+            </h1>
 
-          <div className="flex flex-wrap gap-3 justify-center">
-            {isAuthed ? (
-              <>
-                <Link
-                  className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
-                  to={ROUTES.subjects}
-                >
-                  <Play className="w-5 h-5" />
-                  Crear examen
-                </Link>
-                <Link
-                  className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2"
-                  to={ROUTES.flashcards}
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Estudiar flashcards
-                </Link>
-                {activeAttemptId && (
+            <p className="text-lg sm:text-xl text-text/65 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Simulacros cronometrados, flashcards y análisis de progreso, todo en una plataforma diseñada para convertir tu esfuerzo en resultados.
+            </p>
+
+            <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+              {isAuthed ? (
+                <>
+                  <Link
+                    className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
+                    to={ROUTES.subjects}
+                  >
+                    <Play className="w-5 h-5" />
+                    Crear examen
+                  </Link>
+                  <Link
+                    className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2"
+                    to={ROUTES.flashcards}
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Estudiar flashcards
+                  </Link>
+                  {activeAttemptId && (
+                    <Link
+                      className="btn btn-outline rounded-full px-8 py-3 text-base flex items-center gap-2"
+                      to={ROUTES.examAttempt(activeAttemptId)}
+                    >
+                      <ArrowsRepeat className="w-5 h-5" />
+                      Reanudar examen
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link
+                    className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
+                    to={ROUTES.register}
+                  >
+                    <UserAdd className="w-5 h-5" />
+                    Empieza gratis
+                  </Link>
                   <Link
                     className="btn btn-outline rounded-full px-8 py-3 text-base flex items-center gap-2"
-                    to={ROUTES.examAttempt(activeAttemptId)}
+                    to={ROUTES.login}
                   >
-                    <ArrowsRepeat className="w-5 h-5" />
-                    Reanudar examen
+                    <ArrowRightToBracket className="w-5 h-5" />
+                    Ya tengo cuenta
                   </Link>
-                )}
-              </>
-            ) : (
-              <>
-                <Link
-                  className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
-                  to={ROUTES.register}
-                >
-                  <UserAdd className="w-5 h-5" />
-                  Empieza gratis
-                </Link>
-                <Link
-                  className="btn btn-outline rounded-full px-8 py-3 text-base flex items-center gap-2"
-                  to={ROUTES.login}
-                >
-                  <ArrowRightToBracket className="w-5 h-5" />
-                  Ya tengo cuenta
-                </Link>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
+
+          {/* Image */}
+          <div className="flex-1 flex justify-center lg:justify-end">
+            <img
+              src="/assets/landing/constitution-books.png"
+              alt="Libros de la Constitución española"
+              className="w-full max-w-sm lg:max-w-lg drop-shadow-2xl"
+            />
+          </div>
+
         </div>
       </section>
 
