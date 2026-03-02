@@ -143,7 +143,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
               src="/assets/landing/constitution-books.png"
               alt="Libros de la Constitución española"
               className="drop-shadow-2xl"
-              style={{ width: '125%' }}
+              style={{ maxWidth: '150%' }}
             />
           </div>
 
