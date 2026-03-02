@@ -190,13 +190,13 @@ export default function FlashcardsStudyPage() {
                   </div>
                 </button>
                 <button
-                  className="flex-1 rounded-xl border border-accent/30 bg-accent/10 text-accent hover:bg-accent/15 transition-colors px-4 py-3 text-sm font-semibold disabled:opacity-50"
+                  className="flex-1 rounded-xl border border-yellow-400/30 bg-yellow-400/10 text-yellow-500 hover:bg-yellow-400/15 transition-colors px-4 py-3 text-sm font-semibold disabled:opacity-50"
                   onClick={() => handleReview('GOOD')}
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
                     <span>Good</span>
-                    <span className="text-xs text-accent/60">{currentItem?.intervalHints?.good}</span>
+                    <span className="text-xs text-yellow-500/60">{currentItem?.intervalHints?.good}</span>
                   </div>
                 </button>
                 <button
