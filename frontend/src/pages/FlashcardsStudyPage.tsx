@@ -160,7 +160,7 @@ export default function FlashcardsStudyPage() {
       {/* ── Card ── */}
       <div className="relative">
         <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-bg brightness-90 dark:brightness-75" />
-        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[52vh] flex flex-col">
+        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[52vh] flex flex-col bg-bg">
           <div className="flex-1">
             {!showAnswer ? (
               <p className="text-xl font-semibold leading-relaxed">{currentItem?.front || 'Sin tarjetas disponibles.'}</p>
