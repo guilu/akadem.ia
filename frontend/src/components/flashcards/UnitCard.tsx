@@ -7,36 +7,32 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
   const reviewCount = unit.reviewCount ?? 0;
   const newCount = unit.newCount ?? 0;
   const dueCount = unit.dueCount ?? 0;
-
   const pending = (unit.dueCount ?? reviewCount) + newCount;
 
   return (
     <button
       type="button"
       onClick={() => navigate(`/flashcards/study?unitId=${unit.unitId}`)}
-      className="w-full text-left rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm transition hover:shadow-md hover:scale-[1.01] dark:border-slate-700 dark:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+      className="group w-full text-left border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-secondary dark:bg-slate-700/70">
-          <BookOpen className="w-6 h-6" />
+      <div className="flex items-center gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">
+          <BookOpen className="w-5 h-5" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <div className="font-semibold text-slate-900 dark:text-white">{unit.unitName}</div>
-            <div className="flex flex-col items-end text-slate-500 dark:text-slate-400">
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-200">{pending}</div>
-              <div className="text-xs uppercase tracking-wide">cards</div>
+            <div className="font-bold text-sm leading-snug">{unit.unitName}</div>
+            <div className="text-right shrink-0">
+              <div className="text-xl font-extrabold tabular-nums">{pending}</div>
+              <div className="text-xs text-text/40 uppercase tracking-wide">cards</div>
             </div>
           </div>
-          {/* metrics bar removed */}
         </div>
-        <div className="text-slate-400">›</div>
+        <div className="text-text/30 text-lg">›</div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500">
-        <span>
-          🟡 {reviewCount} en repaso{dueCount > 0 ? ` (${dueCount} pendientes)` : ''}
-        </span>
+      <div className="mt-3 flex flex-wrap gap-4 text-xs text-text/55">
+        <span>🟡 {reviewCount} en repaso{dueCount > 0 ? ` (${dueCount} pendientes)` : ''}</span>
         <span>🆕 {newCount} nuevas</span>
       </div>
     </button>
