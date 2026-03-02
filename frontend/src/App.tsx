@@ -23,6 +23,7 @@ export default function App(){
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
+  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register;
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [minutes, setMinutes] = useState(20);
@@ -170,7 +171,7 @@ export default function App(){
           {toastError}
         </div>
       )}
-      <main className={isHome ? 'pt-20 overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
+      <main className={isFullWidth ? 'pt-20 overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
