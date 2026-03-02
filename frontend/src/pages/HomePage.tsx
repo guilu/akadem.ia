@@ -137,12 +137,12 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             </div>
           </div>
 
-          {/* Image */}
-          <div className="flex-1 flex justify-center lg:justify-end">
+          {/* Image — desktop only */}
+          <div className="hidden lg:flex flex-1 justify-end">
             <img
               src="/assets/landing/constitution-books.png"
               alt="Libros de la Constitución española"
-              className="w-full max-w-sm lg:max-w-lg drop-shadow-2xl"
+              className="w-full max-w-2xl drop-shadow-2xl"
             />
           </div>
 
