@@ -31,7 +31,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         className="flex items-center gap-3 text-2xl font-bold"
       >
         <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-16 h-16" />
-        akadem.ia
+       ConstituApp
       </NavbarBrand>
       <div className="flex md:order-2 items-center gap-2">
         <button

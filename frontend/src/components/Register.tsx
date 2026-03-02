@@ -60,7 +60,7 @@ export default function Register({ onToken }: { onToken: (t: string) => void }) 
   }
 
   return (
-    <div className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-16">
+    <div className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex items-top justify-center px-6 py-16">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/15" />
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl" />
 
