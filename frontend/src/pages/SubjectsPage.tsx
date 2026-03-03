@@ -46,7 +46,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
-        <div>
+        <div className="py-[1.5rem]">
           <h1 className="text-3xl font-extrabold tracking-tight">
             Elige tu{' '}
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">

@@ -65,7 +65,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden px-6 py-[3.5rem]">
+      <section className="relative overflow-hidden px-6 py-[1.5rem]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/15" />
         <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
         <div className="relative max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">

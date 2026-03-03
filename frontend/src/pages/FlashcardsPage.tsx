@@ -57,7 +57,7 @@ export default function FlashcardsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <div>
+        <div className="py-[1.5rem]">
           <h1 className="text-3xl font-extrabold tracking-tight">
             Flash
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">

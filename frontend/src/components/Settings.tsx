@@ -302,7 +302,7 @@ export default function Settings({ token }: { token: string }) {
     <div className="grid md:grid-cols-[200px_1fr] gap-6">
 
       {/* ── Sidebar ── */}
-      <aside className={`${card} h-fit`}>
+      <aside className={`${card} h-fit mt-[4.5rem]`}>
         <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Administración</div>
         {navItems.map(({ id, label, icon }) => (
           <button
@@ -322,8 +322,8 @@ export default function Settings({ token }: { token: string }) {
 
         {/* ── Usuarios ── */}
         {tab === 'users' && (
-          <div className="grid gap-5">
-            <h2 className="text-xl font-extrabold tracking-tight">Usuarios</h2>
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Usuarios</span></h2>
 
             <div className={card}>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
@@ -389,8 +389,8 @@ export default function Settings({ token }: { token: string }) {
 
         {/* ── Materias ── */}
         {tab === 'subjects' && (
-          <div className="grid gap-5">
-            <h2 className="text-xl font-extrabold tracking-tight">Materias</h2>
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
 
             <div className={card}>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
@@ -440,8 +440,8 @@ export default function Settings({ token }: { token: string }) {
 
         {/* ── Unidades ── */}
         {tab === 'units' && (
-          <div className="grid gap-5">
-            <h2 className="text-xl font-extrabold tracking-tight">Unidades</h2>
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
 
             <div className={card}>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
@@ -500,9 +500,9 @@ export default function Settings({ token }: { token: string }) {
 
         {/* ── Preguntas ── */}
         {tab === 'questions' && (
-          <div className="grid gap-5">
+          <div className="grid gap-5 py-[1.5rem]">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xl font-extrabold tracking-tight">Preguntas</h2>
+              <h2 className="text-xl font-extrabold tracking-tight"> Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
                   <FileExport className="w-4 h-4" />Exportar JSON
