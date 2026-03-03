@@ -171,7 +171,7 @@ export default function App(){
           {toastError}
         </div>
       )}
-      <main className={isFullWidth ? 'pt-20 overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
+      <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />

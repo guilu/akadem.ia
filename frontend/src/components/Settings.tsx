@@ -302,7 +302,7 @@ export default function Settings({ token }: { token: string }) {
     <div className="grid md:grid-cols-[200px_1fr] gap-6">
 
       {/* ── Sidebar ── */}
-      <aside className={`${card} h-fit mt-[4.5rem]`}>
+      <aside className={`${card} h-fit lg:mt-[4.5rem]`}>
         <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Administración</div>
         {navItems.map(({ id, label, icon }) => (
           <button
