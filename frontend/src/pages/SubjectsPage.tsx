@@ -1,6 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Alert, Card } from 'flowbite-react';
 import { formatDuration } from '../utils/format';
 import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
@@ -15,7 +14,6 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
   onViewResult: (attemptId: string) => void;
   onResumeAttempt: (attemptId: string) => void;
 }) {
-  const navigate = useNavigate();
   const [history, setHistory] = useState<ExamAttemptSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,49 +41,73 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
       .finally(() => setLoading(false));
   }, [token, apiBase]);
 
-  // formatDuration moved to utils
-
   return (
     <section className="mb-8">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold">Exámenes</h2>
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="py-[1.5rem]">
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Elige tu{' '}
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              simulacro
+            </span>
+          </h1>
+          <p className="text-text/55 text-sm mt-1">Selecciona una materia para configurar tu examen.</p>
+        </div>
         {activeAttemptId && (
-          <Link className="btn btn-secondary flex items-center gap-2" to={ROUTES.examAttempt(activeAttemptId)}>
+          <Link
+            className="btn btn-outline rounded-full px-5 py-2.5 text-sm flex items-center gap-2"
+            to={ROUTES.examAttempt(activeAttemptId)}
+          >
             <ArrowsRepeat className="w-4 h-4" />
             Reanudar examen
           </Link>
         )}
       </div>
 
-      <div id="subjects" className="grid sm:grid-cols-2 gap-4">
+      {/* ── Subject cards ── */}
+      <div className="grid sm:grid-cols-2 gap-4 mb-12">
         {subjects.map(s => (
-          <Card key={s.id} className="border border-secondary/40 bg-bg">
-            <div className="text-lg font-semibold">{s.name}</div>
-            <div className="text-sm text-text/70">{s.description}</div>
-            <div className="mt-3">
-              <Link className="btn btn-primary inline-flex items-center gap-2 w-auto" to={ROUTES.subjectBuilder(s.id)}>
-                <Plus className="w-4 h-4" />
-                Crear examen
-              </Link>
+          <article
+            key={s.id}
+            className="group border border-secondary/25 rounded-2xl p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 transition-colors group-hover:bg-primary/15">
+              <Plus className="w-5 h-5" />
             </div>
-          </Card>
+            <div className="text-lg font-bold mb-1">{s.name}</div>
+            <div className="text-sm text-text/55 mb-5 leading-relaxed">{s.description}</div>
+            <Link
+              className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
+              to={ROUTES.subjectBuilder(s.id)}
+            >
+              <Plus className="w-4 h-4" />
+              Crear examen
+            </Link>
+          </article>
         ))}
       </div>
 
-      <div className="mt-10">
-        <h3 className="text-lg font-semibold mb-3">Historial de exámenes</h3>
+      {/* ── History ── */}
+      <div>
+        <h2 className="text-xl font-extrabold tracking-tight mb-4">Historial de exámenes</h2>
+
         {loading && (
-          <div className="text-text/70">Cargando historial...</div>
+          <div className="text-sm text-text/55">Cargando historial...</div>
         )}
+
         {!loading && error && (
-          <Alert color="failure" className="text-sm">{error}</Alert>
+          <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">{error}</div>
         )}
+
         {!loading && !error && history.length === 0 && (
-          <Card className="border border-secondary/40 bg-bg">
-            <div className="text-lg font-semibold">Aún no tienes exámenes realizados</div>
-            <div className="text-sm text-text/70">Empieza tu primer simulacro para ver tu progreso aquí.</div>
-          </Card>
+          <div className="border border-secondary/25 rounded-2xl p-6">
+            <div className="text-base font-bold mb-1">Aún no tienes exámenes realizados</div>
+            <div className="text-sm text-text/55">Empieza tu primer simulacro para ver tu progreso aquí.</div>
+          </div>
         )}
+
         {!loading && !error && history.length > 0 && (
           <div className="grid gap-3">
             {(showAll ? history : history.slice(0, INITIAL_SHOW)).map(h => {
@@ -93,24 +115,35 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
               const timeSpent = finished && h.startedAt && h.finishedAt
                 ? Math.max(0, Math.floor((new Date(h.finishedAt).getTime() - new Date(h.startedAt).getTime()) / 1000))
                 : 0;
+              const pct = h.percent ?? 0;
+              const scoreColor = pct < 50 ? 'text-red-400' : pct < 70 ? 'text-orange-400' : pct < 90 ? 'text-yellow-500' : 'text-lime-500';
+
               return (
-                <Card key={h.attemptId} className="border border-secondary/40 bg-bg flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                  <div>
-                    <div className="font-semibold">{h.subjectName || 'Materia'}</div>
-                    <div className="text-sm text-text/70">{new Date(h.startedAt).toLocaleString()}</div>
-                    <div className="text-sm mt-1">Estado: <strong>{finished ? 'Finalizado' : 'En curso'}</strong></div>
-                    <div className="text-sm">
-                      Resultado:{' '}
-                      <strong className={finished ? scoreColor(h.percent) : ''}>
-                        {(h.score ?? 0).toFixed(2)} ({h.percent.toFixed(1)}%)
-                      </strong>
+                <div
+                  key={h.attemptId}
+                  className="border border-secondary/25 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-sm">{h.subjectName || 'Materia'}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                        finished
+                          ? 'border-lime-400/30 bg-lime-400/10 text-lime-500'
+                          : 'border-accent/30 bg-accent/10 text-accent'
+                      }`}>
+                        {finished ? 'Finalizado' : 'En curso'}
+                      </span>
                     </div>
-                    <div className="text-sm">Tiempo empleado: <strong>{finished ? formatDuration(timeSpent) : formatDuration(h.totalTimeSeconds)}</strong></div>
+                    <div className="text-xs text-text/45 mb-2">{new Date(h.startedAt).toLocaleString()}</div>
+                    <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-text/60">
+                      <span>Resultado: <strong className={`${scoreColor}`}>{(h.score ?? 0)} ({pct.toFixed(1)}%)</strong></span>
+                      <span>Tiempo: <strong>{finished ? formatDuration(timeSpent) : formatDuration(h.totalTimeSeconds)}</strong></span>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div>
                     {finished ? (
                       <button
-                        className="btn btn-secondary flex items-center gap-2"
+                        className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
                         onClick={() => onViewResult(h.attemptId)}
                       >
                         <ClipboardCheck className="w-4 h-4" />
@@ -118,7 +151,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                       </button>
                     ) : (
                       <button
-                        className="btn btn-primary flex items-center gap-2"
+                        className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
                         <ArrowsRepeat className="w-4 h-4" />
@@ -126,7 +159,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                       </button>
                     )}
                   </div>
-                </Card>
+                </div>
               );
             })}
             {history.length > INITIAL_SHOW && (

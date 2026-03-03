@@ -4,27 +4,24 @@ export default function FlashcardsTabs({ active, onTab }: { active: Tab; onTab?:
   const tabs: { key: Tab; label: string }[] = [
     { key: 'estudio', label: 'Estudio' },
     { key: 'examinar', label: 'Examinar' },
-    { key: 'historial', label: 'Historial' }
+    { key: 'historial', label: 'Historial' },
   ];
 
   return (
-    <div className="inline-flex bg-white/80 dark:bg-slate-800 rounded-full p-1 shadow-sm border border-gray-200 dark:border-slate-700">
-      {tabs.map((tab) => {
-        const isActive = tab.key === active;
-        return (
-          <button
-            key={tab.key}
-            onClick={() => onTab?.(tab.key)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-              isActive
-                ? 'bg-primary text-white shadow'
-                : 'text-slate-500 hover:text-slate-900 dark:text-slate-300'
-            }`}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
+    <div className="inline-flex bg-secondary/10 border border-secondary/25 rounded-full p-1">
+      {tabs.map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => onTab?.(tab.key)}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+            tab.key === active
+              ? 'bg-primary text-bg shadow-sm'
+              : 'text-text/60 hover:text-text'
+          }`}
+        >
+          {tab.label}
+        </button>
+      ))}
     </div>
   );
 }

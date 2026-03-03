@@ -54,18 +54,18 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
 
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
-        <h2 className="text-xl font-semibold mb-2">Cargando intento...</h2>
-        <p className="text-slate-400">Espera un momento.</p>
+      <div className="max-w-xl mx-auto border border-secondary/25 rounded-2xl p-8">
+        <h2 className="text-xl font-bold mb-2">Cargando intento...</h2>
+        <p className="text-text/55">Espera un momento.</p>
       </div>
     );
   }
 
   if (error || !attempt) {
     return (
-      <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
-        <h2 className="text-xl font-semibold mb-2">Error</h2>
-        <p className="text-slate-400">{error || 'No se pudo cargar el intento.'}</p>
+      <div className="max-w-xl mx-auto border border-secondary/25 rounded-2xl p-8">
+        <h2 className="text-xl font-bold mb-2">Error</h2>
+        <p className="text-text/55">{error || 'No se pudo cargar el intento.'}</p>
       </div>
     );
   }

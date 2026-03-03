@@ -15,7 +15,7 @@ export type UnitSummary = {
 
 type GlobalQueue = { new: number; due: number; learning: number };
 
-export default function FlashcardsPage(){
+export default function FlashcardsPage() {
   const navigate = useNavigate();
   const [units, setUnits] = useState<UnitSummary[]>([]);
   const [search, setSearch] = useState('');
@@ -31,18 +31,9 @@ export default function FlashcardsPage(){
     setLoading(true);
     setError('');
     apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
-      .then((data) => {
-        if (!mounted) return;
-        setUnits(data || []);
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setError('No se pudieron cargar las unidades.');
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
+      .then((data) => { if (mounted) setUnits(data || []); })
+      .catch(() => { if (mounted) setError('No se pudieron cargar las unidades.'); })
+      .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [token]);
 
@@ -50,57 +41,55 @@ export default function FlashcardsPage(){
     let mounted = true;
     setGlobalLoading(true);
     apiAuthJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`, token)
-      .then((data) => {
-        if (!mounted) return;
-        setGlobalQueue(data || null);
-      })
-      .catch(() => { /* silencioso, no bloquea la lista de unidades */ })
-      .finally(() => {
-        if (!mounted) return;
-        setGlobalLoading(false);
-      });
+      .then((data) => { if (mounted) setGlobalQueue(data || null); })
+      .catch(() => {})
+      .finally(() => { if (mounted) setGlobalLoading(false); });
     return () => { mounted = false; };
   }, [token]);
 
   const filteredUnits = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return units;
-    return units.filter((u) => u.unitName.toLowerCase().includes(q));
+    return q ? units.filter((u) => u.unitName.toLowerCase().includes(q)) : units;
   }, [units, search]);
 
   const totalPending = globalQueue ? globalQueue.new + globalQueue.due + globalQueue.learning : 0;
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold">Flashcards</h1>
+      <header className="space-y-3">
+        <div className="py-[1.5rem]">
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Flash
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              cards
+            </span>
+          </h1>
+          <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
+        </div>
         <FlashcardsTabs active="examinar" onTab={(tab) => {
           if (tab === 'estudio') navigate('/flashcards/study');
           if (tab === 'historial') navigate('/flashcards/history');
         }} />
       </header>
 
+      {/* ── Global queue strip ── */}
       {globalLoading ? (
-        <div className="animate-pulse h-12 rounded-2xl bg-white/60 dark:bg-slate-800/60" />
+        <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
       ) : globalQueue && totalPending === 0 ? (
-        <div className="rounded-2xl bg-white dark:bg-slate-900 px-4 py-3 shadow text-center text-sm text-secondary">
+        <div className="border border-secondary/25 rounded-2xl px-5 py-3 text-center text-sm text-text/60">
           Nada pendiente hoy 🎉
         </div>
       ) : globalQueue ? (
-        <div className="flex items-center justify-around rounded-2xl bg-white dark:bg-slate-900 px-4 py-3 shadow text-sm font-medium">
-          <span className="text-emerald-600">🆕 {globalQueue.new} nuevas</span>
-          <span className="text-amber-500">⚡ {globalQueue.learning} aprendiendo</span>
-          <span className="text-blue-500">🔁 {globalQueue.due} pendientes</span>
+        <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
+          <span className="text-lime-500">🆕 {globalQueue.new} nuevas</span>
+          <span className="text-accent">⚡ {globalQueue.learning} aprendiendo</span>
+          <span className="text-primary">🔁 {globalQueue.due} pendientes</span>
         </div>
       ) : null}
 
       <section className="space-y-4">
         <SearchInput value={search} onChange={setSearch} />
-        <UnitList
-          loading={loading}
-          error={error}
-          units={filteredUnits}
-        />
+        <UnitList loading={loading} error={error} units={filteredUnits} />
       </section>
     </div>
   );

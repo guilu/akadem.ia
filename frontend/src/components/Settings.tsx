@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, FileInput, Modal, ModalBody, ModalFooter, ModalHeader, Pagination, Select, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from 'flowbite-react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 
@@ -40,6 +39,77 @@ export type AdminQuestion = {
 
 type Tab = 'users' | 'subjects' | 'units' | 'questions';
 
+const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
+const card = 'border border-secondary/25 rounded-2xl p-6';
+const btnPrimary = 'btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2 disabled:opacity-60';
+const btnOutline = 'btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2 disabled:opacity-50';
+const btnDanger = 'inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm bg-red-500 text-white hover:opacity-90 transition-opacity disabled:opacity-50';
+
+function Th({ children, className = '' }: { children?: React.ReactNode; className?: string }) {
+  return <th className={`text-left py-2 px-3 text-xs text-text/50 uppercase tracking-wide font-semibold ${className}`}>{children}</th>;
+}
+function Td({ children, className = '' }: { children?: React.ReactNode; className?: string }) {
+  return <td className={`py-3 px-3 text-sm ${className}`}>{children}</td>;
+}
+
+function DeleteModal({
+  title, body, error, loading, requireText,
+  onClose, onConfirm
+}: {
+  title: string;
+  body: React.ReactNode;
+  error: string;
+  loading: boolean;
+  requireText?: { value: string; onChange: (v: string) => void; passes: boolean };
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+      <div className="bg-bg border border-secondary/25 rounded-2xl p-6 w-full max-w-md shadow-xl">
+        <h3 className="text-lg font-bold mb-4">{title}</h3>
+        <div className="mb-4">{body}</div>
+        {requireText && (
+          <input
+            className={inp + ' mb-3'}
+            placeholder='Escribe "eliminar" para confirmar'
+            value={requireText.value}
+            onChange={e => requireText.onChange(e.target.value)}
+          />
+        )}
+        {error && (
+          <div className="mb-3 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-2 text-sm text-red-400">{error}</div>
+        )}
+        <div className="flex gap-2 justify-end">
+          <button className={btnOutline} onClick={onClose}>
+            <CircleMinus className="w-4 h-4" />
+            Cancelar
+          </button>
+          <button
+            className={btnDanger}
+            disabled={loading || (requireText ? !requireText.passes : false)}
+            onClick={onConfirm}
+          >
+            <TrashBin className="w-4 h-4" />
+            {loading ? 'Eliminando...' : 'Eliminar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-center gap-3 mt-4 text-sm">
+      <button disabled={page <= 1} onClick={() => onChange(page - 1)} className={btnOutline}>‹ Anterior</button>
+      <span className="text-text/50">{page} / {totalPages}</span>
+      <button disabled={page >= totalPages} onClick={() => onChange(page + 1)} className={btnOutline}>Siguiente ›</button>
+    </div>
+  );
+}
+
 export default function Settings({ token }: { token: string }) {
   const [tab, setTab] = useState<Tab>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -74,11 +144,7 @@ export default function Settings({ token }: { token: string }) {
   const [questionPage, setQuestionPage] = useState(1);
   const [questionTotalPages, setQuestionTotalPages] = useState(1);
   const [questionForm, setQuestionForm] = useState<AdminQuestion>({
-    id: '',
-    unitId: '',
-    text: '',
-    explanation: '',
-    difficulty: 'EASY',
+    id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY',
     answers: [
       { text: '', correct: true },
       { text: '', correct: false },
@@ -100,198 +166,39 @@ export default function Settings({ token }: { token: string }) {
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState('');
 
-  const subjectById = useMemo(() => {
-    return subjects.reduce((acc, subject) => {
-      acc[subject.id] = subject;
-      return acc;
-    }, {} as Record<string, AdminSubject>);
-  }, [subjects]);
+  const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
+  const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
+  const subjectOptions = useMemo(() => subjects.map(s => ({ value: s.id, label: s.name })), [subjects]);
+  const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
 
-  const unitById = useMemo(() => {
-    return units.reduce((acc, unit) => {
-      acc[unit.id] = unit;
-      return acc;
-    }, {} as Record<string, AdminUnit>);
-  }, [units]);
-
-  const subjectOptions = useMemo(() => (
-    subjects.map(s => ({ value: s.id, label: s.name }))
-  ), [subjects]);
-
-  const unitOptions = useMemo(() => (
-    units.map(u => ({ value: u.id, label: u.name }))
-  ), [units]);
-
-  const userRows = useMemo(() => users.map(u => (
-    <TableRow key={u.id} className="border-secondary/30 bg-transparent">
-      <TableCell>{u.email}</TableCell>
-      <TableCell className="hidden sm:table-cell">{u.role}</TableCell>
-      <TableCell className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <button type="button" className="text-accent cursor-pointer" onClick={()=>setForm(u)} aria-label="Editar" title="Editar">
-            <Pen className="w-4 h-4" />
-          </button>
-          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>setConfirmDelete(u)} aria-label="Eliminar" title="Eliminar">
-            <TrashBin className="w-4 h-4" />
-          </button>
-        </div>
-      </TableCell>
-    </TableRow>
-  )), [users]);
-
-  const subjectRows = useMemo(() => subjects.map(s => (
-    <TableRow key={s.id} className="border-secondary/30 bg-transparent">
-      <TableCell>{s.name}</TableCell>
-      <TableCell className="hidden sm:table-cell">{s.description || '-'} </TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <button type="button" className="text-accent cursor-pointer" onClick={()=>setSubjectForm(s)} aria-label="Editar" title="Editar">
-            <Pen className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            className="text-red-400 cursor-pointer"
-            onClick={()=>{ setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }}
-            aria-label="Eliminar"
-            title="Eliminar"
-          >
-            <TrashBin className="w-4 h-4" />
-          </button>
-        </div>
-      </TableCell>
-    </TableRow>
-  )), [subjects]);
-
-  const unitRows = useMemo(() => units.map(u => (
-    <TableRow key={u.id} className="border-secondary/30 bg-transparent">
-      <TableCell>{subjectById[u.subjectId]?.name || '-'}</TableCell>
-      <TableCell>{u.name}</TableCell>
-      <TableCell className="hidden sm:table-cell">{u.description || '-'}</TableCell>
-      <TableCell className="hidden sm:table-cell">{u.orderIndex}</TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <button type="button" className="text-accent cursor-pointer" onClick={()=>setUnitForm(u)} aria-label="Editar" title="Editar">
-            <Pen className="w-4 h-4" />
-          </button>
-          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} aria-label="Eliminar" title="Eliminar">
-            <TrashBin className="w-4 h-4" />
-          </button>
-        </div>
-      </TableCell>
-    </TableRow>
-  )), [units, subjectById]);
-
-  const questionRows = useMemo(() => questions.map(q => (
-    <TableRow key={q.id} className="border-secondary/30 bg-transparent">
-      <TableCell>{q.text}</TableCell>
-      <TableCell className="hidden sm:table-cell">{q.difficulty}</TableCell>
-      <TableCell className="hidden sm:table-cell">{q.answers.map(a => a.text).join(', ')}</TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <button type="button" className="text-accent cursor-pointer" onClick={()=>{
-            const unit = unitById[q.unitId];
-            if (unit?.subjectId) {
-              setQuestionSubjectId(unit.subjectId);
-            }
-            setQuestionUnitId(q.unitId);
-            setQuestionForm({
-              id: q.id,
-              unitId: q.unitId,
-              text: q.text,
-              explanation: q.explanation || '',
-              difficulty: q.difficulty,
-              answers: q.answers.map(a => ({ text: a.text, correct: a.correct }))
-            });
-          }} aria-label="Editar" title="Editar">
-            <Pen className="w-4 h-4" />
-          </button>
-          <button type="button" className="text-red-400 cursor-pointer" onClick={()=>{ setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} aria-label="Eliminar" title="Eliminar">
-            <TrashBin className="w-4 h-4" />
-          </button>
-        </div>
-      </TableCell>
-    </TableRow>
-  )), [questions, unitById]);
-
-  function resetForm() {
-    setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' });
-  }
-
-  function resetSubjectForm() {
-    setSubjectForm({ id: '', name: '', description: '' });
-  }
-
-  function resetUnitForm() {
-    setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 });
-  }
-
+  function resetForm() { setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' }); }
+  function resetSubjectForm() { setSubjectForm({ id: '', name: '', description: '' }); }
+  function resetUnitForm() { setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 }); }
   function resetQuestionForm() {
-    setQuestionForm({
-      id: '',
-      unitId: '',
-      text: '',
-      explanation: '',
-      difficulty: 'EASY',
-      answers: [
-        { text: '', correct: true },
-        { text: '', correct: false },
-        { text: '', correct: false },
-        { text: '', correct: false }
-      ]
-    });
+    setQuestionForm({ id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY', answers: [{ text: '', correct: true }, { text: '', correct: false }, { text: '', correct: false }, { text: '', correct: false }] });
   }
 
   async function loadUsers(page = userPage) {
-    const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(
-      `${apiBase}/api/admin/users?page=${page - 1}&size=10`,
-      token
-    );
-    setUsers(data.items);
-    setUserPage(data.page + 1);
-    setUserTotalPages(data.totalPages || 1);
+    const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(`${apiBase}/api/admin/users?page=${page - 1}&size=10`, token);
+    setUsers(data.items); setUserPage(data.page + 1); setUserTotalPages(data.totalPages || 1);
   }
-
   async function loadSubjects() {
     const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/admin/subjects`, token);
     setSubjects(data);
   }
-
   async function loadUnits(subjectId: string) {
-    if (!subjectId) {
-      setUnits([]);
-      return;
-    }
+    if (!subjectId) { setUnits([]); return; }
     const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/admin/units?subjectId=${subjectId}`, token);
     setUnits(data);
   }
-
   async function loadQuestions(unitId: string, page = questionPage) {
-    if (!unitId) {
-      setQuestions([]);
-      setQuestionTotalPages(1);
-      return;
-    }
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(
-      `${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`,
-      token
-    );
-    setQuestions(data.items);
-    setQuestionPage(data.page + 1);
-    setQuestionTotalPages(data.totalPages || 1);
+    if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
+    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`, token);
+    setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
-  useEffect(() => {
-    loadUsers(1).catch(() => setUsers([]));
-    loadSubjects().catch(() => setSubjects([]));
-  }, []);
-
-  useEffect(() => {
-    if (tab === 'units') {
-      loadUnits(unitForm.subjectId).catch(() => setUnits([]));
-    }
-  }, [tab, unitForm.subjectId]);
-
+  useEffect(() => { loadUsers(1).catch(() => setUsers([])); loadSubjects().catch(() => setSubjects([])); }, []);
+  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId).catch(() => setUnits([])); }, [tab, unitForm.subjectId]);
   useEffect(() => {
     if (tab === 'questions') {
       loadUnits(questionSubjectId).catch(() => setUnits([]));
@@ -303,707 +210,523 @@ export default function Settings({ token }: { token: string }) {
     if (!form.email.trim()) return;
     setLoading(true);
     try {
-      if (isEditing) {
-        await apiAuthJson(`${apiBase}/api/admin/users/${form.id}`, token, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: form.email,
-            firstName: form.firstName || null,
-            lastName: form.lastName || null,
-            occupation: form.occupation || null,
-            role: form.role
-          })
-        });
-      } else {
-        await apiAuthJson(`${apiBase}/api/admin/users`, token, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: form.email,
-            firstName: form.firstName || null,
-            lastName: form.lastName || null,
-            occupation: form.occupation || null,
-            role: form.role
-          })
-        });
-      }
-      resetForm();
-      await loadUsers(1);
-    } finally {
-      setLoading(false);
-    }
+      const body = JSON.stringify({ email: form.email, firstName: form.firstName || null, lastName: form.lastName || null, occupation: form.occupation || null, role: form.role });
+      const opts = { method: isEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
+      await apiAuthJson(isEditing ? `${apiBase}/api/admin/users/${form.id}` : `${apiBase}/api/admin/users`, token, opts);
+      resetForm(); await loadUsers(1);
+    } finally { setLoading(false); }
   }
 
   async function saveSubject() {
     if (!subjectForm.name.trim()) return;
     setSubjectLoading(true);
     try {
-      if (isSubjectEditing) {
-        await apiAuthJson(`${apiBase}/api/admin/subjects/${subjectForm.id}`, token, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: subjectForm.name,
-            description: subjectForm.description || null
-          })
-        });
-      } else {
-        await apiAuthJson(`${apiBase}/api/admin/subjects`, token, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: subjectForm.name,
-            description: subjectForm.description || null
-          })
-        });
-      }
-      resetSubjectForm();
-      await loadSubjects();
-    } finally {
-      setSubjectLoading(false);
-    }
+      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null });
+      const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
+      await apiAuthJson(isSubjectEditing ? `${apiBase}/api/admin/subjects/${subjectForm.id}` : `${apiBase}/api/admin/subjects`, token, opts);
+      resetSubjectForm(); await loadSubjects();
+    } finally { setSubjectLoading(false); }
   }
 
-  async function removeUser(id: string) {
-    await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' });
-    await loadUsers(userPage);
-  }
-
-  async function removeSubject(id: string) {
-    await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' });
-    await loadSubjects();
-  }
+  async function removeUser(id: string) { await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' }); await loadUsers(userPage); }
+  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
     setUnitLoading(true);
     try {
-      const payload = {
-        subjectId: unitForm.subjectId,
-        name: unitForm.name,
-        description: unitForm.description || null,
-        orderIndex: unitForm.orderIndex || 0
-      };
-      if (isUnitEditing) {
-        await apiAuthJson(`${apiBase}/api/admin/units/${unitForm.id}`, token, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        await apiAuthJson(`${apiBase}/api/admin/units`, token, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-      resetUnitForm();
-      await loadUnits(unitForm.subjectId);
-      await loadSubjects();
-    } finally {
-      setUnitLoading(false);
-    }
+      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0 };
+      const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
+      await apiAuthJson(isUnitEditing ? `${apiBase}/api/admin/units/${unitForm.id}` : `${apiBase}/api/admin/units`, token, opts);
+      resetUnitForm(); await loadUnits(unitForm.subjectId); await loadSubjects();
+    } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) {
-    await apiAuthJson(`${apiBase}/api/admin/units/${id}`, token, { method: 'DELETE' });
-    await loadUnits(unitForm.subjectId);
-    await loadSubjects();
-  }
+  async function removeUnit(id: string) { await apiAuthJson(`${apiBase}/api/admin/units/${id}`, token, { method: 'DELETE' }); await loadUnits(unitForm.subjectId); await loadSubjects(); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
     if (!unitId || !questionForm.text.trim()) return;
     if (questionForm.answers.some(a => !a.text.trim())) return;
-    const correctCount = questionForm.answers.filter(a => a.correct).length;
-    if (correctCount !== 1) return;
+    if (questionForm.answers.filter(a => a.correct).length !== 1) return;
     setQuestionLoading(true);
     try {
-      const payload = {
-        unitId,
-        text: questionForm.text,
-        explanation: questionForm.explanation || null,
-        difficulty: questionForm.difficulty,
-        answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct }))
-      };
-      if (isQuestionEditing) {
-        await apiAuthJson(`${apiBase}/api/admin/questions/${questionForm.id}`, token, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        await apiAuthJson(`${apiBase}/api/admin/questions`, token, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-      resetQuestionForm();
-      await loadQuestions(unitId, 1);
-      await loadUnits(questionSubjectId);
-    } finally {
-      setQuestionLoading(false);
-    }
+      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })) };
+      const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
+      await apiAuthJson(isQuestionEditing ? `${apiBase}/api/admin/questions/${questionForm.id}` : `${apiBase}/api/admin/questions`, token, opts);
+      resetQuestionForm(); await loadQuestions(unitId, 1); await loadUnits(questionSubjectId);
+    } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) {
-    await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' });
-    await loadQuestions(unitId, questionPage);
-    await loadUnits(questionSubjectId);
-  }
+  async function removeQuestion(id: string, unitId: string) { await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' }); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
     try {
       const query = questionUnitId ? `?unitId=${questionUnitId}&format=${format}` : `?format=${format}`;
-      const res = await fetch(`${apiBase}/api/admin/questions/export${query}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch(`${apiBase}/api/admin/questions/export${query}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('export_failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const subjectName = subjects.find(s => s.id === questionSubjectId)?.name || 'preguntas';
-      const unitName = units.find(u => u.id === questionUnitId)?.name || 'preguntas';
-      const fileName = `${subjectName}-${unitName}.${format}`;
       a.href = url;
-      a.download = fileName;
+      a.download = `${subjects.find(s => s.id === questionSubjectId)?.name || 'preguntas'}-${units.find(u => u.id === questionUnitId)?.name || 'preguntas'}.${format}`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } finally {
-      setExportLoading(false);
-    }
+    } finally { setExportLoading(false); }
   }
 
   async function handleImport() {
-    if (!importFile) {
-      setImportMessage('Selecciona un archivo');
-      return;
-    }
-    setImportLoading(true);
-    setImportMessage('');
+    if (!importFile) { setImportMessage('Selecciona un archivo'); return; }
+    setImportLoading(true); setImportMessage('');
     try {
       const formData = new FormData();
       formData.append('file', importFile);
-      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
+      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'import_failed');
       setImportMessage(`Importadas: ${data.created || 0}. Errores: ${data.errors || 0}`);
       await loadQuestions(questionUnitId);
-    } catch {
-      setImportMessage('No se pudo importar');
-    } finally {
-      setImportLoading(false);
-    }
+    } catch { setImportMessage('No se pudo importar'); }
+    finally { setImportLoading(false); }
   }
 
+  const navItems = [
+    { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
+    { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
+    { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
+  ];
+
   return (
-    <div className="grid md:grid-cols-[220px_1fr] gap-6">
-      <aside className="border border-slate-800 rounded-xl p-3 h-fit">
-        <div className="text-xs text-text/70 mb-2">Administración</div>
-        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'users' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('users')}>
-          <Users className="w-4 h-4" />
-          Usuarios
-        </button>
-        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'subjects' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('subjects')}>
-          <BookOpen className="w-4 h-4" />
-          Materias
-        </button>
-        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'units' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('units')}>
-          <FolderOpen className="w-4 h-4" />
-          Unidades
-        </button>
-        <button className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${tab === 'questions' ? 'btn btn-secondary' : ''}`} onClick={()=>setTab('questions')}>
-          <FileLines className="w-4 h-4" />
-          Preguntas
-        </button>
+    <div className="grid md:grid-cols-[200px_1fr] gap-6">
+
+      {/* ── Sidebar ── */}
+      <aside className={`${card} h-fit lg:mt-[4.5rem]`}>
+        <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Administración</div>
+        {navItems.map(({ id, label, icon }) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm transition-colors mb-1 ${
+              tab === id ? 'bg-primary/10 text-primary font-semibold' : 'text-text/70 hover:bg-secondary/10'
+            }`}
+          >
+            {icon}{label}
+          </button>
+        ))}
       </aside>
 
-      <section className="grid gap-6">
+      {/* ── Content ── */}
+      <section className="grid gap-5">
+
+        {/* ── Usuarios ── */}
         {tab === 'users' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Usuarios</h2>
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="grid gap-2 sm:grid-cols-2">
-                <TextInput placeholder="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email: e.target.value }))} />
-                <Select value={form.role} onChange={e=>setForm(f=>({ ...f, role: e.target.value as AdminUser['role'] }))}>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="TEACHER">TEACHER</option>
-                  <option value="STUDENT">STUDENT</option>
-                </Select>
-                <TextInput placeholder="nombre" value={form.firstName || ''} onChange={e=>setForm(f=>({ ...f, firstName: e.target.value }))} />
-                <TextInput placeholder="apellidos" value={form.lastName || ''} onChange={e=>setForm(f=>({ ...f, lastName: e.target.value }))} />
-                <Select value={form.occupation || ''} onChange={e=>setForm(f=>({ ...f, occupation: e.target.value }))}>
-                  <option value="">ocupación (opcional)</option>
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Usuarios</span></h2>
+
+            <div className={card}>
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                <input className={inp} placeholder="Email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                <select className={inp} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as AdminUser['role'] }))}>
+                  <option value="ADMIN">Admin</option>
+                  <option value="TEACHER">Profesor</option>
+                  <option value="STUDENT">Estudiante</option>
+                </select>
+                <input className={inp} placeholder="Nombre" value={form.firstName || ''} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} />
+                <input className={inp} placeholder="Apellidos" value={form.lastName || ''} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} />
+                <select className={inp} value={form.occupation || ''} onChange={e => setForm(f => ({ ...f, occupation: e.target.value }))}>
+                  <option value="">Ocupación (opcional)</option>
                   <option value="STUDENT">Estudiante</option>
                   <option value="TEACHER">Profesor</option>
                   <option value="OPOSITOR">Opositor</option>
                   <option value="OTHER">Otro</option>
-                </Select>
+                </select>
               </div>
-              <div className="flex gap-2 mt-3">
-                <Button onClick={saveUser} disabled={loading} className="btn btn-primary flex items-center gap-2">
+              <div className="flex gap-2">
+                <button onClick={saveUser} disabled={loading} className={btnPrimary}>
                   {isEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isEditing ? 'Guardar cambios' : 'Crear usuario'}
-                </Button>
+                </button>
                 {isEditing && (
-                  <Button onClick={resetForm} color="light" className="btn btn-outline flex items-center gap-2">
-                    <CircleMinus className="w-4 h-4" />
-                    Cancelar
-                  </Button>
+                  <button onClick={resetForm} className={btnOutline}>
+                    <CircleMinus className="w-4 h-4" />Cancelar
+                  </button>
                 )}
-              </div>
-            </Card>
-
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHead>
-                    <TableHeadCell>Email</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Rol</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Nombre</TableHeadCell>
-                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
-                  </TableHead>
-                  <TableBody className="divide-y">
-                    {userRows}
-                  </TableBody>
-                </Table>
-              </div>
-              {userTotalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                  <Pagination
-                    currentPage={userPage}
-                    totalPages={userTotalPages}
-                    onPageChange={(page) => loadUsers(page)}
-                    showIcons
-                  />
-                </div>
-              )}
-            </Card>
-          </div>
-        )}
-
-        {tab === 'subjects' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Materias</h2>
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="grid gap-2 sm:grid-cols-2">
-                <TextInput placeholder="nombre" value={subjectForm.name} onChange={e=>setSubjectForm(f=>({ ...f, name: e.target.value }))} />
-                <TextInput placeholder="descripción (opcional)" value={subjectForm.description || ''} onChange={e=>setSubjectForm(f=>({ ...f, description: e.target.value }))} />
-              </div>
-              <div className="flex gap-2 mt-3">
-                <Button onClick={saveSubject} disabled={subjectLoading} className="btn btn-primary flex items-center gap-2">
-                  {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
-                </Button>
-                {isSubjectEditing && (
-                  <Button onClick={resetSubjectForm} color="light" className="btn btn-outline flex items-center gap-2">
-                    <CircleMinus className="w-4 h-4" />
-                    Cancelar
-                  </Button>
-                )}
-              </div>
-            </Card>
-
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHead>
-                    <TableHeadCell>Materia</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
-                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
-                  </TableHead>
-                  <TableBody className="divide-y">
-                    {subjectRows}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {tab === 'units' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold">Unidades</h2>
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Select value={unitForm.subjectId} onChange={e=>setUnitForm(f=>({ ...f, subjectId: e.target.value }))}>
-                  <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </Select>
-                <TextInput placeholder="nombre" value={unitForm.name} onChange={e=>setUnitForm(f=>({ ...f, name: e.target.value }))} />
-                <TextInput placeholder="descripción (opcional)" value={unitForm.description || ''} onChange={e=>setUnitForm(f=>({ ...f, description: e.target.value }))} />
-                <TextInput type="number" placeholder="orden" value={unitForm.orderIndex} onChange={e=>setUnitForm(f=>({ ...f, orderIndex: Number(e.target.value) }))} />
-              </div>
-              <div className="flex gap-2 mt-3">
-                <Button onClick={saveUnit} disabled={unitLoading} className="btn btn-primary flex items-center gap-2">
-                  {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
-                </Button>
-                {isUnitEditing && (
-                  <Button onClick={resetUnitForm} color="light" className="btn btn-outline flex items-center gap-2">
-                    <CircleMinus className="w-4 h-4" />
-                    Cancelar
-                  </Button>
-                )}
-              </div>
-            </Card>
-
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHead>
-                    <TableHeadCell>Materia</TableHeadCell>
-                    <TableHeadCell>Unidad</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Descripción</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Orden</TableHeadCell>
-                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
-                  </TableHead>
-                  <TableBody className="divide-y">
-                    {unitRows}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {tab === 'questions' && (
-          <div className="grid gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xl font-semibold">Preguntas</h2>
-              <div className="flex gap-2">
-                <Button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary flex items-center gap-2">
-                  <FileExport className="w-4 h-4" />
-                  Exportar JSON
-                </Button>
-                <Button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className="btn btn-outline text-primary flex items-center gap-2">
-                  <FileCsv className="w-4 h-4" />
-                  Exportar CSV
-                </Button>
-                <Button onClick={() => { setImportOpen(true); setImportMessage(''); }} className="btn btn-secondary flex items-center gap-2">
-                  <FileImport className="w-4 h-4" />
-                  Importar
-                </Button>
               </div>
             </div>
 
-            <Card className="border border-secondary/40 bg-bg">
-              <div className="text-sm text-text/70 mb-2">Filtros</div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Select value={questionSubjectId} onChange={e=>setQuestionSubjectId(e.target.value)}>
-                  <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </Select>
-                <Select value={questionUnitId} onChange={e=>setQuestionUnitId(e.target.value)}>
-                  <option value="">Selecciona unidad</option>
-                  {unitOptions.map(u => (
-                    <option key={u.value} value={u.value}>{u.label}</option>
-                  ))}
-                </Select>
+            <div className={card}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr className="border-b border-secondary/20">
+                    <Th>Email</Th>
+                    <Th className="hidden sm:table-cell">Rol</Th>
+                    <Th className="hidden sm:table-cell">Nombre</Th>
+                    <Th />
+                  </tr></thead>
+                  <tbody>
+                    {users.map(u => (
+                      <tr key={u.id} className="border-b border-secondary/10 last:border-0">
+                        <Td>{u.email}</Td>
+                        <Td className="hidden sm:table-cell">{u.role}</Td>
+                        <Td className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button onClick={() => setForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                            <button onClick={() => setConfirmDelete(u)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                          </div>
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </Card>
+              <Pagination page={userPage} totalPages={userTotalPages} onChange={p => loadUsers(p)} />
+            </div>
+          </div>
+        )}
 
-            <Card className="border border-secondary/40 bg-bg">
+        {/* ── Materias ── */}
+        {tab === 'subjects' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
+
+            <div className={card}>
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                <input className={inp} placeholder="Nombre" value={subjectForm.name} onChange={e => setSubjectForm(f => ({ ...f, name: e.target.value }))} />
+                <input className={inp} placeholder="Descripción (opcional)" value={subjectForm.description || ''} onChange={e => setSubjectForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={saveSubject} disabled={subjectLoading} className={btnPrimary}>
+                  {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
+                </button>
+                {isSubjectEditing && (
+                  <button onClick={resetSubjectForm} className={btnOutline}>
+                    <CircleMinus className="w-4 h-4" />Cancelar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className={card}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr className="border-b border-secondary/20">
+                    <Th>Materia</Th>
+                    <Th className="hidden sm:table-cell">Descripción</Th>
+                    <Th />
+                  </tr></thead>
+                  <tbody>
+                    {subjects.map(s => (
+                      <tr key={s.id} className="border-b border-secondary/10 last:border-0">
+                        <Td>{s.name}</Td>
+                        <Td className="hidden sm:table-cell">{s.description || '-'}</Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button onClick={() => setSubjectForm(s)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                            <button onClick={() => { setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                          </div>
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Unidades ── */}
+        {tab === 'units' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
+
+            <div className={card}>
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))}>
+                  <option value="">Selecciona materia</option>
+                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+                <input className={inp} placeholder="Nombre" value={unitForm.name} onChange={e => setUnitForm(f => ({ ...f, name: e.target.value }))} />
+                <input className={inp} placeholder="Descripción (opcional)" value={unitForm.description || ''} onChange={e => setUnitForm(f => ({ ...f, description: e.target.value }))} />
+                <input className={inp} type="number" placeholder="Orden" value={unitForm.orderIndex} onChange={e => setUnitForm(f => ({ ...f, orderIndex: Number(e.target.value) }))} />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={saveUnit} disabled={unitLoading} className={btnPrimary}>
+                  {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
+                </button>
+                {isUnitEditing && (
+                  <button onClick={resetUnitForm} className={btnOutline}>
+                    <CircleMinus className="w-4 h-4" />Cancelar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className={card}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr className="border-b border-secondary/20">
+                    <Th>Materia</Th>
+                    <Th>Unidad</Th>
+                    <Th className="hidden sm:table-cell">Descripción</Th>
+                    <Th className="hidden sm:table-cell">Orden</Th>
+                    <Th />
+                  </tr></thead>
+                  <tbody>
+                    {units.map(u => (
+                      <tr key={u.id} className="border-b border-secondary/10 last:border-0">
+                        <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
+                        <Td>{u.name}</Td>
+                        <Td className="hidden sm:table-cell">{u.description || '-'}</Td>
+                        <Td className="hidden sm:table-cell">{u.orderIndex}</Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button onClick={() => setUnitForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                            <button onClick={() => { setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                          </div>
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Preguntas ── */}
+        {tab === 'questions' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight"> Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
+                  <FileExport className="w-4 h-4" />Exportar JSON
+                </button>
+                <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
+                  <FileCsv className="w-4 h-4" />Exportar CSV
+                </button>
+                <button onClick={() => { setImportOpen(true); setImportMessage(''); }} className={btnPrimary}>
+                  <FileImport className="w-4 h-4" />Importar
+                </button>
+              </div>
+            </div>
+
+            <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <select className={inp} value={questionSubjectId} onChange={e => setQuestionSubjectId(e.target.value)}>
+                  <option value="">Selecciona materia</option>
+                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+                <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)}>
+                  <option value="">Selecciona unidad</option>
+                  {unitOptions.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className={card}>
               {!questionUnitId && (
-                <div className="text-sm text-text/70 mb-3">Selecciona materia y unidad para crear preguntas.</div>
+                <p className="text-sm text-text/50 mb-4">Selecciona materia y unidad para crear preguntas.</p>
               )}
-              <div className="grid gap-2 sm:grid-cols-2">
-                <TextInput placeholder="enunciado" value={questionForm.text} onChange={e=>setQuestionForm(f=>({ ...f, text: e.target.value }))} />
-                <TextInput placeholder="explicación (opcional)" value={questionForm.explanation || ''} onChange={e=>setQuestionForm(f=>({ ...f, explanation: e.target.value }))} />
-                <Select value={questionForm.difficulty} onChange={e=>setQuestionForm(f=>({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                <input className={inp} placeholder="Enunciado" value={questionForm.text} onChange={e => setQuestionForm(f => ({ ...f, text: e.target.value }))} />
+                <input className={inp} placeholder="Explicación (opcional)" value={questionForm.explanation || ''} onChange={e => setQuestionForm(f => ({ ...f, explanation: e.target.value }))} />
+                <select className={inp} value={questionForm.difficulty} onChange={e => setQuestionForm(f => ({ ...f, difficulty: e.target.value as AdminQuestion['difficulty'] }))}>
                   <option value="EASY">Fácil</option>
                   <option value="MEDIUM">Media</option>
                   <option value="HARD">Difícil</option>
-                </Select>
+                </select>
               </div>
 
-              <div className="mt-4 grid gap-2">
+              <div className="grid gap-2 mb-4">
                 {questionForm.answers.map((a, idx) => (
-                  <div key={idx} className="flex gap-2 items-center">
+                  <div key={idx} className="flex gap-3 items-center">
                     <input
                       type="radio"
                       name="correct"
                       checked={a.correct}
-                      onChange={() => setQuestionForm(f => ({
-                        ...f,
-                        answers: f.answers.map((ans, i) => ({ ...ans, correct: i === idx }))
-                      }))}
+                      onChange={() => setQuestionForm(f => ({ ...f, answers: f.answers.map((ans, i) => ({ ...ans, correct: i === idx })) }))}
+                      className="shrink-0"
                     />
-                    <TextInput
+                    <input
+                      className={inp}
                       placeholder={`Respuesta ${idx + 1}`}
                       value={a.text}
-                      onChange={e => setQuestionForm(f => ({
-                        ...f,
-                        answers: f.answers.map((ans, i) => i === idx ? { ...ans, text: e.target.value } : ans)
-                      }))}
-                      className="flex-1"
+                      onChange={e => setQuestionForm(f => ({ ...f, answers: f.answers.map((ans, i) => i === idx ? { ...ans, text: e.target.value } : ans) }))}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-2 mt-3">
-                <Button onClick={saveQuestion} disabled={questionLoading} className="btn btn-primary flex items-center gap-2">
+              <div className="flex gap-2">
+                <button onClick={saveQuestion} disabled={questionLoading} className={btnPrimary}>
                   {isQuestionEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
-                </Button>
+                </button>
                 {isQuestionEditing && (
-                  <Button onClick={resetQuestionForm} color="light" className="btn btn-outline flex items-center gap-2">
-                    <CircleMinus className="w-4 h-4" />
-                    Cancelar
-                  </Button>
+                  <button onClick={resetQuestionForm} className={btnOutline}>
+                    <CircleMinus className="w-4 h-4" />Cancelar
+                  </button>
                 )}
               </div>
-            </Card>
+            </div>
 
-            <Card className="border border-secondary/40 bg-bg">
+            <div className={card}>
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHead>
-                    <TableHeadCell>Pregunta</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Dificultad</TableHeadCell>
-                    <TableHeadCell className="hidden sm:table-cell">Respuestas</TableHeadCell>
-                    <TableHeadCell><span className="sr-only">Acciones</span></TableHeadCell>
-                  </TableHead>
-                  <TableBody className="divide-y">
-                    {questionRows}
-                  </TableBody>
-                </Table>
+                <table className="w-full">
+                  <thead><tr className="border-b border-secondary/20">
+                    <Th>Pregunta</Th>
+                    <Th className="hidden sm:table-cell">Dificultad</Th>
+                    <Th className="hidden sm:table-cell">Respuestas</Th>
+                    <Th />
+                  </tr></thead>
+                  <tbody>
+                    {questions.map(q => (
+                      <tr key={q.id} className="border-b border-secondary/10 last:border-0">
+                        <Td><span className="line-clamp-2">{q.text}</span></Td>
+                        <Td className="hidden sm:table-cell">{q.difficulty}</Td>
+                        <Td className="hidden sm:table-cell"><span className="line-clamp-1">{q.answers.map(a => a.text).join(', ')}</span></Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button onClick={() => {
+                              const unit = unitById[q.unitId];
+                              if (unit?.subjectId) setQuestionSubjectId(unit.subjectId);
+                              setQuestionUnitId(q.unitId);
+                              setQuestionForm({ id: q.id, unitId: q.unitId, text: q.text, explanation: q.explanation || '', difficulty: q.difficulty, answers: q.answers.map(a => ({ text: a.text, correct: a.correct })) });
+                            }} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                            <button onClick={() => { setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                          </div>
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              {questionTotalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                  <Pagination
-                    currentPage={questionPage}
-                    totalPages={questionTotalPages}
-                    onPageChange={(page) => loadQuestions(questionUnitId, page)}
-                    showIcons
-                  />
-                </div>
-              )}
-            </Card>
+              <Pagination page={questionPage} totalPages={questionTotalPages} onChange={p => loadQuestions(questionUnitId, p)} />
+            </div>
           </div>
         )}
       </section>
 
+      {/* ── Modal Importar ── */}
       {importOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-bg border border-secondary/40 rounded-xl p-5 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-2">Importar preguntas</h3>
-            <div className="grid gap-3">
-              <Select value={importFormat} onChange={e=>setImportFormat(e.target.value as 'csv' | 'json')}>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-bg border border-secondary/25 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Importar preguntas</h3>
+            <div className="grid gap-3 mb-4">
+              <select className={inp} value={importFormat} onChange={e => setImportFormat(e.target.value as 'csv' | 'json')}>
                 <option value="csv">CSV</option>
                 <option value="json">JSON</option>
-              </Select>
-              <FileInput accept={importFormat === 'csv' ? '.csv' : '.json'} onChange={e=>setImportFile(e.target.files?.[0] || null)} />
+              </select>
+              <input type="file" accept={importFormat === 'csv' ? '.csv' : '.json'} onChange={e => setImportFile(e.target.files?.[0] || null)}
+                className="text-sm text-text/70 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:transition-colors"
+              />
               {importMessage && <div className="text-sm text-text/70">{importMessage}</div>}
             </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setImportOpen(false)}>
-                <CircleMinus className="w-4 h-4" />
-                Cancelar
-              </Button>
-              <Button className="btn btn-primary flex items-center gap-2" onClick={handleImport} disabled={importLoading}>
-                <FileImport className="w-4 h-4" />
-                {importLoading ? 'Importando...' : 'Importar'}
-              </Button>
+            <div className="flex gap-2 justify-end">
+              <button className={btnOutline} onClick={() => setImportOpen(false)}>
+                <CircleMinus className="w-4 h-4" />Cancelar
+              </button>
+              <button className={btnPrimary} onClick={handleImport} disabled={importLoading}>
+                <FileImport className="w-4 h-4" />{importLoading ? 'Importando...' : 'Importar'}
+              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ── Modal Eliminar usuario ── */}
       {confirmDelete && (
-        <Modal
-          show
+        <DeleteModal
+          title="Eliminar usuario"
+          body={<p className="text-sm text-text/70">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>}
+          error={deleteError}
+          loading={deleteLoading}
           onClose={() => setConfirmDelete(null)}
-          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
-        >
-          <ModalHeader className="border-b border-secondary/40">Eliminar usuario</ModalHeader>
-          <ModalBody>
-            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar <strong>{confirmDelete.email}</strong>?</p>
-            {deleteError && <Alert color="failure" className="text-sm">{deleteError}</Alert>}
-          </ModalBody>
-          <ModalFooter className="justify-end gap-2">
-            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmDelete(null)}>
-              <CircleMinus className="w-4 h-4" />
-              Cancelar
-            </Button>
-            <Button
-              color="failure"
-              className={`flex items-center gap-2 ${deleteLoading ? 'btn btn-danger' : 'btn btn-primary'}`}
-              disabled={deleteLoading}
-              onClick={async () => {
-                setDeleteError('');
-                setDeleteLoading(true);
-                try {
-                  await removeUser(confirmDelete.id);
-                  setConfirmDelete(null);
-                } catch {
-                  setDeleteError('No se pudo eliminar');
-                } finally {
-                  setDeleteLoading(false);
-                }
-              }}
-            >
-              <TrashBin className="w-4 h-4" />
-              {deleteLoading ? 'Eliminando...' : 'Eliminar'}
-            </Button>
-          </ModalFooter>
-        </Modal>
+          onConfirm={async () => {
+            setDeleteError(''); setDeleteLoading(true);
+            try { await removeUser(confirmDelete.id); setConfirmDelete(null); }
+            catch { setDeleteError('No se pudo eliminar'); }
+            finally { setDeleteLoading(false); }
+          }}
+        />
       )}
 
+      {/* ── Modal Eliminar materia ── */}
       {confirmSubjectDelete && (
-        <Modal
-          show
+        <DeleteModal
+          title="Eliminar materia"
+          body={
+            <>
+              <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
+              {(confirmSubjectDelete.unitCount ?? 0) > 0 && (
+                <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
+                  Esta materia tiene unidades asociadas. Si la eliminas se eliminarán todas sus unidades y preguntas. Esta acción es irreversible.
+                </div>
+              )}
+            </>
+          }
+          error={subjectDeleteError}
+          loading={subjectDeleteLoading}
+          requireText={(confirmSubjectDelete.unitCount ?? 0) > 0 ? { value: subjectDeleteText, onChange: setSubjectDeleteText, passes: subjectDeleteText.trim().toLowerCase() === 'eliminar' } : undefined}
           onClose={() => setConfirmSubjectDelete(null)}
-          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
-        >
-          <ModalHeader className="border-b border-secondary/40">Eliminar materia</ModalHeader>
-          <ModalBody>
-            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
-            {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
-              <Alert color="failure" className="text-sm mb-3">
-                Esta materia tiene unidades asociadas, si la eliminas se eliminarán todas sus unidades y preguntas asociadas. Esta acción es irreversible.
-              </Alert>
-            )}
-            {confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && (
-              <TextInput
-                placeholder='Escribe "eliminar" para confirmar'
-                value={subjectDeleteText}
-                onChange={e=>setSubjectDeleteText(e.target.value)}
-              />
-            )}
-            {subjectDeleteError && <Alert color="failure" className="text-sm mt-3">{subjectDeleteError}</Alert>}
-          </ModalBody>
-          <ModalFooter className="justify-end gap-2">
-            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmSubjectDelete(null)}>
-              <CircleMinus className="w-4 h-4" />
-              Cancelar
-            </Button>
-            <Button
-              color="failure"
-              className={`flex items-center gap-2 ${subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
-              disabled={subjectDeleteLoading || (confirmSubjectDelete.unitCount !== undefined && confirmSubjectDelete.unitCount > 0 && subjectDeleteText.trim().toLowerCase() !== 'eliminar')}
-              onClick={async () => {
-                setSubjectDeleteError('');
-                setSubjectDeleteLoading(true);
-                try {
-                  await removeSubject(confirmSubjectDelete.id);
-                  setConfirmSubjectDelete(null);
-                } catch {
-                  setSubjectDeleteError('No se pudo eliminar');
-                } finally {
-                  setSubjectDeleteLoading(false);
-                }
-              }}
-            >
-              <TrashBin className="w-4 h-4" />
-              {subjectDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-            </Button>
-          </ModalFooter>
-        </Modal>
+          onConfirm={async () => {
+            setSubjectDeleteError(''); setSubjectDeleteLoading(true);
+            try { await removeSubject(confirmSubjectDelete.id); setConfirmSubjectDelete(null); }
+            catch { setSubjectDeleteError('No se pudo eliminar'); }
+            finally { setSubjectDeleteLoading(false); }
+          }}
+        />
       )}
 
+      {/* ── Modal Eliminar unidad ── */}
       {confirmUnitDelete && (
-        <Modal
-          show
+        <DeleteModal
+          title="Eliminar unidad"
+          body={
+            <>
+              <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
+              {(confirmUnitDelete.questionCount ?? 0) > 0 && (
+                <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
+                  Esta unidad tiene preguntas asociadas. Si la eliminas se eliminarán todas sus preguntas. Esta acción es irreversible.
+                </div>
+              )}
+            </>
+          }
+          error={unitDeleteError}
+          loading={unitDeleteLoading}
+          requireText={(confirmUnitDelete.questionCount ?? 0) > 0 ? { value: unitDeleteText, onChange: setUnitDeleteText, passes: unitDeleteText.trim().toLowerCase() === 'eliminar' } : undefined}
           onClose={() => setConfirmUnitDelete(null)}
-          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
-        >
-          <ModalHeader className="border-b border-secondary/40">Eliminar unidad</ModalHeader>
-          <ModalBody>
-            <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmUnitDelete.name}</strong>?</p>
-            {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
-              <Alert color="failure" className="text-sm mb-3">
-                Esta unidad tiene preguntas asociadas, si la eliminas se eliminarán todas sus preguntas y respuestas asociadas. Esta acción es irreversible.
-              </Alert>
-            )}
-            {confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && (
-              <TextInput
-                placeholder='Escribe "eliminar" para confirmar'
-                value={unitDeleteText}
-                onChange={e=>setUnitDeleteText(e.target.value)}
-              />
-            )}
-            {unitDeleteError && <Alert color="failure" className="text-sm mt-3">{unitDeleteError}</Alert>}
-          </ModalBody>
-          <ModalFooter className="justify-end gap-2">
-            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmUnitDelete(null)}>
-              <CircleMinus className="w-4 h-4" />
-              Cancelar
-            </Button>
-            <Button
-              color="failure"
-              className={`flex items-center gap-2 ${unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar') ? 'btn btn-danger' : 'btn btn-primary'}`}
-              disabled={unitDeleteLoading || (confirmUnitDelete.questionCount !== undefined && confirmUnitDelete.questionCount > 0 && unitDeleteText.trim().toLowerCase() !== 'eliminar')}
-              onClick={async () => {
-                setUnitDeleteError('');
-                setUnitDeleteLoading(true);
-                try {
-                  await removeUnit(confirmUnitDelete.id);
-                  setConfirmUnitDelete(null);
-                } catch {
-                  setUnitDeleteError('No se pudo eliminar');
-                } finally {
-                  setUnitDeleteLoading(false);
-                }
-              }}
-            >
-              <TrashBin className="w-4 h-4" />
-              {unitDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-            </Button>
-          </ModalFooter>
-        </Modal>
+          onConfirm={async () => {
+            setUnitDeleteError(''); setUnitDeleteLoading(true);
+            try { await removeUnit(confirmUnitDelete.id); setConfirmUnitDelete(null); }
+            catch { setUnitDeleteError('No se pudo eliminar'); }
+            finally { setUnitDeleteLoading(false); }
+          }}
+        />
       )}
 
+      {/* ── Modal Eliminar pregunta ── */}
       {confirmQuestionDelete && (
-        <Modal
-          show
+        <DeleteModal
+          title="Eliminar pregunta"
+          body={<p className="text-sm text-text/70">¿Seguro que quieres eliminar esta pregunta?</p>}
+          error={questionDeleteError}
+          loading={questionDeleteLoading}
           onClose={() => setConfirmQuestionDelete(null)}
-          theme={{ content: { inner: 'relative rounded-lg bg-bg text-text shadow border border-secondary/40' } }}
-        >
-          <ModalHeader className="border-b border-secondary/40">Eliminar pregunta</ModalHeader>
-          <ModalBody>
-            <p className="text-sm text-text/70 mb-4">¿Seguro que quieres eliminar esta pregunta?</p>
-            {questionDeleteError && <Alert color="failure" className="text-sm">{questionDeleteError}</Alert>}
-          </ModalBody>
-          <ModalFooter className="justify-end gap-2">
-            <Button color="light" className="btn btn-outline flex items-center gap-2" onClick={() => setConfirmQuestionDelete(null)}>
-              <CircleMinus className="w-4 h-4" />
-              Cancelar
-            </Button>
-            <Button
-              color="failure"
-              className={`flex items-center gap-2 ${questionDeleteLoading ? 'btn btn-danger' : 'btn btn-primary'}`}
-              disabled={questionDeleteLoading}
-              onClick={async () => {
-                setQuestionDeleteError('');
-                setQuestionDeleteLoading(true);
-                try {
-                  await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId);
-                  setConfirmQuestionDelete(null);
-                } catch {
-                  setQuestionDeleteError('No se pudo eliminar');
-                } finally {
-                  setQuestionDeleteLoading(false);
-                }
-              }}
-            >
-              <TrashBin className="w-4 h-4" />
-              {questionDeleteLoading ? 'Eliminando...' : 'Eliminar'}
-            </Button>
-          </ModalFooter>
-        </Modal>
+          onConfirm={async () => {
+            setQuestionDeleteError(''); setQuestionDeleteLoading(true);
+            try { await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId); setConfirmQuestionDelete(null); }
+            catch { setQuestionDeleteError('No se pudo eliminar'); }
+            finally { setQuestionDeleteLoading(false); }
+          }}
+        />
       )}
     </div>
   );

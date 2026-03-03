@@ -1,46 +1,68 @@
 import { Navigate, Link } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'flowbite-react-icons/outline';
+import { ArrowLeft, ArrowsRepeat } from 'flowbite-react-icons/outline';
 import type { ExamResult } from '../types';
 import { ROUTES } from '../constants/routes';
 
 export default function ExamResultPage({ result }: { result: ExamResult | null }) {
   if (!result) return <Navigate to={ROUTES.subjects} replace />;
+
   const score10 = result.total === 0 ? 0 : (result.net / result.total) * 10;
 
-  const scoreColor = () => {
-    if (score10 < 5) return 'text-red-500';
-    if (score10 <= 6) return 'text-orange-500';
-    if (score10 <= 8) return 'text-yellow-500';
-    return 'text-lime-500';
-  };
+  const scoreColor = score10 < 5 ? 'text-red-500' : score10 <= 6 ? 'text-orange-400' : score10 <= 8 ? 'text-yellow-500' : 'text-lime-500';
+  const scoreBorder = score10 < 5 ? 'border-red-400/30 bg-red-400/5' : score10 <= 6 ? 'border-orange-400/30 bg-orange-400/5' : score10 <= 8 ? 'border-yellow-400/30 bg-yellow-400/5' : 'border-lime-400/30 bg-lime-400/5';
+
+  const stats = [
+    { label: 'Total preguntas', value: result.total },
+    { label: 'Correctas', value: result.correct, color: 'text-lime-500' },
+    { label: 'Incorrectas', value: result.wrong, color: 'text-red-400' },
+    { label: 'Penalización', value: result.penalty, color: 'text-orange-400' },
+    { label: 'Score neto', value: result.net },
+    { label: 'Porcentaje', value: `${result.percentage.toFixed(1)}%` },
+  ];
 
   return (
-    <div className="max-w-xl mx-auto p-4 border border-slate-700 rounded-xl">
-      <h2 className="text-2xl font-bold mb-3">Resultados</h2>
-
-      <div className="mb-4 rounded-xl border border-secondary/40 bg-secondary/20 p-4 text-center">
-        <div className="text-text/70 text-sm uppercase tracking-wide">Nota final</div>
-        <div className={`text-6xl font-extrabold ${scoreColor()}`}>{score10.toFixed(2)}</div>
-        <div className="text-text/70 text-sm">sobre 10</div>
+    <div className="max-w-xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-1">Resultados</h1>
+        <p className="text-text/55 text-sm">Cada 3 fallos restan 1 acierto.</p>
       </div>
 
-      <div className="space-y-1">
-        <p>Total preguntas: <strong>{result.total}</strong></p>
-        <p>Correctas: <strong>{result.correct}</strong></p>
-        <p>Incorrectas: <strong>{result.wrong}</strong></p>
-        <p>Penalización: <strong>{result.penalty}</strong></p>
-        <p>Score neto: <strong>{result.net}</strong></p>
-        <p>Porcentaje neto: <strong>{result.percentage.toFixed(1)}%</strong></p>
+      {/* ── Score card ── */}
+      <div className={`border ${scoreBorder} rounded-2xl p-8 text-center mb-5`}>
+        <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Nota final</div>
+        <div className={`text-7xl font-extrabold tabular-nums mb-1 ${scoreColor}`}>
+          {score10.toFixed(2)}
+        </div>
+        <div className="text-text/40 text-sm">sobre 10</div>
       </div>
-      <p className="text-slate-400 mt-3">Cada 3 fallos restan 1 acierto.</p>
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <Link className="btn btn-primary flex items-center gap-2" to={ROUTES.subjects}>
-          <Plus className="w-4 h-4" />
+
+      {/* ── Stats grid ── */}
+      <div className="border border-secondary/25 rounded-2xl p-6 mb-5">
+        <dl className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+          {stats.map(({ label, value, color }) => (
+            <div key={label}>
+              <dt className="text-xs text-text/50 mb-1">{label}</dt>
+              <dd className={`text-2xl font-extrabold tabular-nums ${color || ''}`}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {/* ── Actions ── */}
+      <div className="flex gap-3">
+        <Link
+          to={ROUTES.subjects}
+          className="btn btn-primary rounded-full px-6 py-2.5 text-sm shadow-lg shadow-primary/20 flex items-center gap-2"
+        >
+          <ArrowsRepeat className="w-4 h-4" />
           Nuevo examen
         </Link>
-        <Link className="btn btn-outline flex items-center gap-2" to={ROUTES.subjects}>
+        <Link
+          to={ROUTES.home}
+          className="btn btn-outline rounded-full px-6 py-2.5 text-sm flex items-center gap-2"
+        >
           <ArrowLeft className="w-4 h-4" />
-          Volver
+          Inicio
         </Link>
       </div>
     </div>
