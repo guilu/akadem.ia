@@ -15,7 +15,7 @@ services:
 
   api:
     container_name: akademia-prod-api
-    image: akademia-api:1.1.0
+    image: akademia-api:${VERSION}
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/akademia
       SPRING_DATASOURCE_USERNAME: ${AKADEMIA_DB_USER}
@@ -33,7 +33,7 @@ services:
 
   web:
     container_name: akademia-prod-web
-    image: akademia-web:1.1.0
+    image: akademia-web:${VERSION}
     environment:
       VITE_API_URL: https://akademia.diegobarrioh.dev
     ports:
