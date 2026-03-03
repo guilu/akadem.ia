@@ -5,7 +5,7 @@ import { apiBase } from '../api';
 import { ROUTES } from '../constants/routes';
 
 const inputClass =
-  'w-full bg-bg border border-secondary/30 rounded-xl px-4 py-3 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
+  'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-3 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
 export default function Login({ onToken }: { onToken: (t: string) => void }) {
   const [email, setEmail] = useState('');

@@ -3,7 +3,7 @@ import { Minus, Plus, Play } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 import type { UnitAvailability } from '../types';
 
-const inp = 'bg-bg border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
+const inp = 'bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
 export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
   subjectId: string;
@@ -114,7 +114,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
                     value={disabled ? 0 : current}
                     onChange={e => setCount(u.id, Number(e.target.value))}
                     disabled={disabled}
-                    className="w-14 text-center bg-bg border border-secondary/30 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-40"
+                    className="w-14 text-center bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-40"
                   />
                   <button
                     onClick={() => setCount(u.id, current + 1)}
