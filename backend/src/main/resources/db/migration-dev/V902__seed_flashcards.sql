@@ -1,7 +1,7 @@
 -- Seed subjects (units) + flashcards for Constitución Española (dev)
 -- Generated from Constitución Española PDF. Idempotent via ON CONFLICT.
--- ============ FLASHCARDS (merged from R__seed_flashcards.sql) ============
--- NOTE: Using units from this file (R__seed_basic_data.sql). Flashcards reference existing unit ids.
+-- ============ FLASHCARDS (merged from V902__seed_flashcards.sql) ============
+-- NOTE: Using units from this file (V801__seed_math_subject_units.sql). Flashcards reference existing unit ids.
 INSERT INTO flashcards(id, unit_id, front, back, created_at, updated_at) VALUES
 ('01563f10-f05d-57eb-992a-ec31b9a074ca','11111111-1111-1111-1111-111111111202','Artículo 1.1 — ¿Qué establece este apartado?','España se constituye en un Estado social y democrático de
 Derecho, que propugna como valores superiores de su

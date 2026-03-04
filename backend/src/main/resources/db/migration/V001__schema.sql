@@ -136,3 +136,6 @@ create index if not exists idx_flashcard_review_log_user_reviewed_at
 
 create index if not exists idx_flashcard_review_log_flashcard
     on flashcard_review_log (flashcard_id);
+
+ALTER TABLE flashcard_reviews
+    ADD COLUMN learning_step INT NOT NULL DEFAULT -2;
