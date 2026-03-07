@@ -41,7 +41,7 @@ const steps = [
   {
     n: '01',
     title: 'Regístrate gratis',
-    desc: 'Crea tu cuenta en segundos y accede a todos los temas de la Constitución española.',
+    desc: 'Crea tu cuenta en segundos y accede a todos los temas de tu preparación.',
   },
   {
     n: '02',
@@ -56,9 +56,9 @@ const steps = [
 ];
 
 const stats = [
-  { value: '169', label: 'Artículos cubiertos' },
-  { value: '500+', label: 'Preguntas disponibles' },
-  { value: '3', label: 'Niveles de dificultad' },
+  { value: 'Materias', label: 'Organizadas por temas' },
+  { value: 'Exámenes', label: 'Configurables tipo test' },
+  { value: 'Flashcards', label: 'Inteligentes de repaso' },
 ];
 
 export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: boolean; activeAttemptId?: string }) {
@@ -78,9 +78,9 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-6 tracking-tight">
-              Aprueba la{' '}
+              Aprueba tus{' '}
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                Constitución
+                exámenes
               </span>
               <br />sin improvisar
             </h1>
@@ -141,7 +141,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
           <div className="hidden lg:flex flex-1 justify-end">
             <img
               src="/assets/landing/constitution-books.png"
-              alt="Libros de la Constitución española"
+              alt="Libros de estudio"
               className="drop-shadow-2xl"
               style={{ maxWidth: '150%' }}
             />
@@ -155,7 +155,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
         <dl className="max-w-2xl mx-auto grid grid-cols-3 gap-6 text-center">
           {stats.map(({ value, label }) => (
             <div key={label}>
-              <dt className="text-4xl font-extrabold text-primary">{value}</dt>
+              <dt className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-primary">{value}</dt>
               <dd className="mt-1 text-sm text-text/55 font-medium">{label}</dd>
             </div>
           ))}
@@ -166,7 +166,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
       <section className="px-6 py-24">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-3 tracking-tight">
-            Todo lo que necesitas para aprobar
+            Todo lo que necesitas para preparar tus exámenes
           </h2>
           <p className="text-center text-text/55 mb-14 text-lg">Sin distracciones. Sin excusas.</p>
 
