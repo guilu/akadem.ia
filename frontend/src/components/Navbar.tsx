@@ -62,7 +62,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
           className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
         >
           <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-8 h-8" />
-          ConstituApp
+          Akdmia
         </button>
 
         {/* Desktop links */}
