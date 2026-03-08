@@ -22,3 +22,44 @@ export type ExamAttemptSummary = {
   wrongCount: number;
   percent: number;
 };
+
+// RAG module types
+export type SourceDocument = {
+  id: string;
+  fileName: string;
+  fileType: string;
+  status: 'UPLOADED' | 'PROCESSED' | 'FAILED';
+  uploadedAt: string;
+};
+
+export type GeneratedDraft = {
+  id: string;
+  sourceDocumentId: string;
+  unitId?: string | null;
+  topic: string;
+  difficulty: string;
+  statement: string;
+  answers: string[];
+  correctIndex: number;
+  hint?: string | null;
+  explanation?: string | null;
+  reference?: string | null;
+  status: 'GENERATED' | 'VALIDATED' | 'REJECTED';
+};
+
+export type GenerateQuizCommand = {
+  sourceId: string;
+  unitId?: string | null;
+  topic: string;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  questionCount: number;
+  includeHints: boolean;
+  storeAsDraft: boolean;
+};
+
+export type GenerateQuizResponse = {
+  generated: number;
+  questions: GeneratedDraft[];
+};
+
+export type AdminUnit = { id: string; name: string };
