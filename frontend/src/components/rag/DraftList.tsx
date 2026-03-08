@@ -38,7 +38,7 @@ export default function DraftList({ token, sources }: Props) {
         <select value={selectedSourceId} onChange={(e) => setSelectedSourceId(e.target.value)} className={inputCls}>
           <option value="">— Selecciona un documento —</option>
           {processed.map((s) => (
-            <option key={s.id} value={s.id}>{s.fileName}</option>
+            <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
       </div>

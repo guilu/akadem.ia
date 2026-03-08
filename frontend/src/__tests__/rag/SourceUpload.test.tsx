@@ -9,8 +9,8 @@ vi.mock('../../api', () => ({
 
 const mockDoc = {
   id: 'doc-1',
-  fileName: 'test.pdf',
-  fileType: 'PDF',
+  name: 'test.pdf',
+  type: 'PDF',
   status: 'PROCESSED' as const,
   uploadedAt: '2024-01-01T00:00:00'
 };
@@ -70,5 +70,17 @@ describe('SourceUpload', () => {
     Object.defineProperty(input, 'files', { value: [file] });
     fireEvent.change(input);
     expect(await screen.findByRole('alert')).toHaveTextContent(/server error/i);
+  });
+
+  it('shows error and still calls onUploaded when server returns FAILED status', async () => {
+    const failedDoc = { ...mockDoc, status: 'FAILED' as const };
+    vi.mocked(api.uploadSource).mockResolvedValue(failedDoc);
+    render(<SourceUpload token="tok" onUploaded={onUploaded} />);
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['%PDF'], 'fail.pdf', { type: 'application/pdf' });
+    Object.defineProperty(input, 'files', { value: [file] });
+    fireEvent.change(input);
+    await waitFor(() => expect(onUploaded).toHaveBeenCalledWith(failedDoc));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no pudo procesarse/i);
   });
 });

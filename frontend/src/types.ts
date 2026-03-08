@@ -26,8 +26,8 @@ export type ExamAttemptSummary = {
 // RAG module types
 export type SourceDocument = {
   id: string;
-  fileName: string;
-  fileType: string;
+  name: string;
+  type: string;
   status: 'UPLOADED' | 'PROCESSED' | 'FAILED';
   uploadedAt: string;
 };

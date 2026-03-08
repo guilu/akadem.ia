@@ -10,8 +10,8 @@ vi.mock('../../api', () => ({
 
 const processedSource: SourceDocument = {
   id: 'src-1',
-  fileName: 'constitucion.pdf',
-  fileType: 'PDF',
+  name: 'constitucion.pdf',
+  type: 'PDF',
   status: 'PROCESSED',
   uploadedAt: '2024-01-01T00:00:00'
 };

@@ -67,7 +67,7 @@ export default function QuizGenerateForm({ token, sources, subjects, onGenerate,
         <select id="rag-source" value={sourceId} onChange={(e) => setSourceId(e.target.value)} className={inputCls} required>
           <option value="">— Selecciona un documento —</option>
           {processed.map((s) => (
-            <option key={s.id} value={s.id}>{s.fileName}</option>
+            <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
         {processed.length === 0 && (

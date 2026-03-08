@@ -27,6 +27,9 @@ export default function SourceUpload({ token, onUploaded }: Props) {
     try {
       const doc = await uploadSource(token, file);
       onUploaded(doc);
+      if (doc.status === 'FAILED') {
+        setError('El documento se subió pero no pudo procesarse. Comprueba que las API keys de IA estén configuradas en el servidor.');
+      }
     } catch (err: any) {
       setError(err?.body?.message || 'Error al subir el documento.');
     } finally {
