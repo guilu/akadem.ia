@@ -12,16 +12,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * OpenAI chat completions adapter for question generation.
+ * LLM question generator with Groq as primary provider and OpenRouter as fallback.
  *
- * Uses a strict JSON-only system prompt.
- * Validates each generated question before accepting it.
- * Invalid questions are logged and discarded.
+ * Flow:
+ *   1. Try Groq (fast, cheap, llama models)
+ *   2. On any error → log warning and retry via OpenRouter
+ *   3. If both fail → propagate the OpenRouter exception
+ *
+ * Both providers use the OpenAI-compatible chat completions API.
+ *
+ * Config required:
+ *   app.ai.groq.api-key=gsk_...
+ *   app.ai.openrouter.api-key=sk-or-...
  */
 @Component
 public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
@@ -39,51 +47,83 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private final AiProperties props;
-    private final RestClient restClient;
+    private final RestClient groqClient;
+    private final RestClient openRouterClient;
 
     public OpenAiQuestionGeneratorAdapter(AiProperties props) {
         this.props = props;
-        this.restClient = RestClient.builder()
-                .baseUrl(props.getBaseUrl())
+        this.groqClient = RestClient.builder()
+                .baseUrl(props.getGroq().getBaseUrl())
+                .build();
+        this.openRouterClient = RestClient.builder()
+                .baseUrl(props.getOpenrouter().getBaseUrl())
                 .build();
     }
 
     @Override
     public List<GeneratedQuestionDraft> generate(GenerateQuizUseCase.GenerateQuizCommand command,
                                                   List<SourceChunk> contextChunks) {
-        validateApiKey();
+        validateAtLeastOneProvider();
 
         String context = buildContext(contextChunks);
         String userPrompt = buildUserPrompt(command, context);
-
         List<Map<String, String>> messages = List.of(
                 Map.of("role", "system", "content", SYSTEM_PROMPT),
                 Map.of("role", "user", "content", userPrompt)
         );
 
+        if (props.getGroq().isConfigured()) {
+            try {
+                return callProvider(groqClient, props.getGroq().getApiKey(),
+                        props.getGroq().getChatModel(), messages, command, "Groq", Map.of());
+            } catch (Exception e) {
+                log.warn("Groq call failed ({}), falling back to OpenRouter", e.getMessage());
+            }
+        }
+
+        if (!props.getOpenrouter().isConfigured()) {
+            throw new IllegalStateException("Groq failed and OpenRouter API key is not configured.");
+        }
+        return callProvider(openRouterClient, props.getOpenrouter().getApiKey(),
+                props.getOpenrouter().getChatModel(), messages, command, "OpenRouter",
+                Map.of(
+                        "HTTP-Referer", props.getOpenrouter().getSiteUrl(),
+                        "X-Title", props.getOpenrouter().getAppName()
+                ));
+    }
+
+    private List<GeneratedQuestionDraft> callProvider(RestClient client, String apiKey,
+                                                       String model,
+                                                       List<Map<String, String>> messages,
+                                                       GenerateQuizUseCase.GenerateQuizCommand command,
+                                                       String providerName,
+                                                       Map<String, String> extraHeaders) {
+        log.info("Calling {} chat completions, model={}, topic='{}', questionCount={}",
+                providerName, model, command.topic(), command.questionCount());
+
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("model", props.getChatModel());
+        body.put("model", model);
         body.put("messages", messages);
         body.put("temperature", 0.3);
         body.put("response_format", Map.of("type", "json_object"));
 
-        log.info("Calling OpenAI chat completions, model={}, topic='{}', questionCount={}",
-                props.getChatModel(), command.topic(), command.questionCount());
-
-        ChatResponse response = restClient.post()
+        var request = client.post()
                 .uri("/chat/completions")
-                .header("Authorization", "Bearer " + props.getApiKey())
-                .header("Content-Type", "application/json")
-                .body(body)
-                .retrieve()
-                .body(ChatResponse.class);
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json");
+
+        for (var entry : extraHeaders.entrySet()) {
+            request = request.header(entry.getKey(), entry.getValue());
+        }
+
+        ChatResponse response = request.body(body).retrieve().body(ChatResponse.class);
 
         if (response == null || response.choices() == null || response.choices().isEmpty()) {
-            throw new RuntimeException("Empty response from OpenAI chat completions API");
+            throw new RuntimeException("Empty response from " + providerName + " chat completions API");
         }
 
         String rawJson = response.choices().get(0).message().content();
-        return parseAndValidate(rawJson, command);
+        return parseAndValidate(rawJson, command, providerName);
     }
 
     private String buildContext(List<SourceChunk> chunks) {
@@ -140,13 +180,15 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
         );
     }
 
-    private List<GeneratedQuestionDraft> parseAndValidate(String rawJson, GenerateQuizUseCase.GenerateQuizCommand command) {
+    private List<GeneratedQuestionDraft> parseAndValidate(String rawJson,
+                                                           GenerateQuizUseCase.GenerateQuizCommand command,
+                                                           String providerName) {
         QuizJson parsed;
         try {
             parsed = JSON.readValue(rawJson, QuizJson.class);
         } catch (Exception e) {
-            log.error("Failed to parse LLM JSON response: {}", e.getMessage());
-            log.debug("Raw LLM response: {}", rawJson);
+            log.error("[{}] Failed to parse LLM JSON response: {}", providerName, e.getMessage());
+            log.debug("[{}] Raw response: {}", providerName, rawJson);
             throw new RuntimeException("LLM returned non-parseable JSON: " + e.getMessage(), e);
         }
 
@@ -156,24 +198,19 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
         for (QuestionJson q : parsed.questions()) {
             Optional<String> error = validateQuestion(q);
             if (error.isPresent()) {
-                log.warn("Discarding invalid question: {} - {}", error.get(), q.statement());
+                log.warn("[{}] Discarding invalid question: {} — {}", providerName, error.get(), q.statement());
                 continue;
             }
             List<String> answerTexts = q.answers().stream().map(AnswerJson::text).toList();
             drafts.add(GeneratedQuestionDraft.create(
-                    command.sourceId(),
-                    command.unitId(),
-                    command.topic(),
+                    command.sourceId(), command.unitId(), command.topic(),
                     command.difficulty().name(),
-                    q.statement().trim(),
-                    answerTexts,
-                    q.correctIndex(),
-                    q.hint(),
-                    q.explanation(),
-                    q.reference()
+                    q.statement().trim(), answerTexts, q.correctIndex(),
+                    q.hint(), q.explanation(), q.reference()
             ));
         }
-        log.info("Accepted {}/{} questions after validation", drafts.size(), parsed.questions().size());
+        log.info("[{}] Accepted {}/{} questions after validation",
+                providerName, drafts.size(), parsed.questions().size());
         return drafts;
     }
 
@@ -181,27 +218,22 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
         if (q.statement() == null || q.statement().isBlank()) return Optional.of("empty statement");
         if (q.answers() == null || q.answers().size() != 4) return Optional.of("must have exactly 4 answers");
         if (q.correctIndex() < 0 || q.correctIndex() > 3) return Optional.of("correctIndex out of range");
-
         for (AnswerJson a : q.answers()) {
             if (a.text() == null || a.text().isBlank()) return Optional.of("answer text is empty");
         }
-
-        long distinct = q.answers().stream()
-                .map(a -> a.text().trim().toLowerCase())
-                .distinct().count();
+        long distinct = q.answers().stream().map(a -> a.text().trim().toLowerCase()).distinct().count();
         if (distinct < 4) return Optional.of("duplicate answers detected");
-
         return Optional.empty();
     }
 
-    private void validateApiKey() {
-        if (props.getApiKey() == null || props.getApiKey().isBlank()) {
+    private void validateAtLeastOneProvider() {
+        if (!props.getGroq().isConfigured() && !props.getOpenrouter().isConfigured()) {
             throw new IllegalStateException(
-                    "OpenAI API key not configured. Set app.ai.api-key or AI_API_KEY env var.");
+                    "No AI provider configured. Set GROQ_API_KEY and/or OPENROUTER_API_KEY.");
         }
     }
 
-    // --- JSON DTOs (internal to this adapter) ---
+    // --- Internal JSON DTOs ---
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record ChatResponse(List<Choice> choices) {}
