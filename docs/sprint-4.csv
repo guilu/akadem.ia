@@ -1,0 +1,47 @@
+Issue Type,Summary,Description,Story Point Estimate,Epic Link,Depends On
+Epic,AKDMIA-AI Generación automática de preguntas desde documentos,"Implementar sistema RAG para generar preguntas tipo test automáticamente desde documentos como la Constitución.",,,
+
+Story,AKDMIA-101 Subida de documentos fuente,"Permitir subir documentos PDF que se usarán como fuente para generación de preguntas.",3,AKDMIA-AI,
+
+Task,AKDMIA-101.1 Crear entidad SourceDocument,"Crear entidad SourceDocument con campos id,name,type,version,checksum,uploadedAt,status.",2,AKDMIA-AI,
+Task,AKDMIA-101.2 Endpoint POST /api/sources,"Endpoint multipart para subir documentos y registrar metadatos.",2,AKDMIA-AI,AKDMIA-101.1
+Task,AKDMIA-101.3 Servicio almacenamiento documentos,"Servicio para almacenar documentos en filesystem o storage.",2,AKDMIA-AI,AKDMIA-101.1
+
+Story,AKDMIA-102 Extracción de texto de documentos,"Extraer texto estructurado del PDF para procesarlo.",3,AKDMIA-AI,AKDMIA-101.2
+Task,AKDMIA-102.1 Implementar extractor PDF,"Usar Apache PDFBox o Tika para extraer texto.",3,AKDMIA-AI,AKDMIA-101.2
+Task,AKDMIA-102.2 Crear SourceTextExtractorPort,"Puerto hexagonal para extracción de texto.",1,AKDMIA-AI,AKDMIA-102.1
+Task,AKDMIA-102.3 Normalización de texto,"Limpiar saltos de línea, espacios y caracteres especiales.",2,AKDMIA-AI,AKDMIA-102.1
+
+Story,AKDMIA-103 División documento en chunks,"Dividir el documento en fragmentos semánticos.",5,AKDMIA-AI,AKDMIA-102.3
+Task,AKDMIA-103.1 Modelo SourceChunk,"Crear entidad SourceChunk con id,sourceDocumentId,content,metadata.",2,AKDMIA-AI,AKDMIA-102.3
+Task,AKDMIA-103.2 Implementar chunking semántico,"Dividir por artículos o secciones del documento.",5,AKDMIA-AI,AKDMIA-103.1
+Task,AKDMIA-103.3 Persistir chunks,"Guardar chunks en base de datos.",2,AKDMIA-AI,AKDMIA-103.2
+
+Story,AKDMIA-104 Generación de embeddings,"Convertir chunks a vectores para búsqueda semántica.",5,AKDMIA-AI,AKDMIA-103.3
+Task,AKDMIA-104.1 Crear EmbeddingPort,"Puerto hexagonal para generación de embeddings.",1,AKDMIA-AI,AKDMIA-103.3
+Task,AKDMIA-104.2 Implementar cliente embeddings,"Cliente para proveedor de embeddings.",3,AKDMIA-AI,AKDMIA-104.1
+Task,AKDMIA-104.3 Añadir campo embedding a SourceChunk,"Guardar vector embedding en BD.",2,AKDMIA-AI,AKDMIA-104.2
+
+Story,AKDMIA-105 Búsqueda semántica vectorial,"Implementar búsqueda de chunks relevantes.",5,AKDMIA-AI,AKDMIA-104.3
+Task,AKDMIA-105.1 Instalar pgvector,"Extensión vectorial para PostgreSQL.",2,AKDMIA-AI,AKDMIA-104.3
+Task,AKDMIA-105.2 Implementar VectorSearchPort,"Puerto para buscar chunks similares.",3,AKDMIA-AI,AKDMIA-105.1
+Task,AKDMIA-105.3 Crear índice vectorial,"Optimizar búsqueda semántica.",1,AKDMIA-AI,AKDMIA-105.2
+
+Story,AKDMIA-106 Generación automática de preguntas,"Generar preguntas tipo test usando contexto recuperado.",8,AKDMIA-AI,AKDMIA-105.3
+Task,AKDMIA-106.1 Crear GenerateQuizUseCase,"Caso de uso principal de generación de cuestionarios.",2,AKDMIA-AI,AKDMIA-105.3
+Task,AKDMIA-106.2 Implementar QuestionGeneratorPort,"Construir prompt, llamar al LLM y parsear JSON.",5,AKDMIA-AI,AKDMIA-106.1
+Task,AKDMIA-106.3 Definir esquema JSON preguntas,"Formato estándar de preguntas generadas.",1,AKDMIA-AI,AKDMIA-106.2
+
+Story,AKDMIA-107 Validación automática preguntas,"Validar estructura y soporte contextual.",5,AKDMIA-AI,AKDMIA-106.3
+Task,AKDMIA-107.1 Validación estructural,"Comprobar respuestas, correctIndex y duplicados.",2,AKDMIA-AI,AKDMIA-106.3
+Task,AKDMIA-107.2 Validación contextual,"Verificar que respuesta está soportada por contexto.",3,AKDMIA-AI,AKDMIA-107.1
+
+Story,AKDMIA-108 Persistencia preguntas generadas,"Guardar preguntas generadas como borradores.",5,AKDMIA-AI,AKDMIA-107.2
+Task,AKDMIA-108.1 Modelo GeneratedQuestionDraft,"Entidad para preguntas generadas por IA.",2,AKDMIA-AI,AKDMIA-107.2
+Task,AKDMIA-108.2 Adaptador QuestionRepository,"Persistencia de preguntas generadas.",2,AKDMIA-AI,AKDMIA-108.1
+Task,AKDMIA-108.3 Conversión a Question,"Transformar borradores a modelo de dominio.",3,AKDMIA-AI,AKDMIA-108.2
+
+Story,AKDMIA-109 API generación cuestionarios,"Endpoint público para generar cuestionarios.",3,AKDMIA-AI,AKDMIA-108.3
+Task,AKDMIA-109.1 DTO GenerateQuizCommand,"DTO para solicitar generación.",1,AKDMIA-AI,AKDMIA-108.3
+Task,AKDMIA-109.2 Endpoint POST /api/ai/quizzes/generate,"Implementar endpoint REST.",2,AKDMIA-AI,AKDMIA-109.1
+Task,AKDMIA-109.3 Tests integración generación cuestionarios,"Tests con Testcontainers.",3,AKDMIA-AI,AKDMIA-109.2

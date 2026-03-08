@@ -1,0 +1,47 @@
+Issue Type,Summary,Description,Story Point Estimate,Epic Link,Depends On
+Story,AKDMIA-FE-201 UI de gestión de fuentes documentales,"Implementar la interfaz para subir documentos PDF fuente y visualizar su estado de procesamiento dentro de Akademia.",5,AKDMIA-AI,
+
+Task,AKDMIA-FE-201.1 Crear vista de fuentes documentales,"Crear nueva pantalla o sección para listar y gestionar documentos fuente del sistema RAG.",2,AKDMIA-AI,
+Task,AKDMIA-FE-201.2 Implementar formulario de subida de PDF,"Añadir formulario con file input para subir PDFs al endpoint POST /api/sources.",2,AKDMIA-AI,AKDMIA-FE-201.1
+Task,AKDMIA-FE-201.3 Mostrar estados de documentos fuente,"Mostrar nombre, fecha, versión y estado del documento (UPLOADED, PROCESSED, FAILED).",1,AKDMIA-AI,AKDMIA-FE-201.1
+Task,AKDMIA-FE-201.4 Gestionar loading y errores de subida,"Mostrar feedback de progreso, éxito y error al subir documentos.",1,AKDMIA-AI,AKDMIA-FE-201.2
+
+Story,AKDMIA-FE-202 Formulario de generación de cuestionarios IA,"Implementar la interfaz para solicitar la generación de preguntas desde el backend RAG.",5,AKDMIA-AI,AKDMIA-FE-201.3
+Task,AKDMIA-FE-202.1 Crear formulario Generate Quiz,"Crear formulario con sourceId, unitId, topic, difficulty, questionCount, includeHints y storeAsDraft.",2,AKDMIA-AI,AKDMIA-FE-201.3
+Task,AKDMIA-FE-202.2 Integrar POST /api/ai/quizzes/generate,"Conectar el formulario con el endpoint de generación de cuestionarios.",2,AKDMIA-AI,AKDMIA-FE-202.1
+Task,AKDMIA-FE-202.3 Validación de formulario en cliente,"Validar campos obligatorios y rangos antes de enviar la petición.",1,AKDMIA-AI,AKDMIA-FE-202.1
+Task,AKDMIA-FE-202.4 Feedback de ejecución de generación,"Mostrar loading, éxito, error y resumen de preguntas generadas/almacenadas/rechazadas.",1,AKDMIA-AI,AKDMIA-FE-202.2
+
+Story,AKDMIA-FE-203 Selector de fuente y contexto académico,"Permitir seleccionar de forma cómoda la fuente documental y la unidad/tema objetivo para la generación.",3,AKDMIA-AI,AKDMIA-FE-201.3
+Task,AKDMIA-FE-203.1 Selector de documento fuente,"Implementar dropdown/autocomplete para seleccionar un SourceDocument procesado.",1,AKDMIA-AI,AKDMIA-FE-201.3
+Task,AKDMIA-FE-203.2 Selector de unidad/tema,"Integrar selector de Unit existente o crear selector compatible con el flujo actual.",1,AKDMIA-AI,AKDMIA-FE-203.1
+Task,AKDMIA-FE-203.3 Autorrelleno o ayuda contextual de topic,"Permitir introducir topic manualmente con ayuda visual o valores sugeridos.",1,AKDMIA-AI,AKDMIA-FE-203.1
+
+Story,AKDMIA-FE-204 Visualización de resultados de generación,"Mostrar en frontend el resultado devuelto por la generación de cuestionarios de forma clara y útil.",5,AKDMIA-AI,AKDMIA-FE-202.4
+Task,AKDMIA-FE-204.1 Crear panel resumen de generación,"Mostrar sourceId, topic, difficulty, questionCount y resultado del proceso.",1,AKDMIA-AI,AKDMIA-FE-202.4
+Task,AKDMIA-FE-204.2 Mostrar listado de preguntas generadas,"Renderizar preguntas generadas con statement, answers, correctIndex, hint, explanation y reference.",2,AKDMIA-AI,AKDMIA-FE-204.1
+Task,AKDMIA-FE-204.3 Resaltar respuesta correcta y metadatos,"Distinguir visualmente la respuesta correcta y mostrar dificultad/referencia.",1,AKDMIA-AI,AKDMIA-FE-204.2
+Task,AKDMIA-FE-204.4 Gestionar estados vacíos o generación parcial,"Mostrar mensajes claros cuando no haya preguntas, haya rechazo parcial o errores de parseo.",1,AKDMIA-AI,AKDMIA-FE-204.1
+
+Story,AKDMIA-FE-205 Revisión básica de borradores IA,"Implementar una primera UI para revisar los borradores generados por IA antes de consolidarlos en producto.",8,AKDMIA-AI,AKDMIA-FE-204.2
+Task,AKDMIA-FE-205.1 Crear vista de drafts generados,"Pantalla para listar borradores generados por IA con filtros básicos.",2,AKDMIA-AI,AKDMIA-FE-204.2
+Task,AKDMIA-FE-205.2 Filtros por documento unidad  topic y estado,"Permitir filtrar drafts por sourceDocumentId, unitId, topic y status.",2,AKDMIA-AI,AKDMIA-FE-205.1
+Task,AKDMIA-FE-205.3 Vista detalle de draft,"Mostrar contenido completo del draft con respuestas, pista, explicación y referencia.",2,AKDMIA-AI,AKDMIA-FE-205.1
+Task,AKDMIA-FE-205.4 Acciones básicas de revisión,"Preparar botones de aprobar/rechazar/descartar si existen endpoints o dejar la UI preparada para integración futura.",2,AKDMIA-AI,AKDMIA-FE-205.3
+
+Story,AKDMIA-FE-206 Integración de navegación y acceso en la app,"Añadir acceso coherente a las nuevas funcionalidades IA dentro de la navegación de Akademia.",3,AKDMIA-AI,AKDMIA-FE-202.1
+Task,AKDMIA-FE-206.1 Añadir entrada en navegación/admin,"Incluir acceso a la sección RAG/IA desde el menú apropiado.",1,AKDMIA-AI,AKDMIA-FE-202.1
+Task,AKDMIA-FE-206.2 Proteger rutas según permisos o contexto,"Ocultar o proteger la sección si solo debe estar disponible para administración.",1,AKDMIA-AI,AKDMIA-FE-206.1
+Task,AKDMIA-FE-206.3 Mejorar UX de navegación entre upload generate y drafts,"Añadir tabs; breadcrumbs o navegación secundaria para el flujo completo.",1,AKDMIA-AI,AKDMIA-FE-206.1
+
+Story,AKDMIA-FE-207 Cliente API y tipado frontend para RAG,"Crear capa frontend tipada y reutilizable para consumir los endpoints del backend RAG.",5,AKDMIA-AI,
+Task,AKDMIA-FE-207.1 Crear tipos/interfaces TS de SourceDocument y GenerateQuiz,"Definir tipos para requests y responses del backend.",2,AKDMIA-AI,
+Task,AKDMIA-FE-207.2 Implementar cliente API de sources,"Crear funciones para subir y consultar documentos fuente.",1,AKDMIA-AI,AKDMIA-FE-207.1
+Task,AKDMIA-FE-207.3 Implementar cliente API de generación IA,"Crear función para invocar POST /api/ai/quizzes/generate.",1,AKDMIA-AI,AKDMIA-FE-207.1
+Task,AKDMIA-FE-207.4 Normalización de errores y responses,"Centralizar parseo de errores y respuestas del módulo RAG.",1,AKDMIA-AI,AKDMIA-FE-207.2
+
+Story,AKDMIA-FE-208 Tests frontend del módulo RAG,"Cubrir con tests el flujo principal del frontend para evitar que todo se rompa a la primera refactorización con prisas.",5,AKDMIA-AI,AKDMIA-FE-204.2
+Task,AKDMIA-FE-208.1 Tests del formulario de subida,"Probar render, validación y envío de documentos.",1,AKDMIA-AI,AKDMIA-FE-201.2
+Task,AKDMIA-FE-208.2 Tests del formulario de generación,"Probar validaciones, estados y envío al endpoint.",2,AKDMIA-AI,AKDMIA-FE-202.2
+Task,AKDMIA-FE-208.3 Tests de renderizado de resultados,"Probar visualización de preguntas generadas y estados vacíos.",1,AKDMIA-AI,AKDMIA-FE-204.2
+Task,AKDMIA-FE-208.4 Tests de navegación módulo IA,"Probar rutas principales y acceso a pantallas nuevas.",1,AKDMIA-AI,AKDMIA-FE-206.1
