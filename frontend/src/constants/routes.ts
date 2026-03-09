@@ -9,5 +9,6 @@ export const ROUTES = {
   examResult: '/result',
   settings: '/settings',
   flashcards: '/flashcards',
-  flashcardsStudy: '/flashcards/study'
+  flashcardsStudy: '/flashcards/study',
+  rag: '/rag'
 } as const;

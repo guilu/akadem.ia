@@ -16,6 +16,7 @@ import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
+import RagPage from './pages/RagPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
@@ -225,6 +226,11 @@ export default function App(){
           <Route path={ROUTES.flashcardsStudy} element={
             <ProtectedRoute allow={isAuthed}>
               <FlashcardsStudyPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.rag} element={
+            <ProtectedRoute allow={isAuthed && role === 'ADMIN'}>
+              <RagPage token={token} subjects={subjects} />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
