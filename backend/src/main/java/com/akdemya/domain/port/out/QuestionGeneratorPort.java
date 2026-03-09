@@ -13,6 +13,7 @@ import java.util.List;
 public interface QuestionGeneratorPort {
     List<GeneratedQuestionDraft> generate(
             GenerateQuizUseCase.GenerateQuizCommand command,
-            List<SourceChunk> contextChunks
+            List<SourceChunk> contextChunks,
+            String topic
     );
 }

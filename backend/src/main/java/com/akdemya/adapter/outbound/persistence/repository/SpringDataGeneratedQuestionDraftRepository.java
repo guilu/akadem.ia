@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface SpringDataGeneratedQuestionDraftRepository extends JpaRepository<GeneratedQuestionDraftEntity, UUID> {
     List<GeneratedQuestionDraftEntity> findBySourceDocumentIdOrderByCreatedAtDesc(UUID sourceDocumentId);
+    List<GeneratedQuestionDraftEntity> findBySourceDocumentIdAndStatusOrderByCreatedAtDesc(UUID sourceDocumentId, String status);
 }

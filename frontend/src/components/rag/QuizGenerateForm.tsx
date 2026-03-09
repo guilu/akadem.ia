@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getUnitsForSubject } from '../../api';
-import type { Subject, SourceDocument, AdminUnit, GenerateQuizCommand } from '../../types';
+import type { SourceDocument, GenerateQuizCommand } from '../../types';
 
 interface Props {
   token: string;
   sources: SourceDocument[];
-  subjects: Subject[];
+  subjectId: string;
   onGenerate: (cmd: GenerateQuizCommand) => void;
   loading: boolean;
 }
@@ -16,21 +16,20 @@ const DIFFICULTIES = [
   { value: 'HARD', label: 'Difícil' }
 ] as const;
 
-export default function QuizGenerateForm({ token, sources, subjects, onGenerate, loading }: Props) {
+export default function QuizGenerateForm({ token, sources, subjectId, onGenerate, loading }: Props) {
   const processed = sources.filter((s) => s.status === 'PROCESSED');
 
   const [sourceId, setSourceId] = useState('');
-  const [topic, setTopic] = useState('');
+  const [unitId, setUnitId] = useState('');
   const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
   const [questionCount, setQuestionCount] = useState(5);
   const [includeHints, setIncludeHints] = useState(false);
   const [storeAsDraft, setStoreAsDraft] = useState(true);
-  const [subjectId, setSubjectId] = useState('');
-  const [unitId, setUnitId] = useState('');
-  const [units, setUnits] = useState<AdminUnit[]>([]);
+  const [units, setUnits] = useState<{ id: string; name: string }[]>([]);
   const [unitsLoading, setUnitsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Load units for the selected subject
   useEffect(() => {
     if (!subjectId) { setUnits([]); setUnitId(''); return; }
     setUnitsLoading(true);
@@ -42,19 +41,11 @@ export default function QuizGenerateForm({ token, sources, subjects, onGenerate,
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!topic.trim()) { setError('Introduce el tema de las preguntas.'); return; }
     if (!sourceId) { setError('Selecciona un documento fuente.'); return; }
+    if (!unitId) { setError('Selecciona una unidad temática.'); return; }
     if (questionCount < 1 || questionCount > 20) { setError('El número de preguntas debe estar entre 1 y 20.'); return; }
     setError('');
-    onGenerate({
-      sourceId,
-      unitId: unitId || null,
-      topic: topic.trim(),
-      difficulty,
-      questionCount,
-      includeHints,
-      storeAsDraft
-    });
+    onGenerate({ sourceId, unitId, difficulty, questionCount, includeHints, storeAsDraft });
   }
 
   const labelCls = 'block text-sm font-medium text-text/70 mb-1';
@@ -76,16 +67,25 @@ export default function QuizGenerateForm({ token, sources, subjects, onGenerate,
       </div>
 
       <div>
-        <label htmlFor="rag-topic" className={labelCls}>Tema *</label>
-        <input
-          id="rag-topic"
-          type="text"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="Ej: La Corona, Derechos Fundamentales…"
+        <label htmlFor="rag-unit" className={labelCls}>Unidad temática *</label>
+        <select
+          id="rag-unit"
+          value={unitId}
+          onChange={(e) => setUnitId(e.target.value)}
           className={inputCls}
+          disabled={unitsLoading || units.length === 0}
           required
-        />
+        >
+          <option value="">— Selecciona una unidad —</option>
+          {units.map((u) => (
+            <option key={u.id} value={u.id}>{u.name}</option>
+          ))}
+        </select>
+        {units.length === 0 && !unitsLoading && (
+          <p className="text-xs text-yellow-600 mt-1">
+            No hay unidades en esta asignatura. Indexa un documento primero.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -109,29 +109,6 @@ export default function QuizGenerateForm({ token, sources, subjects, onGenerate,
           />
         </div>
       </div>
-
-      {subjects.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelCls}>Asignatura (opcional)</label>
-            <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} className={inputCls}>
-              <option value="">— Sin asignatura —</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls}>Unidad (opcional)</label>
-            <select value={unitId} onChange={(e) => setUnitId(e.target.value)} className={inputCls} disabled={!subjectId || unitsLoading}>
-              <option value="">— Sin unidad —</option>
-              {units.map((u) => (
-                <option key={u.id} value={u.id}>{u.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
 
       <div className="flex flex-col gap-2">
         <label className="flex items-center gap-2 cursor-pointer text-sm text-text/70">

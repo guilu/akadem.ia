@@ -17,7 +17,7 @@ public class SourceChunkMapper {
 
     public SourceChunk toDomain(SourceChunkEntity e) {
         return new SourceChunk(e.getId(), e.getSourceDocumentId(), e.getContent(),
-                e.getChunkIndex(), e.getMetadata());
+                e.getChunkIndex(), e.getMetadata(), e.getUnitName(), e.getUnitId());
     }
 
     public float[] embeddingFromEntity(SourceChunkEntity e) {
@@ -39,7 +39,21 @@ public class SourceChunkMapper {
         e.setContent(d.getContent());
         e.setChunkIndex(d.getChunkIndex());
         e.setMetadata(d.getMetadata());
+        e.setUnitName(d.getUnitName());
+        e.setUnitId(d.getUnitId());
         e.setEmbedding(serializeEmbedding(embedding));
+        return e;
+    }
+
+    public SourceChunkEntity toEntityNoEmbedding(SourceChunk d) {
+        SourceChunkEntity e = new SourceChunkEntity();
+        e.setId(d.getId());
+        e.setSourceDocumentId(d.getSourceDocumentId());
+        e.setContent(d.getContent());
+        e.setChunkIndex(d.getChunkIndex());
+        e.setMetadata(d.getMetadata());
+        e.setUnitName(d.getUnitName());
+        e.setUnitId(d.getUnitId());
         return e;
     }
 

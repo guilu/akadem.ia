@@ -16,21 +16,22 @@ interface Props {
 
 export default function RagPage({ token, subjects }: Props) {
   const [tab, setTab] = useState<Tab>('sources');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
   const [sources, setSources] = useState<SourceDocument[]>([]);
-  const [sourcesLoading, setSourcesLoading] = useState(true);
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
 
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState('');
   const [result, setResult] = useState<GenerateQuizResponse | null>(null);
 
   useEffect(() => {
+    if (!selectedSubjectId) { setSources([]); return; }
     setSourcesLoading(true);
-    getSources(token)
+    getSources(token, selectedSubjectId)
       .then(setSources)
       .catch(() => setSources([]))
       .finally(() => setSourcesLoading(false));
-  }, [token]);
+  }, [token, selectedSubjectId]);
 
   function onUploaded(doc: SourceDocument) {
     setSources((prev) => [doc, ...prev]);
@@ -61,75 +62,112 @@ export default function RagPage({ token, subjects }: Props) {
         : 'text-text/60 hover:text-text hover:bg-secondary/10'
     }`;
 
+  const inputCls = 'rounded-xl border border-secondary/25 bg-secondary/5 px-3 py-2 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30';
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Generador IA de preguntas</h1>
-        <p className="text-sm text-text/50 mt-1">
-          Sube documentos PDF y genera preguntas tipo test automáticamente usando RAG.
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Generador IA de preguntas</h1>
+          <p className="text-sm text-text/50 mt-1">
+            Sube documentos PDF y genera preguntas tipo test automáticamente usando RAG.
+          </p>
+        </div>
+
+        {/* Global subject selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-text/70 whitespace-nowrap">Asignatura:</label>
+          <select
+            value={selectedSubjectId}
+            onChange={(e) => {
+              setSelectedSubjectId(e.target.value);
+              setResult(null);
+              setGenerateError('');
+            }}
+            className={inputCls}
+          >
+            <option value="">— Selecciona asignatura —</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {!selectedSubjectId && (
+        <p className="text-sm text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
+          Selecciona una asignatura para comenzar.
         </p>
-      </div>
+      )}
 
-      <div className="flex gap-2 p-1 bg-secondary/10 rounded-xl w-fit">
-        <button className={tabCls('sources')} onClick={() => setTab('sources')}>
-          Fuentes
-        </button>
-        <button className={tabCls('generate')} onClick={() => setTab('generate')}>
-          Generar
-        </button>
-        <button className={tabCls('drafts')} onClick={() => setTab('drafts')}>
-          Borradores
-        </button>
-      </div>
-
-      <div className="rounded-2xl border border-secondary/20 bg-bg p-6">
-        {tab === 'sources' && (
-          <div className="space-y-6">
-            <section>
-              <h2 className="text-base font-semibold mb-3">Subir documento PDF</h2>
-              <SourceUpload token={token} onUploaded={onUploaded} />
-            </section>
-            <section>
-              <h2 className="text-base font-semibold mb-3">Documentos subidos</h2>
-              <SourceList
-                sources={sources}
-                selectedId={selectedSourceId}
-                onSelect={setSelectedSourceId}
-                loading={sourcesLoading}
-              />
-            </section>
+      {selectedSubjectId && (
+        <>
+          <div className="flex gap-2 p-1 bg-secondary/10 rounded-xl w-fit">
+            <button className={tabCls('sources')} onClick={() => setTab('sources')}>
+              Fuentes
+            </button>
+            <button className={tabCls('generate')} onClick={() => setTab('generate')}>
+              Generar
+            </button>
+            <button className={tabCls('drafts')} onClick={() => setTab('drafts')}>
+              Borradores
+            </button>
           </div>
-        )}
 
-        {tab === 'generate' && (
-          <div className="space-y-6">
-            {result ? (
-              <QuizResults result={result} onReset={() => setResult(null)} />
-            ) : (
-              <>
-                <h2 className="text-base font-semibold">Configurar generación</h2>
-                <QuizGenerateForm
-                  token={token}
-                  sources={sources}
-                  subjects={subjects}
-                  onGenerate={onGenerate}
-                  loading={generating}
-                />
-                {generateError && (
-                  <p role="alert" className="text-sm text-red-500">{generateError}</p>
+          <div className="rounded-2xl border border-secondary/20 bg-bg p-6">
+            {tab === 'sources' && (
+              <div className="space-y-6">
+                <section>
+                  <h2 className="text-base font-semibold mb-3">Subir documento PDF</h2>
+                  <SourceUpload
+                    token={token}
+                    subjectId={selectedSubjectId}
+                    onUploaded={onUploaded}
+                  />
+                </section>
+                <section>
+                  <h2 className="text-base font-semibold mb-3">Documentos subidos</h2>
+                  <SourceList
+                    sources={sources}
+                    selectedId={null}
+                    onSelect={() => {}}
+                    loading={sourcesLoading}
+                  />
+                </section>
+              </div>
+            )}
+
+            {tab === 'generate' && (
+              <div className="space-y-6">
+                {result ? (
+                  <QuizResults result={result} onReset={() => setResult(null)} />
+                ) : (
+                  <>
+                    <h2 className="text-base font-semibold">Configurar generación</h2>
+                    <QuizGenerateForm
+                      token={token}
+                      sources={sources}
+                      subjectId={selectedSubjectId}
+                      onGenerate={onGenerate}
+                      loading={generating}
+                    />
+                    {generateError && (
+                      <p role="alert" className="text-sm text-red-500">{generateError}</p>
+                    )}
+                  </>
                 )}
-              </>
+              </div>
+            )}
+
+            {tab === 'drafts' && (
+              <div className="space-y-6">
+                <h2 className="text-base font-semibold">Borradores guardados</h2>
+                <DraftList token={token} sources={sources} />
+              </div>
             )}
           </div>
-        )}
-
-        {tab === 'drafts' && (
-          <div className="space-y-6">
-            <h2 className="text-base font-semibold">Borradores guardados</h2>
-            <DraftList token={token} sources={sources} />
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,17 +1,20 @@
 import { useRef, useState } from 'react';
 import { uploadSource } from '../../api';
-import type { SourceDocument } from '../../types';
+import type { SourceDocument, IndexPreview } from '../../types';
+import SourceIndexPreview from './SourceIndexPreview';
 
 interface Props {
   token: string;
+  subjectId: string;
   onUploaded: (doc: SourceDocument) => void;
 }
 
-export default function SourceUpload({ token, onUploaded }: Props) {
+export default function SourceUpload({ token, subjectId, onUploaded }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [preview, setPreview] = useState<IndexPreview | null>(null);
 
   async function handleFile(file: File) {
     if (!file.name.toLowerCase().endsWith('.pdf')) {
@@ -25,10 +28,12 @@ export default function SourceUpload({ token, onUploaded }: Props) {
     setError('');
     setLoading(true);
     try {
-      const doc = await uploadSource(token, file);
-      onUploaded(doc);
-      if (doc.status === 'FAILED') {
-        setError('El documento se subió pero no pudo procesarse. Comprueba que las API keys de IA estén configuradas en el servidor.');
+      const result = await uploadSource(token, file, subjectId);
+      if (result.document.status === 'FAILED') {
+        setError('El documento se subió pero no pudo procesarse. Comprueba las API keys del servidor.');
+        onUploaded(result.document);
+      } else {
+        setPreview(result);
       }
     } catch (err: any) {
       setError(err?.body?.message || 'Error al subir el documento.');
@@ -48,6 +53,22 @@ export default function SourceUpload({ token, onUploaded }: Props) {
     setDragOver(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
+  }
+
+  function handleConfirmed(doc: SourceDocument) {
+    setPreview(null);
+    onUploaded(doc);
+  }
+
+  if (preview) {
+    return (
+      <SourceIndexPreview
+        preview={preview}
+        token={token}
+        onConfirmed={handleConfirmed}
+        onCancel={() => setPreview(null)}
+      />
+    );
   }
 
   return (
@@ -71,7 +92,7 @@ export default function SourceUpload({ token, onUploaded }: Props) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4" />
         </svg>
         {loading ? (
-          <p className="text-sm text-text/60">Subiendo y procesando…</p>
+          <p className="text-sm text-text/60">Subiendo y extrayendo temas…</p>
         ) : (
           <>
             <p className="text-sm font-medium text-text/70">Arrastra un PDF aquí o haz clic para seleccionar</p>

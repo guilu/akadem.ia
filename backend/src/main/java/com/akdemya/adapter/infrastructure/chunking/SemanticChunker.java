@@ -9,22 +9,30 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Semantic chunker for Spanish legal/administrative documents.
  *
  * Strategy:
- *  1. Try to split by article patterns ("Artículo N", "Art. N", "ARTÍCULO N", "Sección N")
+ *  1. Try to split by article/section patterns ("Artículo N", "Capítulo N", etc.)
  *  2. If fewer than 3 splits found, fall back to size-based chunking with overlap
  *
- * Metadata per chunk: {"article":"62","section":"Título II","sourceDocumentId":"..."}
+ * Each chunk gets a unitName = the full heading line (e.g. "Artículo 62. Del rey")
+ * which is used to group chunks into units during the index confirmation step.
  */
 @Component
 public class SemanticChunker implements TextChunkerPort {
 
     private static final Pattern ARTICLE_PATTERN = Pattern.compile(
-            "(?m)^\\s*(Art[ií]culo|Art\\.?|ARTÍCULO|Sección|SECCIÓN|Capítulo|CAPÍTULO)\\s+(\\d+[\\w.-]*).*$",
+            "(?m)^\\s*(T[ií]tulo|TÍTULO|Art[ií]culo|Art\\.?|ARTÍCULO|Secci[oó]n|SECCIÓN|Cap[ií]tulo|CAPÍTULO)\\s+(\\d+[\\w.-]*)(.*)$",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+
+    // High-level section keywords (preferred for detected units)
+    private static final Set<String> HIGH_LEVEL_KEYWORDS = Set.of(
+            "título", "titulo", "capítulo", "capitulo", "sección", "seccion",
+            "TÍTULO", "CAPÍTULO", "SECCIÓN"
     );
 
     private static final int MIN_SEMANTIC_SPLITS = 3;
@@ -53,7 +61,13 @@ public class SemanticChunker implements TextChunkerPort {
         List<Split> splits = new ArrayList<>();
         Matcher m = ARTICLE_PATTERN.matcher(text);
         while (m.find()) {
-            splits.add(new Split(m.start(), m.group(1), m.group(2)));
+            String keyword = m.group(1);
+            String number = m.group(2);
+            String rest = m.group(3) != null ? m.group(3).trim() : "";
+            // Build a clean heading: "Artículo 62. Del rey" → unit name
+            String heading = keyword + " " + number + (rest.isBlank() ? "" : ". " + rest.replaceFirst("^[.:\\s]+", "").trim());
+            if (heading.length() > 200) heading = heading.substring(0, 200);
+            splits.add(new Split(m.start(), keyword, number, heading.trim()));
         }
         return splits;
     }
@@ -61,11 +75,12 @@ public class SemanticChunker implements TextChunkerPort {
     private List<SourceChunk> buildSemanticChunks(String text, List<Split> splits, UUID sourceDocumentId) {
         List<SourceChunk> chunks = new ArrayList<>();
 
-        // Text before first article
+        // Text before first heading (preamble)
         if (splits.get(0).start() > 0) {
             String preamble = text.substring(0, splits.get(0).start()).trim();
             if (!preamble.isBlank()) {
-                chunks.add(SourceChunk.create(sourceDocumentId, preamble, 0, metadata(sourceDocumentId, null, null)));
+                chunks.add(SourceChunk.create(sourceDocumentId, preamble, 0,
+                        metadata(sourceDocumentId, null, null), null));
             }
         }
 
@@ -76,14 +91,16 @@ public class SemanticChunker implements TextChunkerPort {
 
             if (content.isBlank()) continue;
 
+            String unitName = splits.get(i).heading();
+
             // If the article content is very long, sub-chunk it by size
             if (content.length() > props.getChunkSize() * 2) {
                 List<SourceChunk> sub = splitBySize(content, sourceDocumentId, chunks.size(),
-                        splits.get(i).keyword(), splits.get(i).number());
+                        splits.get(i).keyword(), splits.get(i).number(), unitName);
                 chunks.addAll(sub);
             } else {
                 String meta = metadata(sourceDocumentId, splits.get(i).keyword(), splits.get(i).number());
-                chunks.add(SourceChunk.create(sourceDocumentId, content, chunks.size(), meta));
+                chunks.add(SourceChunk.create(sourceDocumentId, content, chunks.size(), meta, unitName));
             }
         }
 
@@ -93,11 +110,11 @@ public class SemanticChunker implements TextChunkerPort {
     // --- Size-based fallback ---
 
     private List<SourceChunk> buildSizeChunks(String text, UUID sourceDocumentId) {
-        return splitBySize(text, sourceDocumentId, 0, null, null);
+        return splitBySize(text, sourceDocumentId, 0, null, null, null);
     }
 
     private List<SourceChunk> splitBySize(String text, UUID sourceDocumentId,
-                                           int startIndex, String section, String article) {
+                                           int startIndex, String section, String article, String unitName) {
         List<SourceChunk> chunks = new ArrayList<>();
         int chunkSize = props.getChunkSize();
         int overlap = props.getChunkOverlap();
@@ -116,13 +133,13 @@ public class SemanticChunker implements TextChunkerPort {
             String content = text.substring(pos, end).trim();
             if (!content.isBlank()) {
                 chunks.add(SourceChunk.create(sourceDocumentId, content, idx++,
-                        metadata(sourceDocumentId, section, article)));
+                        metadata(sourceDocumentId, section, article), unitName));
             }
 
-            if (end >= text.length()) break; // reached the end — no more chunks
+            if (end >= text.length()) break;
 
             int nextPos = end - overlap;
-            if (nextPos <= pos) nextPos = end; // safeguard: always advance
+            if (nextPos <= pos) nextPos = end;
             pos = nextPos;
         }
 
@@ -153,5 +170,33 @@ public class SemanticChunker implements TextChunkerPort {
         }
     }
 
-    private record Split(int start, String keyword, String number) {}
+    /**
+     * Extract unique detected units from a list of chunks.
+     * Prefers high-level headings (Título, Capítulo, Sección) over Artículo.
+     * Returns units sorted by first occurrence.
+     */
+    public static List<String> extractDetectedUnitNames(List<SourceChunk> chunks) {
+        // Check if high-level headings exist
+        boolean hasHighLevel = chunks.stream()
+                .filter(c -> c.getUnitName() != null)
+                .anyMatch(c -> isHighLevelHeading(c.getUnitName()));
+
+        // If high-level headings exist, use only those; otherwise use all headings
+        return chunks.stream()
+                .filter(c -> c.getUnitName() != null)
+                .filter(c -> !hasHighLevel || isHighLevelHeading(c.getUnitName()))
+                .map(SourceChunk::getUnitName)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private static boolean isHighLevelHeading(String unitName) {
+        if (unitName == null) return false;
+        String lower = unitName.toLowerCase();
+        return lower.startsWith("título") || lower.startsWith("titulo") ||
+               lower.startsWith("capítulo") || lower.startsWith("capitulo") ||
+               lower.startsWith("sección") || lower.startsWith("seccion");
+    }
+
+    private record Split(int start, String keyword, String number, String heading) {}
 }

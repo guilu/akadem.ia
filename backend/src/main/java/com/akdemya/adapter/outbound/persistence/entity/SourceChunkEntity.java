@@ -27,6 +27,12 @@ public class SourceChunkEntity {
     @Column(columnDefinition = "text")
     private String embedding;
 
+    @Column(name = "unit_name", length = 500)
+    private String unitName;
+
+    @Column(name = "unit_id")
+    private UUID unitId;
+
     public SourceChunkEntity() {}
 
     public UUID getId() { return id; }
@@ -46,4 +52,10 @@ public class SourceChunkEntity {
 
     public String getEmbedding() { return embedding; }
     public void setEmbedding(String embedding) { this.embedding = embedding; }
+
+    public String getUnitName() { return unitName; }
+    public void setUnitName(String unitName) { this.unitName = unitName; }
+
+    public UUID getUnitId() { return unitId; }
+    public void setUnitId(UUID unitId) { this.unitId = unitId; }
 }

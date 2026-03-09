@@ -1,7 +1,5 @@
 package com.akdemya.adapter.outbound.persistence;
 
-import com.akdemya.adapter.outbound.persistence.entity.GeneratedQuestionDraftEntity;
-import com.akdemya.adapter.outbound.persistence.entity.SourceChunkEntity;
 import com.akdemya.adapter.outbound.persistence.entity.SourceDocumentEntity;
 import com.akdemya.adapter.outbound.persistence.mapper.GeneratedQuestionDraftMapper;
 import com.akdemya.adapter.outbound.persistence.mapper.SourceChunkMapper;
@@ -19,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,7 +59,7 @@ class RagPersistenceAdapterTest {
         docEntity.setName("test.pdf");
         docEntity.setType("PDF");
         docEntity.setChecksum("abc123");
-        docEntity.setUploadedAt(java.time.LocalDateTime.now());
+        docEntity.setUploadedAt(LocalDateTime.now());
         docEntity.setStatus("PROCESSED");
         docEntity.setStoragePath("/tmp/test.pdf");
         docJpa.save(docEntity);
@@ -68,8 +67,8 @@ class RagPersistenceAdapterTest {
 
     @Test
     void saveAndFindSourceDocument() {
-        SourceDocument doc = new SourceDocument(UUID.randomUUID(), "doc.pdf", "PDF", null,
-                "xyz789", java.time.LocalDateTime.now(), SourceDocument.Status.UPLOADED, "/tmp/doc.pdf");
+        SourceDocument doc = new SourceDocument(UUID.randomUUID(), null, "doc.pdf", "PDF", null,
+                "xyz789", LocalDateTime.now(), SourceDocument.Status.UPLOADED, "/tmp/doc.pdf");
 
         SourceDocument saved = docAdapter.save(doc);
         Optional<SourceDocument> found = docAdapter.findById(saved.getId());
@@ -95,7 +94,7 @@ class RagPersistenceAdapterTest {
         SourceChunk chunk = SourceChunk.create(docId, "Artículo 1. El Rey...", 0, "{\"article\":\"1\"}");
         float[] embedding = {0.1f, 0.2f, 0.3f};
 
-        SourceChunk saved = chunkAdapter.save(chunk, embedding);
+        chunkAdapter.save(chunk, embedding);
         List<SourceChunk> chunks = chunkAdapter.findBySourceDocumentId(docId);
 
         assertEquals(1, chunks.size());
@@ -129,7 +128,7 @@ class RagPersistenceAdapterTest {
 
         draftAdapter.saveAll(List.of(d1, d2));
 
-        List<GeneratedQuestionDraft> found = draftAdapter.findBySourceDocumentId(docId);
+        List<GeneratedQuestionDraft> found = draftAdapter.findBySourceDocumentId(docId, null);
         assertEquals(2, found.size());
     }
 
@@ -142,7 +141,7 @@ class RagPersistenceAdapterTest {
 
         draftAdapter.save(draft);
 
-        GeneratedQuestionDraft found = draftAdapter.findBySourceDocumentId(docId).get(0);
+        GeneratedQuestionDraft found = draftAdapter.findBySourceDocumentId(docId, null).get(0);
         assertEquals(answers, found.getAnswers());
         assertEquals(2, found.getCorrectIndex());
     }
