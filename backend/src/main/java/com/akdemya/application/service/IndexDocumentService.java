@@ -106,7 +106,10 @@ public class IndexDocumentService implements IndexSourceUseCase {
                 .collect(Collectors.groupingBy(SourceChunk::getUnitName));
 
         List<Unit> savedUnits = new ArrayList<>();
-        int orderIndex = 0;
+        int orderIndex = unitRepo.findBySubjectId(doc.getSubjectId()).stream()
+                .mapToInt(Unit::getOrderIndex)
+                .max()
+                .orElse(-1) + 1;
 
         for (ApprovedUnit approvedUnit : command.approvedUnits()) {
             Unit unit = Unit.create(doc.getSubjectId(), approvedUnit.name(),

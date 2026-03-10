@@ -13,7 +13,7 @@ public interface SpringDataSourceChunkRepository extends JpaRepository<SourceChu
     List<SourceChunkEntity> findBySourceDocumentIdOrderByChunkIndex(UUID sourceDocumentId);
     List<SourceChunkEntity> findByUnitIdOrderByChunkIndex(UUID unitId);
 
-    @Modifying
+    @Modifying(flushAutomatically = true)
     @Query("UPDATE SourceChunkEntity c SET c.unitId = :unitId WHERE c.id = :chunkId")
     void updateUnitId(@Param("chunkId") UUID chunkId, @Param("unitId") UUID unitId);
 }
