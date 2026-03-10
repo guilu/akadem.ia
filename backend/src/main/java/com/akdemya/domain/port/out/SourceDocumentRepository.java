@@ -10,4 +10,5 @@ public interface SourceDocumentRepository {
     SourceDocument save(SourceDocument document);
     Optional<SourceDocument> findById(UUID id);
     List<SourceDocument> findAll();
+    List<SourceDocument> findBySubjectId(UUID subjectId);
 }

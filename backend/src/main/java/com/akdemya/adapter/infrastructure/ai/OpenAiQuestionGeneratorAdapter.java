@@ -62,11 +62,12 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
 
     @Override
     public List<GeneratedQuestionDraft> generate(GenerateQuizUseCase.GenerateQuizCommand command,
-                                                  List<SourceChunk> contextChunks) {
+                                                  List<SourceChunk> contextChunks,
+                                                  String topic) {
         validateAtLeastOneProvider();
 
         String context = buildContext(contextChunks);
-        String userPrompt = buildUserPrompt(command, context);
+        String userPrompt = buildUserPrompt(command, context, topic);
         List<Map<String, String>> messages = List.of(
                 Map.of("role", "system", "content", SYSTEM_PROMPT),
                 Map.of("role", "user", "content", userPrompt)
@@ -75,7 +76,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
         if (props.getGroq().isConfigured()) {
             try {
                 return callProvider(groqClient, props.getGroq().getApiKey(),
-                        props.getGroq().getChatModel(), messages, command, "Groq", Map.of());
+                        props.getGroq().getChatModel(), messages, command, topic, "Groq", Map.of());
             } catch (Exception e) {
                 log.warn("Groq call failed ({}), falling back to OpenRouter", e.getMessage());
             }
@@ -85,7 +86,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
             throw new IllegalStateException("Groq failed and OpenRouter API key is not configured.");
         }
         return callProvider(openRouterClient, props.getOpenrouter().getApiKey(),
-                props.getOpenrouter().getChatModel(), messages, command, "OpenRouter",
+                props.getOpenrouter().getChatModel(), messages, command, topic, "OpenRouter",
                 Map.of(
                         "HTTP-Referer", props.getOpenrouter().getSiteUrl(),
                         "X-Title", props.getOpenrouter().getAppName()
@@ -96,10 +97,11 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
                                                        String model,
                                                        List<Map<String, String>> messages,
                                                        GenerateQuizUseCase.GenerateQuizCommand command,
+                                                       String topic,
                                                        String providerName,
                                                        Map<String, String> extraHeaders) {
         log.info("Calling {} chat completions, model={}, topic='{}', questionCount={}",
-                providerName, model, command.topic(), command.questionCount());
+                providerName, model, topic, command.questionCount());
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", model);
@@ -123,7 +125,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
         }
 
         String rawJson = response.choices().get(0).message().content();
-        return parseAndValidate(rawJson, command, providerName);
+        return parseAndValidate(rawJson, command, topic, providerName);
     }
 
     private String buildContext(List<SourceChunk> chunks) {
@@ -132,7 +134,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
                 .collect(Collectors.joining("\n\n---\n\n"));
     }
 
-    private String buildUserPrompt(GenerateQuizUseCase.GenerateQuizCommand command, String context) {
+    private String buildUserPrompt(GenerateQuizUseCase.GenerateQuizCommand command, String context, String topic) {
         return String.format("""
                 Genera exactamente %d preguntas tipo test sobre el tema: "%s"
                 Dificultad: %s
@@ -172,7 +174,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
                 }
                 """,
                 command.questionCount(),
-                command.topic(),
+                topic,
                 command.difficulty().name(),
                 command.includeHints() ? "- Incluye una pista (hint) útil para recordar la respuesta" : "",
                 command.includeHints() ? "" : "- El campo hint puede ir vacío",
@@ -182,6 +184,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
 
     private List<GeneratedQuestionDraft> parseAndValidate(String rawJson,
                                                            GenerateQuizUseCase.GenerateQuizCommand command,
+                                                           String topic,
                                                            String providerName) {
         QuizJson parsed;
         try {
@@ -203,7 +206,7 @@ public class OpenAiQuestionGeneratorAdapter implements QuestionGeneratorPort {
             }
             List<String> answerTexts = q.answers().stream().map(AnswerJson::text).toList();
             drafts.add(GeneratedQuestionDraft.create(
-                    command.sourceId(), command.unitId(), command.topic(),
+                    command.sourceId(), command.unitId(), topic,
                     command.difficulty().name(),
                     q.statement().trim(), answerTexts, q.correctIndex(),
                     q.hint(), q.explanation(), q.reference()

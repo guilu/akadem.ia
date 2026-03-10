@@ -26,10 +26,32 @@ export type ExamAttemptSummary = {
 // RAG module types
 export type SourceDocument = {
   id: string;
+  subjectId?: string | null;
   name: string;
   type: string;
-  status: 'UPLOADED' | 'PROCESSED' | 'FAILED';
+  status: 'UPLOADED' | 'PENDING_REVIEW' | 'PROCESSED' | 'FAILED';
   uploadedAt: string;
+};
+
+export type DetectedUnit = {
+  name: string;
+  headingKey: string;
+  chunkCount: number;
+};
+
+export type IndexPreview = {
+  document: SourceDocument;
+  detectedUnits: DetectedUnit[];
+};
+
+export type ApprovedUnit = {
+  headingKey: string;
+  name: string;
+  description?: string;
+};
+
+export type ConfirmIndexCommand = {
+  approvedUnits: ApprovedUnit[];
 };
 
 export type GeneratedDraft = {
@@ -49,8 +71,7 @@ export type GeneratedDraft = {
 
 export type GenerateQuizCommand = {
   sourceId: string;
-  unitId?: string | null;
-  topic: string;
+  unitId: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   questionCount: number;
   includeHints: boolean;

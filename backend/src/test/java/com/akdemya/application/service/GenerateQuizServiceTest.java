@@ -5,6 +5,7 @@ import com.akdemya.domain.model.GeneratedQuestionDraft;
 import com.akdemya.domain.model.Question;
 import com.akdemya.domain.model.SourceChunk;
 import com.akdemya.domain.model.SourceDocument;
+import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.GenerateQuizUseCase;
 import com.akdemya.domain.port.out.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +20,12 @@ class GenerateQuizServiceTest {
 
     private final UUID sourceId = UUID.randomUUID();
     private final UUID unitId = UUID.randomUUID();
+    private final UUID subjectId = UUID.randomUUID();
 
     private StubSourceDocumentRepository documentRepo;
+    private StubSourceChunkRepository chunkRepo;
+    private StubUnitRepository unitRepo;
     private StubGeneratedQuestionDraftRepository draftRepo;
-    private StubEmbeddingPort embeddingPort;
-    private StubVectorSearchPort vectorSearchPort;
     private StubQuestionGeneratorPort generatorPort;
     private RagProperties props;
     private GenerateQuizService service;
@@ -34,22 +36,25 @@ class GenerateQuizServiceTest {
         props.setRetrievalTopK(5);
 
         documentRepo = new StubSourceDocumentRepository();
+        chunkRepo = new StubSourceChunkRepository();
+        unitRepo = new StubUnitRepository();
         draftRepo = new StubGeneratedQuestionDraftRepository();
-        embeddingPort = new StubEmbeddingPort();
-        vectorSearchPort = new StubVectorSearchPort();
         generatorPort = new StubQuestionGeneratorPort();
 
-        service = new GenerateQuizService(documentRepo, draftRepo, embeddingPort, vectorSearchPort, generatorPort, props);
+        service = new GenerateQuizService(documentRepo, chunkRepo, unitRepo, draftRepo, generatorPort, props);
     }
 
     @Test
     void generateReturnsAndStoresDrafts() {
-        SourceDocument doc = new SourceDocument(sourceId, "test.pdf", "PDF", null,
+        SourceDocument doc = new SourceDocument(sourceId, subjectId, "test.pdf", "PDF", null,
                 "abc123", LocalDateTime.now(), SourceDocument.Status.PROCESSED, "/tmp/test.pdf");
         documentRepo.save(doc);
 
+        Unit unit = new Unit(unitId, subjectId, "La Corona", null, 0);
+        unitRepo.save(unit);
+
         SourceChunk chunk = SourceChunk.create(sourceId, "El Rey es el Jefe del Estado.", 0, null);
-        vectorSearchPort.addChunk(chunk);
+        chunkRepo.addChunk(unitId, chunk);
 
         GeneratedQuestionDraft mockDraft = GeneratedQuestionDraft.create(
                 sourceId, unitId, "La Corona", "MEDIUM",
@@ -60,7 +65,7 @@ class GenerateQuizServiceTest {
         generatorPort.addDraft(mockDraft);
 
         GenerateQuizUseCase.GenerateQuizCommand cmd = new GenerateQuizUseCase.GenerateQuizCommand(
-                sourceId, unitId, "La Corona", Question.Difficulty.MEDIUM, 1, false, true
+                sourceId, unitId, Question.Difficulty.MEDIUM, 1, false, true
         );
 
         GenerateQuizUseCase.GenerateQuizResult result = service.generate(cmd);
@@ -71,12 +76,15 @@ class GenerateQuizServiceTest {
 
     @Test
     void generateDoesNotStoreWhenStorageDisabled() {
-        SourceDocument doc = new SourceDocument(sourceId, "test.pdf", "PDF", null,
+        SourceDocument doc = new SourceDocument(sourceId, subjectId, "test.pdf", "PDF", null,
                 "abc123", LocalDateTime.now(), SourceDocument.Status.PROCESSED, "/tmp/test.pdf");
         documentRepo.save(doc);
 
+        Unit unit = new Unit(unitId, subjectId, "Tema", null, 0);
+        unitRepo.save(unit);
+
         SourceChunk chunk = SourceChunk.create(sourceId, "Contenido", 0, null);
-        vectorSearchPort.addChunk(chunk);
+        chunkRepo.addChunk(unitId, chunk);
 
         GeneratedQuestionDraft mockDraft = GeneratedQuestionDraft.create(
                 sourceId, unitId, "Tema", "EASY",
@@ -85,7 +93,7 @@ class GenerateQuizServiceTest {
         generatorPort.addDraft(mockDraft);
 
         GenerateQuizUseCase.GenerateQuizCommand cmd = new GenerateQuizUseCase.GenerateQuizCommand(
-                sourceId, unitId, "Tema", Question.Difficulty.EASY, 1, false, false
+                sourceId, unitId, Question.Difficulty.EASY, 1, false, false
         );
 
         service.generate(cmd);
@@ -96,32 +104,38 @@ class GenerateQuizServiceTest {
     @Test
     void generateThrowsWhenDocumentNotFound() {
         GenerateQuizUseCase.GenerateQuizCommand cmd = new GenerateQuizUseCase.GenerateQuizCommand(
-                UUID.randomUUID(), null, "Tema", Question.Difficulty.EASY, 1, false, false
+                UUID.randomUUID(), unitId, Question.Difficulty.EASY, 1, false, false
         );
         assertThrows(NoSuchElementException.class, () -> service.generate(cmd));
     }
 
     @Test
     void generateThrowsWhenDocumentNotProcessed() {
-        SourceDocument doc = new SourceDocument(sourceId, "test.pdf", "PDF", null,
-                "abc123", LocalDateTime.now(), SourceDocument.Status.UPLOADED, "/tmp/test.pdf");
+        SourceDocument doc = new SourceDocument(sourceId, subjectId, "test.pdf", "PDF", null,
+                "abc123", LocalDateTime.now(), SourceDocument.Status.PENDING_REVIEW, "/tmp/test.pdf");
         documentRepo.save(doc);
 
+        Unit unit = new Unit(unitId, subjectId, "Tema", null, 0);
+        unitRepo.save(unit);
+
         GenerateQuizUseCase.GenerateQuizCommand cmd = new GenerateQuizUseCase.GenerateQuizCommand(
-                sourceId, null, "Tema", Question.Difficulty.EASY, 1, false, false
+                sourceId, unitId, Question.Difficulty.EASY, 1, false, false
         );
         assertThrows(IllegalStateException.class, () -> service.generate(cmd));
     }
 
     @Test
     void generateReturnsEmptyWhenNoContextChunks() {
-        SourceDocument doc = new SourceDocument(sourceId, "test.pdf", "PDF", null,
+        SourceDocument doc = new SourceDocument(sourceId, subjectId, "test.pdf", "PDF", null,
                 "abc123", LocalDateTime.now(), SourceDocument.Status.PROCESSED, "/tmp/test.pdf");
         documentRepo.save(doc);
-        // No chunks in vectorSearchPort
+
+        Unit unit = new Unit(unitId, subjectId, "Tema", null, 0);
+        unitRepo.save(unit);
+        // No chunks for unitId
 
         GenerateQuizUseCase.GenerateQuizCommand cmd = new GenerateQuizUseCase.GenerateQuizCommand(
-                sourceId, null, "Tema", Question.Difficulty.EASY, 1, false, false
+                sourceId, unitId, Question.Difficulty.EASY, 1, false, false
         );
 
         GenerateQuizUseCase.GenerateQuizResult result = service.generate(cmd);
@@ -132,14 +146,21 @@ class GenerateQuizServiceTest {
     @Test
     void commandValidationRejectsNullSourceId() {
         assertThrows(IllegalArgumentException.class, () ->
-                new GenerateQuizUseCase.GenerateQuizCommand(null, null, "Tema", Question.Difficulty.EASY, 1, false, false)
+                new GenerateQuizUseCase.GenerateQuizCommand(null, unitId, Question.Difficulty.EASY, 1, false, false)
+        );
+    }
+
+    @Test
+    void commandValidationRejectsNullUnitId() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new GenerateQuizUseCase.GenerateQuizCommand(sourceId, null, Question.Difficulty.EASY, 1, false, false)
         );
     }
 
     @Test
     void commandValidationRejectsExcessiveQuestionCount() {
         assertThrows(IllegalArgumentException.class, () ->
-                new GenerateQuizUseCase.GenerateQuizCommand(sourceId, null, "Tema", Question.Difficulty.EASY, 100, false, false)
+                new GenerateQuizUseCase.GenerateQuizCommand(sourceId, unitId, Question.Difficulty.EASY, 100, false, false)
         );
     }
 
@@ -151,6 +172,40 @@ class GenerateQuizServiceTest {
         @Override public SourceDocument save(SourceDocument d) { store.put(d.getId(), d); return d; }
         @Override public Optional<SourceDocument> findById(UUID id) { return Optional.ofNullable(store.get(id)); }
         @Override public List<SourceDocument> findAll() { return List.copyOf(store.values()); }
+        @Override public List<SourceDocument> findBySubjectId(UUID subjectId) {
+            return store.values().stream().filter(d -> subjectId.equals(d.getSubjectId())).toList();
+        }
+    }
+
+    static class StubSourceChunkRepository implements SourceChunkRepository {
+        private final Map<UUID, List<SourceChunk>> byUnitId = new HashMap<>();
+
+        void addChunk(UUID unitId, SourceChunk chunk) {
+            byUnitId.computeIfAbsent(unitId, k -> new ArrayList<>()).add(chunk);
+        }
+
+        @Override public SourceChunk save(SourceChunk chunk, float[] embedding) { return chunk; }
+        @Override public SourceChunk saveWithoutEmbedding(SourceChunk chunk) { return chunk; }
+        @Override public void updateUnitId(UUID chunkId, UUID unitId) {}
+        @Override public List<SourceChunk> findBySourceDocumentId(UUID sourceDocumentId) { return List.of(); }
+        @Override public List<SourceChunk> findByUnitId(UUID unitId) {
+            return byUnitId.getOrDefault(unitId, List.of());
+        }
+        @Override public List<ChunkWithEmbedding> findWithEmbeddingsBySourceDocumentId(UUID sourceDocumentId) {
+            return List.of();
+        }
+    }
+
+    static class StubUnitRepository implements UnitRepository {
+        private final Map<UUID, Unit> store = new HashMap<>();
+
+        @Override public Unit save(Unit u) { store.put(u.getId(), u); return u; }
+        @Override public Optional<Unit> findById(UUID id) { return Optional.ofNullable(store.get(id)); }
+        @Override public List<Unit> findBySubjectId(UUID subjectId) { return List.of(); }
+        @Override public List<Unit> findBySubjectIdWithFlashcards(UUID subjectId) { return List.of(); }
+        @Override public List<Unit> findAll() { return List.copyOf(store.values()); }
+        @Override public List<Unit> findAllWithFlashcards() { return List.of(); }
+        @Override public void deleteById(UUID id) { store.remove(id); }
     }
 
     static class StubGeneratedQuestionDraftRepository implements GeneratedQuestionDraftRepository {
@@ -158,25 +213,14 @@ class GenerateQuizServiceTest {
 
         @Override public GeneratedQuestionDraft save(GeneratedQuestionDraft d) { saved.add(d); return d; }
         @Override public List<GeneratedQuestionDraft> saveAll(List<GeneratedQuestionDraft> ds) { saved.addAll(ds); return ds; }
-        @Override public List<GeneratedQuestionDraft> findBySourceDocumentId(UUID id) {
+        @Override public Optional<GeneratedQuestionDraft> findById(UUID id) {
+            return saved.stream().filter(d -> d.getId().equals(id)).findFirst();
+        }
+        @Override public List<GeneratedQuestionDraft> findBySourceDocumentId(UUID id, GeneratedQuestionDraft.Status status) {
             return saved.stream().filter(d -> d.getSourceDocumentId().equals(id)).toList();
         }
-    }
-
-    static class StubEmbeddingPort implements EmbeddingPort {
-        @Override public float[] embed(String text) { return new float[]{0.1f, 0.2f, 0.3f}; }
-        @Override public List<float[]> embedBatch(List<String> texts) {
-            return texts.stream().map(t -> new float[]{0.1f, 0.2f, 0.3f}).toList();
-        }
-    }
-
-    static class StubVectorSearchPort implements VectorSearchPort {
-        private final List<SourceChunk> chunks = new ArrayList<>();
-        void addChunk(SourceChunk c) { chunks.add(c); }
-
-        @Override public List<SourceChunk> findTopK(float[] queryVector, UUID sourceDocumentId, int topK) {
-            return chunks.stream().filter(c -> c.getSourceDocumentId().equals(sourceDocumentId))
-                    .limit(topK).toList();
+        @Override public GeneratedQuestionDraft updateStatus(UUID id, GeneratedQuestionDraft.Status newStatus) {
+            return saved.stream().filter(d -> d.getId().equals(id)).findFirst().orElseThrow();
         }
     }
 
@@ -185,7 +229,7 @@ class GenerateQuizServiceTest {
         void addDraft(GeneratedQuestionDraft d) { drafts.add(d); }
 
         @Override public List<GeneratedQuestionDraft> generate(
-                GenerateQuizUseCase.GenerateQuizCommand command, List<SourceChunk> contextChunks) {
+                GenerateQuizUseCase.GenerateQuizCommand command, List<SourceChunk> contextChunks, String topic) {
             return List.copyOf(drafts);
         }
     }

@@ -11,7 +11,6 @@ public interface GenerateQuizUseCase {
     record GenerateQuizCommand(
             UUID sourceId,
             UUID unitId,
-            String topic,
             Question.Difficulty difficulty,
             int questionCount,
             boolean includeHints,
@@ -19,7 +18,7 @@ public interface GenerateQuizUseCase {
     ) {
         public GenerateQuizCommand {
             if (sourceId == null) throw new IllegalArgumentException("sourceId is required");
-            if (topic == null || topic.isBlank()) throw new IllegalArgumentException("topic is required");
+            if (unitId == null) throw new IllegalArgumentException("unitId is required");
             if (difficulty == null) throw new IllegalArgumentException("difficulty is required");
             if (questionCount < 1 || questionCount > 50) throw new IllegalArgumentException("questionCount must be between 1 and 50");
         }
@@ -28,6 +27,4 @@ public interface GenerateQuizUseCase {
     record GenerateQuizResult(List<GeneratedQuestionDraft> drafts) {}
 
     GenerateQuizResult generate(GenerateQuizCommand command);
-
-    List<GeneratedQuestionDraft> listDrafts(UUID sourceId);
 }

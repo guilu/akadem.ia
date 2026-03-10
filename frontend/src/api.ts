@@ -47,11 +47,15 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
 }
 
 // RAG module API functions
-import type { SourceDocument, GeneratedDraft, GenerateQuizCommand, GenerateQuizResponse } from './types';
+import type {
+  SourceDocument, GeneratedDraft, GenerateQuizCommand, GenerateQuizResponse,
+  IndexPreview, ConfirmIndexCommand, ApprovedUnit
+} from './types';
 
-export async function uploadSource(token: string, file: File): Promise<SourceDocument> {
+export async function uploadSource(token: string, file: File, subjectId: string): Promise<IndexPreview> {
   const form = new FormData();
   form.append('file', file);
+  form.append('subjectId', subjectId);
   const res = await fetch(`${apiBase}/api/sources`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
@@ -66,8 +70,24 @@ export async function uploadSource(token: string, file: File): Promise<SourceDoc
   return res.json();
 }
 
-export async function getSources(token: string): Promise<SourceDocument[]> {
-  return apiAuthJson<SourceDocument[]>(`${apiBase}/api/sources`, token);
+export async function confirmIndex(
+  token: string,
+  documentId: string,
+  approvedUnits: ApprovedUnit[]
+): Promise<{ document: SourceDocument; savedUnits: { id: string; name: string }[] }> {
+  const cmd: ConfirmIndexCommand = { approvedUnits };
+  return apiAuthJson(`${apiBase}/api/sources/${documentId}/confirm`, token, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cmd)
+  });
+}
+
+export async function getSources(token: string, subjectId?: string): Promise<SourceDocument[]> {
+  const url = subjectId
+    ? `${apiBase}/api/sources?subjectId=${subjectId}`
+    : `${apiBase}/api/sources`;
+  return apiAuthJson<SourceDocument[]>(url, token);
 }
 
 export async function generateQuiz(token: string, cmd: GenerateQuizCommand): Promise<GenerateQuizResponse> {
@@ -79,8 +99,23 @@ export async function generateQuiz(token: string, cmd: GenerateQuizCommand): Pro
   });
 }
 
-export async function getDrafts(token: string, sourceId: string): Promise<GeneratedDraft[]> {
-  return apiAuthJson<GeneratedDraft[]>(`${apiBase}/api/ai/quizzes/drafts?sourceId=${sourceId}`, token);
+export async function getDrafts(token: string, sourceId: string, status?: string): Promise<GeneratedDraft[]> {
+  const url = status
+    ? `${apiBase}/api/ai/quizzes/drafts?sourceId=${sourceId}&status=${status}`
+    : `${apiBase}/api/ai/quizzes/drafts?sourceId=${sourceId}`;
+  return apiAuthJson<GeneratedDraft[]>(url, token);
+}
+
+export async function approveDraft(token: string, draftId: string): Promise<GeneratedDraft> {
+  return apiAuthJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/approve`, token, {
+    method: 'POST'
+  });
+}
+
+export async function rejectDraft(token: string, draftId: string): Promise<GeneratedDraft> {
+  return apiAuthJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/reject`, token, {
+    method: 'POST'
+  });
 }
 
 export async function getUnitsForSubject(token: string, subjectId: string): Promise<{ id: string; name: string }[]> {

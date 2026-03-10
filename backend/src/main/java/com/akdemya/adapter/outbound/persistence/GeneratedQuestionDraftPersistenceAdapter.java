@@ -7,6 +7,7 @@ import com.akdemya.domain.port.out.GeneratedQuestionDraftRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -28,14 +29,30 @@ public class GeneratedQuestionDraftPersistenceAdapter implements GeneratedQuesti
 
     @Override
     public List<GeneratedQuestionDraft> saveAll(List<GeneratedQuestionDraft> drafts) {
-        List<com.akdemya.adapter.outbound.persistence.entity.GeneratedQuestionDraftEntity> entities =
-                drafts.stream().map(mapper::toEntity).toList();
-        return repository.saveAll(entities).stream().map(mapper::toDomain).toList();
+        return repository.saveAll(drafts.stream().map(mapper::toEntity).toList())
+                .stream().map(mapper::toDomain).toList();
     }
 
     @Override
-    public List<GeneratedQuestionDraft> findBySourceDocumentId(UUID sourceDocumentId) {
-        return repository.findBySourceDocumentIdOrderByCreatedAtDesc(sourceDocumentId)
+    public Optional<GeneratedQuestionDraft> findById(UUID id) {
+        return repository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<GeneratedQuestionDraft> findBySourceDocumentId(UUID sourceDocumentId, GeneratedQuestionDraft.Status status) {
+        if (status == null) {
+            return repository.findBySourceDocumentIdOrderByCreatedAtDesc(sourceDocumentId)
+                    .stream().map(mapper::toDomain).toList();
+        }
+        return repository.findBySourceDocumentIdAndStatusOrderByCreatedAtDesc(sourceDocumentId, status.name())
                 .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public GeneratedQuestionDraft updateStatus(UUID id, GeneratedQuestionDraft.Status newStatus) {
+        var entity = repository.findById(id)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Draft not found: " + id));
+        entity.setStatus(newStatus.name());
+        return mapper.toDomain(repository.save(entity));
     }
 }

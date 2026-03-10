@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import QuizGenerateForm from '../../components/rag/QuizGenerateForm';
 import * as api from '../../api';
-import type { SourceDocument, Subject } from '../../types';
+import type { SourceDocument } from '../../types';
 
 vi.mock('../../api', () => ({
-  getUnitsForSubject: vi.fn().mockResolvedValue([])
+  getUnitsForSubject: vi.fn().mockResolvedValue([{ id: 'unit-1', name: 'La Corona' }])
 }));
 
 const processedSource: SourceDocument = {
@@ -16,8 +16,6 @@ const processedSource: SourceDocument = {
   uploadedAt: '2024-01-01T00:00:00'
 };
 
-const subjects: Subject[] = [{ id: 'subj-1', name: 'Derecho Constitucional' }];
-
 describe('QuizGenerateForm', () => {
   const onGenerate = vi.fn();
 
@@ -25,41 +23,42 @@ describe('QuizGenerateForm', () => {
     vi.clearAllMocks();
   });
 
-  it('renders form fields', () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjects={subjects} onGenerate={onGenerate} loading={false} />);
+  it('renders form fields', async () => {
+    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     expect(screen.getByText(/documento fuente/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/la corona/i)).toBeInTheDocument();
+    expect(screen.getByText(/unidad temática/i)).toBeInTheDocument();
     expect(screen.getByText(/dificultad/i)).toBeInTheDocument();
   });
 
   it('shows warning when no processed sources', () => {
-    render(<QuizGenerateForm token="tok" sources={[]} subjects={[]} onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm token="tok" sources={[]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     expect(screen.getByText(/no hay documentos procesados/i)).toBeInTheDocument();
   });
 
-  it('validates empty topic', async () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjects={[]} onGenerate={onGenerate} loading={false} />);
-    // Submit without filling topic (topic is checked first)
+  it('validates missing source and unit', async () => {
+    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     fireEvent.click(screen.getByRole('button', { name: /generar preguntas/i }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(/introduce el tema/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/selecciona un documento/i);
     expect(onGenerate).not.toHaveBeenCalled();
   });
 
   it('calls onGenerate with correct command', async () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjects={[]} onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    // Wait for units to load
+    await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalled());
     fireEvent.change(screen.getByRole('combobox', { name: /documento fuente \*/i }), { target: { value: 'src-1' } });
-    fireEvent.change(screen.getByPlaceholderText(/la corona/i), { target: { value: 'La Corona' } });
+    fireEvent.change(screen.getByRole('combobox', { name: /unidad temática \*/i }), { target: { value: 'unit-1' } });
     fireEvent.click(screen.getByRole('button', { name: /generar preguntas/i }));
     await waitFor(() => expect(onGenerate).toHaveBeenCalledWith(expect.objectContaining({
       sourceId: 'src-1',
-      topic: 'La Corona',
+      unitId: 'unit-1',
       difficulty: 'MEDIUM',
       questionCount: 5
     })));
   });
 
   it('disables submit button while loading', () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjects={[]} onGenerate={onGenerate} loading={true} />);
+    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={true} />);
     expect(screen.getByRole('button', { name: /generando/i })).toBeDisabled();
   });
 });

@@ -11,6 +11,9 @@ public class SourceDocumentEntity {
     @Id
     private UUID id;
 
+    @Column(name = "subject_id")
+    private UUID subjectId;
+
     @Column(nullable = false, length = 500)
     private String name;
 
@@ -36,6 +39,9 @@ public class SourceDocumentEntity {
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public UUID getSubjectId() { return subjectId; }
+    public void setSubjectId(UUID subjectId) { this.subjectId = subjectId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

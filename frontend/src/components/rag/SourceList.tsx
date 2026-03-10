@@ -9,12 +9,14 @@ interface Props {
 
 const STATUS_LABEL: Record<SourceDocument['status'], string> = {
   UPLOADED: 'Subido',
+  PENDING_REVIEW: 'Pendiente revisión',
   PROCESSED: 'Procesado',
   FAILED: 'Error'
 };
 
 const STATUS_COLOR: Record<SourceDocument['status'], string> = {
   UPLOADED: 'bg-yellow-400/15 text-yellow-600 dark:text-yellow-400',
+  PENDING_REVIEW: 'bg-blue-400/15 text-blue-600 dark:text-blue-400',
   PROCESSED: 'bg-green-400/15 text-green-600 dark:text-green-400',
   FAILED: 'bg-red-400/15 text-red-600 dark:text-red-400'
 };

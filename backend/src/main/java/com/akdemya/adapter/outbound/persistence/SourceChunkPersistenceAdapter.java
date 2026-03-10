@@ -6,6 +6,7 @@ import com.akdemya.adapter.outbound.persistence.repository.SpringDataSourceChunk
 import com.akdemya.domain.model.SourceChunk;
 import com.akdemya.domain.port.out.SourceChunkRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +30,26 @@ public class SourceChunkPersistenceAdapter implements SourceChunkRepository {
     }
 
     @Override
+    public SourceChunk saveWithoutEmbedding(SourceChunk chunk) {
+        SourceChunkEntity entity = mapper.toEntityNoEmbedding(chunk);
+        return mapper.toDomain(repository.save(entity));
+    }
+
+    @Override
+    @Transactional
+    public void updateUnitId(UUID chunkId, UUID unitId) {
+        repository.updateUnitId(chunkId, unitId);
+    }
+
+    @Override
     public List<SourceChunk> findBySourceDocumentId(UUID sourceDocumentId) {
         return repository.findBySourceDocumentIdOrderByChunkIndex(sourceDocumentId)
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public List<SourceChunk> findByUnitId(UUID unitId) {
+        return repository.findByUnitIdOrderByChunkIndex(unitId)
                 .stream().map(mapper::toDomain).toList();
     }
 

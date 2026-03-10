@@ -10,6 +10,7 @@ public class SourceDocumentMapper {
     public SourceDocument toDomain(SourceDocumentEntity e) {
         return new SourceDocument(
                 e.getId(),
+                e.getSubjectId(),
                 e.getName(),
                 e.getType(),
                 e.getVersion(),
@@ -23,6 +24,7 @@ public class SourceDocumentMapper {
     public SourceDocumentEntity toEntity(SourceDocument d) {
         SourceDocumentEntity e = new SourceDocumentEntity();
         e.setId(d.getId());
+        e.setSubjectId(d.getSubjectId());
         e.setName(d.getName());
         e.setType(d.getType());
         e.setVersion(d.getVersion());

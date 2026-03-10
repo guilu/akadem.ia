@@ -28,8 +28,11 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_PROFILES_ACTIVE: dev
       SPRING_FLYWAY_ENABLE: true
+      SPRING_FLYWAY_OUT_OF_ORDER: true
       SPRING_SQL_INIT_MODE: never
       JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     depends_on:
       db:
         condition: service_healthy
