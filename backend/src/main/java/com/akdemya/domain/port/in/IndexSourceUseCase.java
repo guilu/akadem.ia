@@ -38,4 +38,10 @@ public interface IndexSourceUseCase {
     List<SourceDocument> listBySubject(UUID subjectId);
 
     SourceDocument findById(UUID id);
+
+    /**
+     * Delete source document and all associated data:
+     * units derived from it (and their questions), plus chunks and drafts (cascade via DB).
+     */
+    void deleteSource(UUID id);
 }

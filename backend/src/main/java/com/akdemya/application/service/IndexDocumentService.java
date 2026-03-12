@@ -30,6 +30,7 @@ public class IndexDocumentService implements IndexSourceUseCase {
     private final SourceDocumentRepository documentRepo;
     private final SourceChunkRepository chunkRepo;
     private final UnitRepository unitRepo;
+    private final QuestionRepository questionRepo;
     private final FileStoragePort storage;
     private final SourceTextExtractorPort extractor;
     private final TextChunkerPort chunker;
@@ -37,12 +38,14 @@ public class IndexDocumentService implements IndexSourceUseCase {
     public IndexDocumentService(SourceDocumentRepository documentRepo,
                                  SourceChunkRepository chunkRepo,
                                  UnitRepository unitRepo,
+                                 QuestionRepository questionRepo,
                                  FileStoragePort storage,
                                  SourceTextExtractorPort extractor,
                                  TextChunkerPort chunker) {
         this.documentRepo = documentRepo;
         this.chunkRepo = chunkRepo;
         this.unitRepo = unitRepo;
+        this.questionRepo = questionRepo;
         this.storage = storage;
         this.extractor = extractor;
         this.chunker = chunker;
@@ -135,6 +138,30 @@ public class IndexDocumentService implements IndexSourceUseCase {
         log.info("Document id={} marked as PROCESSED with {} units", processed.getId(), savedUnits.size());
 
         return new ConfirmResult(processed, savedUnits);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSource(UUID id) {
+        SourceDocument doc = documentRepo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Source document not found: " + id));
+
+        // Collect unit IDs referenced by this document's chunks
+        List<UUID> unitIds = chunkRepo.findBySourceDocumentId(id).stream()
+                .map(SourceChunk::getUnitId)
+                .filter(uid -> uid != null)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Delete questions and units derived from this document
+        for (UUID unitId : unitIds) {
+            questionRepo.findByUnitId(unitId).forEach(q -> questionRepo.deleteById(q.getId()));
+            unitRepo.deleteById(unitId);
+        }
+
+        // Delete the document — chunks and drafts cascade via DB foreign keys
+        documentRepo.deleteById(doc.getId());
+        log.info("Deleted source document id={} along with {} units and their questions", id, unitIds.size());
     }
 
     @Override

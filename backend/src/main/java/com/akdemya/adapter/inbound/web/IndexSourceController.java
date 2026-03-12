@@ -117,6 +117,17 @@ public class IndexSourceController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
+        try {
+            useCase.deleteSource(id);
+            return ResponseEntity.noContent().build();
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private SourceDocumentResponse toDocResponse(SourceDocument d) {
         return new SourceDocumentResponse(d.getId(), d.getSubjectId(), d.getName(), d.getType(),
                 d.getVersion(), d.getChecksum(), d.getUploadedAt(), d.getStatus().name());

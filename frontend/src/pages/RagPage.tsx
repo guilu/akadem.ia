@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSources, generateQuiz } from '../api';
+import { getSources, generateQuiz, deleteSource } from '../api';
 import type { Subject, SourceDocument, GenerateQuizCommand, GenerateQuizResponse } from '../types';
 import SourceUpload from '../components/rag/SourceUpload';
 import SourceList from '../components/rag/SourceList';
@@ -35,6 +35,11 @@ export default function RagPage({ token, subjects }: Props) {
 
   function onUploaded(doc: SourceDocument) {
     setSources((prev) => [doc, ...prev]);
+  }
+
+  async function onDelete(id: string) {
+    await deleteSource(token, id);
+    setSources((prev) => prev.filter((s) => s.id !== id));
   }
 
   async function onGenerate(cmd: GenerateQuizCommand) {
@@ -132,6 +137,7 @@ export default function RagPage({ token, subjects }: Props) {
                     selectedId={null}
                     onSelect={() => {}}
                     loading={sourcesLoading}
+                    onDelete={onDelete}
                   />
                 </section>
               </div>
