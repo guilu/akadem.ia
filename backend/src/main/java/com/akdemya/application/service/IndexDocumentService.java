@@ -146,21 +146,25 @@ public class IndexDocumentService implements IndexSourceUseCase {
         SourceDocument doc = documentRepo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Source document not found: " + id));
 
-        // Collect unit IDs referenced by this document's chunks
+        // Collect unit IDs referenced by this document's chunks BEFORE deleting the document
         List<UUID> unitIds = chunkRepo.findBySourceDocumentId(id).stream()
                 .map(SourceChunk::getUnitId)
                 .filter(uid -> uid != null)
                 .distinct()
                 .collect(Collectors.toList());
 
-        // Delete questions and units derived from this document
+        // Delete questions for each unit first
         for (UUID unitId : unitIds) {
             questionRepo.findByUnitId(unitId).forEach(q -> questionRepo.deleteById(q.getId()));
-            unitRepo.deleteById(unitId);
         }
 
-        // Delete the document — chunks and drafts cascade via DB foreign keys
+        // Delete the document — this cascades to chunks (removing the unit_id FK refs) and drafts
         documentRepo.deleteById(doc.getId());
+
+        // Now units are no longer referenced by chunks, safe to delete
+        for (UUID unitId : unitIds) {
+            unitRepo.deleteById(unitId);
+        }
         log.info("Deleted source document id={} along with {} units and their questions", id, unitIds.size());
     }
 
