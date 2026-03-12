@@ -41,4 +41,9 @@ public class SourceDocumentPersistenceAdapter implements SourceDocumentRepositor
     public List<SourceDocument> findBySubjectId(UUID subjectId) {
         return repository.findBySubjectId(subjectId).stream().map(mapper::toDomain).toList();
     }
+
+    @Override
+    public Optional<SourceDocument> findBySubjectIdAndName(UUID subjectId, String name) {
+        return repository.findBySubjectIdAndName(subjectId, name).map(mapper::toDomain);
+    }
 }

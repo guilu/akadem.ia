@@ -51,6 +51,12 @@ public class IndexDocumentService implements IndexSourceUseCase {
     @Override
     @Transactional
     public UploadPreview upload(UploadCommand command) {
+        documentRepo.findBySubjectIdAndName(command.subjectId(), command.filename())
+                .filter(d -> d.getStatus() != SourceDocument.Status.FAILED)
+                .ifPresent(d -> {
+                    throw new IllegalStateException("document_already_exists:" + d.getName());
+                });
+
         String checksum = sha256(command.bytes());
         Path storedPath = storage.store(command.filename(), command.bytes());
 

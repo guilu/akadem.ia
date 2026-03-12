@@ -45,7 +45,19 @@ public class IndexSourceController {
         IndexSourceUseCase.UploadCommand cmd = new IndexSourceUseCase.UploadCommand(
                 subjectId, file.getOriginalFilename(), contentType, file.getBytes()
         );
-        IndexSourceUseCase.UploadPreview result = useCase.upload(cmd);
+        IndexSourceUseCase.UploadPreview result;
+        try {
+            result = useCase.upload(cmd);
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("document_already_exists:")) {
+                String docName = e.getMessage().substring("document_already_exists:".length());
+                return ResponseEntity.status(409).body(Map.of(
+                        "error", "document_already_exists",
+                        "message", "El documento \"" + docName + "\" ya ha sido procesado. Elimínalo primero para volver a subirlo."
+                ));
+            }
+            throw e;
+        }
 
         return ResponseEntity.ok(new UploadPreviewResponse(
                 toDocResponse(result.document()),
