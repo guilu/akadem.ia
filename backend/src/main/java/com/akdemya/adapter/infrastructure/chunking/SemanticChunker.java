@@ -40,10 +40,9 @@ public class SemanticChunker implements TextChunkerPort {
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
     );
 
-    private static final Set<String> HIGH_LEVEL_KEYWORDS = Set.of(
-            "título", "titulo", "capítulo", "capitulo", "sección", "seccion",
-            "título", "capítulo", "sección"
-    );
+    private static final Set<String> HIGH_LEVEL_KEYWORDS = new HashSet<>(List.of(
+            "título", "titulo", "capítulo", "capitulo", "sección", "seccion"
+    ));
 
     private static final int MIN_SEMANTIC_SPLITS = 3;
 
