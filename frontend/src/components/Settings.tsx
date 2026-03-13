@@ -110,7 +110,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   );
 }
 
-export default function Settings({ token }: { token: string }) {
+export default function Settings({ token, onSubjectsChanged }: { token: string; onSubjectsChanged?: () => void }) {
   const [tab, setTab] = useState<Tab>('users');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userPage, setUserPage] = useState(1);
@@ -224,12 +224,12 @@ export default function Settings({ token }: { token: string }) {
       const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiAuthJson(isSubjectEditing ? `${apiBase}/api/admin/subjects/${subjectForm.id}` : `${apiBase}/api/admin/subjects`, token, opts);
-      resetSubjectForm(); await loadSubjects();
+      resetSubjectForm(); await loadSubjects(); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
   async function removeUser(id: string) { await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' }); await loadUsers(userPage); }
-  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(); }
+  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;

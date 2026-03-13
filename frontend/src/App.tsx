@@ -59,14 +59,18 @@ export default function App(){
     }
   }
 
-  useEffect(() => {
+  const refreshSubjects = () => {
     if (!token) {
       setSubjects([]);
-      return;
+      return Promise.resolve();
     }
-    authedJson<Subject[]>(`${apiBase}/api/subjects`)
+    return authedJson<Subject[]>(`${apiBase}/api/subjects`)
       .then(setSubjects)
       .catch(() => setSubjects([]));
+  };
+
+  useEffect(() => {
+    refreshSubjects();
   }, [token, apiBase]);
 
   function onToken(t:string){
@@ -215,7 +219,7 @@ export default function App(){
           } />
           <Route path={ROUTES.settings} element={
             <ProtectedRoute allow={isAuthed}>
-              <SettingsPage isAdmin={role === 'ADMIN'} token={token} />
+              <SettingsPage isAdmin={role === 'ADMIN'} token={token} onSubjectsChanged={refreshSubjects} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.flashcards} element={
