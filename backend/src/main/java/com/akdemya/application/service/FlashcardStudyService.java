@@ -4,9 +4,11 @@ import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.StudySettingsDefaults;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.port.out.UserSettingsRepository;
 import com.akdemya.domain.service.Sm2Scheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,22 +21,29 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class FlashcardStudyService implements FlashcardStudyUseCase {
 
-  private static final int NEW_LIMIT = 10;
-
   private final FlashcardRepository flashcardRepo;
   private final FlashcardReviewRepository reviewRepo;
+  private final UserSettingsRepository settingsRepo;
   private final Sm2Scheduler scheduler;
 
   public FlashcardStudyService(FlashcardRepository flashcardRepo,
                                FlashcardReviewRepository reviewRepo,
+                               UserSettingsRepository settingsRepo,
                                FlashcardSchedulerProperties schedulerProperties) {
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
+    this.settingsRepo = settingsRepo;
     this.scheduler = new Sm2Scheduler(
         schedulerProperties.getLearningStepsMinutes(),
         schedulerProperties.getEasyIntervalDays(),
         schedulerProperties.getReviewAgainRelearnMinutes()
     );
+  }
+
+  private int newLimit(UUID userId) {
+    return settingsRepo.findByUserId(userId)
+        .map(s -> s.newCardsLimit())
+        .orElse(StudySettingsDefaults.DEFAULT_NEW_LIMIT);
   }
 
   @Override
@@ -59,7 +68,8 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
       newCount = flashcardRepo.countNewByUserIdAndUnitId(command.userId(), command.unitId());
     }
 
-    return new StudyQueueResponse(newCount, dueCount, learningCount);
+    long cappedNew = Math.min(newCount, newLimit(command.userId()));
+    return new StudyQueueResponse(cappedNew, dueCount, learningCount);
   }
 
   @Override

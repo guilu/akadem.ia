@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
+import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines, Cog } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 
 export type AdminUser = {
@@ -37,7 +37,12 @@ export type AdminQuestion = {
   answers: AdminAnswer[];
 };
 
-type Tab = 'users' | 'subjects' | 'units' | 'questions';
+type Tab = 'general' | 'users' | 'subjects' | 'units' | 'questions';
+
+type UserSettings = {
+  newCardsLimit: number;
+  reviewCardsLimit: number;
+};
 
 const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 const card = 'border border-secondary/25 rounded-2xl p-6';
@@ -110,8 +115,37 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   );
 }
 
-export default function Settings({ token, onSubjectsChanged }: { token: string; onSubjectsChanged?: () => void }) {
-  const [tab, setTab] = useState<Tab>('users');
+export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmin: boolean; token: string; onSubjectsChanged?: () => void }) {
+  const [tab, setTab] = useState<Tab>('general');
+
+  // ── User settings ──
+  const [settingsForm, setSettingsForm] = useState<UserSettings>({ newCardsLimit: 20, reviewCardsLimit: 100 });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  const [settingsError, setSettingsError] = useState('');
+
+  async function loadUserSettings() {
+    try {
+      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token);
+      setSettingsForm(data);
+    } catch { /* keep defaults */ }
+  }
+
+  async function saveUserSettings() {
+    setSettingsLoading(true); setSettingsSaved(false); setSettingsError('');
+    try {
+      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsForm),
+      });
+      setSettingsForm(data);
+      setSettingsSaved(true);
+      setTimeout(() => setSettingsSaved(false), 2500);
+    } catch { setSettingsError('No se pudo guardar'); }
+    finally { setSettingsLoading(false); }
+  }
+
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userPage, setUserPage] = useState(1);
   const [userTotalPages, setUserTotalPages] = useState(1);
@@ -197,7 +231,10 @@ export default function Settings({ token, onSubjectsChanged }: { token: string; 
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
-  useEffect(() => { loadUsers(1).catch(() => setUsers([])); loadSubjects().catch(() => setSubjects([])); }, []);
+  useEffect(() => {
+    loadUserSettings();
+    if (isAdmin) { loadUsers(1).catch(() => setUsers([])); loadSubjects().catch(() => setSubjects([])); }
+  }, []);
   useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId).catch(() => setUnits([])); }, [tab, unitForm.subjectId]);
   useEffect(() => {
     if (tab === 'questions') {
@@ -291,7 +328,11 @@ export default function Settings({ token, onSubjectsChanged }: { token: string; 
     finally { setImportLoading(false); }
   }
 
-  const navItems = [
+  const generalNavItems = [
+    { id: 'general' as Tab, label: 'General', icon: <Cog className="w-4 h-4" /> },
+  ];
+
+  const adminNavItems = [
     { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
     { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
@@ -303,8 +344,8 @@ export default function Settings({ token, onSubjectsChanged }: { token: string; 
 
       {/* ── Sidebar ── */}
       <aside className={`${card} h-fit lg:mt-[4.5rem]`}>
-        <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Administración</div>
-        {navItems.map(({ id, label, icon }) => (
+        <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Ajustes</div>
+        {generalNavItems.map(({ id, label, icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
@@ -315,10 +356,75 @@ export default function Settings({ token, onSubjectsChanged }: { token: string; 
             {icon}{label}
           </button>
         ))}
+        {isAdmin && (
+          <>
+            <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mt-5 mb-3">Administración</div>
+            {adminNavItems.map(({ id, label, icon }) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm transition-colors mb-1 ${
+                  tab === id ? 'bg-primary/10 text-primary font-semibold' : 'text-text/70 hover:bg-secondary/10'
+                }`}
+              >
+                {icon}{label}
+              </button>
+            ))}
+          </>
+        )}
       </aside>
 
       {/* ── Content ── */}
       <section className="grid gap-5">
+
+        {/* ── General ── */}
+        {tab === 'general' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <h2 className="text-xl font-extrabold tracking-tight">Ajustes <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Generales</span></h2>
+
+            <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-4">Flashcards</div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium text-text/80">Tarjetas nuevas por día</label>
+                  <p className="text-xs text-text/45">Máximo de tarjetas nuevas que se introducen cada día de estudio.</p>
+                  <input
+                    className={inp}
+                    type="number"
+                    min={1}
+                    max={9999}
+                    value={settingsForm.newCardsLimit}
+                    onChange={e => setSettingsForm(f => ({ ...f, newCardsLimit: Math.max(1, Number(e.target.value)) }))}
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium text-text/80">Repasos por día</label>
+                  <p className="text-xs text-text/45">Máximo de tarjetas en repaso (due + learning) que se muestran cada día.</p>
+                  <input
+                    className={inp}
+                    type="number"
+                    min={1}
+                    max={9999}
+                    value={settingsForm.reviewCardsLimit}
+                    onChange={e => setSettingsForm(f => ({ ...f, reviewCardsLimit: Math.max(1, Number(e.target.value)) }))}
+                  />
+                </div>
+              </div>
+              {settingsError && (
+                <div className="mt-3 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-2 text-sm text-red-400">{settingsError}</div>
+              )}
+              <div className="flex items-center gap-3 mt-5">
+                <button onClick={saveUserSettings} disabled={settingsLoading} className={btnPrimary}>
+                  {settingsSaved ? <Check className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                  {settingsLoading ? 'Guardando...' : settingsSaved ? 'Guardado' : 'Guardar cambios'}
+                </button>
+                {settingsSaved && (
+                  <span className="text-sm text-primary font-medium">Cambios guardados correctamente</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Usuarios ── */}
         {tab === 'users' && (
