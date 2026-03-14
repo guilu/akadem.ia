@@ -4,9 +4,11 @@ import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.UserSettings;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.port.out.UserSettingsRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ class FlashcardStudyServiceTest {
   private final UUID unitId = UUID.randomUUID();
   private final LocalDateTime now = LocalDateTime.of(2026, 2, 24, 10, 0);
   private final FlashcardSchedulerProperties schedulerProperties = new FlashcardSchedulerProperties();
+  private final InMemoryUserSettingsRepo settingsRepo = new InMemoryUserSettingsRepo();
 
   @Test
   void studyQueueCountsDueLearningAndNew() {
@@ -43,7 +46,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(learningCard.getId(), now.minusMinutes(5), ReviewState.LEARNING));
     reviewRepo.save(review(reviewCard.getId(), now.minusMinutes(10), ReviewState.REVIEW));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
 
     assertEquals(1, response.learningCount());
@@ -64,7 +67,7 @@ class FlashcardStudyServiceTest {
 
     reviewRepo.save(review(dueCard.getId(), now.minusMinutes(5)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
 
     assertNotNull(next);
@@ -77,7 +80,7 @@ class FlashcardStudyServiceTest {
     InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
     flashcardRepo.attach(reviewRepo);
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -94,7 +97,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(flashcard("card1", unitId));
     flashcardRepo.save(flashcard("card2", unitId));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(2, response.newCount());
@@ -112,7 +115,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(card);
     reviewRepo.save(review(card.getId(), now.minusMinutes(5), ReviewState.LEARNING));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -130,7 +133,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(flashcard("card-unit1", unitId));
     flashcardRepo.save(flashcard("card-unit2", unitId2));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(2, response.newCount());
@@ -151,7 +154,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(learningCard.getId(), now.plusMinutes(30), ReviewState.LEARNING));
     reviewRepo.save(review(reviewCard.getId(), now.plusDays(1), ReviewState.REVIEW));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -181,7 +184,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(in5.getId(), now.plusDays(5)));
     reviewRepo.save(review(in10.getId(), now.plusDays(10)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var dashboard = service.getDashboard(new FlashcardStudyUseCase.DashboardCommand(userId, unitId, now));
 
     assertEquals(1, dashboard.dueToday());
@@ -261,6 +264,39 @@ class FlashcardStudyServiceTest {
     @Override
     public void deleteById(UUID id) {
       data.remove(id);
+    }
+  }
+
+  @Test
+  void studyQueueCapsNewCountByUserLimit() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    for (int i = 0; i < 5; i++) {
+      flashcardRepo.save(flashcard("card" + i, unitId));
+    }
+
+    settingsRepo.save(new UserSettings(userId, 3, 100));
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
+    var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
+
+    assertEquals(3, response.newCount(), "newCount should be capped by user's newCardsLimit");
+  }
+
+  static class InMemoryUserSettingsRepo implements UserSettingsRepository {
+    private final Map<UUID, UserSettings> data = new ConcurrentHashMap<>();
+
+    @Override
+    public Optional<UserSettings> findByUserId(UUID userId) {
+      return Optional.ofNullable(data.get(userId));
+    }
+
+    @Override
+    public UserSettings save(UserSettings settings) {
+      data.put(settings.userId(), settings);
+      return settings;
     }
   }
 
