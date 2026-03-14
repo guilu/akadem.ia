@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiAuthJson, apiBase } from '../api';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
@@ -17,6 +17,9 @@ type GlobalQueue = { new: number; due: number; learning: number };
 
 export default function FlashcardsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode') === 'study' ? 'estudio' : 'examinar';
+
   const [units, setUnits] = useState<UnitSummary[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -54,6 +57,14 @@ export default function FlashcardsPage() {
 
   const totalPending = globalQueue ? globalQueue.new + globalQueue.due + globalQueue.learning : 0;
 
+  const handleUnitClick = (unit: UnitSummary) => {
+    if (mode === 'estudio') {
+      navigate(`/flashcards/study?unitId=${unit.unitId}`);
+    } else {
+      navigate(`/flashcards/examine?unitId=${unit.unitId}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <header className="space-y-3">
@@ -66,30 +77,33 @@ export default function FlashcardsPage() {
           </h1>
           <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
         </div>
-        <FlashcardsTabs active="examinar" onTab={(tab) => {
-          if (tab === 'estudio') navigate('/flashcards/study');
+        <FlashcardsTabs active={mode} onTab={(tab) => {
+          if (tab === 'estudio') navigate('/flashcards?mode=study');
+          if (tab === 'examinar') navigate('/flashcards');
           if (tab === 'historial') navigate('/flashcards/history');
         }} />
       </header>
 
-      {/* ── Global queue strip ── */}
-      {globalLoading ? (
-        <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
-      ) : globalQueue && totalPending === 0 ? (
-        <div className="border border-secondary/25 rounded-2xl px-5 py-3 text-center text-sm text-text/60">
-          Nada pendiente hoy 🎉
-        </div>
-      ) : globalQueue ? (
-        <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
-          <span className="text-lime-500">🆕 {globalQueue.new} nuevas</span>
-          <span className="text-accent">⚡ {globalQueue.learning} aprendiendo</span>
-          <span className="text-primary">🔁 {globalQueue.due} pendientes</span>
-        </div>
-      ) : null}
+      {/* Global queue strip — only in study mode */}
+      {mode === 'estudio' && (
+        globalLoading ? (
+          <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
+        ) : globalQueue && totalPending === 0 ? (
+          <div className="border border-secondary/25 rounded-2xl px-5 py-3 text-center text-sm text-text/60">
+            Nada pendiente hoy 🎉
+          </div>
+        ) : globalQueue ? (
+          <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
+            <span className="text-lime-500">🆕 {globalQueue.new} nuevas</span>
+            <span className="text-accent">⚡ {globalQueue.learning} aprendiendo</span>
+            <span className="text-primary">🔁 {globalQueue.due} pendientes</span>
+          </div>
+        ) : null
+      )}
 
       <section className="space-y-4">
         <SearchInput value={search} onChange={setSearch} />
-        <UnitList loading={loading} error={error} units={filteredUnits} />
+        <UnitList loading={loading} error={error} units={filteredUnits} onUnitClick={handleUnitClick} />
       </section>
     </div>
   );

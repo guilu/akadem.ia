@@ -16,6 +16,8 @@ import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
+import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
+import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
@@ -230,6 +232,16 @@ export default function App(){
           <Route path={ROUTES.flashcardsStudy} element={
             <ProtectedRoute allow={isAuthed}>
               <FlashcardsStudyPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.flashcardsHistory} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsHistoryPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.flashcardsExamine} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsExamineUnitPage />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.rag} element={
