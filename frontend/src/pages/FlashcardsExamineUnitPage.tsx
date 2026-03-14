@@ -71,7 +71,7 @@ export default function FlashcardsExamineUnitPage() {
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <h1 className="text-xl font-extrabold tracking-tight">Examinar tarjetas</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">Examinar <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Flashcards</span></h1>
         <div className="w-9" />
       </header>
 
