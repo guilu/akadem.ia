@@ -45,7 +45,7 @@ services:
     container_name: akademia-dev-web
     build: ./frontend
     environment:
-      VITE_API_URL: http://192.168.1.175:8080
+      VITE_API_URL: /api
     ports:
       - "3000:3000"
     depends_on:

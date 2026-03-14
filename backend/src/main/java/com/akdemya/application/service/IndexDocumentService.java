@@ -30,6 +30,7 @@ public class IndexDocumentService implements IndexSourceUseCase {
     private final SourceDocumentRepository documentRepo;
     private final SourceChunkRepository chunkRepo;
     private final UnitRepository unitRepo;
+    private final QuestionRepository questionRepo;
     private final FileStoragePort storage;
     private final SourceTextExtractorPort extractor;
     private final TextChunkerPort chunker;
@@ -37,12 +38,14 @@ public class IndexDocumentService implements IndexSourceUseCase {
     public IndexDocumentService(SourceDocumentRepository documentRepo,
                                  SourceChunkRepository chunkRepo,
                                  UnitRepository unitRepo,
+                                 QuestionRepository questionRepo,
                                  FileStoragePort storage,
                                  SourceTextExtractorPort extractor,
                                  TextChunkerPort chunker) {
         this.documentRepo = documentRepo;
         this.chunkRepo = chunkRepo;
         this.unitRepo = unitRepo;
+        this.questionRepo = questionRepo;
         this.storage = storage;
         this.extractor = extractor;
         this.chunker = chunker;
@@ -51,6 +54,12 @@ public class IndexDocumentService implements IndexSourceUseCase {
     @Override
     @Transactional
     public UploadPreview upload(UploadCommand command) {
+        documentRepo.findBySubjectIdAndName(command.subjectId(), command.filename())
+                .filter(d -> d.getStatus() != SourceDocument.Status.FAILED)
+                .ifPresent(d -> {
+                    throw new IllegalStateException("document_already_exists:" + d.getName());
+                });
+
         String checksum = sha256(command.bytes());
         Path storedPath = storage.store(command.filename(), command.bytes());
 
@@ -106,7 +115,10 @@ public class IndexDocumentService implements IndexSourceUseCase {
                 .collect(Collectors.groupingBy(SourceChunk::getUnitName));
 
         List<Unit> savedUnits = new ArrayList<>();
-        int orderIndex = 0;
+        int orderIndex = unitRepo.findBySubjectId(doc.getSubjectId()).stream()
+                .mapToInt(Unit::getOrderIndex)
+                .max()
+                .orElse(-1) + 1;
 
         for (ApprovedUnit approvedUnit : command.approvedUnits()) {
             Unit unit = Unit.create(doc.getSubjectId(), approvedUnit.name(),
@@ -126,6 +138,34 @@ public class IndexDocumentService implements IndexSourceUseCase {
         log.info("Document id={} marked as PROCESSED with {} units", processed.getId(), savedUnits.size());
 
         return new ConfirmResult(processed, savedUnits);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSource(UUID id) {
+        SourceDocument doc = documentRepo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Source document not found: " + id));
+
+        // Collect unit IDs referenced by this document's chunks BEFORE deleting the document
+        List<UUID> unitIds = chunkRepo.findBySourceDocumentId(id).stream()
+                .map(SourceChunk::getUnitId)
+                .filter(uid -> uid != null)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Delete questions for each unit first
+        for (UUID unitId : unitIds) {
+            questionRepo.findByUnitId(unitId).forEach(q -> questionRepo.deleteById(q.getId()));
+        }
+
+        // Delete the document — this cascades to chunks (removing the unit_id FK refs) and drafts
+        documentRepo.deleteById(doc.getId());
+
+        // Now units are no longer referenced by chunks, safe to delete
+        for (UUID unitId : unitIds) {
+            unitRepo.deleteById(unitId);
+        }
+        log.info("Deleted source document id={} along with {} units and their questions", id, unitIds.size());
     }
 
     @Override

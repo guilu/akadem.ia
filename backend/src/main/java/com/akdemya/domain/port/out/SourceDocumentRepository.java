@@ -11,4 +11,6 @@ public interface SourceDocumentRepository {
     Optional<SourceDocument> findById(UUID id);
     List<SourceDocument> findAll();
     List<SourceDocument> findBySubjectId(UUID subjectId);
+    Optional<SourceDocument> findBySubjectIdAndName(UUID subjectId, String name);
+    void deleteById(UUID id);
 }

@@ -119,7 +119,11 @@ export async function rejectDraft(token: string, draftId: string): Promise<Gener
 }
 
 export async function getUnitsForSubject(token: string, subjectId: string): Promise<{ id: string; name: string }[]> {
-  return apiAuthJson<{ id: string; name: string }[]>(`${apiBase}/api/subjects/${subjectId}/units`, token);
+  return apiAuthJson<{ id: string; name: string }[]>(`${apiBase}/api/units?subjectId=${subjectId}`, token);
+}
+
+export async function deleteSource(token: string, id: string): Promise<void> {
+  return apiAuthJson<void>(`${apiBase}/api/sources/${id}`, token, { method: 'DELETE' });
 }
 
 export async function apiAuthJson<T>(url: string, token: string, options: RequestOptions = {}): Promise<T> {
