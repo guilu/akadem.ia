@@ -15,16 +15,21 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
   const [time, setTime] = useState(20);
   const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD' | 'ALL'>('ALL');
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
     const diffQuery = difficulty === 'ALL' ? '' : `&difficulty=${difficulty}`;
     setAvailabilityLoading(true);
     apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}${diffQuery}`, token)
-      .then(us => setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))))
+      .then(us => { setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))); setPage(0); })
       .catch(err => { if (err?.status === 401) onUnauthorized(); })
       .finally(() => setAvailabilityLoading(false));
   }, [subjectId, apiBase, difficulty]);
+
+  const totalPages = Math.ceil(units.length / PAGE_SIZE);
+  const pagedUnits = units.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function setCount(id: string, count: number) {
     const unit = units.find(u => u.id === id);
@@ -84,7 +89,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
       <div className="border border-secondary/25 rounded-2xl p-6 mb-5">
         <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-4">Preguntas por unidad</div>
         <div className="grid gap-3">
-          {units.map(u => {
+          {pagedUnits.map(u => {
             const disabled = (u.available || 0) === 0;
             const current = rules[u.id] || 0;
             return (
@@ -129,6 +134,27 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
             );
           })}
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary/20">
+            <button
+              onClick={() => setPage(p => p - 1)}
+              disabled={page === 0}
+              className="px-3 py-1.5 rounded-lg border border-secondary/30 text-sm hover:border-secondary/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ← Anterior
+            </button>
+            <span className="text-xs text-text/50">
+              Página {page + 1} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => p + 1)}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-1.5 rounded-lg border border-secondary/30 text-sm hover:border-secondary/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Footer ── */}
