@@ -5,9 +5,10 @@ import type { UnitAvailability } from '../types';
 
 const inp = 'bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
-export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
+export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnauthorized }: {
   subjectId: string;
   onStart: (cfg: { unitCounts: Record<string, number>; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) => void;
+  onStartRandom: (cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) => void;
   onUnauthorized: () => void;
 }) {
   const [units, setUnits] = useState<UnitAvailability[]>([]);
@@ -16,6 +17,7 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
   const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD' | 'ALL'>('ALL');
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [page, setPage] = useState(0);
+  const [randomCount, setRandomCount] = useState(10);
   const PAGE_SIZE = 10;
 
   useEffect(() => {
@@ -81,6 +83,34 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
               onChange={e => setTime(Number(e.target.value))}
               className={inp + ' w-28'}
             />
+          </div>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-secondary/20">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[160px]">
+              <label className="block text-sm font-medium text-text/70 mb-1.5">
+                Preguntas aleatorias
+                <span className="ml-1.5 text-text/40 font-normal">(máx. {totalAvailable})</span>
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={totalAvailable || 1}
+                value={randomCount}
+                onChange={e => setRandomCount(Math.max(1, Math.min(Number(e.target.value), totalAvailable || 1)))}
+                disabled={totalAvailable === 0}
+                className={inp + ' w-28 disabled:opacity-40'}
+              />
+            </div>
+            <button
+              onClick={() => onStartRandom({ subjectId, count: randomCount, minutes: time, difficulty: difficulty === 'ALL' ? undefined : difficulty })}
+              disabled={totalAvailable === 0 || randomCount < 1}
+              className="btn btn-primary rounded-full px-6 py-2.5 text-sm shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Play className="w-4 h-4" />
+              Examen aleatorio
+            </button>
           </div>
         </div>
       </div>

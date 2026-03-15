@@ -113,6 +113,29 @@ export default function App(){
     }
   }
 
+  async function startRandomExam(cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
+    try {
+      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start-random`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg),
+        timeoutMs: 15000
+      });
+      setAttemptId(data.attemptId);
+      setMinutes(Math.round(data.totalTimeSeconds / 60));
+      setQuestions(data.questions);
+      sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
+      setActiveAttemptId(data.attemptId);
+      navigate(ROUTES.examAttempt(data.attemptId));
+    } catch (err: any) {
+      if (err?.code === 'timeout') {
+        showError(timeoutMessage);
+        return;
+      }
+      throw err;
+    }
+  }
+
   async function finishExam(payload:{ selections: Record<string,string|undefined> }){
     const selections: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) selections[q] = a; });
@@ -197,7 +220,7 @@ export default function App(){
           } />
           <Route path="/subjects/:subjectId/builder" element={
             <ProtectedRoute allow={isAuthed}>
-              <ExamBuilderPage onStart={startExam} onUnauthorized={onLogout} />
+              <ExamBuilderPage onStart={startExam} onStartRandom={startRandomExam} onUnauthorized={onLogout} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.examRunner} element={

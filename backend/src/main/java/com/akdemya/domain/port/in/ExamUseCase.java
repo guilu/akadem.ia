@@ -7,6 +7,8 @@ import java.util.UUID;
 public interface ExamUseCase {
   StartResponse startExam(StartCommand command);
 
+  StartResponse startRandomExam(StartRandomCommand command);
+
   SubmitResult submitExam(SubmitCommand command, String userEmail);
 
   AttemptResponse getAttempt(UUID attemptId, String userEmail);
@@ -16,6 +18,9 @@ public interface ExamUseCase {
   void updateAnswer(UpdateAnswerCommand command, String userEmail);
 
   record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
+  }
+
+  record StartRandomCommand(String userEmail, UUID subjectId, int count, int minutes, String difficulty) {
   }
 
   record StartResponse(UUID attemptId, int totalTimeSeconds, List<QuestionData> questions) {
