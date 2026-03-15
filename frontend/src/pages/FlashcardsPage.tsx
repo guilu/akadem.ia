@@ -251,7 +251,6 @@ export default function FlashcardsPage() {
 
       {showImport && (
         <FlashcardImportModal
-          units={units}
           token={token}
           onClose={() => setShowImport(false)}
           onImported={loadUnits}
