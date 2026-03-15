@@ -670,10 +670,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                 )}
                 <div className="ml-auto flex flex-wrap gap-2">
                   <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                    <FileExport className="w-4 h-4" />Exportar JSON
+                    <FileExport className="w-4 h-4" />JSON
                   </button>
                   <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                    <FileCsv className="w-4 h-4" />Exportar CSV
+                    <FileCsv className="w-4 h-4" />CSV
                   </button>
                   <button onClick={() => { setImportOpen(true); setImportMessage(''); }} disabled={!questionUnitId} className={btnOutline}>
                     <FileImport className="w-4 h-4" />Importar
