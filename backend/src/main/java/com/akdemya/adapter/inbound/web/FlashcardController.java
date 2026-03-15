@@ -10,9 +10,11 @@ import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
+import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.port.out.SubjectRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserRepository;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +46,7 @@ public class FlashcardController {
   private final FlashcardReviewLogRepository reviewLogRepo;
   private final UserRepository userRepo;
   private final UnitRepository unitRepo;
+  private final SubjectRepository subjectRepo;
 
   public FlashcardController(FlashcardStudyUseCase studyUseCase,
                              FlashcardReviewUseCase reviewUseCase,
@@ -53,7 +56,8 @@ public class FlashcardController {
                              FlashcardReviewRepository reviewRepo,
                              FlashcardReviewLogRepository reviewLogRepo,
                              UserRepository userRepo,
-                             UnitRepository unitRepo) {
+                             UnitRepository unitRepo,
+                             SubjectRepository subjectRepo) {
     this.studyUseCase = studyUseCase;
     this.reviewUseCase = reviewUseCase;
     this.managementUseCase = managementUseCase;
@@ -63,6 +67,7 @@ public class FlashcardController {
     this.reviewLogRepo = reviewLogRepo;
     this.userRepo = userRepo;
     this.unitRepo = unitRepo;
+    this.subjectRepo = subjectRepo;
   }
 
   @GetMapping
@@ -183,13 +188,17 @@ public class FlashcardController {
   public List<FlashcardDto.UnitSummary> getUnitSummary(@AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);
     LocalDateTime now = LocalDateTime.now();
+    Map<UUID, String> subjectNames = subjectRepo.findAll().stream()
+        .collect(Collectors.toMap(Subject::getId, Subject::getName));
     return unitRepo.findAllWithFlashcards().stream()
         .map(unit -> {
           long newCount = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
           long reviewCount = reviewRepo.countByUserIdAndUnitIdAndStateIn(userId, unit.getId(),
               List.of(ReviewState.LEARNING, ReviewState.REVIEW));
           long dueCount = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
-          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(), newCount, reviewCount, dueCount);
+          String subjectName = subjectNames.getOrDefault(unit.getSubjectId(), "");
+          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(),
+              unit.getSubjectId(), subjectName, newCount, reviewCount, dueCount);
         })
         .toList();
   }

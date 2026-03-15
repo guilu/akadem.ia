@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { apiBase } from '../../api';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
@@ -12,12 +12,36 @@ type Props = {
 };
 
 export default function FlashcardImportModal({ units, token, onClose, onImported }: Props) {
-  const [unitId, setUnitId] = useState(units[0]?.unitId ?? '');
+  // Derive subjects from units
+  const subjects = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const u of units) {
+      if (u.subjectId && !map.has(u.subjectId)) map.set(u.subjectId, u.subjectName);
+    }
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [units]);
+
+  const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? '');
+  const [unitId, setUnitId] = useState('');
   const [format, setFormat] = useState<'csv' | 'json'>('csv');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const unitsForSubject = useMemo(
+    () => units.filter((u) => u.subjectId === subjectId),
+    [units, subjectId]
+  );
+
+  // Auto-select first unit when subject changes
+  const handleSubjectChange = (id: string) => {
+    setSubjectId(id);
+    setUnitId('');
+    setResult(null);
+  };
+
+  const resolvedUnitId = unitId || unitsForSubject[0]?.unitId || '';
 
   const handleSubmit = async () => {
     const file = fileRef.current?.files?.[0];
@@ -25,7 +49,7 @@ export default function FlashcardImportModal({ units, token, onClose, onImported
       setError('Selecciona un archivo para importar.');
       return;
     }
-    if (!unitId) {
+    if (!resolvedUnitId) {
       setError('Selecciona una unidad.');
       return;
     }
@@ -37,7 +61,7 @@ export default function FlashcardImportModal({ units, token, onClose, onImported
     try {
       const content = await file.text();
       const res = await fetch(
-        `${apiBase}/api/flashcards/import?unitId=${unitId}&format=${format}`,
+        `${apiBase}/api/flashcards/import?unitId=${resolvedUnitId}&format=${format}`,
         {
           method: 'POST',
           headers: {
@@ -75,19 +99,35 @@ export default function FlashcardImportModal({ units, token, onClose, onImported
           </button>
         </div>
 
+        {/* Subject selector */}
         <div className="space-y-1">
-          <label className="text-sm font-medium text-text/70">Unidad destino</label>
+          <label className="text-sm font-medium text-text/70">Materia</label>
           <select
-            value={unitId}
+            value={subjectId}
+            onChange={(e) => handleSubjectChange(e.target.value)}
+            className="w-full rounded-xl border border-secondary/30 bg-bg px-3 py-2 text-sm focus:outline-none focus:border-primary/50"
+          >
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Unit selector */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-text/70">Mazo (unidad destino)</label>
+          <select
+            value={resolvedUnitId}
             onChange={(e) => setUnitId(e.target.value)}
             className="w-full rounded-xl border border-secondary/30 bg-bg px-3 py-2 text-sm focus:outline-none focus:border-primary/50"
           >
-            {units.map((u) => (
+            {unitsForSubject.map((u) => (
               <option key={u.unitId} value={u.unitId}>{u.unitName}</option>
             ))}
           </select>
         </div>
 
+        {/* Format selector */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-text/70">Formato</label>
           <div className="flex gap-3">
@@ -113,6 +153,7 @@ export default function FlashcardImportModal({ units, token, onClose, onImported
           </p>
         </div>
 
+        {/* File input */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-text/70">Archivo</label>
           <input
@@ -123,9 +164,7 @@ export default function FlashcardImportModal({ units, token, onClose, onImported
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-red-400">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
         {result && (
           <div className={`rounded-xl px-4 py-3 text-sm space-y-1 ${

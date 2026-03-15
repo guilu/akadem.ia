@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiBase } from '../api';
-import { apiAuthJson } from '../api';
+import { apiAuthJson, apiBase } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
+import SubjectCard from '../components/flashcards/SubjectCard';
+import type { SubjectSummary } from '../components/flashcards/SubjectCard';
 import UnitList from '../components/flashcards/UnitList';
 
 export type UnitSummary = {
   unitId: string;
   unitName: string;
+  subjectId: string;
+  subjectName: string;
   newCount: number;
   reviewCount: number;
   dueCount?: number;
@@ -29,6 +32,7 @@ export default function FlashcardsPage() {
   const [globalQueue, setGlobalQueue] = useState<GlobalQueue | null>(null);
   const [globalLoading, setGlobalLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
 
   const token = localStorage.getItem('ak_token') || '';
 
@@ -62,10 +66,48 @@ export default function FlashcardsPage() {
     return () => { mounted = false; };
   }, [token]);
 
-  const filteredUnits = useMemo(() => {
+  // Derive subject summaries from unit data
+  const subjects = useMemo<SubjectSummary[]>(() => {
+    const map = new Map<string, SubjectSummary>();
+    for (const u of units) {
+      if (!u.subjectId) continue;
+      if (!map.has(u.subjectId)) {
+        map.set(u.subjectId, {
+          subjectId: u.subjectId,
+          subjectName: u.subjectName,
+          newCount: 0,
+          reviewCount: 0,
+          dueCount: 0,
+          unitCount: 0,
+        });
+      }
+      const s = map.get(u.subjectId)!;
+      s.newCount += u.newCount;
+      s.reviewCount += u.reviewCount;
+      s.dueCount += u.dueCount ?? 0;
+      s.unitCount++;
+    }
+    return Array.from(map.values());
+  }, [units]);
+
+  const selectedSubject = selectedSubjectId
+    ? subjects.find((s) => s.subjectId === selectedSubjectId) ?? null
+    : null;
+
+  const unitsForSubject = useMemo(
+    () => (selectedSubjectId ? units.filter((u) => u.subjectId === selectedSubjectId) : []),
+    [units, selectedSubjectId]
+  );
+
+  const filteredSubjects = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return q ? units.filter((u) => u.unitName.toLowerCase().includes(q)) : units;
-  }, [units, search]);
+    return q ? subjects.filter((s) => s.subjectName.toLowerCase().includes(q)) : subjects;
+  }, [subjects, search]);
+
+  const filteredUnitsForSubject = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q ? unitsForSubject.filter((u) => u.unitName.toLowerCase().includes(q)) : unitsForSubject;
+  }, [unitsForSubject, search]);
 
   const totalPending = globalQueue ? globalQueue.new + globalQueue.due + globalQueue.learning : 0;
 
@@ -94,22 +136,48 @@ export default function FlashcardsPage() {
       link.click();
       URL.revokeObjectURL(link.href);
     } catch {
-      // silently ignore — browser will show nothing
+      // silently ignore
     }
+  };
+
+  const handleSelectSubject = (subjectId: string) => {
+    setSelectedSubjectId(subjectId);
+    setSearch('');
+  };
+
+  const handleBack = () => {
+    setSelectedSubjectId(null);
+    setSearch('');
   };
 
   return (
     <div className="space-y-6">
       <header className="space-y-3">
         <div className="py-[1.5rem] flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              Flash
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                cards
-              </span>
-            </h1>
-            <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
+          <div className="flex items-center gap-3">
+            {selectedSubjectId && (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors text-sm"
+                aria-label="Volver a materias"
+              >
+                ←
+              </button>
+            )}
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight">
+                Flash
+                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                  cards
+                </span>
+              </h1>
+              {selectedSubject ? (
+                <p className="text-text/55 text-sm mt-1">{selectedSubject.subjectName}</p>
+              ) : (
+                <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
+              )}
+            </div>
           </div>
           <button
             type="button"
@@ -126,8 +194,8 @@ export default function FlashcardsPage() {
         }} />
       </header>
 
-      {/* Global queue strip — only in study mode */}
-      {mode === 'estudio' && (
+      {/* Global queue strip — only in study mode and subject list view */}
+      {mode === 'estudio' && !selectedSubjectId && (
         globalLoading ? (
           <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
         ) : globalQueue && totalPending === 0 ? (
@@ -145,13 +213,40 @@ export default function FlashcardsPage() {
 
       <section className="space-y-4">
         <SearchInput value={search} onChange={setSearch} />
-        <UnitList
-          loading={loading}
-          error={error}
-          units={filteredUnits}
-          onUnitClick={handleUnitClick}
-          onExport={handleExport}
-        />
+
+        {selectedSubjectId ? (
+          <UnitList
+            loading={loading}
+            error={error}
+            units={filteredUnitsForSubject}
+            onUnitClick={handleUnitClick}
+            onExport={handleExport}
+          />
+        ) : loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        ) : filteredSubjects.length === 0 ? (
+          <div className="border border-secondary/25 rounded-2xl px-5 py-4 text-sm text-text/55">
+            No hay materias disponibles.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredSubjects.map((subject) => (
+              <SubjectCard
+                key={subject.subjectId}
+                subject={subject}
+                onClick={() => handleSelectSubject(subject.subjectId)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {showImport && (
