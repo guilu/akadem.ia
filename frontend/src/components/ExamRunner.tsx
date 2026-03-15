@@ -141,17 +141,17 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
           <button
             onClick={prev}
             disabled={safeIndex === 0}
-            className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="btn btn-outline rounded-full px-4 py-2 text-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ArrowLeft className="w-4 h-4" />
-            Anterior
+            <span className="hidden sm:inline">Anterior</span>
           </button>
           <button
             onClick={next}
             disabled={safeIndex === shuffled.length - 1}
-            className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="btn btn-outline rounded-full px-4 py-2 text-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Siguiente
+            <span className="hidden sm:inline">Siguiente</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
