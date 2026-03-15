@@ -315,11 +315,12 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
 
   async function handleImport() {
     if (!importFile) { setImportMessage('Selecciona un archivo'); return; }
+    if (!questionUnitId) { setImportMessage('Selecciona una unidad'); return; }
     setImportLoading(true); setImportMessage('');
     try {
       const formData = new FormData();
       formData.append('file', importFile);
-      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'import_failed');
       setImportMessage(`Importadas: ${data.created || 0}. Errores: ${data.errors || 0}`);
@@ -607,20 +608,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
         {/* ── Preguntas ── */}
         {tab === 'questions' && (
           <div className="grid gap-5 py-[1.5rem]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xl font-extrabold tracking-tight"> Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                  <FileExport className="w-4 h-4" />Exportar JSON
-                </button>
-                <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                  <FileCsv className="w-4 h-4" />Exportar CSV
-                </button>
-                <button onClick={() => { setImportOpen(true); setImportMessage(''); }} className={btnPrimary}>
-                  <FileImport className="w-4 h-4" />Importar
-                </button>
-              </div>
-            </div>
+            <h2 className="text-xl font-extrabold tracking-tight"> Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
 
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
@@ -670,8 +658,8 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                 ))}
               </div>
 
-              <div className="flex gap-2">
-                <button onClick={saveQuestion} disabled={questionLoading} className={btnPrimary}>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={saveQuestion} disabled={questionLoading || !questionSubjectId || !questionUnitId} className={btnPrimary}>
                   {isQuestionEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
                 </button>
@@ -680,6 +668,17 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                     <CircleMinus className="w-4 h-4" />Cancelar
                   </button>
                 )}
+                <div className="ml-auto flex flex-wrap gap-2">
+                  <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
+                    <FileExport className="w-4 h-4" />Exportar JSON
+                  </button>
+                  <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
+                    <FileCsv className="w-4 h-4" />Exportar CSV
+                  </button>
+                  <button onClick={() => { setImportOpen(true); setImportMessage(''); }} disabled={!questionUnitId} className={btnOutline}>
+                    <FileImport className="w-4 h-4" />Importar
+                  </button>
+                </div>
               </div>
             </div>
 
