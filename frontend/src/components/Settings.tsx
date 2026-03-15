@@ -199,6 +199,8 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   const [importFormat, setImportFormat] = useState<'csv' | 'json'>('csv');
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState('');
+  const [importDone, setImportDone] = useState(false);
+  const [importStats, setImportStats] = useState<{ created: number; errors: number } | null>(null);
 
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
@@ -323,7 +325,11 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
       const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'import_failed');
-      setImportMessage(`Importadas: ${data.created || 0}. Errores: ${data.errors || 0}`);
+      const created = data.created || 0;
+      const errors = data.errors || 0;
+      setImportStats({ created, errors });
+      setImportMessage(`Importadas: ${created}. Errores: ${errors}`);
+      setImportDone(true);
       await loadQuestions(questionUnitId);
     } catch { setImportMessage('No se pudo importar'); }
     finally { setImportLoading(false); }
@@ -675,7 +681,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                   <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
                     <FileCsv className="w-4 h-4" />CSV
                   </button>
-                  <button onClick={() => { setImportOpen(true); setImportMessage(''); }} disabled={!questionUnitId} className={btnOutline}>
+                  <button onClick={() => { setImportOpen(true); setImportMessage(''); setImportDone(false); setImportStats(null); setImportFile(null); }} disabled={!questionUnitId} className={btnOutline}>
                     <FileImport className="w-4 h-4" />Importar
                   </button>
                 </div>
@@ -732,15 +738,32 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
               <input type="file" accept={importFormat === 'csv' ? '.csv' : '.json'} onChange={e => setImportFile(e.target.files?.[0] || null)}
                 className="text-sm text-text/70 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:transition-colors"
               />
-              {importMessage && <div className="text-sm text-text/70">{importMessage}</div>}
+              {importMessage && (() => {
+                const badgeClass = importStats
+                  ? importStats.created > 0 && importStats.errors === 0
+                    ? 'bg-green-500/15 text-green-600 border border-green-500/30'
+                    : importStats.created === 0 && importStats.errors > 0
+                      ? 'bg-red-500/15 text-red-600 border border-red-500/30'
+                      : 'bg-yellow-500/15 text-yellow-600 border border-yellow-500/30'
+                  : 'bg-secondary/20 text-text/70';
+                return <div className={`text-sm rounded-lg px-3 py-2 font-medium ${badgeClass}`}>{importMessage}</div>;
+              })()}
             </div>
             <div className="flex gap-2 justify-end">
-              <button className={btnOutline} onClick={() => setImportOpen(false)}>
-                <CircleMinus className="w-4 h-4" />Cancelar
-              </button>
-              <button className={btnPrimary} onClick={handleImport} disabled={importLoading}>
-                <FileImport className="w-4 h-4" />{importLoading ? 'Importando...' : 'Importar'}
-              </button>
+              {importDone ? (
+                <button className={btnPrimary} onClick={() => setImportOpen(false)}>
+                  Cerrar
+                </button>
+              ) : (
+                <>
+                  <button className={btnOutline} onClick={() => setImportOpen(false)}>
+                    <CircleMinus className="w-4 h-4" />Cancelar
+                  </button>
+                  <button className={btnPrimary} onClick={handleImport} disabled={importLoading}>
+                    <FileImport className="w-4 h-4" />{importLoading ? 'Importando...' : 'Importar'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
