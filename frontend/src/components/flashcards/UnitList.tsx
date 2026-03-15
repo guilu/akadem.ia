@@ -1,7 +1,7 @@
 import UnitCard from './UnitCard';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
-export default function UnitList({ units, loading, error, onUnitClick }: { units: UnitSummary[]; loading: boolean; error: string; onUnitClick?: (unit: UnitSummary) => void }) {
+export default function UnitList({ units, loading, error, onUnitClick, onExport }: { units: UnitSummary[]; loading: boolean; error: string; onUnitClick?: (unit: UnitSummary) => void; onExport?: (unit: UnitSummary, format: 'csv' | 'json') => void }) {
   if (loading) {
     return (
       <div className="space-y-3">
@@ -31,7 +31,12 @@ export default function UnitList({ units, loading, error, onUnitClick }: { units
   return (
     <div className="space-y-3">
       {units.map((unit) => (
-        <UnitCard key={unit.unitId} unit={unit} onClick={onUnitClick ? () => onUnitClick(unit) : undefined} />
+        <UnitCard
+            key={unit.unitId}
+            unit={unit}
+            onClick={onUnitClick ? () => onUnitClick(unit) : undefined}
+            onExport={onExport ? (fmt) => onExport(unit, fmt) : undefined}
+          />
       ))}
     </div>
   );

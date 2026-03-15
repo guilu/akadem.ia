@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiAuthJson, apiBase } from '../api';
+import { apiBase } from '../api';
+import { apiAuthJson } from '../api';
+import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
 import UnitList from '../components/flashcards/UnitList';
@@ -26,8 +28,18 @@ export default function FlashcardsPage() {
   const [error, setError] = useState<string>('');
   const [globalQueue, setGlobalQueue] = useState<GlobalQueue | null>(null);
   const [globalLoading, setGlobalLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
 
   const token = localStorage.getItem('ak_token') || '';
+
+  const loadUnits = () => {
+    setLoading(true);
+    setError('');
+    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+      .then((data) => setUnits(data || []))
+      .catch(() => setError('No se pudieron cargar las unidades.'))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -65,17 +77,47 @@ export default function FlashcardsPage() {
     }
   };
 
+  const handleExport = async (unit: UnitSummary, format: 'csv' | 'json') => {
+    try {
+      const res = await fetch(
+        `${apiBase}/api/flashcards/export?unitId=${unit.unitId}&format=${format}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) return;
+      const content = await res.text();
+      const blob = new Blob([content], {
+        type: format === 'json' ? 'application/json' : 'text/csv',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${unit.unitName}.${format}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      // silently ignore — browser will show nothing
+    }
+  };
+
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <div className="py-[1.5rem]">
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            Flash
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              cards
-            </span>
-          </h1>
-          <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
+        <div className="py-[1.5rem] flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              Flash
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                cards
+              </span>
+            </h1>
+            <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowImport(true)}
+            className="mt-1 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-primary/40 hover:text-text transition-colors"
+          >
+            <span>⬆</span> Importar
+          </button>
         </div>
         <FlashcardsTabs active={mode} onTab={(tab) => {
           if (tab === 'estudio') navigate('/flashcards?mode=study');
@@ -103,8 +145,23 @@ export default function FlashcardsPage() {
 
       <section className="space-y-4">
         <SearchInput value={search} onChange={setSearch} />
-        <UnitList loading={loading} error={error} units={filteredUnits} onUnitClick={handleUnitClick} />
+        <UnitList
+          loading={loading}
+          error={error}
+          units={filteredUnits}
+          onUnitClick={handleUnitClick}
+          onExport={handleExport}
+        />
       </section>
+
+      {showImport && (
+        <FlashcardImportModal
+          units={units}
+          token={token}
+          onClose={() => setShowImport(false)}
+          onImported={loadUnits}
+        />
+      )}
     </div>
   );
 }

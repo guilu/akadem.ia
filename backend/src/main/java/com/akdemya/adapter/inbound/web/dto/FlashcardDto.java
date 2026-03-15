@@ -66,4 +66,7 @@ public class FlashcardDto {
                             Integer intervalBefore, Integer intervalAfter,
                             Double easeBefore, Double easeAfter) {
   }
+
+  public record ImportResult(int imported, int skipped, List<String> errors) {
+  }
 }
