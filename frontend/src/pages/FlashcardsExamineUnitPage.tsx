@@ -93,7 +93,7 @@ export default function FlashcardsExamineUnitPage() {
       <div className="relative cursor-pointer" onClick={() => setFlipped((f) => !f)}>
         <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-bg brightness-90 dark:brightness-75" />
         <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[45vh] flex flex-col items-center justify-center bg-bg select-none">
-          <p className="text-xl font-semibold leading-relaxed text-justify w-full">
+          <p className="text-xl font-semibold leading-relaxed text-left w-full">
             {flipped ? card.back : card.front}
           </p>
           <p className="mt-6 text-xs text-text/35 text-center w-full">
