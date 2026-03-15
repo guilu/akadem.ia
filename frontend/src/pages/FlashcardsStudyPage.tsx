@@ -185,7 +185,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>Again</span>
+                    <span>❌ Repetir</span>
                     <span className="text-xs text-red-400/60">{currentItem?.intervalHints?.again}</span>
                   </div>
                 </button>
@@ -195,7 +195,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>Good</span>
+                    <span>⚡ Revisar</span>
                     <span className="text-xs text-yellow-500/60">{currentItem?.intervalHints?.good}</span>
                   </div>
                 </button>
@@ -205,7 +205,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>Easy</span>
+                    <span>🚀 Memorizada</span>
                     <span className="text-xs text-lime-500/60">{currentItem?.intervalHints?.easy}</span>
                   </div>
                 </button>

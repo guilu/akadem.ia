@@ -98,6 +98,52 @@ public class ExamManager implements ExamUseCase {
   }
 
   @Override
+  public StartResponse startRandomExam(StartRandomCommand command) {
+    int totalSec = Math.max(60, command.minutes() * 60);
+    ExamAttempt attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(),
+        java.time.OffsetDateTime.now(), null, totalSec, null);
+    attemptRepo.save(attempt);
+
+    Question.Difficulty difficulty = null;
+    if (command.difficulty() != null && !command.difficulty().isBlank()) {
+      try {
+        difficulty = Question.Difficulty.valueOf(command.difficulty());
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+    final Question.Difficulty selectedDifficulty = difficulty;
+
+    List<Unit> units = unitRepo.findBySubjectId(command.subjectId());
+    List<Question> allQuestions = new ArrayList<>();
+    for (Unit u : units) {
+      List<Question> qs = questionRepo.findByUnitId(u.getId());
+      if (selectedDifficulty != null) {
+        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
+      }
+      allQuestions.addAll(qs);
+    }
+    Collections.shuffle(allQuestions, rnd);
+    int take = command.count() > 0 ? Math.min(command.count(), allQuestions.size()) : allQuestions.size();
+    List<Question> pool = allQuestions.subList(0, take);
+
+    List<ExamAttemptAnswer> placeholders = new ArrayList<>();
+    for (Question q : pool) {
+      placeholders.add(ExamAttemptAnswer.create(attempt.getId(), q.getId(), null));
+    }
+    attemptAnsRepo.saveAll(placeholders);
+
+    List<QuestionData> questionDataList = pool.stream().map(q -> {
+      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+          .map(a -> new AnswerData(a.getId(), a.getText()))
+          .collect(Collectors.toList());
+      Collections.shuffle(answers, rnd);
+      return new QuestionData(q.getId(), q.getText(), answers);
+    }).toList();
+
+    return new StartResponse(attempt.getId(), totalSec, questionDataList);
+  }
+
+  @Override
   public SubmitResult submitExam(SubmitCommand command, String userEmail) {
     ExamAttempt attempt = attemptRepo.findById(command.attemptId())
         .orElseThrow(() -> new NoSuchElementException("Attempt not found"));

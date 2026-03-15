@@ -10,5 +10,7 @@ export const ROUTES = {
   settings: '/settings',
   flashcards: '/flashcards',
   flashcardsStudy: '/flashcards/study',
+  flashcardsHistory: '/flashcards/history',
+  flashcardsExamine: '/flashcards/examine',
   rag: '/rag'
 } as const;

@@ -5,9 +5,10 @@ import type { UnitAvailability } from '../types';
 
 const inp = 'bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
-export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
+export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnauthorized }: {
   subjectId: string;
   onStart: (cfg: { unitCounts: Record<string, number>; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) => void;
+  onStartRandom: (cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) => void;
   onUnauthorized: () => void;
 }) {
   const [units, setUnits] = useState<UnitAvailability[]>([]);
@@ -15,16 +16,22 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
   const [time, setTime] = useState(20);
   const [difficulty, setDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD' | 'ALL'>('ALL');
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [randomCount, setRandomCount] = useState(10);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
     const diffQuery = difficulty === 'ALL' ? '' : `&difficulty=${difficulty}`;
     setAvailabilityLoading(true);
     apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}${diffQuery}`, token)
-      .then(us => setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))))
+      .then(us => { setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))); setPage(0); })
       .catch(err => { if (err?.status === 401) onUnauthorized(); })
       .finally(() => setAvailabilityLoading(false));
   }, [subjectId, apiBase, difficulty]);
+
+  const totalPages = Math.ceil(units.length / PAGE_SIZE);
+  const pagedUnits = units.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function setCount(id: string, count: number) {
     const unit = units.find(u => u.id === id);
@@ -78,13 +85,41 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
             />
           </div>
         </div>
+
+        <div className="mt-4 pt-4 border-t border-secondary/20">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[160px]">
+              <label className="block text-sm font-medium text-text/70 mb-1.5">
+                Preguntas aleatorias
+                <span className="ml-1.5 text-text/40 font-normal">(máx. {totalAvailable})</span>
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={totalAvailable || 1}
+                value={randomCount}
+                onChange={e => setRandomCount(Math.max(1, Math.min(Number(e.target.value), totalAvailable || 1)))}
+                disabled={totalAvailable === 0}
+                className={inp + ' w-28 disabled:opacity-40'}
+              />
+            </div>
+            <button
+              onClick={() => onStartRandom({ subjectId, count: randomCount, minutes: time, difficulty: difficulty === 'ALL' ? undefined : difficulty })}
+              disabled={totalAvailable === 0 || randomCount < 1}
+              className="btn btn-primary rounded-full px-6 py-2.5 text-sm shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Play className="w-4 h-4" />
+              Examen aleatorio
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Units ── */}
       <div className="border border-secondary/25 rounded-2xl p-6 mb-5">
         <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-4">Preguntas por unidad</div>
         <div className="grid gap-3">
-          {units.map(u => {
+          {pagedUnits.map(u => {
             const disabled = (u.available || 0) === 0;
             const current = rules[u.id] || 0;
             return (
@@ -129,6 +164,27 @@ export default function ExamBuilder({ subjectId, onStart, onUnauthorized }: {
             );
           })}
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary/20">
+            <button
+              onClick={() => setPage(p => p - 1)}
+              disabled={page === 0}
+              className="px-3 py-1.5 rounded-lg border border-secondary/30 text-sm hover:border-secondary/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ← Anterior
+            </button>
+            <span className="text-xs text-text/50">
+              Página {page + 1} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => p + 1)}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-1.5 rounded-lg border border-secondary/30 text-sm hover:border-secondary/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Footer ── */}

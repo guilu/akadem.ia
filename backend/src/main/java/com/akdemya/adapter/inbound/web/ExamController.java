@@ -24,6 +24,20 @@ public class ExamController {
     public record StartRequest(java.util.Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
     }
 
+    public record StartRandomRequest(UUID subjectId, int count, int minutes, String difficulty) {
+    }
+
+    @PostMapping("/attempts/start-random")
+    public ResponseEntity<?> startRandom(@RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        var command = new ExamUseCase.StartRandomCommand(
+                principal.getUsername(), req.subjectId(), req.count(), req.minutes(), req.difficulty());
+        var response = examUseCase.startRandomExam(command);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/attempts/start")
     public ResponseEntity<?> start(@RequestBody StartRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {

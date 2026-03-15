@@ -2,7 +2,7 @@ import { BookOpen } from 'flowbite-react-icons/outline';
 import { useNavigate } from 'react-router-dom';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
-export default function UnitCard({ unit }: { unit: UnitSummary }) {
+export default function UnitCard({ unit, onClick }: { unit: UnitSummary; onClick?: () => void }) {
   const navigate = useNavigate();
   const reviewCount = unit.reviewCount ?? 0;
   const newCount = unit.newCount ?? 0;
@@ -12,7 +12,7 @@ export default function UnitCard({ unit }: { unit: UnitSummary }) {
   return (
     <button
       type="button"
-      onClick={() => navigate(`/flashcards/study?unitId=${unit.unitId}`)}
+      onClick={() => onClick ? onClick() : navigate(`/flashcards/study?unitId=${unit.unitId}`)}
       className="group w-full text-left border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
     >
       <div className="flex items-center gap-4">

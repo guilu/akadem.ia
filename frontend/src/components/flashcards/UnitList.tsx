@@ -1,7 +1,7 @@
 import UnitCard from './UnitCard';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
-export default function UnitList({ units, loading, error }: { units: UnitSummary[]; loading: boolean; error: string }) {
+export default function UnitList({ units, loading, error, onUnitClick }: { units: UnitSummary[]; loading: boolean; error: string; onUnitClick?: (unit: UnitSummary) => void }) {
   if (loading) {
     return (
       <div className="space-y-3">
@@ -31,7 +31,7 @@ export default function UnitList({ units, loading, error }: { units: UnitSummary
   return (
     <div className="space-y-3">
       {units.map((unit) => (
-        <UnitCard key={unit.unitId} unit={unit} />
+        <UnitCard key={unit.unitId} unit={unit} onClick={onUnitClick ? () => onUnitClick(unit) : undefined} />
       ))}
     </div>
   );

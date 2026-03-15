@@ -16,6 +16,8 @@ import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
+import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
+import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
@@ -93,6 +95,29 @@ export default function App(){
       const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(cfg),
+        timeoutMs: 15000
+      });
+      setAttemptId(data.attemptId);
+      setMinutes(Math.round(data.totalTimeSeconds / 60));
+      setQuestions(data.questions);
+      sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
+      setActiveAttemptId(data.attemptId);
+      navigate(ROUTES.examAttempt(data.attemptId));
+    } catch (err: any) {
+      if (err?.code === 'timeout') {
+        showError(timeoutMessage);
+        return;
+      }
+      throw err;
+    }
+  }
+
+  async function startRandomExam(cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
+    try {
+      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start-random`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cfg),
         timeoutMs: 15000
       });
@@ -195,7 +220,7 @@ export default function App(){
           } />
           <Route path="/subjects/:subjectId/builder" element={
             <ProtectedRoute allow={isAuthed}>
-              <ExamBuilderPage onStart={startExam} onUnauthorized={onLogout} />
+              <ExamBuilderPage onStart={startExam} onStartRandom={startRandomExam} onUnauthorized={onLogout} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.examRunner} element={
@@ -230,6 +255,16 @@ export default function App(){
           <Route path={ROUTES.flashcardsStudy} element={
             <ProtectedRoute allow={isAuthed}>
               <FlashcardsStudyPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.flashcardsHistory} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsHistoryPage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.flashcardsExamine} element={
+            <ProtectedRoute allow={isAuthed}>
+              <FlashcardsExamineUnitPage />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.rag} element={
