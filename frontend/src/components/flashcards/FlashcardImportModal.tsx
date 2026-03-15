@@ -185,17 +185,25 @@ export default function FlashcardImportModal({ token, onClose, onImported }: Pro
         )}
 
         <div className="flex gap-3 pt-1">
-          <button type="button" onClick={onClose} className="flex-1 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-secondary/60 transition-colors">
-            Cerrar
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading || !unitId}
-            className="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Importando…' : 'Importar'}
-          </button>
+          {result ? (
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors">
+              Cerrar
+            </button>
+          ) : (
+            <>
+              <button type="button" onClick={onClose} className="flex-1 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-secondary/60 transition-colors">
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading || !unitId}
+                className="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {loading ? 'Importando…' : 'Importar'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
