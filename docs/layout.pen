@@ -1,0 +1,3729 @@
+{
+  "version": "2.8",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": -1593,
+      "y": 0,
+      "name": "Frame",
+      "clip": true,
+      "width": 2393,
+      "height": 1592,
+      "fill": "#FFFFFF",
+      "layout": "none"
+    },
+    {
+      "type": "frame",
+      "id": "mDlMj",
+      "x": 900,
+      "y": 0,
+      "name": "Akadem.ia — Landing Page",
+      "width": 1440,
+      "height": 2160,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "EBW53",
+          "x": 0,
+          "y": 0,
+          "name": "Navbar",
+          "width": 1440,
+          "height": 72,
+          "fill": "#FFFFFF",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "34hBP",
+              "x": 0,
+              "y": 71,
+              "name": "NavBorder",
+              "fill": "#E5E7EB",
+              "width": 1440,
+              "height": 1
+            },
+            {
+              "type": "rectangle",
+              "id": "RfrU8",
+              "x": 96,
+              "y": 20,
+              "name": "LogoBg",
+              "fill": "#DC2626",
+              "width": 32,
+              "height": 32
+            },
+            {
+              "type": "text",
+              "id": "0mbhd",
+              "x": 109,
+              "y": 27,
+              "name": "LogoLetter",
+              "fill": "#FFFFFF",
+              "content": "A",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "KObDs",
+              "x": 136,
+              "y": 27,
+              "name": "LogoText",
+              "fill": "#111827",
+              "content": "Akadem.ia",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "7WxHm",
+              "x": 566,
+              "y": 28,
+              "name": "NavMaterias",
+              "fill": "#6B7280",
+              "content": "Materias",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "zjrDf",
+              "x": 666,
+              "y": 28,
+              "name": "NavExamenes",
+              "fill": "#374151",
+              "content": "Exámenes",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "rUfw9",
+              "x": 774,
+              "y": 28,
+              "name": "NavFlash",
+              "fill": "#6B7280",
+              "content": "Flashcards",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "500"
+            },
+            {
+              "type": "rectangle",
+              "id": "GvVmp",
+              "x": 1214,
+              "y": 18,
+              "name": "LoginBtn",
+              "fill": "#DC2626",
+              "width": 130,
+              "height": 36
+            },
+            {
+              "type": "text",
+              "id": "QdcDc",
+              "x": 1224,
+              "y": 30,
+              "name": "LoginBtnText",
+              "fill": "#FFFFFF",
+              "content": "Iniciar sesión",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "A8w7L",
+          "x": 0,
+          "y": 72,
+          "name": "Hero",
+          "clip": true,
+          "width": 1440,
+          "height": 600,
+          "fill": "#FFFFFF",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "hZJud",
+              "x": 820,
+              "y": -120,
+              "name": "HeroBlob",
+              "fill": "#FEF2F2",
+              "width": 720,
+              "height": 720
+            },
+            {
+              "type": "rectangle",
+              "id": "PF85T",
+              "x": 900,
+              "y": 48,
+              "name": "MockupBg",
+              "fill": "#FFFFFF",
+              "width": 420,
+              "height": 500
+            },
+            {
+              "type": "rectangle",
+              "id": "hnCIL",
+              "x": 908,
+              "y": 54,
+              "name": "heroImg",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/image.png",
+                "mode": "fill"
+              },
+              "width": 404,
+              "height": 488
+            },
+            {
+              "type": "rectangle",
+              "id": "Sbx2r",
+              "x": 96,
+              "y": 100,
+              "name": "BadgeBg",
+              "fill": "#FEF2F2",
+              "width": 224,
+              "height": 32
+            },
+            {
+              "type": "text",
+              "id": "ZezuJ",
+              "x": 112,
+              "y": 109,
+              "name": "BadgeText",
+              "fill": "#DC2626",
+              "content": "✓  Simulacro gratuito",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "PQrsz",
+              "x": 96,
+              "y": 152,
+              "name": "HeroH1a",
+              "fill": "#111827",
+              "content": "Aprueba tus",
+              "fontFamily": "Inter",
+              "fontSize": 68,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "ccU6R",
+              "x": 96,
+              "y": 228,
+              "name": "HeroH1b",
+              "fill": "#DC2626",
+              "content": "exámenes",
+              "fontFamily": "Inter",
+              "fontSize": 68,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "Nt4A4",
+              "x": 96,
+              "y": 304,
+              "name": "HeroH1c",
+              "fill": "#111827",
+              "content": "sin Improvisar",
+              "fontFamily": "Inter",
+              "fontSize": 68,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "Qa1Co",
+              "x": 96,
+              "y": 400,
+              "name": "HeroSubtitle",
+              "fill": "#6B7280",
+              "content": "Practica con simulacros reales y penalización como en el examen oficial.\nMejora tu nota y aprende de cada error.",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "IpCCr",
+              "x": 96,
+              "y": 488,
+              "name": "PrimaryBtn",
+              "fill": "#DC2626",
+              "width": 200,
+              "height": 52
+            },
+            {
+              "type": "text",
+              "id": "no6ov",
+              "x": 113,
+              "y": 506,
+              "name": "PrimaryBtnText",
+              "fill": "#FFFFFF",
+              "content": "Empezar gratis →",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "47W85",
+              "x": 312,
+              "y": 488,
+              "name": "SecondaryBtn",
+              "fill": "#FFFFFF",
+              "width": 192,
+              "height": 52
+            },
+            {
+              "type": "text",
+              "id": "LEL5Q",
+              "x": 322,
+              "y": 506,
+              "name": "SecondaryBtnText",
+              "fill": "#374151",
+              "content": "Ver cómo funciona",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "abJT2",
+          "x": 0,
+          "y": 672,
+          "name": "Stats Bar",
+          "width": 1440,
+          "height": 120,
+          "fill": "#FFF1F1",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "OWtno",
+              "x": 156,
+              "y": 20,
+              "name": "Stat1Num",
+              "fill": "#DC2626",
+              "content": "500+",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 36,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "JeNYT",
+              "x": 152,
+              "y": 66,
+              "name": "Stat1Lbl",
+              "fill": "#6B7280",
+              "content": "Preguntas disponibles",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "jrZJX",
+              "x": 516,
+              "y": 20,
+              "name": "Stat2Num",
+              "fill": "#DC2626",
+              "content": "3",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 36,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "RW39X",
+              "x": 516,
+              "y": 66,
+              "name": "Stat2Lbl",
+              "fill": "#6B7280",
+              "content": "Materias",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "YhvJo",
+              "x": 828,
+              "y": 20,
+              "name": "Stat3Num",
+              "fill": "#DC2626",
+              "content": "−⅓",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 36,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "Z7205",
+              "x": 820,
+              "y": 66,
+              "name": "Stat3Lbl",
+              "fill": "#6B7280",
+              "content": "Penalización por fallo",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "iRTtu",
+              "x": 1108,
+              "y": 20,
+              "name": "Stat4Num",
+              "fill": "#DC2626",
+              "content": "Gratis",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 36,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "HFPFm",
+              "x": 1104,
+              "y": 66,
+              "name": "Stat4Lbl",
+              "fill": "#6B7280",
+              "content": "Sin tarjeta de crédito",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xJb0S",
+          "x": 0,
+          "y": 792,
+          "name": "Subjects",
+          "width": 1440,
+          "height": 560,
+          "fill": "#FFFFFF",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "bb55f",
+              "x": 96,
+              "y": 60,
+              "name": "SubjectsTitle",
+              "fill": "#111827",
+              "content": "Materias disponibles",
+              "fontFamily": "Inter",
+              "fontSize": 42,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "xwb5l",
+              "x": 96,
+              "y": 120,
+              "name": "SubjectsSub",
+              "fill": "#6B7280",
+              "content": "Practica con las asignaturas de tus oposiciones favoritas",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "PEhQM",
+              "x": 96,
+              "y": 180,
+              "name": "Card1",
+              "fill": "#FAFAFA",
+              "width": 390,
+              "height": 300
+            },
+            {
+              "type": "rectangle",
+              "id": "WWVUC",
+              "x": 120,
+              "y": 216,
+              "name": "C1IconBg",
+              "fill": "#DC2626",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "qN2XC",
+              "x": 128,
+              "y": 222,
+              "name": "C1Icon",
+              "content": "📋",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "ZmjwE",
+              "x": 120,
+              "y": 278,
+              "name": "C1Title",
+              "fill": "#111827",
+              "content": "Oposiciones",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "juTS7",
+              "x": 120,
+              "y": 314,
+              "name": "C1Desc",
+              "fill": "#6B7280",
+              "content": "Simulacros completos con preguntas reales de los últimos años de convocatoria.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "ViSbw",
+              "x": 120,
+              "y": 394,
+              "name": "C1Count",
+              "fill": "#DC2626",
+              "content": "200+ preguntas",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "type": "rectangle",
+              "id": "w4bq1",
+              "x": 525,
+              "y": 180,
+              "name": "Card2",
+              "fill": "#FAFAFA",
+              "width": 390,
+              "height": 300
+            },
+            {
+              "type": "rectangle",
+              "id": "FII1F",
+              "x": 549,
+              "y": 216,
+              "name": "C2IconBg",
+              "fill": "#2563EB",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "PKNIY",
+              "x": 559,
+              "y": 218,
+              "name": "C2Icon",
+              "fill": "#FFFFFF",
+              "content": "∑",
+              "fontFamily": "Inter",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "xGVDX",
+              "x": 549,
+              "y": 278,
+              "name": "C2Title",
+              "fill": "#111827",
+              "content": "Matemáticas",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "sjCr7",
+              "x": 549,
+              "y": 314,
+              "name": "C2Desc",
+              "fill": "#6B7280",
+              "content": "Álgebra, geometría y estadística con ejercicios paso a paso y teoría.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "l3Cbg",
+              "x": 549,
+              "y": 394,
+              "name": "C2Count",
+              "fill": "#2563EB",
+              "content": "180+ ejercicios",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "type": "rectangle",
+              "id": "Sp7bn",
+              "x": 954,
+              "y": 180,
+              "name": "Card3",
+              "fill": "#FAFAFA",
+              "width": 390,
+              "height": 300
+            },
+            {
+              "type": "rectangle",
+              "id": "tMGYA",
+              "x": 978,
+              "y": 216,
+              "name": "C3IconBg",
+              "fill": "#059669",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "jwijr",
+              "x": 986,
+              "y": 222,
+              "name": "C3Icon",
+              "content": "🏛",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "qhJZz",
+              "x": 978,
+              "y": 278,
+              "name": "C3Title",
+              "fill": "#111827",
+              "content": "Historia",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "2sRqk",
+              "x": 978,
+              "y": 314,
+              "name": "C3Desc",
+              "fill": "#6B7280",
+              "content": "De la Prehistoria a la actualidad, con preguntas tipo test de examen oficial.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "u7llL",
+              "x": 978,
+              "y": 394,
+              "name": "C3Count",
+              "fill": "#059669",
+              "content": "120+ preguntas",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "7jd4P",
+          "x": 0,
+          "y": 1352,
+          "name": "How It Works",
+          "width": 1440,
+          "height": 500,
+          "fill": "#F9FAFB",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "vvg0i",
+              "x": 96,
+              "y": 60,
+              "name": "HowTitle",
+              "fill": "#111827",
+              "content": "Cómo funciona",
+              "fontFamily": "Inter",
+              "fontSize": 42,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "wkDGw",
+              "x": 96,
+              "y": 120,
+              "name": "HowSub",
+              "fill": "#6B7280",
+              "content": "En tres sencillos pasos puedes empezar a mejorar tu nota",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "FVfhA",
+              "x": 96,
+              "y": 200,
+              "name": "Step1Circle",
+              "fill": "#DC2626",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "pgZTJ",
+              "x": 116,
+              "y": 214,
+              "name": "Step1Num",
+              "fill": "#FFFFFF",
+              "content": "1",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "800"
+            },
+            {
+              "type": "rectangle",
+              "id": "SL18X",
+              "x": 160,
+              "y": 223,
+              "name": "Connector1",
+              "fill": "#E5E7EB",
+              "width": 296,
+              "height": 2
+            },
+            {
+              "type": "text",
+              "id": "Uvu1t",
+              "x": 96,
+              "y": 268,
+              "name": "Step1Title",
+              "fill": "#111827",
+              "content": "Elige tu materia",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "JPDtZ",
+              "x": 96,
+              "y": 304,
+              "name": "Step1Desc",
+              "fill": "#6B7280",
+              "content": "Selecciona la asignatura que quieres practicar y configura la duración de tu simulacro.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "ykp5a",
+              "x": 512,
+              "y": 200,
+              "name": "Step2Circle",
+              "fill": "#DC2626",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "bTlrt",
+              "x": 530,
+              "y": 214,
+              "name": "Step2Num",
+              "fill": "#FFFFFF",
+              "content": "2",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "800"
+            },
+            {
+              "type": "rectangle",
+              "id": "ePdQS",
+              "x": 576,
+              "y": 223,
+              "name": "Connector2",
+              "fill": "#E5E7EB",
+              "width": 296,
+              "height": 2
+            },
+            {
+              "type": "text",
+              "id": "tq3JS",
+              "x": 512,
+              "y": 268,
+              "name": "Step2Title",
+              "fill": "#111827",
+              "content": "Practica con simulacros",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "IWJWb",
+              "x": 512,
+              "y": 304,
+              "name": "Step2Desc",
+              "fill": "#6B7280",
+              "content": "Responde preguntas reales con penalización como en el examen oficial. Sin trampa.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "8f3OV",
+              "x": 928,
+              "y": 200,
+              "name": "Step3Circle",
+              "fill": "#DC2626",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "type": "text",
+              "id": "UhZCk",
+              "x": 945,
+              "y": 214,
+              "name": "Step3Num",
+              "fill": "#FFFFFF",
+              "content": "3",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "9BVAl",
+              "x": 928,
+              "y": 268,
+              "name": "Step3Title",
+              "fill": "#111827",
+              "content": "Analiza tus resultados",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "yn1ys",
+              "x": 928,
+              "y": 304,
+              "name": "Step3Desc",
+              "fill": "#6B7280",
+              "content": "Revisa tus aciertos, fallos y evolución para mejorar sesión a sesión.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qfSKL",
+          "x": 0,
+          "y": 1852,
+          "name": "CTA",
+          "width": 1440,
+          "height": 280,
+          "fill": "#DC2626",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "GWRFU",
+              "x": 0,
+              "y": 72,
+              "name": "CTAH2",
+              "fill": "#FFFFFF",
+              "content": "¿Listo para aprender?",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 46,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "IGWbc",
+              "x": 0,
+              "y": 140,
+              "name": "CTASub",
+              "fill": "#ffffffbf",
+              "content": "Únete hoy y empieza a preparar tu examen de forma inteligente. Es completamente gratis.",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "Y6ugd",
+              "x": 580,
+              "y": 192,
+              "name": "CTABtn",
+              "fill": "#FFFFFF",
+              "width": 280,
+              "height": 52
+            },
+            {
+              "type": "text",
+              "id": "YbnwM",
+              "x": 592,
+              "y": 208,
+              "name": "CTABtnText",
+              "fill": "#DC2626",
+              "content": "Empezar gratis — sin registro",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hVU8m",
+      "x": 2440,
+      "y": 0,
+      "name": "Akadem.ia — Mobile Landing",
+      "clip": true,
+      "width": 402,
+      "fill": "#0A0F1C",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "93grP",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 60,
+          "fill": "#0A0F1C",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "JuKvr",
+              "name": "logo",
+              "fill": "#22D3EE",
+              "content": "AKADEM.IA",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 16,
+              "fontWeight": "700",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "5F7RI",
+              "name": "loginBtn",
+              "fill": "#00000000",
+              "cornerRadius": 6,
+              "padding": [
+                6,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "f1Cvo",
+                  "name": "loginText",
+                  "fill": "#22D3EE",
+                  "content": "ENTRAR",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 10,
+                  "fontWeight": "600",
+                  "letterSpacing": 1.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zoPdc",
+          "name": "Hero",
+          "width": "fill_container",
+          "fill": "#0A0F1C",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            48,
+            24,
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "qfSOz",
+              "name": "badge",
+              "fill": "#0F172A",
+              "cornerRadius": 100,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xrLAB",
+                  "name": "badgeText",
+                  "fill": "#22D3EE",
+                  "content": "✓  PENALIZACIÓN REAL · OPOSICIONES",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 9,
+                  "fontWeight": "600",
+                  "letterSpacing": 1.5
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "V7cEe",
+              "name": "heroTitle",
+              "fill": "#FFFFFF",
+              "content": "DOMINA TU\nOPOSICIÓN.",
+              "lineHeight": 1.1,
+              "fontFamily": "Inter",
+              "fontSize": 40,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "5qgcM",
+              "name": "heroSub",
+              "fill": "#94A3B8",
+              "content": "Entrena con penalización real. Simula el examen oficial. Analiza cada error en profundidad.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 15
+            },
+            {
+              "type": "frame",
+              "id": "fVHbm",
+              "name": "ctaRow",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "5SuXI",
+                  "name": "ctaPrimary",
+                  "fill": "#22D3EE",
+                  "cornerRadius": 8,
+                  "padding": [
+                    14,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "h0Jg2",
+                      "name": "ctaPrimaryText",
+                      "fill": "#0A0F1C",
+                      "content": "EMPEZAR GRATIS",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rWx4i",
+                  "name": "ctaSecondary",
+                  "fill": "#00000000",
+                  "cornerRadius": 8,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "l41yt",
+                      "name": "ctaSecondaryText",
+                      "fill": "#94A3B8",
+                      "content": "VER DEMO →",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fufHb",
+              "name": "HeroImage",
+              "clip": true,
+              "width": "fill_container",
+              "height": 200,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "./images/generated-1773214390535.png",
+                "mode": "fill"
+              },
+              "cornerRadius": 12,
+              "layout": "vertical"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "hRtNM",
+          "name": "How It Works",
+          "width": "fill_container",
+          "fill": "#0A0F1C",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "HrI3v",
+              "name": "hwLabel",
+              "fill": "#22D3EE",
+              "content": "PROCESO",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "1I8WC",
+              "name": "hwTitle",
+              "fill": "#FFFFFF",
+              "content": "Tres pasos para\naprobar.",
+              "lineHeight": 1.2,
+              "fontFamily": "Inter",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "N6zUb",
+              "name": "step1",
+              "width": "fill_container",
+              "fill": "#1E293B",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oHfPx",
+                  "name": "s1num",
+                  "fill": "#22D3EE",
+                  "content": "01 —",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "TnT3F",
+                  "name": "s1title",
+                  "fill": "#FFFFFF",
+                  "content": "Elige tu temario",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "YcSSY",
+                  "name": "s1desc",
+                  "fill": "#94A3B8",
+                  "content": "Selecciona asignaturas y unidades temáticas para cada sesión de práctica.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tosDe",
+              "name": "step2",
+              "width": "fill_container",
+              "fill": "#1E293B",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HBW2i",
+                  "name": "s2num",
+                  "fill": "#22D3EE",
+                  "content": "02 —",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "yImRg",
+                  "name": "s2title",
+                  "fill": "#FFFFFF",
+                  "content": "Simula el examen",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "7IeRm",
+                  "name": "s2desc",
+                  "fill": "#94A3B8",
+                  "content": "Responde con penalización –1/3 por error. Igual que el día del examen oficial.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aie5f",
+              "name": "step3",
+              "width": "fill_container",
+              "fill": "#22D3EE",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Eq7y5",
+                  "name": "s3num",
+                  "fill": "#0A0F1C",
+                  "content": "03 —",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "zgq5V",
+                  "name": "s3title",
+                  "fill": "#0A0F1C",
+                  "content": "Analiza y mejora",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "CUwiw",
+                  "name": "s3desc",
+                  "fill": "#0F172A",
+                  "content": "Revisa errores, nota media y progreso por tema. Identifica exactamente dónde necesitas refuerzo.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dUfm9",
+          "name": "Features",
+          "width": "fill_container",
+          "fill": "#0F172A",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "RRxAc",
+              "name": "ftLabel",
+              "fill": "#22D3EE",
+              "content": "FUNCIONALIDADES",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "K5NC6",
+              "name": "ftTitle",
+              "fill": "#FFFFFF",
+              "content": "Todo lo que necesitas\npara prepararte.",
+              "lineHeight": 1.2,
+              "fontFamily": "Inter",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "mF10n",
+              "name": "ft1",
+              "width": "fill_container",
+              "fill": "#1E293B",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ydSqk",
+                  "name": "ft1icon",
+                  "fill": "#22D3EE",
+                  "content": "◐",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "MrLKO",
+                  "name": "ft1title",
+                  "fill": "#FFFFFF",
+                  "content": "Simulacros ilimitados",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "lYFh8",
+                  "name": "ft1desc",
+                  "fill": "#94A3B8",
+                  "content": "Genera exámenes con el número exacto de preguntas del modelo oficial. Sin límite de intentos.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VubRU",
+              "name": "ft2",
+              "width": "fill_container",
+              "fill": "#1E293B",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FOFmo",
+                  "name": "ft2icon",
+                  "fill": "#22D3EE",
+                  "content": "✓",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "BBOkD",
+                  "name": "ft2title",
+                  "fill": "#FFFFFF",
+                  "content": "Penalización real",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "jLI8f",
+                  "name": "ft2desc",
+                  "fill": "#94A3B8",
+                  "content": "Sistema de corrección idéntico al examen oficial: aciertos, errores y blancos con su peso exacto.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cyLnq",
+              "name": "ft3",
+              "width": "fill_container",
+              "fill": "#1E293B",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Jv0ft",
+                  "name": "ft3icon",
+                  "fill": "#22D3EE",
+                  "content": "○",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "GcN3m",
+                  "name": "ft3title",
+                  "fill": "#FFFFFF",
+                  "content": "Historial y estadísticas",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "FqUVC",
+                  "name": "ft3desc",
+                  "fill": "#94A3B8",
+                  "content": "Consulta tu evolución, nota media y tasa de aciertos por tema. Identifica tus puntos débiles.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gluTR",
+          "name": "Stats",
+          "width": "fill_container",
+          "fill": "#0A0F1C",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "OTA3w",
+              "name": "stLabel",
+              "fill": "#22D3EE",
+              "content": "EN NÚMEROS",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "q2yWd",
+              "name": "statsGrid",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dXubx",
+                  "name": "st1",
+                  "width": "fill_container",
+                  "fill": "#1E293B",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    16,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EHUT5",
+                      "name": "st1val",
+                      "fill": "#22D3EE",
+                      "content": "5.000+",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QeYaz",
+                      "name": "st1lab",
+                      "fill": "#64748B",
+                      "content": "PREGUNTAS",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "6cjUn",
+                  "name": "st2",
+                  "width": "fill_container",
+                  "fill": "#1E293B",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    16,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VPtnK",
+                      "name": "st2val",
+                      "fill": "#22D3EE",
+                      "content": "87%",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "aGVpv",
+                      "name": "st2lab",
+                      "fill": "#64748B",
+                      "content": "APROBADOS",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "5v7FG",
+                  "name": "st3",
+                  "width": "fill_container",
+                  "fill": "#1E293B",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    16,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "8tMZQ",
+                      "name": "st3val",
+                      "fill": "#22D3EE",
+                      "content": "1.200+",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lNhiT",
+                      "name": "st3lab",
+                      "fill": "#64748B",
+                      "content": "OPOSITORES",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "S5KFi",
+          "name": "Final CTA",
+          "width": "fill_container",
+          "fill": "#0F172A",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            48,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "oBuLi",
+              "name": "ctaLabel2",
+              "fill": "#22D3EE",
+              "content": "¿LISTO PARA APROBAR?",
+              "textAlign": "center",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "dSIEY",
+              "name": "ctaHeadline",
+              "fill": "#FFFFFF",
+              "content": "Empieza hoy.\nCompletamente gratis.",
+              "lineHeight": 1.15,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "ufLY3",
+              "name": "ctaSubtext",
+              "fill": "#94A3B8",
+              "content": "Sin tarjeta de crédito. Sin compromisos.",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14
+            },
+            {
+              "type": "frame",
+              "id": "yMIw6",
+              "name": "ctaFinalBtn",
+              "fill": "#22D3EE",
+              "cornerRadius": 8,
+              "padding": [
+                16,
+                32
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Wl7AJ",
+                  "name": "ctaFinalBtnText",
+                  "fill": "#0A0F1C",
+                  "content": "CREAR CUENTA GRATIS",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FTMVC",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#0A0F1C",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            32,
+            24,
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "hazMz",
+              "name": "footerLogo",
+              "fill": "#22D3EE",
+              "content": "AKADEM.IA",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 16,
+              "fontWeight": "700",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "OGm7o",
+              "name": "footerTagline",
+              "fill": "#64748B",
+              "content": "El simulacro que prepara\ncomo el examen real.",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 13
+            },
+            {
+              "type": "frame",
+              "id": "IwsZC",
+              "name": "footerLinks",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "k3wKD",
+                  "name": "fl1",
+                  "fill": "#94A3B8",
+                  "content": "Inicio",
+                  "fontFamily": "Inter",
+                  "fontSize": 12
+                },
+                {
+                  "type": "text",
+                  "id": "sp5GZ",
+                  "name": "fl2",
+                  "fill": "#94A3B8",
+                  "content": "Funcionalidades",
+                  "fontFamily": "Inter",
+                  "fontSize": 12
+                },
+                {
+                  "type": "text",
+                  "id": "4E0jY",
+                  "name": "fl3",
+                  "fill": "#94A3B8",
+                  "content": "Privacidad",
+                  "fontFamily": "Inter",
+                  "fontSize": 12
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "zSY2g",
+              "name": "footerCopyright",
+              "fill": "#475569",
+              "content": "© 2026 Akadem.ia",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rpSaz",
+      "x": 2942,
+      "y": 0,
+      "name": "Akdmia — Mobile (Warm)",
+      "clip": true,
+      "width": 402,
+      "fill": "#FAFAF9",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "uqiQl",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 60,
+          "fill": "#FAFAF9",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Fnlw7",
+              "name": "logoRow",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tlkpJ",
+                  "name": "logoIcon",
+                  "width": 30,
+                  "height": 30,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 225,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#EA580C",
+                        "position": 0
+                      },
+                      {
+                        "color": "#D97706",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 8
+                },
+                {
+                  "type": "text",
+                  "id": "H46ZS",
+                  "name": "logoText",
+                  "fill": "#292524",
+                  "content": "Akdmia",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "jZRRz",
+              "name": "loginBtn",
+              "fill": "#EA580C",
+              "cornerRadius": 100,
+              "padding": [
+                8,
+                16
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "skSg8",
+                  "name": "loginBtnText",
+                  "fill": "#FFFFFF",
+                  "content": "Entrar",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "3bBE5",
+          "name": "Hero",
+          "width": "fill_container",
+          "fill": "#FAFAF9",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            32,
+            24,
+            36,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "m8oTW",
+              "name": "badge",
+              "fill": "#EA580C15",
+              "cornerRadius": 100,
+              "padding": [
+                6,
+                14
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yfsr0",
+                  "name": "badgeText",
+                  "fill": "#EA580C",
+                  "content": "★  Preparación inteligente para opositores",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "AdeOF",
+              "name": "heroTitle",
+              "fill": [
+                "#292524",
+                "#00000033"
+              ],
+              "content": "Aprueba tus exámenes\nsin improvisar",
+              "lineHeight": 1.15,
+              "fontFamily": "DM Sans",
+              "fontSize": 32,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "rHWs7",
+              "name": "heroAccent",
+              "fill": "#EA580C",
+              "content": "Simulacros · Flashcards · Progreso",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 13,
+              "fontWeight": "600",
+              "letterSpacing": 0.5
+            },
+            {
+              "type": "text",
+              "id": "BBHek",
+              "name": "heroSub",
+              "fill": "#78716C",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Todo en una plataforma diseñada para convertir tu esfuerzo en resultados reales.",
+              "lineHeight": 1.5,
+              "fontFamily": "DM Sans",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Rvsdu",
+              "name": "ctaRow",
+              "width": "fill_container",
+              "gap": 12,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wElii",
+                  "name": "ctaPrimary",
+                  "width": 167,
+                  "fill": "#EA580C",
+                  "cornerRadius": 100,
+                  "padding": [
+                    12,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nSobA",
+                      "name": "ctaPrimaryText",
+                      "fill": "#FFFFFF",
+                      "content": "Empieza gratis",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VAGDV",
+                  "name": "ctaSecondary",
+                  "width": 174,
+                  "fill": "#748b8bff",
+                  "cornerRadius": 100,
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MeSkq",
+                      "name": "ctaSecondaryText",
+                      "fill": "#f2eddfff",
+                      "textGrowth": "fixed-width",
+                      "width": "fit_content(111)",
+                      "content": "Ya tengo cuenta",
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UAe50",
+              "name": "HeroImage",
+              "clip": true,
+              "width": "fill_container",
+              "height": 200,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "./images/generated-1773253595853.png",
+                "mode": "fill"
+              },
+              "cornerRadius": 20
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "EFrl4",
+          "name": "Stats",
+          "width": "fill_container",
+          "fill": "#F1F1F1",
+          "padding": [
+            24,
+            25
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "xCD09",
+              "name": "s1",
+              "width": 117,
+              "height": 61,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "syrNB",
+                  "name": "s1val",
+                  "fill": "#EA580C",
+                  "content": "Materias",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "0rxNm",
+                  "name": "s1lab",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Organizadas por temas",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VfVti",
+              "name": "s2",
+              "width": 108,
+              "height": 60,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "krm87",
+                  "name": "s2val",
+                  "fill": "#EA580C",
+                  "content": "Exámenes",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "uXBzb",
+                  "name": "s2lab",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Configurables tipo test",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AJnxn",
+              "name": "s3",
+              "width": 131,
+              "height": 58,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "arMjC",
+                  "name": "s3val",
+                  "rotation": -0.13120978762742938,
+                  "fill": "#EA580C",
+                  "content": "Flashcards",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "i7WUp",
+                  "name": "s3lab",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Inteligentes de repaso",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "m2umN",
+          "name": "Features",
+          "width": "fill_container",
+          "fill": "#FAFAF9",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "b0I7q",
+              "name": "ftHead",
+              "fill": "#292524",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Todo lo que necesitas para preparar tus exámenes",
+              "lineHeight": 1.2,
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "nQ5lw",
+              "name": "ftSub",
+              "fill": "#78716C",
+              "content": "Sin distracciones. Sin excusas.",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "y3eFV",
+              "name": "ft1",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "syk0a",
+                  "name": "ft1iconBox",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#EA580C15",
+                  "cornerRadius": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uLrxN",
+                      "name": "ft1iconTxt",
+                      "content": "⏱",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "GnK8i",
+                  "name": "ft1title",
+                  "fill": "#292524",
+                  "content": "Simulacros cronometrados",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Z58SN",
+                  "name": "ft1desc",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Reproduce las condiciones exactas del examen. Entrena la presión del tiempo real antes del gran día.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GJZYi",
+              "name": "ft2",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ajP3m",
+                  "name": "ft2iconBox",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#EA580C15",
+                  "cornerRadius": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "r1oqR",
+                      "name": "ft2iconTxt",
+                      "content": "📊",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "EMbdG",
+                  "name": "ft2title",
+                  "fill": "#292524",
+                  "content": "Seguimiento de progreso",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "DWOFN",
+                  "name": "ft2desc",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Nota, tiempo y evolución guardados automáticamente. Observa tu mejora semana a semana.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hV1Lv",
+              "name": "ft3",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "E8TNv",
+                  "name": "ft3iconBox",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#EA580C15",
+                  "cornerRadius": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "F2HvA",
+                      "name": "ft3iconTxt",
+                      "fill": "#EA580C",
+                      "content": "↺",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "zKFXa",
+                  "name": "ft3title",
+                  "fill": "#292524",
+                  "content": "Reanuda cuando quieras",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "dtvoK",
+                  "name": "ft3desc",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Empieza hoy, continúa mañana. Tu progreso se guarda en cada sesión sin perder nada.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JTQw0",
+              "name": "ft4",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "6Xymt",
+                  "name": "ft4iconBox",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#0D948815",
+                  "cornerRadius": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vxQtY",
+                      "name": "ft4iconTxt",
+                      "content": "📚",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "6RK5p",
+                  "name": "ft4title",
+                  "fill": "#292524",
+                  "content": "Flashcards inteligentes",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "7RonR",
+                  "name": "ft4desc",
+                  "fill": "#78716C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Repasa conceptos clave con tarjetas organizadas por tema para fijar el conocimiento a largo plazo.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "A9f1V",
+          "name": "How It Works",
+          "width": "fill_container",
+          "fill": "#F1F1F1",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "skMVX",
+              "name": "hwHead",
+              "fill": "#292524",
+              "content": "Cómo funciona",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "VrHTd",
+              "name": "hwSub",
+              "fill": "#78716C",
+              "content": "Tres pasos para empezar a prepararte hoy.",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Wzahk",
+              "name": "step1",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "awHtf",
+                  "name": "s1n",
+                  "fill": "#EA580C33",
+                  "content": "01",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "ICzWk",
+                  "name": "s1content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "6giAl",
+                      "name": "s1title",
+                      "fill": "#292524",
+                      "content": "Regístrate gratis",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "aIT06",
+                      "name": "s1desc",
+                      "fill": "#78716C",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Crea tu cuenta en segundos y accede a todos los temas de tu preparación.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A5aFv",
+              "name": "step2",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "aGBbd",
+                  "name": "s2n",
+                  "fill": "#EA580C33",
+                  "content": "02",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "4rIIo",
+                  "name": "s2content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "U2sxr",
+                      "name": "s2title",
+                      "fill": "#292524",
+                      "content": "Elige tu examen",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "9ueF0",
+                      "name": "s2desc",
+                      "fill": "#78716C",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Selecciona temas, número de preguntas y dificultad. Tú controlas el entrenamiento.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "CK4B5",
+              "name": "step3",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YwSwk",
+                  "name": "s3n",
+                  "fill": "#EA580C33",
+                  "content": "03",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "J7LyK",
+                  "name": "s3content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "unBtO",
+                      "name": "s3title",
+                      "fill": "#292524",
+                      "content": "Analiza y mejora",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VmayO",
+                      "name": "s3desc",
+                      "fill": "#78716C",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Revisa tus resultados, identifica puntos débiles y vuelve a intentarlo hasta dominarlo.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "bD5IA",
+          "name": "Final CTA",
+          "width": "fill_container",
+          "fill": "#FAFAF9",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            48,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "p1Yqo",
+              "name": "ctaHead",
+              "fill": "#292524",
+              "content": "¿Listo para aprobar?",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 26,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "a0iBz",
+              "name": "ctaSub",
+              "fill": "#78716C",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Únete hoy y empieza a entrenar con exámenes reales. Sin tarjeta, sin compromiso.",
+              "lineHeight": 1.5,
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "XQ1ap",
+              "name": "finalBtnWrap",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 225,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#EA580C",
+                    "position": 0
+                  },
+                  {
+                    "color": "#D97706",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 100,
+              "padding": [
+                14,
+                32
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vWFuI",
+                  "name": "finalBtnText",
+                  "fill": "#FFFFFF",
+                  "content": "Crear mi cuenta gratis",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Rz9e8",
+              "name": "ctaTrust",
+              "fill": "#A8A29E",
+              "content": "Sin tarjeta de crédito · Gratis para siempre",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ENkfw",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#F1F1F1",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            28,
+            24,
+            36,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "pumZz",
+              "name": "footerTop",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cIjX1",
+                  "name": "footerIcon",
+                  "width": 26,
+                  "height": 26,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 225,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#EA580C",
+                        "position": 0
+                      },
+                      {
+                        "color": "#D97706",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6
+                },
+                {
+                  "type": "text",
+                  "id": "xvv9N",
+                  "name": "footerLogo",
+                  "fill": "#292524",
+                  "content": "Akdmia",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "RmbSR",
+              "name": "footerTagline",
+              "fill": "#78716C",
+              "content": "La plataforma de simulacros para opositores.",
+              "lineHeight": 1.4,
+              "fontFamily": "DM Sans",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "NGeRQ",
+              "name": "footerLinks",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "pQKlV",
+                  "name": "flLogin",
+                  "fill": "#A8A29E",
+                  "content": "Login",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "xH8Sy",
+                  "name": "flRegister",
+                  "fill": "#A8A29E",
+                  "content": "Registro",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "EIIha",
+                  "name": "flPrivacy",
+                  "fill": "#A8A29E",
+                  "content": "Privacidad",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "ylaYK",
+              "name": "footerCopy",
+              "fill": "#A8A29E",
+              "content": "© 2026 Akdmia",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "rectangle",
+      "id": "jS34t",
+      "x": 3548,
+      "y": -728,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/paleta2.png",
+        "mode": "fill"
+      },
+      "width": 634,
+      "height": 192
+    },
+    {
+      "type": "rectangle",
+      "id": "fCPYx",
+      "x": 3548,
+      "y": -440,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/paleta1.png",
+        "mode": "fill"
+      },
+      "width": 634,
+      "height": 192
+    },
+    {
+      "type": "frame",
+      "id": "WxU5g",
+      "x": 3500,
+      "y": 0,
+      "name": "Akdmia — Bauhaus Digital",
+      "clip": true,
+      "width": 402,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "fdt2H",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 60,
+          "fill": "#FFFFFF",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "fsvS9",
+              "name": "logoRow",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "CBzMl",
+                  "name": "logoSquare",
+                  "width": 28,
+                  "height": 28,
+                  "fill": "#E53935"
+                },
+                {
+                  "type": "text",
+                  "id": "8pano",
+                  "name": "logoText",
+                  "fill": "#000000",
+                  "content": "AKDMIA",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ok7rj",
+              "name": "loginBtn",
+              "fill": "#E53935",
+              "cornerRadius": 100,
+              "padding": [
+                8,
+                16
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZITcv",
+                  "name": "loginBtnText",
+                  "fill": "#FFFFFF",
+                  "content": "Entrar",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "q7BSQ",
+          "name": "Hero",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            36,
+            24,
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "MieQ3",
+              "name": "badge",
+              "fill": "#E53935",
+              "cornerRadius": 100,
+              "padding": [
+                6,
+                14
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TveVQ",
+                  "name": "badgeText",
+                  "fill": "#FFFFFF",
+                  "content": "★  Preparación inteligente para opositores",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "UpzzM",
+              "name": "heroTitle",
+              "fill": "#000000",
+              "content": "Aprueba tus\nexámenes\nsin improvisar",
+              "lineHeight": 1.05,
+              "fontFamily": "DM Sans",
+              "fontSize": 34,
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
+              "type": "text",
+              "id": "QAxWl",
+              "name": "heroSub",
+              "fill": "#757575",
+              "content": "Simulacros cronometrados, flashcards y análisis de progreso. Diseñado para convertir esfuerzo en resultados.",
+              "lineHeight": 1.4,
+              "fontFamily": "DM Sans",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "s895Z",
+              "name": "ctaRow",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "qOePR",
+                  "name": "ctaPrimary",
+                  "fill": "#E53935",
+                  "cornerRadius": 100,
+                  "padding": [
+                    12,
+                    24
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KaZqJ",
+                      "name": "ctaPrimaryText",
+                      "fill": "#FFFFFF",
+                      "content": "Empieza gratis",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nNZUi",
+                  "name": "ctaSecondary",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 100,
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "X2lEL",
+                      "name": "ctaSecondaryText",
+                      "fill": "#000000",
+                      "content": "Ya tengo cuenta",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "w7wE9",
+              "name": "HeroImage",
+              "clip": true,
+              "width": "fill_container",
+              "height": 200,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "./images/generated-1773254592487.png",
+                "mode": "fill"
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dJfTr",
+          "name": "Stats",
+          "width": "fill_container",
+          "fill": "#F5F5F5",
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ujf2i",
+              "name": "s1",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "iNOK1",
+                  "name": "s1val",
+                  "fill": "#000000",
+                  "content": "Materias",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "BbCCa",
+                  "name": "s1lab",
+                  "fill": "#757575",
+                  "content": "Organizadas por temas",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "1TDD0",
+              "name": "s2",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZFp21",
+                  "name": "s2val",
+                  "fill": "#000000",
+                  "content": "Exámenes",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "AGNie",
+                  "name": "s2lab",
+                  "fill": "#757575",
+                  "content": "Configurables tipo test",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W2775",
+              "name": "s3",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wzSLt",
+                  "name": "s3val",
+                  "fill": "#000000",
+                  "content": "Flashcards",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "gfhHu",
+                  "name": "s3lab",
+                  "fill": "#757575",
+                  "content": "Inteligentes de repaso",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "o6FTd",
+          "name": "Features",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "z0C8C",
+              "name": "ftHead",
+              "fill": "#000000",
+              "content": "TODO LO QUE\nNECESITAS",
+              "lineHeight": 1.05,
+              "fontFamily": "DM Sans",
+              "fontSize": 28,
+              "fontWeight": "700",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "Glo0u",
+              "name": "ftSub",
+              "fill": "#757575",
+              "content": "Sin distracciones. Sin excusas.",
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "PHKIV",
+              "name": "ft1",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "AO6GO",
+                  "name": "ft1bar",
+                  "width": 32,
+                  "height": 4,
+                  "fill": "#E53935"
+                },
+                {
+                  "type": "text",
+                  "id": "hn2ct",
+                  "name": "ft1title",
+                  "fill": "#000000",
+                  "content": "Simulacros cronometrados",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "b5sFD",
+                  "name": "ft1desc",
+                  "fill": "#757575",
+                  "content": "Reproduce las condiciones exactas del examen. Entrena la presión del tiempo real antes del gran día.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ExvJp",
+              "name": "ft2",
+              "width": "fill_container",
+              "fill": "#000000",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KL4Vd",
+                  "name": "ft2bar",
+                  "width": 32,
+                  "height": 4,
+                  "fill": "#E53935"
+                },
+                {
+                  "type": "text",
+                  "id": "FUcNg",
+                  "name": "ft2title",
+                  "fill": "#FFFFFF",
+                  "content": "Seguimiento de progreso",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "SFgW2",
+                  "name": "ft2desc",
+                  "fill": "#BDBDBD",
+                  "content": "Nota, tiempo y evolución guardados automáticamente. Observa tu mejora semana a semana.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "axZDO",
+              "name": "ft3",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yZJUV",
+                  "name": "ft3bar",
+                  "width": 32,
+                  "height": 4,
+                  "fill": "#000000"
+                },
+                {
+                  "type": "text",
+                  "id": "HnLY3",
+                  "name": "ft3title",
+                  "fill": "#000000",
+                  "content": "Reanuda cuando quieras",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "bus8W",
+                  "name": "ft3desc",
+                  "fill": "#757575",
+                  "content": "Empieza hoy, continúa mañana. Tu progreso se guarda en cada sesión sin perder nada.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nwGP9",
+              "name": "ft4",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "8pz9X",
+                  "name": "ft4bar",
+                  "width": 32,
+                  "height": 4,
+                  "fill": "#E53935"
+                },
+                {
+                  "type": "text",
+                  "id": "6yNen",
+                  "name": "ft4title",
+                  "fill": "#000000",
+                  "content": "Flashcards inteligentes",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Gk0u7",
+                  "name": "ft4desc",
+                  "fill": "#757575",
+                  "content": "Repasa conceptos clave con tarjetas organizadas por tema para fijar el conocimiento a largo plazo.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "hCeAQ",
+          "name": "How It Works",
+          "width": "fill_container",
+          "fill": "#F5F5F5",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "4SsXV",
+              "name": "hwHead",
+              "fill": "#000000",
+              "content": "CÓMO FUNCIONA",
+              "fontFamily": "DM Sans",
+              "fontSize": 22,
+              "fontWeight": "700",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "ugyWa",
+              "name": "hwSub",
+              "fill": "#757575",
+              "content": "Tres pasos para empezar a prepararte hoy.",
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "5PiS7",
+              "name": "step1",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "H6Fzb",
+                  "name": "s1n",
+                  "fill": "#E53935",
+                  "content": "01",
+                  "lineHeight": 1,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "x3jAe",
+                  "name": "s1content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Jl2T7",
+                      "name": "s1title",
+                      "fill": "#000000",
+                      "content": "Regístrate gratis",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yFOwT",
+                      "name": "s1desc",
+                      "fill": "#757575",
+                      "content": "Crea tu cuenta en segundos y accede a todos los temas de tu preparación.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m6jab",
+              "name": "step2",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "6MbY7",
+                  "name": "s2n",
+                  "fill": "#000000",
+                  "content": "02",
+                  "lineHeight": 1,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "Gm0i6",
+                  "name": "s2content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zKxT1",
+                      "name": "s2title",
+                      "fill": "#000000",
+                      "content": "Elige tu examen",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "oQZZw",
+                      "name": "s2desc",
+                      "fill": "#757575",
+                      "content": "Selecciona temas, número de preguntas y dificultad. Tú controlas el entrenamiento.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "a0x25",
+              "name": "step3",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "y4y7e",
+                  "name": "s3n",
+                  "fill": "#000000",
+                  "content": "03",
+                  "lineHeight": 1,
+                  "fontFamily": "DM Sans",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "667ci",
+                  "name": "s3content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bgnhb",
+                      "name": "s3title",
+                      "fill": "#000000",
+                      "content": "Analiza y mejora",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vgHXT",
+                      "name": "s3desc",
+                      "fill": "#757575",
+                      "content": "Revisa tus resultados, identifica puntos débiles y vuelve a intentarlo hasta dominarlo.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zKBDI",
+          "name": "Final CTA",
+          "width": "fill_container",
+          "fill": "#000000",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            48,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "QugQK",
+              "name": "ctaAccentBar",
+              "width": 48,
+              "height": 4,
+              "fill": "#E53935"
+            },
+            {
+              "type": "text",
+              "id": "09c3G",
+              "name": "ctaHead",
+              "fill": "#FFFFFF",
+              "content": "¿Listo para\naprobar?",
+              "lineHeight": 1.05,
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 34,
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
+              "type": "text",
+              "id": "7qEYU",
+              "name": "ctaSub",
+              "fill": "#BDBDBD",
+              "content": "Sin tarjeta, sin compromiso. Empieza a entrenar hoy.",
+              "lineHeight": 1.4,
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "SYlZL",
+              "name": "finalBtn",
+              "fill": "#E53935",
+              "cornerRadius": 100,
+              "padding": [
+                14,
+                32
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "2UYXL",
+                  "name": "finalBtnText",
+                  "fill": "#FFFFFF",
+                  "content": "Crear mi cuenta gratis",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "zoUIV",
+              "name": "ctaTrust",
+              "fill": "#757575",
+              "content": "Gratis · Sin tarjeta · Para siempre",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oAaPc",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            28,
+            24,
+            40,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "6oVE3",
+              "name": "footerTop",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KGSwd",
+                  "name": "footerSquare",
+                  "width": 24,
+                  "height": 24,
+                  "fill": "#E53935"
+                },
+                {
+                  "type": "text",
+                  "id": "di466",
+                  "name": "footerLogo",
+                  "fill": "#000000",
+                  "content": "AKDMIA",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "N1LeV",
+              "name": "footerDivider",
+              "width": "fill_container",
+              "height": 2,
+              "fill": "#000000"
+            },
+            {
+              "type": "text",
+              "id": "UnqcK",
+              "name": "footerTagline",
+              "fill": "#757575",
+              "content": "La plataforma de simulacros para opositores.",
+              "fontFamily": "DM Sans",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "3OHAl",
+              "name": "footerLinks",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Ijzpn",
+                  "name": "flLogin",
+                  "fill": "#757575",
+                  "content": "Login",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "4LnaE",
+                  "name": "flRegister",
+                  "fill": "#757575",
+                  "content": "Registro",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "U2mnJ",
+                  "name": "flPrivacy",
+                  "fill": "#757575",
+                  "content": "Privacidad",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "XhbYU",
+              "name": "footerCopy",
+              "fill": "#BDBDBD",
+              "content": "© 2026 Akdmia",
+              "fontFamily": "DM Sans",
+              "fontSize": 11,
+              "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
