@@ -58,12 +58,16 @@ public class FlashcardDto {
                                   long totalDue) {
   }
 
-  public record UnitSummary(UUID unitId, String unitName, long newCount, long reviewCount, long dueCount) {
+  public record UnitSummary(UUID unitId, String unitName, UUID subjectId, String subjectName,
+                            long newCount, long reviewCount, long dueCount) {
   }
 
   public record HistoryItem(UUID id, UUID flashcardId, String front, String back,
                             ReviewGrade grade, LocalDateTime reviewedAt,
                             Integer intervalBefore, Integer intervalAfter,
                             Double easeBefore, Double easeAfter) {
+  }
+
+  public record ImportResult(int imported, int skipped, List<String> errors) {
   }
 }

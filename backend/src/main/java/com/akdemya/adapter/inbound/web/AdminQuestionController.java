@@ -55,7 +55,8 @@ public class AdminQuestionController {
 
   @PostMapping(value = "/import", consumes = "multipart/form-data")
   public ResponseEntity<?> importQuestions(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-                                           @RequestParam(defaultValue = "json") String format) throws Exception {
+                                           @RequestParam(defaultValue = "json") String format,
+                                           @RequestParam(required = false) UUID unitId) throws Exception {
     if (file.isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "file_required"));
     }
@@ -73,7 +74,7 @@ public class AdminQuestionController {
       List<String[]> rows = parseCsv(content);
       for (int i = 1; i < rows.size(); i++) {
         try {
-          QuestionRequest req = csvToRequest(rows.get(i));
+          QuestionRequest req = csvToRequest(rows.get(i), unitId);
           var validation = validateRequest(req);
           if (validation != null) {
             errors++;
@@ -89,12 +90,13 @@ public class AdminQuestionController {
       com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
       QuestionRequest[] reqs = mapper.readValue(file.getBytes(), QuestionRequest[].class);
       for (QuestionRequest req : reqs) {
-        var validation = validateRequest(req);
+        QuestionRequest effective = unitId != null ? new QuestionRequest(unitId, req.text(), req.explanation(), req.difficulty(), req.answers()) : req;
+        var validation = validateRequest(effective);
         if (validation != null) {
           errors++;
           continue;
         }
-        saveQuestion(req);
+        saveQuestion(effective);
         created++;
       }
     }
@@ -207,22 +209,30 @@ public class AdminQuestionController {
     return rows;
   }
 
-  private QuestionRequest csvToRequest(String[] row) {
-    if (row.length < 9) {
-      throw new IllegalArgumentException("invalid_row");
+  private QuestionRequest csvToRequest(String[] row, UUID overrideUnitId) {
+    // When overrideUnitId is provided: supports 8-col (no unitId) or 9-col (unitId col ignored)
+    // When overrideUnitId is null: requires 9-col with unitId in first column
+    UUID unitId;
+    int col;
+    if (overrideUnitId != null) {
+      unitId = overrideUnitId;
+      col = (row.length >= 9) ? 1 : 0;
+      if (row.length < col + 8) throw new IllegalArgumentException("invalid_row");
+    } else {
+      if (row.length < 9) throw new IllegalArgumentException("invalid_row");
+      unitId = UUID.fromString(row[0].trim());
+      col = 1;
     }
-    UUID unitId = UUID.fromString(row[0].trim());
-    String text = row[1];
-    String explanation = row[2].isBlank() ? null : row[2];
-    Question.Difficulty difficulty = Question.Difficulty.valueOf(row[3].trim());
-    List<AnswerRequest> list = List.of(
-        new AnswerRequest(row[4], false),
-        new AnswerRequest(row[5], false),
-        new AnswerRequest(row[6], false),
-        new AnswerRequest(row[7], false)
-    );
-    int correct = Integer.parseInt(row[8].trim());
-    List<AnswerRequest> answers = new java.util.ArrayList<>(list);
+    String text = row[col];
+    String explanation = row[col + 1].isBlank() ? null : row[col + 1];
+    Question.Difficulty difficulty = Question.Difficulty.valueOf(row[col + 2].trim());
+    List<AnswerRequest> answers = new java.util.ArrayList<>(List.of(
+        new AnswerRequest(row[col + 3], false),
+        new AnswerRequest(row[col + 4], false),
+        new AnswerRequest(row[col + 5], false),
+        new AnswerRequest(row[col + 6], false)
+    ));
+    int correct = Integer.parseInt(row[col + 7].trim());
     AnswerRequest picked = answers.get(Math.max(0, Math.min(3, correct - 1)));
     answers.set(Math.max(0, Math.min(3, correct - 1)), new AnswerRequest(picked.text(), true));
     return new QuestionRequest(unitId, text, explanation, difficulty, answers);
