@@ -47,7 +47,7 @@ com.akdemya
 
 ### Capas principales
 - **Controllers** (adapter/inbound/web): Auth, Subjects, Units, Questions, Exams, Flashcards, AI
-- **Use Cases** (application/service): `AuthManager`, `ExamManager`, `ContentManagement`, `FlashcardManagementService`, `FlashcardStudyService`, `IndexDocumentService`, `GenerateQuizService`
+- **Use Cases** (application/service): `AuthManager`, `ExamManager`, `ContentManagement`, `FlashcardManagementService`, `FlashcardStudyService`, `UserSettingsService`, `IndexDocumentService`, `GenerateQuizService`
 - **Infraestructura** (adapter/infrastructure): `OpenAiEmbeddingAdapter`, `OpenAiQuestionGeneratorAdapter`, `PdfBoxTextExtractor`
 - **Persistencia** (adapter/outbound/persistence): adapters JPA + repositorios Spring Data
 - **Dominio** (domain/model): entidades puras
@@ -60,8 +60,8 @@ com.akdemya
   - `/api/subjects/**`
   - `/api/units/**`
   - `/api/questions/**`
-- El resto requiere JWT
-- Endpoints `/api/admin/**` y `/api/sources/**` requieren rol ADMIN
+- El resto requiere JWT (incluye `/api/settings`, `/api/flashcards`, `/api/exams/**`)
+- Endpoints `/api/admin/**`, `/api/sources/**` y `/api/ai/**` requieren rol ADMIN
 
 > ⚠️ **Importante**: la clave JWT está hardcodeada en `JwtService` y debe cambiarse en producción.
 
@@ -96,18 +96,24 @@ com.akdemya
 - `POST /api/questions/{id}/answers`
 
 ### Exámenes (Simulacros)
-- Start exam con selección de unidades y tiempo
+- Start exam con selección de unidades, tiempo y dificultad (EASY/MEDIUM/HARD)
+- Modo aleatorio: start exam con selección de asignatura y número de preguntas
 - Submit con selección de respuestas
 - Puntuación con penalización por error (configurable)
 
 **Endpoints:**
 - `POST /api/exams/attempts/start`
   ```json
-  { "unitCounts": {"<unitId>": 5}, "minutes": 20 }
+  { "unitCounts": {"<unitId>": 5}, "minutes": 20, "difficulty": "MEDIUM" }
   ```
   Respuesta:
   ```json
   { "attemptId": "...", "totalTimeSeconds": 1200, "questions": [ ... ] }
+  ```
+
+- `POST /api/exams/attempts/start-random`
+  ```json
+  { "subjectId": "<uuid>", "count": 20, "minutes": 20, "difficulty": "EASY" }
   ```
 
 - `PUT /api/exams/attempts/{attemptId}/answers/{questionId}`
@@ -126,9 +132,10 @@ com.akdemya
 
 ### Flashcards
 - CRUD de flashcards por unidad
-- Estudio con **algoritmo de repetición espaciada** (grados: AGAIN, HARD, GOOD, EASY)
+- Estudio con **algoritmo de repetición espaciada SM-2** (grados: AGAIN, HARD, GOOD, EASY)
 - Registro de revisiones y progreso detallado
-- Import/Export en formato CSV y JSON por unidad
+- Import/Export en formato CSV y JSON por unidad (import masivo)
+- Learning steps, session counters e interval hints
 
 **Endpoints:**
 - `GET /api/flashcards?unitId={uuid}` — listar flashcards
@@ -138,6 +145,15 @@ com.akdemya
 - `POST /api/flashcards/review` — registrar revisión `{ flashcardId, grade }`
 - `POST /api/flashcards/import?unitId={uuid}` — importar CSV/JSON (multipart)
 - `GET /api/flashcards/export?unitId={uuid}&format=csv|json` — exportar
+
+### Configuración de usuario (Límites de estudio)
+- Cada usuario puede configurar sus límites diarios de estudio para flashcards
+
+**Endpoints:**
+- `GET /api/settings` — obtener configuración `{ newCardsLimit, reviewCardsLimit }`
+- `PUT /api/settings` — actualizar límites `{ newCardsLimit, reviewCardsLimit }`
+
+> Requiere autenticación JWT. Los límites controlan cuántas tarjetas nuevas y de repaso se sirven por sesión.
 
 ### Generación IA desde PDF (RAG) — Solo ADMIN
 - Subida y procesamiento de documentos PDF
@@ -160,35 +176,40 @@ com.akdemya
 ## 🎨 Frontend (React + Vite + Tailwind)
 
 ### Pantallas principales
-- **Home**: lista de asignaturas
-- **ExamBuilder**: configuración de simulacro por unidades y dificultad
-- **ExamRunner**: ejecución del examen con timer
+- **Home**: landing con CTA, stats y hero
+- **Subjects**: lista de asignaturas del usuario
+- **ExamBuilder**: configuración de simulacro por unidades, modo aleatorio y dificultad (EASY/MEDIUM/HARD)
+- **ExamRunner / ExamAttempt**: ejecución del examen con timer
+- **ExamResult**: resumen de resultados con puntuación y color por rango
 - **Login/Register**: autenticación
-- **Result**: resumen de resultados con puntuación
-- **Flashcards**: dashboard de materias y mazos
-- **FlashcardsStudy**: estudio de tarjetas con repetición espaciada
-- **FlashcardsHistory**: historial de revisiones
-- **Settings (Admin)**: gestión de contenido, usuarios, import/export de preguntas, y generación IA desde PDF
+- **Flashcards**: dashboard de materias y mazos con cola de estudio global
+- **FlashcardsStudy**: estudio de tarjetas con repetición espaciada SM-2
+- **FlashcardsHistory**: historial de revisiones con estado vacío y CTA
+- **FlashcardsExamine**: detalle de unidad con stats de tarjetas
+- **Settings**: gestión de contenido, límites de estudio, import/export de preguntas
+- **RAG** *(solo Admin)*: subida de PDFs, indexación y generación de preguntas IA
 
 ### Flujo principal
 1. Usuario se registra o inicia sesión → se guarda JWT en `localStorage` (`ak_token`)
-2. Selecciona una asignatura y configura el simulacro
+2. Selecciona una asignatura y configura el simulacro (unidades, dificultad, tiempo)
 3. Inicia examen → backend genera preguntas aleatorias
 4. Responde y envía resultados
 
 ### Flujo flashcards
 1. Selecciona materia → unidad → mazo de tarjetas
 2. Estudia las tarjetas y puntúa cada una (AGAIN/HARD/GOOD/EASY)
-3. El algoritmo de repetición espaciada prioriza las tarjetas más difíciles
+3. El algoritmo SM-2 de repetición espaciada prioriza las tarjetas más difíciles
 4. Puede importar/exportar tarjetas en CSV o JSON
+5. Los límites diarios (nuevas/repaso) son configurables por usuario en Settings
 
 ### Archivos clave
-- `src/App.tsx` → router principal
-- `src/components/Login.tsx`, `Register.tsx`
-- `src/components/ExamBuilder.tsx`, `ExamRunner.tsx`
-- `src/components/flashcards/FlashcardsPage.tsx`, `FlashcardsStudyPage.tsx`
-- `src/components/rag/SourceUpload.tsx`, `QuizGenerateForm.tsx`, `DraftList.tsx`
-- `src/components/Settings.tsx` — panel de administración
+- `src/App.tsx` → router principal con todas las rutas
+- `src/constants/routes.ts` → constantes de rutas centralizadas (`ROUTES`)
+- `src/pages/` → una página por ruta (LoginPage, RegisterPage, ExamBuilderPage, etc.)
+- `src/components/ExamBuilder.tsx`, `ExamRunner.tsx` — componentes de examen
+- `src/components/flashcards/` — componentes de flashcards (tabs, import modal, tarjetas)
+- `src/components/rag/` — `SourceUpload.tsx`, `QuizGenerateForm.tsx`, `DraftList.tsx`
+- `src/components/Settings.tsx` — panel de administración y configuración de usuario
 
 ---
 
