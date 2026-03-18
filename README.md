@@ -1,10 +1,11 @@
-# Akdemya — MVP (Spring Boot + React + Tailwind + Postgres)
-Version: 1.1.0
+# Akadem.ia — MVP (Spring Boot + React + Tailwind + Postgres)
+Version: 1.2.0
 
-MVP para creación y ejecución de simulacros. Incluye:
-- **Frontend** React + Vite + Tailwind
+MVP para creación y ejecución de simulacros, estudio con flashcards y generación automática de preguntas desde PDFs con IA. Incluye:
+- **Frontend** React + Vite + Tailwind + Flowbite
 - **Backend** Spring Boot 3 (Hexagonal/Ports & Adapters)
 - **DB** Postgres
+- **IA** OpenAI API (embeddings + GPT-4o-mini)
 - **Docker Compose** para levantar todo el stack
 
 ---
@@ -33,6 +34,7 @@ El backend sigue un enfoque **hexagonal**:
 com.akdemya
 ├── adapter
 │   ├── inbound/web           # Controllers REST
+│   ├── infrastructure        # AI (OpenAI), Storage, PDF, Security
 │   └── outbound/persistence  # JPA adapters
 ├── application/service        # Casos de uso (use cases)
 ├── domain
@@ -44,8 +46,9 @@ com.akdemya
 ```
 
 ### Capas principales
-- **Controllers** (adapter/inbound/web): Auth, Subjects, Units, Questions, Exams
-- **Use Cases** (application/service): `AuthManager`, `ExamManager`, `ContentManagement`
+- **Controllers** (adapter/inbound/web): Auth, Subjects, Units, Questions, Exams, Flashcards, AI
+- **Use Cases** (application/service): `AuthManager`, `ExamManager`, `ContentManagement`, `FlashcardManagementService`, `FlashcardStudyService`, `IndexDocumentService`, `GenerateQuizService`
+- **Infraestructura** (adapter/infrastructure): `OpenAiEmbeddingAdapter`, `OpenAiQuestionGeneratorAdapter`, `PdfBoxTextExtractor`
 - **Persistencia** (adapter/outbound/persistence): adapters JPA + repositorios Spring Data
 - **Dominio** (domain/model): entidades puras
 
@@ -58,6 +61,7 @@ com.akdemya
   - `/api/units/**`
   - `/api/questions/**`
 - El resto requiere JWT
+- Endpoints `/api/admin/**` y `/api/sources/**` requieren rol ADMIN
 
 > ⚠️ **Importante**: la clave JWT está hardcodeada en `JwtService` y debe cambiarse en producción.
 
@@ -94,6 +98,7 @@ com.akdemya
 ### Exámenes (Simulacros)
 - Start exam con selección de unidades y tiempo
 - Submit con selección de respuestas
+- Puntuación con penalización por error (configurable)
 
 **Endpoints:**
 - `POST /api/exams/attempts/start`
@@ -105,6 +110,11 @@ com.akdemya
   { "attemptId": "...", "totalTimeSeconds": 1200, "questions": [ ... ] }
   ```
 
+- `PUT /api/exams/attempts/{attemptId}/answers/{questionId}`
+  ```json
+  { "answerId": "<uuid>" }
+  ```
+
 - `POST /api/exams/attempts/{attemptId}/submit`
   ```json
   { "selections": {"<questionId>": "<answerId>"} }
@@ -114,28 +124,71 @@ com.akdemya
   { "total": 20, "correct": 14, "percentage": 70.0 }
   ```
 
+### Flashcards
+- CRUD de flashcards por unidad
+- Estudio con **algoritmo de repetición espaciada** (grados: AGAIN, HARD, GOOD, EASY)
+- Registro de revisiones y progreso detallado
+- Import/Export en formato CSV y JSON por unidad
+
+**Endpoints:**
+- `GET /api/flashcards?unitId={uuid}` — listar flashcards
+- `POST /api/flashcards` — crear flashcard `{ front, back, unitId }`
+- `PUT /api/flashcards/{id}` — actualizar flashcard
+- `DELETE /api/flashcards/{id}` — eliminar flashcard
+- `POST /api/flashcards/review` — registrar revisión `{ flashcardId, grade }`
+- `POST /api/flashcards/import?unitId={uuid}` — importar CSV/JSON (multipart)
+- `GET /api/flashcards/export?unitId={uuid}&format=csv|json` — exportar
+
+### Generación IA desde PDF (RAG) — Solo ADMIN
+- Subida y procesamiento de documentos PDF
+- Extracción de texto con **Apache PDFBox**
+- Chunking semántico y generación de **embeddings** con OpenAI
+- Generación de preguntas tipo test con **GPT-4o-mini**
+- Gestión de borradores de preguntas generadas
+
+**Requiere:** `OPENAI_API_KEY` configurado en entorno.
+
+**Endpoints:**
+- `POST /api/sources` — subir PDF (multipart)
+- `GET /api/sources` — listar documentos indexados
+- `POST /api/ai/quizzes/generate` `{ sourceId, unitId, count }` — generar preguntas
+- `GET /api/ai/quizzes/drafts` — listar borradores generados
+- `POST /api/ai/quizzes/drafts/{id}/approve` — aprobar borrador como pregunta real
+
 ---
 
 ## 🎨 Frontend (React + Vite + Tailwind)
 
 ### Pantallas principales
 - **Home**: lista de asignaturas
-- **ExamBuilder**: configuración de simulacro por unidades
+- **ExamBuilder**: configuración de simulacro por unidades y dificultad
 - **ExamRunner**: ejecución del examen con timer
 - **Login/Register**: autenticación
-- **Result**: resumen de resultados
+- **Result**: resumen de resultados con puntuación
+- **Flashcards**: dashboard de materias y mazos
+- **FlashcardsStudy**: estudio de tarjetas con repetición espaciada
+- **FlashcardsHistory**: historial de revisiones
+- **Settings (Admin)**: gestión de contenido, usuarios, import/export de preguntas, y generación IA desde PDF
 
-### Flujo
+### Flujo principal
 1. Usuario se registra o inicia sesión → se guarda JWT en `localStorage` (`ak_token`)
 2. Selecciona una asignatura y configura el simulacro
-3. Inicia examen → backend genera preguntas
+3. Inicia examen → backend genera preguntas aleatorias
 4. Responde y envía resultados
 
+### Flujo flashcards
+1. Selecciona materia → unidad → mazo de tarjetas
+2. Estudia las tarjetas y puntúa cada una (AGAIN/HARD/GOOD/EASY)
+3. El algoritmo de repetición espaciada prioriza las tarjetas más difíciles
+4. Puede importar/exportar tarjetas en CSV o JSON
+
 ### Archivos clave
-- `src/App.tsx` → flujo principal
-- `src/components/Login.tsx`
-- `src/components/ExamBuilder.tsx`
-- `src/components/ExamRunner.tsx`
+- `src/App.tsx` → router principal
+- `src/components/Login.tsx`, `Register.tsx`
+- `src/components/ExamBuilder.tsx`, `ExamRunner.tsx`
+- `src/components/flashcards/FlashcardsPage.tsx`, `FlashcardsStudyPage.tsx`
+- `src/components/rag/SourceUpload.tsx`, `QuizGenerateForm.tsx`, `DraftList.tsx`
+- `src/components/Settings.tsx` — panel de administración
 
 ---
 
@@ -149,6 +202,7 @@ com.akdemya
   - `SPRING_DATASOURCE_PASSWORD`
   - `SPRING_JPA_HIBERNATE_DDL_AUTO`
   - `SPRING_PROFILES_ACTIVE` (dev/prod)
+  - `OPENAI_API_KEY` — requerida para funcionalidad RAG/IA
 
 ### Base de datos
 - Seeds de desarrollo en `data-dev.sql` (solo en profile `dev`)
@@ -168,6 +222,7 @@ com.akdemya
    AKADEMIA_DB_USER=...
    AKADEMIA_DB_PASSWORD=...
    JWT_SECRET=...
+   OPENAI_API_KEY=sk-...
    ```
 
 3. **Levantar stack de producción**
@@ -185,10 +240,11 @@ com.akdemya
 
 ## ✅ Notas / TODO
 - Cambiar secret JWT en producción
-- Añadir validaciones y manejo de errores
-- Añadir paginación y filtros en contenido
-- Añadir roles/admin para gestión avanzada
+- Añadir validaciones y manejo de errores más granulares
+- Añadir paginación en endpoints de contenido
 - Añadir tests y CI
+- Migrar búsqueda vectorial a **pgvector** en producción (actualmente en memoria)
+- Hacer el procesamiento de PDFs **asíncrono** para documentos grandes
 
 ---
 
@@ -196,6 +252,10 @@ com.akdemya
 - Java 21
 - Spring Boot 3.3
 - Spring Security + JWT
-- PostgreSQL 18
-- React 18 + Vite + Tailwind
+- Apache PDFBox 3 (extracción de texto PDF)
+- PostgreSQL 16
+- React 18 + Vite + Tailwind CSS
+- Flowbite React (componentes UI)
+- OpenAI API (embeddings + generación de preguntas)
+- Vitest (testing frontend)
 - Docker Compose
