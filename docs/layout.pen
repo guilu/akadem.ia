@@ -1,11 +1,11 @@
 {
-  "version": "2.8",
+  "version": "2.9",
   "children": [
     {
       "type": "frame",
       "id": "bi8Au",
       "x": -1593,
-      "y": 0,
+      "y": -604,
       "name": "Frame",
       "clip": true,
       "width": 2393,
@@ -15,913 +15,9 @@
     },
     {
       "type": "frame",
-      "id": "mDlMj",
-      "x": 900,
-      "y": 0,
-      "name": "Akadem.ia — Landing Page",
-      "width": 1440,
-      "height": 2160,
-      "fill": "#FFFFFF",
-      "layout": "none",
-      "children": [
-        {
-          "type": "frame",
-          "id": "EBW53",
-          "x": 0,
-          "y": 0,
-          "name": "Navbar",
-          "width": 1440,
-          "height": 72,
-          "fill": "#FFFFFF",
-          "layout": "none",
-          "children": [
-            {
-              "type": "rectangle",
-              "id": "34hBP",
-              "x": 0,
-              "y": 71,
-              "name": "NavBorder",
-              "fill": "#E5E7EB",
-              "width": 1440,
-              "height": 1
-            },
-            {
-              "type": "rectangle",
-              "id": "RfrU8",
-              "x": 96,
-              "y": 20,
-              "name": "LogoBg",
-              "fill": "#DC2626",
-              "width": 32,
-              "height": 32
-            },
-            {
-              "type": "text",
-              "id": "0mbhd",
-              "x": 109,
-              "y": 27,
-              "name": "LogoLetter",
-              "fill": "#FFFFFF",
-              "content": "A",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "KObDs",
-              "x": 136,
-              "y": 27,
-              "name": "LogoText",
-              "fill": "#111827",
-              "content": "Akadem.ia",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "7WxHm",
-              "x": 566,
-              "y": 28,
-              "name": "NavMaterias",
-              "fill": "#6B7280",
-              "content": "Materias",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "500"
-            },
-            {
-              "type": "text",
-              "id": "zjrDf",
-              "x": 666,
-              "y": 28,
-              "name": "NavExamenes",
-              "fill": "#374151",
-              "content": "Exámenes",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "500"
-            },
-            {
-              "type": "text",
-              "id": "rUfw9",
-              "x": 774,
-              "y": 28,
-              "name": "NavFlash",
-              "fill": "#6B7280",
-              "content": "Flashcards",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "500"
-            },
-            {
-              "type": "rectangle",
-              "id": "GvVmp",
-              "x": 1214,
-              "y": 18,
-              "name": "LoginBtn",
-              "fill": "#DC2626",
-              "width": 130,
-              "height": 36
-            },
-            {
-              "type": "text",
-              "id": "QdcDc",
-              "x": 1224,
-              "y": 30,
-              "name": "LoginBtnText",
-              "fill": "#FFFFFF",
-              "content": "Iniciar sesión",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "600"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "A8w7L",
-          "x": 0,
-          "y": 72,
-          "name": "Hero",
-          "clip": true,
-          "width": 1440,
-          "height": 600,
-          "fill": "#FFFFFF",
-          "layout": "none",
-          "children": [
-            {
-              "type": "rectangle",
-              "id": "hZJud",
-              "x": 820,
-              "y": -120,
-              "name": "HeroBlob",
-              "fill": "#FEF2F2",
-              "width": 720,
-              "height": 720
-            },
-            {
-              "type": "rectangle",
-              "id": "PF85T",
-              "x": 900,
-              "y": 48,
-              "name": "MockupBg",
-              "fill": "#FFFFFF",
-              "width": 420,
-              "height": 500
-            },
-            {
-              "type": "rectangle",
-              "id": "hnCIL",
-              "x": 908,
-              "y": 54,
-              "name": "heroImg",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "images/image.png",
-                "mode": "fill"
-              },
-              "width": 404,
-              "height": 488
-            },
-            {
-              "type": "rectangle",
-              "id": "Sbx2r",
-              "x": 96,
-              "y": 100,
-              "name": "BadgeBg",
-              "fill": "#FEF2F2",
-              "width": 224,
-              "height": 32
-            },
-            {
-              "type": "text",
-              "id": "ZezuJ",
-              "x": 112,
-              "y": 109,
-              "name": "BadgeText",
-              "fill": "#DC2626",
-              "content": "✓  Simulacro gratuito",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "PQrsz",
-              "x": 96,
-              "y": 152,
-              "name": "HeroH1a",
-              "fill": "#111827",
-              "content": "Aprueba tus",
-              "fontFamily": "Inter",
-              "fontSize": 68,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "ccU6R",
-              "x": 96,
-              "y": 228,
-              "name": "HeroH1b",
-              "fill": "#DC2626",
-              "content": "exámenes",
-              "fontFamily": "Inter",
-              "fontSize": 68,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "Nt4A4",
-              "x": 96,
-              "y": 304,
-              "name": "HeroH1c",
-              "fill": "#111827",
-              "content": "sin Improvisar",
-              "fontFamily": "Inter",
-              "fontSize": 68,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "Qa1Co",
-              "x": 96,
-              "y": 400,
-              "name": "HeroSubtitle",
-              "fill": "#6B7280",
-              "content": "Practica con simulacros reales y penalización como en el examen oficial.\nMejora tu nota y aprende de cada error.",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "IpCCr",
-              "x": 96,
-              "y": 488,
-              "name": "PrimaryBtn",
-              "fill": "#DC2626",
-              "width": 200,
-              "height": 52
-            },
-            {
-              "type": "text",
-              "id": "no6ov",
-              "x": 113,
-              "y": 506,
-              "name": "PrimaryBtnText",
-              "fill": "#FFFFFF",
-              "content": "Empezar gratis →",
-              "fontFamily": "Inter",
-              "fontSize": 16,
-              "fontWeight": "700"
-            },
-            {
-              "type": "rectangle",
-              "id": "47W85",
-              "x": 312,
-              "y": 488,
-              "name": "SecondaryBtn",
-              "fill": "#FFFFFF",
-              "width": 192,
-              "height": 52
-            },
-            {
-              "type": "text",
-              "id": "LEL5Q",
-              "x": 322,
-              "y": 506,
-              "name": "SecondaryBtnText",
-              "fill": "#374151",
-              "content": "Ver cómo funciona",
-              "fontFamily": "Inter",
-              "fontSize": 16,
-              "fontWeight": "500"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "abJT2",
-          "x": 0,
-          "y": 672,
-          "name": "Stats Bar",
-          "width": 1440,
-          "height": 120,
-          "fill": "#FFF1F1",
-          "layout": "none",
-          "children": [
-            {
-              "type": "text",
-              "id": "OWtno",
-              "x": 156,
-              "y": 20,
-              "name": "Stat1Num",
-              "fill": "#DC2626",
-              "content": "500+",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 36,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "JeNYT",
-              "x": 152,
-              "y": 66,
-              "name": "Stat1Lbl",
-              "fill": "#6B7280",
-              "content": "Preguntas disponibles",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "jrZJX",
-              "x": 516,
-              "y": 20,
-              "name": "Stat2Num",
-              "fill": "#DC2626",
-              "content": "3",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 36,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "RW39X",
-              "x": 516,
-              "y": 66,
-              "name": "Stat2Lbl",
-              "fill": "#6B7280",
-              "content": "Materias",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "YhvJo",
-              "x": 828,
-              "y": 20,
-              "name": "Stat3Num",
-              "fill": "#DC2626",
-              "content": "−⅓",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 36,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "Z7205",
-              "x": 820,
-              "y": 66,
-              "name": "Stat3Lbl",
-              "fill": "#6B7280",
-              "content": "Penalización por fallo",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "iRTtu",
-              "x": 1108,
-              "y": 20,
-              "name": "Stat4Num",
-              "fill": "#DC2626",
-              "content": "Gratis",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 36,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "HFPFm",
-              "x": 1104,
-              "y": 66,
-              "name": "Stat4Lbl",
-              "fill": "#6B7280",
-              "content": "Sin tarjeta de crédito",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "normal"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "xJb0S",
-          "x": 0,
-          "y": 792,
-          "name": "Subjects",
-          "width": 1440,
-          "height": 560,
-          "fill": "#FFFFFF",
-          "layout": "none",
-          "children": [
-            {
-              "type": "text",
-              "id": "bb55f",
-              "x": 96,
-              "y": 60,
-              "name": "SubjectsTitle",
-              "fill": "#111827",
-              "content": "Materias disponibles",
-              "fontFamily": "Inter",
-              "fontSize": 42,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "xwb5l",
-              "x": 96,
-              "y": 120,
-              "name": "SubjectsSub",
-              "fill": "#6B7280",
-              "content": "Practica con las asignaturas de tus oposiciones favoritas",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "PEhQM",
-              "x": 96,
-              "y": 180,
-              "name": "Card1",
-              "fill": "#FAFAFA",
-              "width": 390,
-              "height": 300
-            },
-            {
-              "type": "rectangle",
-              "id": "WWVUC",
-              "x": 120,
-              "y": 216,
-              "name": "C1IconBg",
-              "fill": "#DC2626",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "qN2XC",
-              "x": 128,
-              "y": 222,
-              "name": "C1Icon",
-              "content": "📋",
-              "fontFamily": "Inter",
-              "fontSize": 20,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "ZmjwE",
-              "x": 120,
-              "y": 278,
-              "name": "C1Title",
-              "fill": "#111827",
-              "content": "Oposiciones",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "juTS7",
-              "x": 120,
-              "y": 314,
-              "name": "C1Desc",
-              "fill": "#6B7280",
-              "content": "Simulacros completos con preguntas reales de los últimos años de convocatoria.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "ViSbw",
-              "x": 120,
-              "y": 394,
-              "name": "C1Count",
-              "fill": "#DC2626",
-              "content": "200+ preguntas",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "600"
-            },
-            {
-              "type": "rectangle",
-              "id": "w4bq1",
-              "x": 525,
-              "y": 180,
-              "name": "Card2",
-              "fill": "#FAFAFA",
-              "width": 390,
-              "height": 300
-            },
-            {
-              "type": "rectangle",
-              "id": "FII1F",
-              "x": 549,
-              "y": 216,
-              "name": "C2IconBg",
-              "fill": "#2563EB",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "PKNIY",
-              "x": 559,
-              "y": 218,
-              "name": "C2Icon",
-              "fill": "#FFFFFF",
-              "content": "∑",
-              "fontFamily": "Inter",
-              "fontSize": 24,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "xGVDX",
-              "x": 549,
-              "y": 278,
-              "name": "C2Title",
-              "fill": "#111827",
-              "content": "Matemáticas",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "sjCr7",
-              "x": 549,
-              "y": 314,
-              "name": "C2Desc",
-              "fill": "#6B7280",
-              "content": "Álgebra, geometría y estadística con ejercicios paso a paso y teoría.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "l3Cbg",
-              "x": 549,
-              "y": 394,
-              "name": "C2Count",
-              "fill": "#2563EB",
-              "content": "180+ ejercicios",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "600"
-            },
-            {
-              "type": "rectangle",
-              "id": "Sp7bn",
-              "x": 954,
-              "y": 180,
-              "name": "Card3",
-              "fill": "#FAFAFA",
-              "width": 390,
-              "height": 300
-            },
-            {
-              "type": "rectangle",
-              "id": "tMGYA",
-              "x": 978,
-              "y": 216,
-              "name": "C3IconBg",
-              "fill": "#059669",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "jwijr",
-              "x": 986,
-              "y": 222,
-              "name": "C3Icon",
-              "content": "🏛",
-              "fontFamily": "Inter",
-              "fontSize": 20,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "qhJZz",
-              "x": 978,
-              "y": 278,
-              "name": "C3Title",
-              "fill": "#111827",
-              "content": "Historia",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "2sRqk",
-              "x": 978,
-              "y": 314,
-              "name": "C3Desc",
-              "fill": "#6B7280",
-              "content": "De la Prehistoria a la actualidad, con preguntas tipo test de examen oficial.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "text",
-              "id": "u7llL",
-              "x": 978,
-              "y": 394,
-              "name": "C3Count",
-              "fill": "#059669",
-              "content": "120+ preguntas",
-              "fontFamily": "Inter",
-              "fontSize": 13,
-              "fontWeight": "600"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "7jd4P",
-          "x": 0,
-          "y": 1352,
-          "name": "How It Works",
-          "width": 1440,
-          "height": 500,
-          "fill": "#F9FAFB",
-          "layout": "none",
-          "children": [
-            {
-              "type": "text",
-              "id": "vvg0i",
-              "x": 96,
-              "y": 60,
-              "name": "HowTitle",
-              "fill": "#111827",
-              "content": "Cómo funciona",
-              "fontFamily": "Inter",
-              "fontSize": 42,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "wkDGw",
-              "x": 96,
-              "y": 120,
-              "name": "HowSub",
-              "fill": "#6B7280",
-              "content": "En tres sencillos pasos puedes empezar a mejorar tu nota",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "FVfhA",
-              "x": 96,
-              "y": 200,
-              "name": "Step1Circle",
-              "fill": "#DC2626",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "pgZTJ",
-              "x": 116,
-              "y": 214,
-              "name": "Step1Num",
-              "fill": "#FFFFFF",
-              "content": "1",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "800"
-            },
-            {
-              "type": "rectangle",
-              "id": "SL18X",
-              "x": 160,
-              "y": 223,
-              "name": "Connector1",
-              "fill": "#E5E7EB",
-              "width": 296,
-              "height": 2
-            },
-            {
-              "type": "text",
-              "id": "Uvu1t",
-              "x": 96,
-              "y": 268,
-              "name": "Step1Title",
-              "fill": "#111827",
-              "content": "Elige tu materia",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "JPDtZ",
-              "x": 96,
-              "y": 304,
-              "name": "Step1Desc",
-              "fill": "#6B7280",
-              "content": "Selecciona la asignatura que quieres practicar y configura la duración de tu simulacro.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "ykp5a",
-              "x": 512,
-              "y": 200,
-              "name": "Step2Circle",
-              "fill": "#DC2626",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "bTlrt",
-              "x": 530,
-              "y": 214,
-              "name": "Step2Num",
-              "fill": "#FFFFFF",
-              "content": "2",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "800"
-            },
-            {
-              "type": "rectangle",
-              "id": "ePdQS",
-              "x": 576,
-              "y": 223,
-              "name": "Connector2",
-              "fill": "#E5E7EB",
-              "width": 296,
-              "height": 2
-            },
-            {
-              "type": "text",
-              "id": "tq3JS",
-              "x": 512,
-              "y": 268,
-              "name": "Step2Title",
-              "fill": "#111827",
-              "content": "Practica con simulacros",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "IWJWb",
-              "x": 512,
-              "y": 304,
-              "name": "Step2Desc",
-              "fill": "#6B7280",
-              "content": "Responde preguntas reales con penalización como en el examen oficial. Sin trampa.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "8f3OV",
-              "x": 928,
-              "y": 200,
-              "name": "Step3Circle",
-              "fill": "#DC2626",
-              "width": 48,
-              "height": 48
-            },
-            {
-              "type": "text",
-              "id": "UhZCk",
-              "x": 945,
-              "y": 214,
-              "name": "Step3Num",
-              "fill": "#FFFFFF",
-              "content": "3",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "9BVAl",
-              "x": 928,
-              "y": 268,
-              "name": "Step3Title",
-              "fill": "#111827",
-              "content": "Analiza tus resultados",
-              "fontFamily": "Inter",
-              "fontSize": 22,
-              "fontWeight": "700"
-            },
-            {
-              "type": "text",
-              "id": "yn1ys",
-              "x": 928,
-              "y": 304,
-              "name": "Step3Desc",
-              "fill": "#6B7280",
-              "content": "Revisa tus aciertos, fallos y evolución para mejorar sesión a sesión.",
-              "fontFamily": "Inter",
-              "fontSize": 14,
-              "fontWeight": "normal"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "qfSKL",
-          "x": 0,
-          "y": 1852,
-          "name": "CTA",
-          "width": 1440,
-          "height": 280,
-          "fill": "#DC2626",
-          "layout": "none",
-          "children": [
-            {
-              "type": "text",
-              "id": "GWRFU",
-              "x": 0,
-              "y": 72,
-              "name": "CTAH2",
-              "fill": "#FFFFFF",
-              "content": "¿Listo para aprender?",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 46,
-              "fontWeight": "800"
-            },
-            {
-              "type": "text",
-              "id": "IGWbc",
-              "x": 0,
-              "y": 140,
-              "name": "CTASub",
-              "fill": "#ffffffbf",
-              "content": "Únete hoy y empieza a preparar tu examen de forma inteligente. Es completamente gratis.",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 18,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "rectangle",
-              "id": "Y6ugd",
-              "x": 580,
-              "y": 192,
-              "name": "CTABtn",
-              "fill": "#FFFFFF",
-              "width": 280,
-              "height": 52
-            },
-            {
-              "type": "text",
-              "id": "YbnwM",
-              "x": 592,
-              "y": 208,
-              "name": "CTABtnText",
-              "fill": "#DC2626",
-              "content": "Empezar gratis — sin registro",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "700"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "hVU8m",
-      "x": 2440,
-      "y": 0,
+      "x": 1000,
+      "y": -824,
       "name": "Akadem.ia — Mobile Landing",
       "clip": true,
       "width": 402,
@@ -1035,7 +131,8 @@
               "content": "Entrena con penalización real. Simula el examen oficial. Analiza cada error en profundidad.",
               "lineHeight": 1.5,
               "fontFamily": "Inter",
-              "fontSize": 15
+              "fontSize": 15,
+              "fontWeight": "normal"
             },
             {
               "type": "frame",
@@ -1187,7 +284,8 @@
                   "content": "Selecciona asignaturas y unidades temáticas para cada sesión de práctica.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1231,7 +329,8 @@
                   "content": "Responde con penalización –1/3 por error. Igual que el día del examen oficial.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1275,7 +374,8 @@
                   "content": "Revisa errores, nota media y progreso por tema. Identifica exactamente dónde necesitas refuerzo.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             }
@@ -1355,7 +455,8 @@
                   "content": "Genera exámenes con el número exacto de preguntas del modelo oficial. Sin límite de intentos.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1398,7 +499,8 @@
                   "content": "Sistema de corrección idéntico al examen oficial: aciertos, errores y blancos con su peso exacto.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1441,7 +543,8 @@
                   "content": "Consulta tu evolución, nota media y tasa de aciertos por tema. Identifica tus puntos débiles.",
                   "lineHeight": 1.4,
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             }
@@ -1638,7 +741,8 @@
               "content": "Sin tarjeta de crédito. Sin compromisos.",
               "textAlign": "center",
               "fontFamily": "Inter",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             },
             {
               "type": "frame",
@@ -1700,7 +804,8 @@
               "content": "El simulacro que prepara\ncomo el examen real.",
               "lineHeight": 1.4,
               "fontFamily": "Inter",
-              "fontSize": 13
+              "fontSize": 13,
+              "fontWeight": "normal"
             },
             {
               "type": "frame",
@@ -1716,7 +821,8 @@
                   "fill": "#94A3B8",
                   "content": "Inicio",
                   "fontFamily": "Inter",
-                  "fontSize": 12
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "text",
@@ -1725,7 +831,8 @@
                   "fill": "#94A3B8",
                   "content": "Funcionalidades",
                   "fontFamily": "Inter",
-                  "fontSize": 12
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "text",
@@ -1734,7 +841,8 @@
                   "fill": "#94A3B8",
                   "content": "Privacidad",
                   "fontFamily": "Inter",
-                  "fontSize": 12
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1745,7 +853,8 @@
               "fill": "#475569",
               "content": "© 2026 Akadem.ia",
               "fontFamily": "JetBrains Mono",
-              "fontSize": 11
+              "fontSize": 11,
+              "fontWeight": "normal"
             }
           ]
         }
@@ -1754,8 +863,8 @@
     {
       "type": "frame",
       "id": "rpSaz",
-      "x": 2942,
-      "y": 0,
+      "x": 1881,
+      "y": -848,
       "name": "Akdmia — Mobile (Warm)",
       "clip": true,
       "width": 402,
@@ -2296,19 +1405,7 @@
                   "width": 44,
                   "height": 44,
                   "fill": "#EA580C15",
-                  "cornerRadius": 12,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "F2HvA",
-                      "name": "ft3iconTxt",
-                      "fill": "#EA580C",
-                      "content": "↺",
-                      "fontFamily": "DM Sans",
-                      "fontSize": 22,
-                      "fontWeight": "700"
-                    }
-                  ]
+                  "cornerRadius": 12
                 },
                 {
                   "type": "text",
@@ -2804,14 +1901,96 @@
               "fontWeight": "500"
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "kIzgD",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 60,
+          "fill": "#FAFAF9",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "FBviP",
+              "name": "logoRow",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "9vAzj",
+                  "name": "logoIcon",
+                  "width": 30,
+                  "height": 30,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 225,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#EA580C",
+                        "position": 0
+                      },
+                      {
+                        "color": "#D97706",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 8
+                },
+                {
+                  "type": "text",
+                  "id": "hvb3R",
+                  "name": "logoText",
+                  "fill": "#292524",
+                  "content": "Akdmia",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "9ygf9",
+              "name": "loginBtn",
+              "fill": "#EA580C",
+              "cornerRadius": 100,
+              "padding": [
+                8,
+                16
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "zZHrH",
+                  "name": "loginBtnText",
+                  "fill": "#FFFFFF",
+                  "content": "Entrar",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     {
       "type": "rectangle",
       "id": "jS34t",
-      "x": 3548,
-      "y": -728,
+      "x": 1000,
+      "y": 1925,
       "fill": {
         "type": "image",
         "enabled": true,
@@ -2824,8 +2003,8 @@
     {
       "type": "rectangle",
       "id": "fCPYx",
-      "x": 3548,
-      "y": -440,
+      "x": -1226,
+      "y": 1925,
       "fill": {
         "type": "image",
         "enabled": true,
@@ -2838,8 +2017,8 @@
     {
       "type": "frame",
       "id": "WxU5g",
-      "x": 3500,
-      "y": 0,
+      "x": 2624,
+      "y": -795,
       "name": "Akdmia — Bauhaus Digital",
       "clip": true,
       "width": 402,
@@ -3724,6 +2903,398 @@
           ]
         }
       ]
+    },
+    {
+      "type": "rectangle",
+      "id": "fT57H",
+      "x": 1000,
+      "y": 2193,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-2.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 3176
+    },
+    {
+      "type": "rectangle",
+      "id": "bJB3e",
+      "x": -1226,
+      "y": 2193,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-3.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 3176
+    },
+    {
+      "type": "rectangle",
+      "id": "PxOpG",
+      "x": -1226,
+      "y": 5497,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-4.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "79FpH",
+      "x": -1226,
+      "y": 6798,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-5.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "M1HA1",
+      "x": -1226,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-6.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "kpvSh",
+      "x": 12039,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-7.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "okUP0",
+      "x": 996,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-9.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "FAYPZ",
+      "x": 3192,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-10.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "qW9lv",
+      "x": 5414,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-11.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "ssK5t",
+      "x": 7646,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-12.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "DbWrY",
+      "x": -1226,
+      "y": 9655,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-13.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "E8iAa",
+      "x": 1000,
+      "y": 9655,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-14.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "KCxGY",
+      "x": 3199,
+      "y": 9655,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-15.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "NzQoR",
+      "x": -1226,
+      "y": 11029,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-16.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "gyAhT",
+      "x": 996,
+      "y": 11029,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-17.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "8JqCM",
+      "x": 3192,
+      "y": 11003,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-18.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "ZJTw0",
+      "x": 5414,
+      "y": 11003,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-19.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "3tEnf",
+      "x": 3199,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-20.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "wyy3a",
+      "x": 5402,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-21.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "NOccr",
+      "x": 7617,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-22.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "ZS2xu",
+      "x": 9849,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-23.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "bDD5A",
+      "x": -1226,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-24.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "AMwRu",
+      "x": 1000,
+      "y": 12436,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-25.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "X2RgY",
+      "x": -1226,
+      "y": 13886,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-26.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "op46k",
+      "x": 9848,
+      "y": 8195,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-27.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "gYCK4",
+      "x": 996,
+      "y": 13886,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-28.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 3954
+    },
+    {
+      "type": "rectangle",
+      "id": "lYAEr",
+      "x": -1226,
+      "y": 18182,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-29.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "8EhdK",
+      "x": 1000,
+      "y": 18182,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-30.png",
+        "mode": "fill"
+      },
+      "width": 2026,
+      "height": 1228
     }
   ]
 }
