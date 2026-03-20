@@ -143,7 +143,7 @@ com.akdemya
 - `PUT /api/flashcards/{id}` — actualizar flashcard
 - `DELETE /api/flashcards/{id}` — eliminar flashcard
 - `POST /api/flashcards/review` — registrar revisión `{ flashcardId, grade }`
-- `POST /api/flashcards/import?unitId={uuid}` — importar CSV/JSON (multipart)
+- `POST /api/flashcards/import?unitId={uuid}&format=csv|json` — importar CSV o JSON como `text/plain` en el body de la petición
 - `GET /api/flashcards/export?unitId={uuid}&format=csv|json` — exportar
 
 ### Configuración de usuario (Límites de estudio)

@@ -210,6 +210,8 @@ public class FlashcardController {
       @RequestBody String content,
       @AuthenticationPrincipal User principal) {
     requireUserId(principal);
+    unitRepo.findById(unitId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unit not found"));
     FlashcardImportExportUseCase.ImportResult result =
         importExportUseCase.importFlashcards(unitId, format, content);
     return ResponseEntity.ok(
@@ -222,6 +224,8 @@ public class FlashcardController {
       @RequestParam(defaultValue = "csv") String format,
       @AuthenticationPrincipal User principal) {
     requireUserId(principal);
+    unitRepo.findById(unitId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unit not found"));
     String content = importExportUseCase.exportFlashcards(unitId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";
