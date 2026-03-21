@@ -62,4 +62,24 @@ public class AuthManager implements AuthUseCase {
         Map.of("uid", user.getId().toString(), "role", user.getRole()));
     return AuthResponse.success(token, user.getRole());
   }
+
+  @Override
+  public AuthResponse loginWithOAuth2(String email, String name) {
+    AppUser user = users.findByEmail(email).orElse(null);
+    if (user == null) {
+      // First OAuth2 login: create user without password
+      String firstName = name;
+      String lastName = null;
+      if (name != null && name.contains(" ")) {
+        int idx = name.indexOf(' ');
+        firstName = name.substring(0, idx);
+        lastName = name.substring(idx + 1);
+      }
+      user = AppUser.create(email, null, "STUDENT", firstName, lastName, null);
+      users.save(user);
+    }
+    String token = tokenProvider.generate(user.getEmail(),
+        Map.of("uid", user.getId().toString(), "role", user.getRole()));
+    return AuthResponse.success(token, user.getRole());
+  }
 }

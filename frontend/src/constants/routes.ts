@@ -12,5 +12,6 @@ export const ROUTES = {
   flashcardsStudy: '/flashcards/study',
   flashcardsHistory: '/flashcards/history',
   flashcardsExamine: '/flashcards/examine',
-  rag: '/rag'
+  rag: '/rag',
+  oauth2Callback: '/oauth2/callback'
 } as const;
