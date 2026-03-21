@@ -14,8 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -32,33 +30,46 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
 
     private final JwtService jwt;
+    private final GoogleOAuth2UserService googleOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(JwtService jwt) {
+    public SecurityConfig(JwtService jwt,
+                          GoogleOAuth2UserService googleOAuth2UserService,
+                          OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwt = jwt;
+        this.googleOAuth2UserService = googleOAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <- habilita CORS
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(reg -> reg
-                        // Permite preflight de CORS
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // IF_REQUIRED: stateless for JWT requests, creates a session only
+            // during the OAuth2 authorization code flow to store the state param.
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .authorizeHttpRequests(reg -> reg
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                // OAuth2 endpoints are served under /api to go through the single nginx proxy rule
+                .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2
+                // Mount OAuth2 endpoints under /api so they share the same
+                // nginx proxy rule as regular API calls (/api/ → backend:8080).
+                // This prevents the SPA from intercepting /oauth2/authorization/google
+                // and redirecting to home (React Router catch-all).
+                .authorizationEndpoint(auth -> auth
+                    .baseUri("/api/oauth2/authorization"))
+                .redirectionEndpoint(redirection -> redirection
+                    .baseUri("/api/login/oauth2/code/*"))
+                .userInfoEndpoint(ui -> ui.userService(googleOAuth2UserService))
+                .successHandler(oAuth2SuccessHandler));
 
-                        // Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // Admin only
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // Resto autenticado
-                        .anyRequest().authenticated());
-
-        // Mantén tu filtro JWT si lo tienes
-        http.addFilterBefore(new SecurityConfig.JwtAuthFilter(jwt),
-                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthFilter(jwt),
+            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -66,41 +77,33 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-
-        // En dev: permite tu frontend
         cfg.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://192.168.1.175:3000",
-                "https://akademia.diegobarrioh.dev"
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://192.168.1.175:3000",
+            "https://akademia.diegobarrioh.dev"
         ));
-        // Si usas otras URLs (puertos distintos, etc.), añádelas aquí
-        // cfg.setAllowedOriginPatterns(List.of("*")); // alternativa amplia en dev
-
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         cfg.setExposedHeaders(List.of("Authorization", "Content-Type"));
-        cfg.setAllowCredentials(true); // si vas a enviar cookies/autenticación
+        cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // NOTE: PasswordEncoder @Bean lives in PasswordEncoderConfig to break the
+    // circular dependency chain:
+    //   SecurityConfig → OAuth2SuccessHandler → AuthManager
+    //     → SpringSecurityPasswordHasher → PasswordEncoder (@Bean here → cycle)
 
     static class JwtAuthFilter extends OncePerRequestFilter {
         private final JwtService jwt;
 
-        JwtAuthFilter(JwtService jwt) {
-            this.jwt = jwt;
-        }
+        JwtAuthFilter(JwtService jwt) { this.jwt = jwt; }
 
         @Override
         protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -111,13 +114,15 @@ public class SecurityConfig {
                 try {
                     var jws = jwt.parse(token);
                     String email = jws.getBody().getSubject();
-                    String role = String.valueOf(jws.getBody().get("role"));
-                    String authority = "ROLE_" + role;
-                    UserDetails principal = User.withUsername(email).password("").authorities(authority).build();
-                    var auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+                    String role  = String.valueOf(jws.getBody().get("role"));
+                    UserDetails principal = User.withUsername(email)
+                        .password("").authorities("ROLE_" + role).build();
+                    var auth = new UsernamePasswordAuthenticationToken(
+                        principal, null, principal.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception e) {
-                    org.slf4j.LoggerFactory.getLogger(JwtAuthFilter.class).warn("JWT validation failed: {}", e.getMessage());
+                    org.slf4j.LoggerFactory.getLogger(JwtAuthFilter.class)
+                        .warn("JWT validation failed: {}", e.getMessage());
                 }
             }
             chain.doFilter(req, res);

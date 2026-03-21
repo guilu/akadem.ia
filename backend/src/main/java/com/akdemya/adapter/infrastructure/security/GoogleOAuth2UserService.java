@@ -1,0 +1,22 @@
+package com.akdemya.adapter.infrastructure.security;
+
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+/**
+ * Loads the OAuth2 user attributes from Google.
+ * User creation/lookup is handled downstream by OAuth2SuccessHandler,
+ * keeping this class free of any domain dependency (and therefore free
+ * of any circular reference through AuthManager → PasswordEncoder).
+ */
+@Service
+public class GoogleOAuth2UserService extends DefaultOAuth2UserService {
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        return super.loadUser(userRequest);
+    }
+}

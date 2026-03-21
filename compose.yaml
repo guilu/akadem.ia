@@ -33,6 +33,10 @@ services:
       JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
       GROQ_API_KEY: ${GROQ_API_KEY}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Set FRONTEND_URL=https://akademia.diegobarrioh.dev in .env for production.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     depends_on:
       db:
         condition: service_healthy
