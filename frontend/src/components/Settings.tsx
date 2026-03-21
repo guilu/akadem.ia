@@ -193,6 +193,8 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   const isQuestionEditing = useMemo(() => Boolean(questionForm.id), [questionForm.id]);
   const [questionSubjectId, setQuestionSubjectId] = useState('');
   const [questionUnitId, setQuestionUnitId] = useState('');
+  const [questionSortBy, setQuestionSortBy] = useState<'' | 'difficulty'>('');
+  const [questionSortDir, setQuestionSortDir] = useState<'asc' | 'desc'>('asc');
   const [exportLoading, setExportLoading] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -227,9 +229,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/admin/units?subjectId=${subjectId}`, token);
     setUnits(data);
   }
-  async function loadQuestions(unitId: string, page = questionPage) {
+  async function loadQuestions(unitId: string, page = questionPage, sortBy = questionSortBy, sortDir = questionSortDir) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`, token);
+    const sortParams = sortBy ? `&sortBy=${sortBy}&sortDir=${sortDir}` : '';
+    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10${sortParams}`, token);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
@@ -241,9 +244,9 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   useEffect(() => {
     if (tab === 'questions') {
       loadUnits(questionSubjectId).catch(() => setUnits([]));
-      loadQuestions(questionUnitId, 1).catch(() => setQuestions([]));
+      loadQuestions(questionUnitId, 1, questionSortBy, questionSortDir).catch(() => setQuestions([]));
     }
-  }, [tab, questionSubjectId, questionUnitId]);
+  }, [tab, questionSubjectId, questionUnitId, questionSortBy, questionSortDir]);
 
   async function saveUser() {
     if (!form.email.trim()) return;
@@ -626,6 +629,14 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                 <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)}>
                   <option value="">Selecciona unidad</option>
                   {unitOptions.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+                </select>
+                <select className={inp} value={questionSortBy} onChange={e => setQuestionSortBy(e.target.value as '' | 'difficulty')}>
+                  <option value="">Ordenar por: predeterminado</option>
+                  <option value="difficulty">Ordenar por: dificultad</option>
+                </select>
+                <select className={inp} value={questionSortDir} disabled={!questionSortBy} onChange={e => setQuestionSortDir(e.target.value as 'asc' | 'desc')}>
+                  <option value="asc">Ascendente (fácil → difícil)</option>
+                  <option value="desc">Descendente (difícil → fácil)</option>
                 </select>
               </div>
             </div>

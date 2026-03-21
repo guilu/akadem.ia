@@ -10,6 +10,8 @@ public interface QuestionRepository {
 
   org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size);
 
+  org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size, String sortBy, String sortDir);
+
   List<Question> findAll();
 
   Optional<Question> findById(UUID id);

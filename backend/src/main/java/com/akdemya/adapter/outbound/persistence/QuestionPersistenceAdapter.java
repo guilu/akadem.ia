@@ -38,6 +38,18 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   }
 
   @Override
+  public org.springframework.data.domain.Page<Question> findPageByUnitId(UUID unitId, int page, int size, String sortBy, String sortDir) {
+    var pageable = org.springframework.data.domain.PageRequest.of(page, size);
+    if ("difficulty".equalsIgnoreCase(sortBy)) {
+      if ("desc".equalsIgnoreCase(sortDir)) {
+        return repository.findByUnit_IdSortByDifficultyDesc(unitId, pageable).map(mapper::toDomain);
+      }
+      return repository.findByUnit_IdSortByDifficultyAsc(unitId, pageable).map(mapper::toDomain);
+    }
+    return repository.findByUnit_Id(unitId, pageable).map(mapper::toDomain);
+  }
+
+  @Override
   public Optional<Question> findById(UUID id) {
     return repository.findById(id).map(mapper::toDomain);
   }

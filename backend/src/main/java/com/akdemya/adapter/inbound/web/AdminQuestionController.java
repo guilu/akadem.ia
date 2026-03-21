@@ -26,8 +26,12 @@ public class AdminQuestionController {
   @GetMapping
   public PageResponse<QuestionResponse> list(@RequestParam UUID unitId,
                                              @RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size) {
-    var data = questions.findPageByUnitId(unitId, page, size);
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(required = false) String sortBy,
+                                             @RequestParam(defaultValue = "asc") String sortDir) {
+    var data = (sortBy != null && !sortBy.isBlank())
+        ? questions.findPageByUnitId(unitId, page, size, sortBy, sortDir)
+        : questions.findPageByUnitId(unitId, page, size);
     return PageResponse.from(data, q -> QuestionResponse.from(q, answers.findByQuestionId(q.getId())));
   }
 
