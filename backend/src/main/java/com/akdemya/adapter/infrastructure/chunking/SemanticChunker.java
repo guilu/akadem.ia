@@ -47,7 +47,7 @@ public class SemanticChunker implements TextChunkerPort {
     private static final int MIN_SEMANTIC_SPLITS = 3;
 
     /** Chunks shorter than this are considered TOC remnants and are discarded. */
-    private static final int MIN_CHUNK_CONTENT_CHARS = 300;
+    private static final int MIN_CHUNK_CONTENT_CHARS = 50;
 
     private static final ObjectMapper JSON = new ObjectMapper();
 

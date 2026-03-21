@@ -175,6 +175,8 @@ class GenerateQuizServiceTest {
         @Override public List<SourceDocument> findBySubjectId(UUID subjectId) {
             return store.values().stream().filter(d -> subjectId.equals(d.getSubjectId())).toList();
         }
+        @Override  public Optional<SourceDocument> findBySubjectIdAndName(UUID subjectId, String name) {return Optional.empty();}
+        @Override public void deleteById(UUID id) {}
     }
 
     static class StubSourceChunkRepository implements SourceChunkRepository {
