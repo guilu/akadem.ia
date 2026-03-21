@@ -8,12 +8,14 @@ import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.Unit;
+import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.port.out.SubjectRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,10 @@ import static org.mockito.Mockito.*;
 
 class FlashcardControllerTest {
 
+
+  private final FlashcardImportExportUseCase importExportUseCase = mock(FlashcardImportExportUseCase.class);
+  private final SubjectRepository subjectRepo = mock(SubjectRepository.class);
+
   private final FlashcardStudyUseCase studyUseCase = mock(FlashcardStudyUseCase.class);
   private final FlashcardReviewUseCase reviewUseCase = mock(FlashcardReviewUseCase.class);
   private final FlashcardManagementUseCase managementUseCase = mock(FlashcardManagementUseCase.class);
@@ -44,7 +50,16 @@ class FlashcardControllerTest {
   private final UnitRepository unitRepo = mock(UnitRepository.class);
 
   private final FlashcardController controller = new FlashcardController(
-      studyUseCase, reviewUseCase, managementUseCase, flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo);
+      studyUseCase,
+       reviewUseCase,
+       managementUseCase,
+       importExportUseCase,
+       flashcardRepo,
+       reviewRepo,
+       reviewLogRepo,
+       userRepo,
+       unitRepo,
+       subjectRepo);
 
   @Test
   void studyQueueReturnsCounts() {
