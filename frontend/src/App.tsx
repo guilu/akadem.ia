@@ -19,6 +19,7 @@ import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
 import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
 import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
+import OAuth2CallbackPage from './pages/OAuth2CallbackPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
@@ -206,6 +207,7 @@ export default function App(){
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
+          <Route path={ROUTES.oauth2Callback} element={<OAuth2CallbackPage onToken={onToken} />} />
           <Route path={ROUTES.subjects} element={
             <ProtectedRoute allow={isAuthed}>
               <SubjectsPage

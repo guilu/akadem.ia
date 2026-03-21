@@ -55,9 +55,21 @@ public class AuthManager implements AuthUseCase {
   @Override
   public AuthResponse login(LoginCommand command) {
     AppUser user = users.findByEmail(command.email()).orElse(null);
-    if (user == null || !hasher.matches(command.password(), user.getPasswordHash())) {
+    if (user == null || user.getPasswordHash() == null
+        || !hasher.matches(command.password(), user.getPasswordHash())) {
       return AuthResponse.fail("invalid_credentials");
     }
+    String token = tokenProvider.generate(user.getEmail(),
+        Map.of("uid", user.getId().toString(), "role", user.getRole()));
+    return AuthResponse.success(token, user.getRole());
+  }
+
+  @Override
+  public AuthResponse loginWithOAuth2(String email, String name) {
+    AppUser user = users.findByEmail(email).orElseGet(() -> {
+      AppUser newUser = AppUser.create(email, null, "STUDENT", name, null, null);
+      return users.save(newUser);
+    });
     String token = tokenProvider.generate(user.getEmail(),
         Map.of("uid", user.getId().toString(), "role", user.getRole()));
     return AuthResponse.success(token, user.getRole());

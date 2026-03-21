@@ -10,7 +10,7 @@ public class AppUserEntity {
     private UUID id = UUID.randomUUID();
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false, name = "password_hash")
+    @Column(nullable = true, name = "password_hash")
     private String passwordHash;
     @Column(nullable = false)
     private String role = "STUDENT";

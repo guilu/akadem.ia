@@ -32,9 +32,15 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
 
     private final JwtService jwt;
+    private final GoogleOAuth2UserService googleOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(JwtService jwt) {
+    public SecurityConfig(JwtService jwt,
+                          GoogleOAuth2UserService googleOAuth2UserService,
+                          OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwt = jwt;
+        this.googleOAuth2UserService = googleOAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -42,7 +48,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <- habilita CORS
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(reg -> reg
                         // Permite preflight de CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -50,11 +56,17 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // OAuth2 flow
+                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
+
                         // Admin only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Resto autenticado
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(ui -> ui.userService(googleOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler));
 
         // Mantén tu filtro JWT si lo tienes
         http.addFilterBefore(new SecurityConfig.JwtAuthFilter(jwt),
