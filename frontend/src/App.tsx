@@ -75,6 +75,19 @@ export default function App(){
     refreshSubjects();
   }, [token, apiBase]);
 
+  // Handle OAuth2 callback: extract token from URL query param
+  useEffect(() => {
+    if (location.pathname === ROUTES.oauth2Callback) {
+      const params = new URLSearchParams(location.search);
+      const callbackToken = params.get('token');
+      if (callbackToken) {
+        onToken(callbackToken);
+      } else {
+        navigate(ROUTES.login);
+      }
+    }
+  }, [location.pathname]);
+
   function onToken(t:string){
     setToken(t);
     localStorage.setItem('ak_token', t);
@@ -272,6 +285,7 @@ export default function App(){
               <RagPage token={token} subjects={subjects} />
             </ProtectedRoute>
           } />
+          <Route path={ROUTES.oauth2Callback} element={null} />
           <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
         </Routes>
       </main>
