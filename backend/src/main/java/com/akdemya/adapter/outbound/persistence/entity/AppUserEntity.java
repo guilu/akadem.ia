@@ -1,87 +1,91 @@
 package com.akdemya.adapter.outbound.persistence.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class AppUserEntity {
-    @Id
-    private UUID id = UUID.randomUUID();
-    @Column(nullable = false, unique = true)
-    private String email;
-    @Column(nullable = false, name = "password_hash")
-    private String passwordHash;
-    @Column(nullable = false)
-    private String role = "STUDENT";
-    @Column(name = "first_name")
-    private String firstName;
-    @Column(name = "last_name")
-    private String lastName;
-    @Column
-    private String occupation;
 
-    public AppUserEntity() {
-    }
+  @Id
+  private UUID id = UUID.randomUUID();
+  @Column(nullable = false, unique = true)
+  private String email;
+  @Column(nullable = true, name = "password_hash")
+  private String passwordHash;
+  @Column(nullable = false)
+  private String role = "STUDENT";
+  @Column(name = "first_name")
+  private String firstName;
+  @Column(name = "last_name")
+  private String lastName;
+  @Column
+  private String occupation;
 
-    public AppUserEntity(String email, String passwordHash) {
-        this.email = email;
-        this.passwordHash = passwordHash;
-    }
+  public AppUserEntity() {
+  }
 
-    public UUID getId() {
-        return id;
-    }
+  public AppUserEntity(String email, String passwordHash) {
+    this.email = email;
+    this.passwordHash = passwordHash;
+  }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+  public UUID getId() {
+    return id;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getRole() {
-        return role;
-    }
+  public String getPasswordHash() {
+    return passwordHash;
+  }
 
-    public void setEmail(String e) {
-        this.email = e;
-    }
+  public String getRole() {
+    return role;
+  }
 
-    public void setPasswordHash(String p) {
-        this.passwordHash = p;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setRole(String r) {
-        this.role = r;
-    }
+  public void setPasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
+  }
 
-    public String getFirstName() {
-        return firstName;
-    }
+  public void setRole(String role) {
+    this.role = role;
+  }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+  public String getFirstName() {
+    return firstName;
+  }
 
-    public String getLastName() {
-        return lastName;
-    }
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+  public String getLastName() {
+    return lastName;
+  }
 
-    public String getOccupation() {
-        return occupation;
-    }
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 
-    public void setOccupation(String occupation) {
-        this.occupation = occupation;
-    }
+  public String getOccupation() {
+    return occupation;
+  }
+
+  public void setOccupation(String occupation) {
+    this.occupation = occupation;
+  }
 }
