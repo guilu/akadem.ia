@@ -33,7 +33,6 @@ export default function App() {
   const [minutes, setMinutes] = useState(20);
   const [attemptId, setAttemptId] = useState<string>('');
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
-  const [user, setUser] = useState<NavUser | null>(null);
   const [result, setResult] = useState<ExamResult | null>(null);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
   const [toastError, setToastError] = useState<string>('');
@@ -44,21 +43,15 @@ export default function App() {
   }
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
-  const role = useMemo(() => {
+  const { role, user } = useMemo<{ role: string | null; user: NavUser | null }>(() => {
     try {
-      if (!token) {
-        setUser(null);
-        return null;
-      }
+      if (!token) return { role: null, user: null };
       const payload = JSON.parse(atob(token.split('.')[1]));
       const email: string = payload.sub || '';
       const initials = deriveInitials(email);
-      const navUser: NavUser = { email, initials };
-      setUser(navUser);
-      return payload.role || null;
+      return { role: payload.role || null, user: { email, initials } };
     } catch {
-      setUser(null);
-      return null;
+      return { role: null, user: null };
     }
   }, [token]);
 
@@ -109,7 +102,6 @@ export default function App() {
     sessionStorage.removeItem('akdmia.activeAttemptId');
     setActiveAttemptId('');
     setToken('');
-    setUser(null);
     navigate(ROUTES.home);
   }
 
