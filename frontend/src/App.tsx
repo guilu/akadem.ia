@@ -3,8 +3,9 @@ import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-
 import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
 import { apiBase, apiAuthJson } from './api';
-import type { Subject, ExamResult, ExamStartResponse } from './types';
+import type { Subject, ExamResult, ExamStartResponse, NavUser } from './types';
 import { timeoutMessage } from './utils/messages';
+import { deriveInitials } from './utils/format';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -22,7 +23,7 @@ import RagPage from './pages/RagPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
-export default function App(){
+export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
@@ -32,7 +33,7 @@ export default function App(){
   const [minutes, setMinutes] = useState(20);
   const [attemptId, setAttemptId] = useState<string>('');
   const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
-  const [result, setResult] = useState<ExamResult|null>(null);
+  const [result, setResult] = useState<ExamResult | null>(null);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
   const [toastError, setToastError] = useState<string>('');
 
@@ -42,13 +43,15 @@ export default function App(){
   }
 
   const isAuthed = useMemo(() => Boolean(token), [token]);
-  const role = useMemo(() => {
+  const { role, user } = useMemo<{ role: string | null; user: NavUser | null }>(() => {
     try {
-      if (!token) return null;
+      if (!token) return { role: null, user: null };
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role || null;
+      const email: string = payload.sub || '';
+      const initials = deriveInitials(email);
+      return { role: payload.role || null, user: { email, initials } };
     } catch {
-      return null;
+      return { role: null, user: null };
     }
   }, [token]);
 
@@ -88,7 +91,7 @@ export default function App(){
     }
   }, [location.pathname]);
 
-  function onToken(t:string){
+  function onToken(t: string) {
     setToken(t);
     localStorage.setItem('ak_token', t);
     navigate(ROUTES.subjects);
@@ -103,11 +106,11 @@ export default function App(){
   }
 
   // timeoutMessage from utils
-  async function startExam(cfg:{ unitCounts: Record<string, number>, minutes: number, difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }){
+  async function startExam(cfg: { unitCounts: Record<string, number>; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
     try {
       const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cfg),
         timeoutMs: 15000
       });
@@ -149,13 +152,17 @@ export default function App(){
     }
   }
 
-  async function finishExam(payload:{ selections: Record<string,string|undefined> }){
-    const selections: Record<string,string> = {};
-    Object.entries(payload.selections).forEach(([q, a]) => { if(a) selections[q] = a; });
+  async function finishExam(payload: { selections: Record<string, string | undefined> }) {
+    const selections: Record<string, string> = {};
+    Object.entries(payload.selections).forEach(([q, a]) => {
+      if (a) {
+        selections[q] = a;
+      }
+    });
     try {
       const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selections }),
         timeoutMs: 15000
       });
@@ -176,7 +183,7 @@ export default function App(){
     try {
       const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selections: {} }),
         timeoutMs: 15000
       });
@@ -206,7 +213,9 @@ export default function App(){
       <Navbar
         isAuthed={isAuthed}
         isAdmin={role === 'ADMIN'}
+        user={user}
         onLogout={onLogout}
+        onSettings={() => navigate(ROUTES.settings)}
       />
 
       {toastError && (

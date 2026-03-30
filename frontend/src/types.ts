@@ -84,3 +84,9 @@ export type GenerateQuizResponse = {
 };
 
 export type AdminUnit = { id: string; name: string };
+
+export interface NavUser {
+  email: string;
+  initials: string;
+  avatarUrl?: string;
+}

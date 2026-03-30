@@ -28,6 +28,9 @@ Thumbs.db
 **/.gradle/
 **/.idea/
 **/bin/
+**/.classpath
+**/.project
+**/.settings/
 
 # Coverage
 coverage/
