@@ -20,6 +20,7 @@ import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
 import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
 import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
+import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import { ROUTES } from './constants/routes';
 
@@ -215,6 +216,7 @@ export default function App() {
         isAdmin={role === 'ADMIN'}
         user={user}
         onLogout={onLogout}
+        onProfile={() => navigate(ROUTES.profile)}
         onSettings={() => navigate(ROUTES.settings)}
       />
 
@@ -292,6 +294,11 @@ export default function App() {
           <Route path={ROUTES.rag} element={
             <ProtectedRoute allow={isAuthed && role === 'ADMIN'}>
               <RagPage token={token} subjects={subjects} />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.profile} element={
+            <ProtectedRoute allow={isAuthed}>
+              <ProfilePage token={token} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.oauth2Callback} element={null} />

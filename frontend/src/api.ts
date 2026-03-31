@@ -46,11 +46,28 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
   }
 }
 
-// RAG module API functions
+// User profile API functions
 import type {
   SourceDocument, GeneratedDraft, GenerateQuizCommand, GenerateQuizResponse,
-  IndexPreview, ConfirmIndexCommand, ApprovedUnit
+  IndexPreview, ConfirmIndexCommand, ApprovedUnit, UserProfile
 } from './types';
+
+export async function getMyProfile(token: string): Promise<UserProfile> {
+  return apiAuthJson<UserProfile>(`${apiBase}/api/v1/users/me`, token);
+}
+
+export async function updateMyProfile(
+  token: string,
+  data: { firstName: string | null; lastName: string | null }
+): Promise<UserProfile> {
+  return apiAuthJson<UserProfile>(`${apiBase}/api/v1/users/me`, token, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
+
+// RAG module API functions
 
 export async function uploadSource(token: string, file: File, subjectId: string): Promise<IndexPreview> {
   const form = new FormData();

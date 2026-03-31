@@ -4,11 +4,12 @@ import { NavUser } from '../types';
 interface Props {
   user: NavUser;
   isAdmin: boolean;
+  onProfile: () => void;
   onSettings: () => void;
   onLogout: () => void;
 }
 
-export function UserMenuDropdown({ user, isAdmin, onSettings, onLogout }: Props) {
+export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -49,7 +50,12 @@ export function UserMenuDropdown({ user, isAdmin, onSettings, onLogout }: Props)
           <div className="px-3 py-2 text-xs text-text/50 truncate border-b border-secondary/10 mb-1">
             {user.email}
           </div>
-          {/* Future: Profile entry */}
+          <button
+            onClick={() => { onProfile(); setOpen(false); }}
+            className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"
+          >
+            Mi perfil
+          </button>
           <button
             onClick={() => { onSettings(); setOpen(false); }}
             className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"

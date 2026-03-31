@@ -90,3 +90,10 @@ export interface NavUser {
   initials: string;
   avatarUrl?: string;
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}
