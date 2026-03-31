@@ -12,69 +12,73 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class UserProfileControllerTest {
 
-    private final UserProfileUseCase userProfileUseCase = mock(UserProfileUseCase.class);
-    private final UserRepository userRepo = mock(UserRepository.class);
+  private final UserProfileUseCase userProfileUseCase = mock(UserProfileUseCase.class);
+  private final UserRepository userRepo = mock(UserRepository.class);
 
-    private final UserProfileController controller =
-        new UserProfileController(userProfileUseCase, userRepo);
+  private final UserProfileController controller =
+      new UserProfileController(userProfileUseCase, userRepo);
 
-    @Test
-    void getProfile_authenticated_returns200WithProfile() {
-        UUID userId = UUID.randomUUID();
-        var principal = new User("user@example.com", "", List.of());
-        when(userRepo.findByEmail("user@example.com"))
-            .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", "John", "Doe", null)));
-        when(userProfileUseCase.getProfile(userId))
-            .thenReturn(new UserProfileUseCase.GetProfileResponse(userId, "user@example.com", "John", "Doe"));
+  @Test
+  void getProfile_authenticated_returns200WithProfile() {
+    UUID userId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", "John", "Doe", null)));
+    when(userProfileUseCase.getProfile(userId))
+        .thenReturn(new UserProfileUseCase.GetProfileResponse(userId, "user@example.com", "John", "Doe"));
 
-        ResponseEntity<UserProfileController.GetProfileResponse> response = controller.getProfile(principal);
+    ResponseEntity<UserProfileController.GetProfileResponse> response = controller.getProfile(principal);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-        assertEquals("John", response.getBody().firstName());
-        assertEquals("Doe", response.getBody().lastName());
-        assertEquals("user@example.com", response.getBody().email());
-    }
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertEquals("John", response.getBody().firstName());
+    assertEquals("Doe", response.getBody().lastName());
+    assertEquals("user@example.com", response.getBody().email());
+  }
 
-    @Test
-    void getProfile_unauthenticated_throws401() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-            () -> controller.getProfile(null));
-        assertEquals(401, ex.getStatusCode().value());
-    }
+  @Test
+  void getProfile_unauthenticated_throws401() {
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> controller.getProfile(null));
+    assertEquals(401, ex.getStatusCode().value());
+  }
 
-    @Test
-    void updateProfile_validBody_returns200WithUpdatedProfile() {
-        UUID userId = UUID.randomUUID();
-        var principal = new User("user@example.com", "", List.of());
-        when(userRepo.findByEmail("user@example.com"))
-            .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", "Old", "Name", null)));
-        when(userProfileUseCase.updateProfile(eq(userId), any()))
-            .thenReturn(new UserProfileUseCase.GetProfileResponse(userId, "user@example.com", "Jane", "Smith"));
+  @Test
+  void updateProfile_validBody_returns200WithUpdatedProfile() {
+    UUID userId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", "Old", "Name", null)));
+    when(userProfileUseCase.updateProfile(eq(userId), any()))
+        .thenReturn(new UserProfileUseCase.GetProfileResponse(userId, "user@example.com", "Jane", "Smith"));
 
-        var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
-        ResponseEntity<UserProfileController.GetProfileResponse> response = controller.updateProfile(req, principal);
+    var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
+    ResponseEntity<UserProfileController.GetProfileResponse> response = controller.updateProfile(req, principal);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-        assertEquals("Jane", response.getBody().firstName());
-        assertEquals("Smith", response.getBody().lastName());
-        verify(userProfileUseCase).updateProfile(eq(userId),
-            eq(new UserProfileUseCase.UpdateProfileCommand("Jane", "Smith")));
-    }
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertEquals("Jane", response.getBody().firstName());
+    assertEquals("Smith", response.getBody().lastName());
+    verify(userProfileUseCase).updateProfile(eq(userId),
+        eq(new UserProfileUseCase.UpdateProfileCommand("Jane", "Smith")));
+  }
 
-    @Test
-    void updateProfile_unauthenticated_throws401() {
-        var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-            () -> controller.updateProfile(req, null));
-        assertEquals(401, ex.getStatusCode().value());
-    }
+  @Test
+  void updateProfile_unauthenticated_throws401() {
+    var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> controller.updateProfile(req, null));
+    assertEquals(401, ex.getStatusCode().value());
+  }
 }

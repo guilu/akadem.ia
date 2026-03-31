@@ -13,54 +13,54 @@ import java.util.UUID;
 @Transactional
 public class UserProfileService implements UserProfileUseCase {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public UserProfileService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+  public UserProfileService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public GetProfileResponse getProfile(UUID userId) {
+    AppUser user = userRepository.findById(userId)
+        .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+    return toResponse(user);
+  }
+
+  @Override
+  public GetProfileResponse updateProfile(UUID userId, UpdateProfileCommand command) {
+    AppUser user = userRepository.findById(userId)
+        .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+
+    validateName(command.firstName(), "firstName");
+    validateName(command.lastName(), "lastName");
+
+    AppUser updated = new AppUser(
+        user.getId(),
+        user.getEmail(),
+        user.getPasswordHash(),
+        user.getRole(),
+        command.firstName(),
+        command.lastName(),
+        user.getOccupation()
+    );
+
+    AppUser saved = userRepository.save(updated);
+    return toResponse(saved);
+  }
+
+  private void validateName(String value, String field) {
+    if (value != null && value.length() > 100) {
+      throw new IllegalArgumentException(field + "_too_long");
     }
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public GetProfileResponse getProfile(UUID userId) {
-        AppUser user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
-        return toResponse(user);
-    }
-
-    @Override
-    public GetProfileResponse updateProfile(UUID userId, UpdateProfileCommand command) {
-        AppUser user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
-
-        validateName(command.firstName(), "firstName");
-        validateName(command.lastName(), "lastName");
-
-        AppUser updated = new AppUser(
-            user.getId(),
-            user.getEmail(),
-            user.getPasswordHash(),
-            user.getRole(),
-            command.firstName(),
-            command.lastName(),
-            user.getOccupation()
-        );
-
-        AppUser saved = userRepository.save(updated);
-        return toResponse(saved);
-    }
-
-    private void validateName(String value, String field) {
-        if (value != null && value.length() > 100) {
-            throw new IllegalArgumentException(field + "_too_long");
-        }
-    }
-
-    private GetProfileResponse toResponse(AppUser user) {
-        return new GetProfileResponse(
-            user.getId(),
-            user.getEmail(),
-            user.getFirstName(),
-            user.getLastName()
-        );
-    }
+  private GetProfileResponse toResponse(AppUser user) {
+    return new GetProfileResponse(
+        user.getId(),
+        user.getEmail(),
+        user.getFirstName(),
+        user.getLastName()
+    );
+  }
 }

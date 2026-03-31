@@ -3,6 +3,7 @@ package com.akdemya.application.service;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
+import com.akdemya.domain.port.out.UnitRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,14 @@ import java.util.UUID;
 public class FlashcardImportExportService implements FlashcardImportExportUseCase {
 
   private final FlashcardManagementUseCase managementUseCase;
+  private final UnitRepository unitRepository;
   private final ObjectMapper objectMapper;
 
   public FlashcardImportExportService(FlashcardManagementUseCase managementUseCase,
+                                      UnitRepository unitRepository,
                                       ObjectMapper objectMapper) {
     this.managementUseCase = managementUseCase;
+    this.unitRepository = unitRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -74,6 +78,30 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
   @Override
   public String exportFlashcards(UUID unitId, String format) {
     List<Flashcard> flashcards = managementUseCase.listByUnit(unitId);
+
+    if ("json".equalsIgnoreCase(format)) {
+      List<Map<String, String>> list = flashcards.stream()
+          .map(f -> Map.of("front", f.getFront(), "back", f.getBack()))
+          .toList();
+      try {
+        return objectMapper.writeValueAsString(list);
+      } catch (Exception e) {
+        throw new RuntimeException("Error al generar JSON", e);
+      }
+    }
+
+    StringBuilder sb = new StringBuilder("front,back\n");
+    for (Flashcard f : flashcards) {
+      sb.append(csvEscape(f.getFront())).append(',').append(csvEscape(f.getBack())).append('\n');
+    }
+    return sb.toString();
+  }
+
+  @Override
+  public String exportFlashcardsBySubject(UUID subjectId, String format) {
+    List<Flashcard> flashcards = unitRepository.findBySubjectId(subjectId).stream()
+        .flatMap(unit -> managementUseCase.listByUnit(unit.getId()).stream())
+        .toList();
 
     if ("json".equalsIgnoreCase(format)) {
       List<Map<String, String>> list = flashcards.stream()
