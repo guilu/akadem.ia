@@ -143,6 +143,23 @@ export async function deleteSource(token: string, id: string): Promise<void> {
   return apiAuthJson<void>(`${apiBase}/api/sources/${id}`, token, { method: 'DELETE' });
 }
 
+export async function exportFlashcardsBySubject(
+  token: string,
+  subjectId: string,
+  format: 'csv' | 'json'
+): Promise<string> {
+  const res = await fetch(
+    `${apiBase}/api/flashcards/export?subjectId=${subjectId}&format=${format}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) {
+    const err: any = new Error('api_error');
+    err.status = res.status;
+    throw err;
+  }
+  return res.text();
+}
+
 export async function apiAuthJson<T>(url: string, token: string, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs, ...fetchOptions } = options;
   const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
