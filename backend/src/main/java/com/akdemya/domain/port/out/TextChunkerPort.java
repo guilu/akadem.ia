@@ -1,9 +1,9 @@
 package com.akdemya.domain.port.out;
 
 import com.akdemya.domain.model.SourceChunk;
+import com.akdemya.domain.model.SourceDocument;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Splits raw document text into semantic chunks with metadata.
@@ -11,5 +11,5 @@ import java.util.UUID;
  * fall back to size-based chunking with overlap when no structure is found.
  */
 public interface TextChunkerPort {
-    List<SourceChunk> chunk(String text, UUID sourceDocumentId);
+    List<SourceChunk> chunk(String text, SourceDocument document);
 }

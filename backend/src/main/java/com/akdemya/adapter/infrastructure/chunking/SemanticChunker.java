@@ -2,6 +2,7 @@ package com.akdemya.adapter.infrastructure.chunking;
 
 import com.akdemya.application.config.RagProperties;
 import com.akdemya.domain.model.SourceChunk;
+import com.akdemya.domain.model.SourceDocument;
 import com.akdemya.domain.port.out.TextChunkerPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class SemanticChunker implements TextChunkerPort {
     }
 
     @Override
-    public List<SourceChunk> chunk(String text, UUID sourceDocumentId) {
+    public List<SourceChunk> chunk(String text, SourceDocument document) {
         List<Split> splits = findSemanticSplits(text);
 
         // Filter splits whose content block is too short (TOC remnants)
@@ -67,9 +68,9 @@ public class SemanticChunker implements TextChunkerPort {
         log.info("Found {} total splits, {} valid after short-content filter", splits.size(), validSplits.size());
 
         if (validSplits.size() >= MIN_SEMANTIC_SPLITS) {
-            return buildHierarchicalChunks(text, validSplits, sourceDocumentId);
+            return buildHierarchicalChunks(text, validSplits, document.getId());
         }
-        return buildSizeChunks(text, sourceDocumentId);
+        return buildSizeChunks(text, document);
     }
 
     // -------------------------------------------------------------------------
@@ -173,9 +174,13 @@ public class SemanticChunker implements TextChunkerPort {
     // Size-based fallback
     // -------------------------------------------------------------------------
 
-    private List<SourceChunk> buildSizeChunks(String text, UUID sourceDocumentId) {
-        log.info("Using size-based fallback chunking for document {}", sourceDocumentId);
-        return splitBySize(text, sourceDocumentId, 0, null, null, null);
+    private List<SourceChunk> buildSizeChunks(String text, SourceDocument document) {
+        log.info("Using size-based fallback chunking for document {}", document.getId());
+        String documentName = document.getName();
+        if (documentName != null && documentName.toLowerCase().endsWith(".pdf")) {
+            documentName = documentName.substring(0, documentName.length() - 4);
+        }
+        return splitBySize(text, document.getId(), 0, null, null, documentName);
     }
 
     private List<SourceChunk> splitBySize(String text, UUID sourceDocumentId,
@@ -207,6 +212,19 @@ public class SemanticChunker implements TextChunkerPort {
     }
 
     private int findSentenceBoundary(String text, int start, int end) {
+        // Try paragraph boundaries first (\n\n)
+        for (int i = end; i > start + 100; i--) {
+            if (text.charAt(i - 1) == '\n' && i < text.length() && text.charAt(i) == '\n') {
+                return i;
+            }
+        }
+        // Try line boundaries (\n)
+        for (int i = end; i > start + 100; i--) {
+            if (text.charAt(i - 1) == '\n') {
+                return i;
+            }
+        }
+        // Try sentence boundaries
         for (int i = end; i > start + 100; i--) {
             char c = text.charAt(i - 1);
             if ((c == '.' || c == '?' || c == '!') && i < text.length() &&
