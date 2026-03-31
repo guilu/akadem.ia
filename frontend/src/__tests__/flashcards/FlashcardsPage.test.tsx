@@ -69,8 +69,8 @@ describe('FlashcardsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.setItem('ak_token', 'test-token');
-    global.URL.createObjectURL = vi.fn(() => 'blob:test');
-    global.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:test');
+    globalThis.URL.revokeObjectURL = vi.fn();
   });
 
   it('shows empty state with import CTA when no subjects available', async () => {
@@ -235,7 +235,7 @@ describe('FlashcardsPage', () => {
 
   it('shows export error banner when unit export fetch fails', async () => {
     vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
-    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
     render(<FlashcardsPage />);
 
@@ -259,7 +259,7 @@ describe('FlashcardsPage', () => {
 
   it('dismisses export error banner when close button is clicked', async () => {
     vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
-    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
     render(<FlashcardsPage />);
 
