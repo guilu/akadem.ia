@@ -15,6 +15,7 @@ const userWithAvatar: NavUser = {
 };
 
 describe('UserMenuDropdown', () => {
+  const onProfile = vi.fn();
   const onSettings = vi.fn();
   const onLogout = vi.fn();
 
@@ -27,6 +28,7 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -41,6 +43,7 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={userWithAvatar}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -55,11 +58,13 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
     );
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Mi perfil')).not.toBeInTheDocument();
     expect(screen.queryByText('Cerrar sesión')).not.toBeInTheDocument();
   });
 
@@ -68,11 +73,13 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
     );
     fireEvent.click(screen.getByRole('button', { name: /user menu/i }));
+    expect(screen.getByText('Mi perfil')).toBeInTheDocument();
     expect(screen.getByText('Ajustes')).toBeInTheDocument();
     expect(screen.getByText('Cerrar sesión')).toBeInTheDocument();
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
@@ -85,6 +92,7 @@ describe('UserMenuDropdown', () => {
         <UserMenuDropdown
           user={baseUser}
           isAdmin={false}
+          onProfile={onProfile}
           onSettings={onSettings}
           onLogout={onLogout}
         />
@@ -102,6 +110,7 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -113,11 +122,29 @@ describe('UserMenuDropdown', () => {
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument();
   });
 
+  it('clicking "Mi perfil" calls onProfile and closes the panel', () => {
+    render(
+      <UserMenuDropdown
+        user={baseUser}
+        isAdmin={false}
+        onProfile={onProfile}
+        onSettings={onSettings}
+        onLogout={onLogout}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /user menu/i }));
+    fireEvent.click(screen.getByText('Mi perfil'));
+
+    expect(onProfile).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Mi perfil')).not.toBeInTheDocument();
+  });
+
   it('clicking "Ajustes" calls onSettings and closes the panel', () => {
     render(
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -134,6 +161,7 @@ describe('UserMenuDropdown', () => {
       <UserMenuDropdown
         user={baseUser}
         isAdmin={false}
+        onProfile={onProfile}
         onSettings={onSettings}
         onLogout={onLogout}
       />

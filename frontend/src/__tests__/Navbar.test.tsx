@@ -15,6 +15,7 @@ const mockUser: NavUser = {
 
 describe('Navbar — Desktop', () => {
   const onLogout = vi.fn();
+  const onProfile = vi.fn();
   const onSettings = vi.fn();
 
   beforeEach(() => {
@@ -28,6 +29,7 @@ describe('Navbar — Desktop', () => {
         isAdmin={false}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -41,6 +43,7 @@ describe('Navbar — Desktop', () => {
         isAdmin={false}
         user={null}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -56,6 +59,7 @@ describe('Navbar — Desktop', () => {
         isAdmin={false}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -69,6 +73,7 @@ describe('Navbar — Desktop', () => {
         isAdmin={true}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -82,6 +87,7 @@ describe('Navbar — Desktop', () => {
         isAdmin={false}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -96,6 +102,7 @@ describe('Navbar — Desktop', () => {
 
 describe('Navbar — theme toggle', () => {
   const onLogout = vi.fn();
+  const onProfile = vi.fn();
   const onSettings = vi.fn();
 
   beforeEach(() => {
@@ -110,6 +117,7 @@ describe('Navbar — theme toggle', () => {
         isAdmin={false}
         user={null}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -124,6 +132,7 @@ describe('Navbar — theme toggle', () => {
 
 describe('Navbar — navigation (go)', () => {
   const onLogout = vi.fn();
+  const onProfile = vi.fn();
   const onSettings = vi.fn();
 
   beforeEach(() => {
@@ -137,6 +146,7 @@ describe('Navbar — navigation (go)', () => {
         isAdmin={false}
         user={null}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -149,6 +159,7 @@ describe('Navbar — navigation (go)', () => {
 
 describe('Navbar — Mobile', () => {
   const onLogout = vi.fn();
+  const onProfile = vi.fn();
   const onSettings = vi.fn();
 
   beforeEach(() => {
@@ -162,6 +173,7 @@ describe('Navbar — Mobile', () => {
         isAdmin={false}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );
@@ -177,6 +189,7 @@ describe('Navbar — Mobile', () => {
         isAdmin={false}
         user={mockUser}
         onLogout={onLogout}
+        onProfile={onProfile}
         onSettings={onSettings}
       />
     );

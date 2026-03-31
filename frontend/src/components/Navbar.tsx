@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket } from 'flowbite-react-icons/outline';
+import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
 import type { NavUser } from '../types';
 import { UserMenuDropdown } from './UserMenuDropdown';
 
-export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onSettings }: {
+export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onProfile, onSettings }: {
   isAuthed: boolean;
   isAdmin: boolean;
   user: NavUser | null;
   onLogout: () => void;
+  onProfile: () => void;
   onSettings: () => void;
 }) {
   const [isDark, setIsDark] = useState(false);
@@ -127,6 +128,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onS
               <UserMenuDropdown
                 user={user}
                 isAdmin={isAdmin}
+                onProfile={onProfile}
                 onSettings={onSettings}
                 onLogout={onLogout}
               />
@@ -202,6 +204,13 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onS
                   {user.email}
                 </div>
               )}
+              <button
+                onClick={() => { onProfile(); setMenuOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
+              >
+                <User className="w-4 h-4" />
+                Mi perfil
+              </button>
               <button
                 onClick={() => { onSettings(); setMenuOpen(false); }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
