@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getMyProfile, updateMyProfile, apiAuthJson, apiJson } from '../api';
+import {
+  getMyProfile, updateMyProfile, apiAuthJson, apiJson, exportFlashcardsBySubject,
+  uploadSource, confirmIndex, getSources, generateQuiz, getDrafts, approveDraft,
+  rejectDraft, getUnitsForSubject, deleteSource
+} from '../api';
 
 // Mock global fetch
 const mockFetch = vi.fn();
@@ -147,5 +151,226 @@ describe('apiJson', () => {
     mockFetch.mockRejectedValue(abortErr);
 
     await expect(apiJson('http://localhost/data')).rejects.toMatchObject({ message: 'timeout', code: 'timeout' });
+  });
+});
+
+describe('apiAuthJson with timeoutMs', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('clears timeout after successful response', async () => {
+    vi.useFakeTimers();
+    const clearSpy = vi.spyOn(window, 'clearTimeout');
+    mockFetch.mockResolvedValue(makeResponse({ data: 'ok' }));
+
+    const result = await apiAuthJson<{ data: string }>('http://localhost/test', 'token', { timeoutMs: 5000 });
+
+    expect(result).toEqual({ data: 'ok' });
+    expect(clearSpy).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+});
+
+describe('RAG API functions', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it('uploadSource posts FormData and returns IndexPreview', async () => {
+    const preview = { documentId: 'doc-1', units: [] };
+    mockFetch.mockResolvedValue(makeResponse(preview));
+
+    const file = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+    const result = await uploadSource('token', file, 'subj-1');
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/sources');
+    expect(options.method).toBe('POST');
+    expect(options.headers.Authorization).toBe('Bearer token');
+    expect(result).toEqual(preview);
+  });
+
+  it('uploadSource throws api_error on failure', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400, json: () => Promise.resolve({}) } as unknown as Response);
+
+    const file = new File([''], 'test.pdf');
+    await expect(uploadSource('token', file, 'subj-1')).rejects.toMatchObject({ message: 'api_error', status: 400 });
+  });
+
+  it('confirmIndex posts to confirm endpoint and returns result', async () => {
+    const result = { document: { id: 'doc-1' }, savedUnits: [] };
+    mockFetch.mockResolvedValue(makeResponse(result));
+
+    const res = await confirmIndex('token', 'doc-1', []);
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/sources/doc-1/confirm');
+    expect(options.method).toBe('POST');
+    expect(res).toEqual(result);
+  });
+
+  it('getSources returns list of sources', async () => {
+    const sources = [{ id: 'src-1', name: 'Document' }];
+    mockFetch.mockResolvedValue(makeResponse(sources));
+
+    const result = await getSources('token');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/sources');
+    expect(result).toEqual(sources);
+  });
+
+  it('getSources with subjectId appends query param', async () => {
+    mockFetch.mockResolvedValue(makeResponse([]));
+
+    await getSources('token', 'subj-1');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('subjectId=subj-1');
+  });
+
+  it('generateQuiz posts command and returns response', async () => {
+    const quizResponse = { quizId: 'q-1', questions: [] };
+    mockFetch.mockResolvedValue(makeResponse(quizResponse));
+
+    // generateQuiz uses timeoutMs internally; stub clearTimeout so it works in jsdom
+    const origClearTimeout = window.clearTimeout;
+    vi.stubGlobal('clearTimeout', vi.fn());
+
+    const result = await generateQuiz('token', { sourceId: 'src-1', count: 5 } as any);
+
+    vi.stubGlobal('clearTimeout', origClearTimeout);
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/ai/quizzes/generate');
+    expect(options.method).toBe('POST');
+    expect(result).toEqual(quizResponse);
+  });
+
+  it('getDrafts returns filtered drafts by sourceId', async () => {
+    const drafts = [{ id: 'd-1', status: 'PENDING' }];
+    mockFetch.mockResolvedValue(makeResponse(drafts));
+
+    const result = await getDrafts('token', 'src-1');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('sourceId=src-1');
+    expect(result).toEqual(drafts);
+  });
+
+  it('getDrafts appends status query param when provided', async () => {
+    mockFetch.mockResolvedValue(makeResponse([]));
+
+    await getDrafts('token', 'src-1', 'PENDING');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('status=PENDING');
+  });
+
+  it('approveDraft posts to approve endpoint', async () => {
+    const draft = { id: 'd-1', status: 'APPROVED' };
+    mockFetch.mockResolvedValue(makeResponse(draft));
+
+    const result = await approveDraft('token', 'd-1');
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/ai/drafts/d-1/approve');
+    expect(options.method).toBe('POST');
+    expect(result).toEqual(draft);
+  });
+
+  it('rejectDraft posts to reject endpoint', async () => {
+    const draft = { id: 'd-1', status: 'REJECTED' };
+    mockFetch.mockResolvedValue(makeResponse(draft));
+
+    const result = await rejectDraft('token', 'd-1');
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/ai/drafts/d-1/reject');
+    expect(options.method).toBe('POST');
+    expect(result).toEqual(draft);
+  });
+
+  it('getUnitsForSubject returns units list', async () => {
+    const units = [{ id: 'u-1', name: 'Unit 1' }];
+    mockFetch.mockResolvedValue(makeResponse(units));
+
+    const result = await getUnitsForSubject('token', 'subj-1');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/units?subjectId=subj-1');
+    expect(result).toEqual(units);
+  });
+
+  it('deleteSource sends DELETE request', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 204, text: () => Promise.resolve(''), json: () => Promise.resolve(undefined) } as unknown as Response);
+
+    await deleteSource('token', 'src-1');
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('/api/sources/src-1');
+    expect(options.method).toBe('DELETE');
+  });
+});
+
+describe('exportFlashcardsBySubject', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it('returns text content on success', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('front,back\nHello,Hola\n'),
+    } as unknown as Response);
+
+    const result = await exportFlashcardsBySubject('my-token', 'subj-1', 'csv');
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toContain('subjectId=subj-1');
+    expect(url).toContain('format=csv');
+    expect(options.headers.Authorization).toBe('Bearer my-token');
+    expect(result).toBe('front,back\nHello,Hola\n');
+  });
+
+  it('returns JSON text when format is json', async () => {
+    const jsonContent = '[{"front":"Hello","back":"Hola"}]';
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(jsonContent),
+    } as unknown as Response);
+
+    const result = await exportFlashcardsBySubject('token', 'subj-2', 'json');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toContain('format=json');
+    expect(result).toBe(jsonContent);
+  });
+
+  it('throws with status when response is not ok', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 403,
+    } as unknown as Response);
+
+    await expect(exportFlashcardsBySubject('token', 'subj-3', 'csv')).rejects.toMatchObject({
+      message: 'api_error',
+      status: 403,
+    });
+  });
+
+  it('throws network error when fetch rejects', async () => {
+    mockFetch.mockRejectedValue(new Error('network failure'));
+
+    await expect(exportFlashcardsBySubject('token', 'subj-4', 'csv')).rejects.toThrow('network failure');
   });
 });
