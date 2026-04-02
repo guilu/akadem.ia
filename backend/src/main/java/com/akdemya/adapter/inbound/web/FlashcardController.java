@@ -23,11 +23,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -218,11 +229,17 @@ public class FlashcardController {
 
   @GetMapping("/export")
   public ResponseEntity<String> exportFlashcards(
-      @RequestParam UUID unitId,
+      @RequestParam(required = false) UUID unitId,
+      @RequestParam(required = false) UUID subjectId,
       @RequestParam(defaultValue = "csv") String format,
       @AuthenticationPrincipal User principal) {
     requireUserId(principal);
-    String content = importExportUseCase.exportFlashcards(unitId, format);
+    if (unitId == null && subjectId == null) {
+      return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
+    }
+    String content = unitId != null
+        ? importExportUseCase.exportFlashcards(unitId, format)
+        : importExportUseCase.exportFlashcardsBySubject(subjectId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";
     String filename = isJson ? "flashcards.json" : "flashcards.csv";

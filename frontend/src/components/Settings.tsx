@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines, Cog } from 'flowbite-react-icons/outline';
-import { apiBase, apiAuthJson } from '../api';
+import {
+  getUserSettings, updateUserSettings,
+  getAdminUsers, saveAdminUser, deleteAdminUser,
+  getAdminSubjects, saveAdminSubject, deleteAdminSubject,
+  getAdminUnits, saveAdminUnit, deleteAdminUnit,
+  getAdminQuestions, saveAdminQuestion, deleteAdminQuestion,
+  exportAdminQuestions, importAdminQuestions,
+} from '../api';
 
 export type AdminUser = {
   id: string;
@@ -126,7 +133,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
 
   async function loadUserSettings() {
     try {
-      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token);
+      const data = await getUserSettings(token);
       setSettingsForm(data);
     } catch { /* keep defaults */ }
   }
@@ -134,11 +141,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   async function saveUserSettings() {
     setSettingsLoading(true); setSettingsSaved(false); setSettingsError('');
     try {
-      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settingsForm),
-      });
+      const data = await updateUserSettings(token, settingsForm);
       setSettingsForm(data);
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2500);
@@ -215,21 +218,21 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   }
 
   async function loadUsers(page = userPage) {
-    const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(`${apiBase}/api/admin/users?page=${page - 1}&size=10`, token);
+    const data = await getAdminUsers(token, page - 1);
     setUsers(data.items); setUserPage(data.page + 1); setUserTotalPages(data.totalPages || 1);
   }
   async function loadSubjects() {
-    const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/admin/subjects`, token);
+    const data = await getAdminSubjects(token);
     setSubjects(data);
   }
   async function loadUnits(subjectId: string) {
     if (!subjectId) { setUnits([]); return; }
-    const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/admin/units?subjectId=${subjectId}`, token);
+    const data = await getAdminUnits(token, subjectId);
     setUnits(data);
   }
   async function loadQuestions(unitId: string, page = questionPage) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`, token);
+    const data = await getAdminQuestions(token, unitId, page - 1);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
@@ -249,9 +252,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (!form.email.trim()) return;
     setLoading(true);
     try {
-      const body = JSON.stringify({ email: form.email, firstName: form.firstName || null, lastName: form.lastName || null, occupation: form.occupation || null, role: form.role });
-      const opts = { method: isEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
-      await apiAuthJson(isEditing ? `${apiBase}/api/admin/users/${form.id}` : `${apiBase}/api/admin/users`, token, opts);
+      await saveAdminUser(token, { id: form.id, email: form.email, firstName: form.firstName || '', lastName: form.lastName || '', occupation: form.occupation || '', role: form.role }, isEditing);
       resetForm(); await loadUsers(1);
     } finally { setLoading(false); }
   }
@@ -260,28 +261,24 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (!subjectForm.name.trim()) return;
     setSubjectLoading(true);
     try {
-      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null });
-      const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
-      await apiAuthJson(isSubjectEditing ? `${apiBase}/api/admin/subjects/${subjectForm.id}` : `${apiBase}/api/admin/subjects`, token, opts);
+      await saveAdminSubject(token, { id: subjectForm.id, name: subjectForm.name, description: subjectForm.description || '' }, isSubjectEditing);
       resetSubjectForm(); await loadSubjects(); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
-  async function removeUser(id: string) { await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' }); await loadUsers(userPage); }
-  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(); onSubjectsChanged?.(); }
+  async function removeUser(id: string) { await deleteAdminUser(token, id); await loadUsers(userPage); }
+  async function removeSubject(id: string) { await deleteAdminSubject(token, id); await loadSubjects(); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
     setUnitLoading(true);
     try {
-      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0 };
-      const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isUnitEditing ? `${apiBase}/api/admin/units/${unitForm.id}` : `${apiBase}/api/admin/units`, token, opts);
+      await saveAdminUnit(token, { id: unitForm.id, subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || '', orderIndex: unitForm.orderIndex || 0 }, isUnitEditing);
       resetUnitForm(); await loadUnits(unitForm.subjectId); await loadSubjects();
     } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) { await apiAuthJson(`${apiBase}/api/admin/units/${id}`, token, { method: 'DELETE' }); await loadUnits(unitForm.subjectId); await loadSubjects(); }
+  async function removeUnit(id: string) { await deleteAdminUnit(token, id); await loadUnits(unitForm.subjectId); await loadSubjects(); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
@@ -290,22 +287,17 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (questionForm.answers.filter(a => a.correct).length !== 1) return;
     setQuestionLoading(true);
     try {
-      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })) };
-      const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isQuestionEditing ? `${apiBase}/api/admin/questions/${questionForm.id}` : `${apiBase}/api/admin/questions`, token, opts);
+      await saveAdminQuestion(token, { ...questionForm, unitId }, isQuestionEditing);
       resetQuestionForm(); await loadQuestions(unitId, 1); await loadUnits(questionSubjectId);
     } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) { await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' }); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
+  async function removeQuestion(id: string, unitId: string) { await deleteAdminQuestion(token, id); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
     try {
-      const query = questionUnitId ? `?unitId=${questionUnitId}&format=${format}` : `?format=${format}`;
-      const res = await fetch(`${apiBase}/api/admin/questions/export${query}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error('export_failed');
-      const blob = await res.blob();
+      const blob = await exportAdminQuestions(token, format, questionUnitId || undefined);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -320,13 +312,9 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (!questionUnitId) { setImportMessage('Selecciona una unidad'); return; }
     setImportLoading(true); setImportMessage('');
     try {
-      const formData = new FormData();
-      formData.append('file', importFile);
-      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'import_failed');
+      const data = await importAdminQuestions(token, importFormat, questionUnitId, importFile);
       const created = data.created || 0;
-      const errors = data.errors || 0;
+      const errors = (data.errors as number) || 0;
       setImportStats({ created, errors });
       setImportMessage(`Importadas: ${created}. Errores: ${errors}`);
       setImportDone(true);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiAuthJson, apiBase } from '../api';
+import { exportFlashcardsBySubject, exportFlashcardsByUnit, getFlashcardsUnitsSummary, getFlashcardsStudyQueue } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
@@ -33,13 +33,14 @@ export default function FlashcardsPage() {
   const [globalLoading, setGlobalLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string>('');
 
   const token = localStorage.getItem('ak_token') || '';
 
   const loadUnits = () => {
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    getFlashcardsUnitsSummary<UnitSummary[]>(token)
       .then((data) => setUnits(data || []))
       .catch(() => setError('No se pudieron cargar las unidades.'))
       .finally(() => setLoading(false));
@@ -49,7 +50,7 @@ export default function FlashcardsPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    getFlashcardsUnitsSummary<UnitSummary[]>(token)
       .then((data) => { if (mounted) setUnits(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las unidades.'); })
       .finally(() => { if (mounted) setLoading(false); });
@@ -59,7 +60,7 @@ export default function FlashcardsPage() {
   useEffect(() => {
     let mounted = true;
     setGlobalLoading(true);
-    apiAuthJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`, token)
+    getFlashcardsStudyQueue<GlobalQueue>(token)
       .then((data) => { if (mounted) setGlobalQueue(data || null); })
       .catch(() => {})
       .finally(() => { if (mounted) setGlobalLoading(false); });
@@ -120,13 +121,9 @@ export default function FlashcardsPage() {
   };
 
   const handleExport = async (unit: UnitSummary, format: 'csv' | 'json') => {
+    setExportError('');
     try {
-      const res = await fetch(
-        `${apiBase}/api/flashcards/export?unitId=${unit.unitId}&format=${format}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) return;
-      const content = await res.text();
+      const content = await exportFlashcardsByUnit(token, unit.unitId, format);
       const blob = new Blob([content], {
         type: format === 'json' ? 'application/json' : 'text/csv',
       });
@@ -136,7 +133,24 @@ export default function FlashcardsPage() {
       link.click();
       URL.revokeObjectURL(link.href);
     } catch {
-      // silently ignore
+      setExportError('No se pudo exportar. Inténtalo de nuevo.');
+    }
+  };
+
+  const handleSubjectExport = async (subject: SubjectSummary, format: 'csv' | 'json') => {
+    setExportError('');
+    try {
+      const content = await exportFlashcardsBySubject(token, subject.subjectId, format);
+      const blob = new Blob([content], {
+        type: format === 'json' ? 'application/json' : 'text/csv',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${subject.subjectName}.${format}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      setExportError('No se pudo exportar la materia. Inténtalo de nuevo.');
     }
   };
 
@@ -149,6 +163,8 @@ export default function FlashcardsPage() {
     setSelectedSubjectId(null);
     setSearch('');
   };
+
+  const openImport = () => setShowImport(true);
 
   return (
     <div className="space-y-6">
@@ -181,7 +197,7 @@ export default function FlashcardsPage() {
           </div>
           <button
             type="button"
-            onClick={() => setShowImport(true)}
+            onClick={openImport}
             className="mt-1 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-primary/40 hover:text-text transition-colors"
           >
             <span>⬆</span> Importar
@@ -193,6 +209,24 @@ export default function FlashcardsPage() {
           if (tab === 'historial') navigate('/flashcards/history');
         }} />
       </header>
+
+      {/* Export error banner */}
+      {exportError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400 flex items-center justify-between gap-3"
+        >
+          <span>{exportError}</span>
+          <button
+            type="button"
+            onClick={() => setExportError('')}
+            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            aria-label="Cerrar error"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Global queue strip — only in study mode and subject list view */}
       {mode === 'estudio' && !selectedSubjectId && (
@@ -221,6 +255,7 @@ export default function FlashcardsPage() {
             units={filteredUnitsForSubject}
             onUnitClick={handleUnitClick}
             onExport={handleExport}
+            onImport={openImport}
           />
         ) : loading ? (
           <div className="space-y-3">
@@ -233,8 +268,15 @@ export default function FlashcardsPage() {
             {error}
           </div>
         ) : filteredSubjects.length === 0 ? (
-          <div className="border border-secondary/25 rounded-2xl px-5 py-4 text-sm text-text/55">
-            No hay materias disponibles.
+          <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center space-y-4">
+            <p className="text-sm text-text/55">No hay materias disponibles.</p>
+            <button
+              type="button"
+              onClick={openImport}
+              className="btn btn-primary rounded-full px-6 py-2 text-sm shadow-sm shadow-primary/15"
+            >
+              Importar flashcards
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -243,6 +285,7 @@ export default function FlashcardsPage() {
                 key={subject.subjectId}
                 subject={subject}
                 onClick={() => handleSelectSubject(subject.subjectId)}
+                onExport={(fmt) => handleSubjectExport(subject, fmt)}
               />
             ))}
           </div>

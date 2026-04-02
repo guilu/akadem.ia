@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { getFlashcardsByUnit } from '../api';
 
 type Flashcard = {
   id: string;
@@ -25,7 +25,7 @@ export default function FlashcardsExamineUnitPage() {
   useEffect(() => {
     if (!unitId) { setError('Falta el unitId.'); setLoading(false); return; }
     let mounted = true;
-    apiAuthJson<Flashcard[]>(`${apiBase}/api/flashcards?unitId=${unitId}`, token)
+    getFlashcardsByUnit<Flashcard[]>(token, unitId)
       .then((data) => { if (mounted) setCards(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las tarjetas.'); })
       .finally(() => { if (mounted) setLoading(false); });
@@ -38,7 +38,22 @@ export default function FlashcardsExamineUnitPage() {
   const prev = () => { setIndex((i) => Math.max(0, i - 1)); setFlipped(false); };
   const next = () => { setIndex((i) => Math.min(total - 1, i + 1)); setFlipped(false); };
 
-  if (loading) return <div className="text-sm text-text/55">Cargando tarjetas...</div>;
+  if (loading) {
+    return (
+      <div className="space-y-5 max-w-2xl mx-auto animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="h-9 w-9 rounded-full bg-secondary/20" />
+          <div className="h-5 w-40 rounded-full bg-secondary/20" />
+          <div className="w-9" />
+        </div>
+        <div className="space-y-1.5">
+          <div className="h-3 w-1/3 rounded-full bg-secondary/20" />
+          <div className="h-1.5 w-full rounded-full bg-secondary/20" />
+        </div>
+        <div className="border border-secondary/15 rounded-2xl p-7 min-h-[45vh] bg-secondary/5" />
+      </div>
+    );
+  }
 
   if (error) return (
     <div className="space-y-4">
@@ -53,7 +68,20 @@ export default function FlashcardsExamineUnitPage() {
         <div className="text-4xl mb-3">📭</div>
         <p className="text-text/55 text-sm">No hay tarjetas en esta unidad.</p>
       </div>
-      <button className="btn btn-outline rounded-full px-5 py-2 text-sm" onClick={() => navigate('/flashcards')}>Volver</button>
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          className="btn btn-outline rounded-full px-5 py-2 text-sm"
+          onClick={() => navigate('/flashcards')}
+        >
+          Volver
+        </button>
+        <button
+          className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15"
+          onClick={() => navigate('/flashcards')}
+        >
+          Importar flashcards
+        </button>
+      </div>
     </div>
   );
 

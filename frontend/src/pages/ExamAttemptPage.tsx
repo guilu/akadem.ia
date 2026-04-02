@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import ExamRunner, { Question } from '../components/ExamRunner';
-import { apiAuthJson, apiBase } from '../api';
+import { getExamAttempt, saveExamAnswer, submitExam } from '../api';
 import { timeoutMessage } from '../utils/messages';
 import { ROUTES } from '../constants/routes';
 import type { ExamResult } from '../types';
@@ -37,7 +37,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     if (!attemptId) return;
     setLoading(true);
     setError('');
-    apiAuthJson<AttemptResponse>(`${apiBase}/api/exams/attempts/${attemptId}`, token, { timeoutMs: 15000 })
+    getExamAttempt<AttemptResponse>(token, attemptId)
       .then(data => setAttempt(data))
       .catch(err => {
         if (err?.status === 401) onUnauthorized();
@@ -48,7 +48,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
         setError('No se pudo cargar el intento');
       })
       .finally(() => setLoading(false));
-  }, [attemptId, token, apiBase]);
+  }, [attemptId, token]);
 
   if (!attemptId) return <Navigate to={ROUTES.subjects} replace />;
 
@@ -76,12 +76,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     const current = selections[questionId];
     if (current === answerId) return;
     try {
-      await apiAuthJson(`${apiBase}/api/exams/attempts/${attemptId}/answers/${questionId}`, token, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selectedAnswerId: answerId }),
-        timeoutMs: 15000
-      });
+      await saveExamAnswer(token, attemptId!, questionId, answerId);
     } catch (err: any) {
       if (err?.status === 401) onUnauthorized();
       if (err?.code === 'timeout') {
@@ -96,12 +91,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     const filtered: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) filtered[q] = a; });
     try {
-      const result = await apiAuthJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, token, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ selections: filtered }),
-        timeoutMs: 15000
-      });
+      const result = await submitExam(token, attemptId!, filtered);
       sessionStorage.removeItem('akdmia.activeAttemptId');
       onFinish(result);
       navigate(ROUTES.examResult);

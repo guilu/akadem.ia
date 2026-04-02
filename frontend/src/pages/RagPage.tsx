@@ -100,9 +100,9 @@ export default function RagPage({ token, subjects }: Props) {
       </div>
 
       {!selectedSubjectId && (
-        <p className="text-sm text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
-          Selecciona una asignatura para comenzar.
-        </p>
+        <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center">
+          <p className="text-sm text-text/55">Selecciona una asignatura para comenzar.</p>
+        </div>
       )}
 
       {selectedSubjectId && (

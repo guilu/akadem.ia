@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CircleMinus, CheckCircle } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { getFlashcardsStudyQueue, getFlashcardsStudyNext, reviewFlashcard } from '../api';
 
 type IntervalHints = { again: string; good: string; easy: string };
 type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
@@ -19,6 +19,7 @@ export default function FlashcardsStudyPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -28,10 +29,10 @@ export default function FlashcardsStudyPage() {
   const token = localStorage.getItem('ak_token') || '';
 
   const fetchNext = async () => {
-    const data = await apiAuthJson<StudyItem | undefined>(`${apiBase}/api/flashcards/study/next?unitId=${unitId}`, token);
+    const data = await getFlashcardsStudyNext<StudyItem | undefined>(token, unitId!);
     return data || null;
   };
-  const fetchQueue = async () => apiAuthJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}`, token);
+  const fetchQueue = async () => getFlashcardsStudyQueue<StudyQueueResponse>(token, unitId!);
 
   const currentItem = items[currentIndex];
   const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
@@ -64,12 +65,9 @@ export default function FlashcardsStudyPage() {
   const handleReview = async (grade: ReviewRequest['grade']) => {
     if (!currentItem || submitting) return;
     setSubmitting(true);
+    setReviewError(null);
     try {
-      await apiAuthJson(`${apiBase}/api/flashcards/study/review`, token, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest)
-      });
+      await reviewFlashcard(token, { flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest);
       const [newQueue, next] = await Promise.all([fetchQueue(), fetchNext()]);
       if (newQueue) setQueueCounts(newQueue);
       setAnsweredCount((prev) => prev + 1);
@@ -78,14 +76,23 @@ export default function FlashcardsStudyPage() {
       setItems((prev) => [...prev, next]);
       setCurrentIndex((prev) => prev + 1);
     } catch {
-      setError('No se pudo registrar la respuesta.');
+      setReviewError('No se pudo registrar la respuesta. Inténtalo de nuevo.');
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <div className="text-sm text-text/55">Cargando sesión...</div>;
+    return (
+      <div className="space-y-5 max-w-2xl mx-auto animate-pulse">
+        <div className="h-9 w-9 rounded-full bg-secondary/20" />
+        <div className="space-y-1.5">
+          <div className="h-3 w-2/3 rounded-full bg-secondary/20" />
+          <div className="h-1.5 w-full rounded-full bg-secondary/20" />
+        </div>
+        <div className="border border-secondary/15 rounded-2xl p-7 min-h-[52vh] bg-secondary/5" />
+      </div>
+    );
   }
 
   if (error) {
@@ -98,6 +105,7 @@ export default function FlashcardsStudyPage() {
   }
 
   if (finished) {
+    const nothingToReview = answeredCount === 0;
     return (
       <div className="space-y-6">
         <header className="flex items-center gap-4">
@@ -108,12 +116,20 @@ export default function FlashcardsStudyPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-2xl font-extrabold tracking-tight">Sesión completada</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {nothingToReview ? 'Sin pendientes' : 'Sesión completada'}
+          </h1>
         </header>
         <div className="border border-secondary/25 rounded-2xl p-8 text-center">
-          <div className="text-5xl mb-4">🎉</div>
-          <div className="text-xl font-bold mb-2">¡Bien hecho!</div>
-          <p className="text-text/55 text-sm mb-6">Has respondido <strong>{answeredCount}</strong> tarjetas en esta sesión.</p>
+          <div className="text-5xl mb-4">{nothingToReview ? '✅' : '🎉'}</div>
+          <div className="text-xl font-bold mb-2">
+            {nothingToReview ? 'Nada que repasar hoy' : '¡Bien hecho!'}
+          </div>
+          <p className="text-text/55 text-sm mb-6">
+            {nothingToReview
+              ? 'No había tarjetas pendientes para repasar en esta sesión.'
+              : <>Has respondido <strong>{answeredCount}</strong> tarjetas en esta sesión.</>}
+          </p>
           <button
             className="btn btn-primary rounded-full px-8 py-2.5 text-sm shadow-lg shadow-primary/20 inline-flex items-center gap-2"
             onClick={() => navigate('/flashcards')}
@@ -156,6 +172,24 @@ export default function FlashcardsStudyPage() {
           <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
         </div>
       </div>
+
+      {/* ── Review error banner ── */}
+      {reviewError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400 flex items-center justify-between gap-3"
+        >
+          <span>{reviewError}</span>
+          <button
+            type="button"
+            onClick={() => setReviewError(null)}
+            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            aria-label="Cerrar error"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ── Card ── */}
       <div className="relative">

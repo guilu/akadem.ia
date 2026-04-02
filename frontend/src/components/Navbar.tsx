@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket } from 'flowbite-react-icons/outline';
+import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
+import type { NavUser } from '../types';
+import { UserMenuDropdown } from './UserMenuDropdown';
 
-export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
+export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onProfile, onSettings }: {
   isAuthed: boolean;
   isAdmin: boolean;
+  user: NavUser | null;
   onLogout: () => void;
+  onProfile: () => void;
+  onSettings: () => void;
 }) {
   const [isDark, setIsDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -101,22 +106,11 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
                   IA
                 </button>
               )}
-              <button onClick={() => go(ROUTES.settings)} className={linkCls(ROUTES.settings)}>
-                <Cog className="w-4 h-4" />
-                Ajustes
-              </button>
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-text/65 hover:text-red-400 hover:bg-red-400/10 transition-colors"
-              >
-                <ArrowLeftToBracket className="w-4 h-4" />
-                Salir
-              </button>
             </>
           )}
         </div>
 
-        {/* Right: theme toggle + mobile burger */}
+        {/* Right: theme toggle + user menu / mobile burger */}
         <div className="flex items-center gap-2">
           <button
             className={`theme-toggle ${isDark ? 'dark' : 'light'}`}
@@ -127,6 +121,19 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
             <span className="theme-icon" aria-hidden>☾</span>
             <span className="theme-icon" aria-hidden>☀︎</span>
           </button>
+
+          {/* Desktop user menu */}
+          {isAuthed && user && (
+            <div className="hidden md:block">
+              <UserMenuDropdown
+                user={user}
+                isAdmin={isAdmin}
+                onProfile={onProfile}
+                onSettings={onSettings}
+                onLogout={onLogout}
+              />
+            </div>
+          )}
 
           {/* Hamburger / X button */}
           <button
@@ -151,6 +158,8 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
         }`}
       >
         <div className="px-4 pb-4 pt-2 border-t border-secondary/15 space-y-1 bg-bg/95 backdrop-blur-md">
+
+          {/* Navigation zone */}
           <button onClick={() => go(ROUTES.home)} className={mobileLinkCls(ROUTES.home)}>
             <Home className="w-4 h-4" />
             Home
@@ -185,19 +194,37 @@ export default function NavbarComponent({ isAuthed, isAdmin, onLogout }: {
                   IA
                 </button>
               )}
-              <button onClick={() => go(ROUTES.settings)} className={mobileLinkCls(ROUTES.settings)}>
+
+              {/* Divider between nav zone and user zone */}
+              <div className="border-t border-secondary/15 my-1" />
+
+              {/* User zone */}
+              {user && (
+                <div className="px-4 py-2 text-xs text-text/50 truncate">
+                  {user.email}
+                </div>
+              )}
+              <button
+                onClick={() => { onProfile(); setMenuOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
+              >
+                <User className="w-4 h-4" />
+                Mi perfil
+              </button>
+              <button
+                onClick={() => { onSettings(); setMenuOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
+              >
                 <Cog className="w-4 h-4" />
                 Ajustes
               </button>
-              <div className="pt-1 mt-1 border-t border-secondary/15">
-                <button
-                  onClick={() => { onLogout(); setMenuOpen(false); }}
-                  className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors"
-                >
-                  <ArrowLeftToBracket className="w-4 h-4" />
-                  Salir
-                </button>
-              </div>
+              <button
+                onClick={() => { onLogout(); setMenuOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors"
+              >
+                <ArrowLeftToBracket className="w-4 h-4" />
+                Salir
+              </button>
             </>
           )}
         </div>

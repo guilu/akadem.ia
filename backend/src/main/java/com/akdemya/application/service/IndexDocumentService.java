@@ -80,7 +80,7 @@ public class IndexDocumentService implements IndexSourceUseCase {
             String rawText = extractor.extract(is, command.contentType());
             log.info("Extracted {} chars from document id={}", rawText.length(), doc.getId());
 
-            chunks = chunker.chunk(rawText, doc.getId());
+            chunks = chunker.chunk(rawText, doc);
             log.info("Created {} chunks for document id={}", chunks.size(), doc.getId());
 
             for (SourceChunk chunk : chunks) {

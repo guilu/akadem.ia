@@ -9,5 +9,7 @@ public interface FlashcardImportExportUseCase {
 
   String exportFlashcards(UUID unitId, String format);
 
+  String exportFlashcardsBySubject(UUID subjectId, String format);
+
   record ImportResult(int imported, int skipped, List<String> errors) {}
 }

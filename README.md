@@ -55,8 +55,10 @@ com.akdemya
 ### Seguridad
 - JWT stateless (HS256)
 - Filtro `JwtAuthFilter` valida `Authorization: Bearer <token>`
+- Autenticación con Google OAuth2 (flujo completo vía `/api/oauth2/authorization/google`)
 - Endpoints públicos:
   - `/api/auth/**`
+  - `/api/oauth2/**`
   - `/api/subjects/**`
   - `/api/units/**`
   - `/api/questions/**`
@@ -72,10 +74,12 @@ com.akdemya
 ### Auth
 - Registro y login con JWT
 - Hash de passwords con BCrypt
+- **Login con Google (OAuth2)**: los usuarios que acceden por primera vez con Google son creados automáticamente con rol STUDENT. La identidad se vincula por email, por lo que si un usuario ya tiene cuenta con contraseña puede continuar usando la misma cuenta.
 
 **Endpoints:**
 - `POST /api/auth/register` `{ email, password }` → `{ accessToken }`
 - `POST /api/auth/login` `{ email, password }` → `{ accessToken }`
+- `GET /api/oauth2/authorization/google` → redirige al flujo OAuth2 de Google
 
 ### Contenido
 - Subjects → Units → Questions → Answers
@@ -190,7 +194,7 @@ com.akdemya
 - **RAG** *(solo Admin)*: subida de PDFs, indexación y generación de preguntas IA
 
 ### Flujo principal
-1. Usuario se registra o inicia sesión → se guarda JWT en `localStorage` (`ak_token`)
+1. Usuario se registra, inicia sesión con email/contraseña o accede con Google → se guarda JWT en `localStorage` (`ak_token`)
 2. Selecciona una asignatura y configura el simulacro (unidades, dificultad, tiempo)
 3. Inicia examen → backend genera preguntas aleatorias
 4. Responde y envía resultados
@@ -263,7 +267,6 @@ com.akdemya
 - Cambiar secret JWT en producción
 - Añadir validaciones y manejo de errores más granulares
 - Añadir paginación en endpoints de contenido
-- Añadir tests y CI
 - Migrar búsqueda vectorial a **pgvector** en producción (actualmente en memoria)
 - Hacer el procesamiento de PDFs **asíncrono** para documentos grandes
 

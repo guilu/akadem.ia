@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { formatDuration } from '../utils/format';
 import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { getExamAttempts } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
 import { ROUTES } from '../constants/routes';
 
@@ -31,7 +31,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
   useEffect(() => {
     setLoading(true);
     setError('');
-    apiAuthJson<ExamAttemptSummary[]>(`${apiBase}/api/exams/attempts`, token)
+    getExamAttempts(token)
       .then(setHistory)
       .catch(err => {
         if (err?.status === 401) onUnauthorized();
@@ -39,7 +39,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
         setHistory([]);
       })
       .finally(() => setLoading(false));
-  }, [token, apiBase]);
+  }, [token]);
 
   return (
     <section className="mb-8">
