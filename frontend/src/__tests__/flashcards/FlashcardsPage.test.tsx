@@ -41,6 +41,9 @@ vi.mock('../../api', async (importOriginal) => {
     ...actual,
     apiAuthJson: vi.fn(),
     exportFlashcardsBySubject: vi.fn(),
+    exportFlashcardsByUnit: vi.fn(),
+    getFlashcardsUnitsSummary: vi.fn(),
+    getFlashcardsStudyQueue: vi.fn(),
   };
 });
 
@@ -74,7 +77,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows empty state with import CTA when no subjects available', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -88,7 +92,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('opens import modal when empty state CTA is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -102,7 +107,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('opens import modal when header Importar button is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -117,7 +123,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('closes import modal when close is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -131,7 +138,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('reloads units when onImported is called from modal', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -140,12 +148,13 @@ describe('FlashcardsPage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     fireEvent.click(screen.getByText('Importado'));
 
-    // apiAuthJson should be called again (reload)
-    expect(vi.mocked(api.apiAuthJson).mock.calls.length).toBeGreaterThan(2);
+    // getFlashcardsUnitsSummary should be called again (reload)
+    expect(vi.mocked(api.getFlashcardsUnitsSummary).mock.calls.length).toBeGreaterThan(1);
   });
 
   it('shows subjects when data loads', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -155,7 +164,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows unit list when subject is selected', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     // We need SubjectCard to be real here — don't mock it
     render(<FlashcardsPage />);
@@ -172,7 +182,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows back button and navigates back when clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -194,14 +205,16 @@ describe('FlashcardsPage', () => {
       useSearchParams: () => [new URLSearchParams('mode=study')],
     }));
 
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
     render(<FlashcardsPage />);
 
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
   });
 
   it('navigates to study page tab when Estudio tab clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -212,7 +225,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('navigates to flashcards when Examinar tab clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -223,7 +237,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('navigates to history when Historial tab clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -234,8 +249,9 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows export error banner when unit export fetch fails', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
-    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.exportFlashcardsByUnit).mockRejectedValue(Object.assign(new Error('api_error'), { status: 500 }));
 
     render(<FlashcardsPage />);
 
@@ -258,8 +274,9 @@ describe('FlashcardsPage', () => {
   });
 
   it('dismisses export error banner when close button is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
-    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.exportFlashcardsByUnit).mockRejectedValue(Object.assign(new Error('api_error'), { status: 500 }));
 
     render(<FlashcardsPage />);
 
@@ -277,7 +294,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('calls exportFlashcardsBySubject and creates download link on success', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
     vi.mocked(api.exportFlashcardsBySubject).mockResolvedValue('front,back\nHello,Hola\n');
 
     // Spy on link.click without mocking createElement globally
@@ -308,7 +326,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows subject export error banner when exportFlashcardsBySubject fails', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
     vi.mocked(api.exportFlashcardsBySubject).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsPage />);
@@ -326,7 +345,7 @@ describe('FlashcardsPage', () => {
   });
 
   it('filters subjects by search term', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([
       ...mockUnits,
       {
         unitId: 'unit-3',
@@ -338,6 +357,7 @@ describe('FlashcardsPage', () => {
         dueCount: 0,
       },
     ]);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
@@ -355,7 +375,8 @@ describe('FlashcardsPage', () => {
   });
 
   it('filters units by search term when subject is selected', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
+    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 

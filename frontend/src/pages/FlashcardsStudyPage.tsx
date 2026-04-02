@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CircleMinus, CheckCircle } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { getFlashcardsStudyQueue, getFlashcardsStudyNext, reviewFlashcard } from '../api';
 
 type IntervalHints = { again: string; good: string; easy: string };
 type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
@@ -29,10 +29,10 @@ export default function FlashcardsStudyPage() {
   const token = localStorage.getItem('ak_token') || '';
 
   const fetchNext = async () => {
-    const data = await apiAuthJson<StudyItem | undefined>(`${apiBase}/api/flashcards/study/next?unitId=${unitId}`, token);
+    const data = await getFlashcardsStudyNext<StudyItem | undefined>(token, unitId!);
     return data || null;
   };
-  const fetchQueue = async () => apiAuthJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}`, token);
+  const fetchQueue = async () => getFlashcardsStudyQueue<StudyQueueResponse>(token, unitId!);
 
   const currentItem = items[currentIndex];
   const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
@@ -67,11 +67,7 @@ export default function FlashcardsStudyPage() {
     setSubmitting(true);
     setReviewError(null);
     try {
-      await apiAuthJson(`${apiBase}/api/flashcards/study/review`, token, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest)
-      });
+      await reviewFlashcard(token, { flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest);
       const [newQueue, next] = await Promise.all([fetchQueue(), fetchNext()]);
       if (newQueue) setQueueCounts(newQueue);
       setAnsweredCount((prev) => prev + 1);

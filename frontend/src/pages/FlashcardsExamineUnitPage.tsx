@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { getFlashcardsByUnit } from '../api';
 
 type Flashcard = {
   id: string;
@@ -25,7 +25,7 @@ export default function FlashcardsExamineUnitPage() {
   useEffect(() => {
     if (!unitId) { setError('Falta el unitId.'); setLoading(false); return; }
     let mounted = true;
-    apiAuthJson<Flashcard[]>(`${apiBase}/api/flashcards?unitId=${unitId}`, token)
+    getFlashcardsByUnit<Flashcard[]>(token, unitId)
       .then((data) => { if (mounted) setCards(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las tarjetas.'); })
       .finally(() => { if (mounted) setLoading(false); });

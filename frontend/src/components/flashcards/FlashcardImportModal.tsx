@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiAuthJson, apiBase, getUnitsForSubject } from '../../api';
+import { getSubjects, getUnitsForSubject, importFlashcards } from '../../api';
 
 type Subject = { id: string; name: string; description?: string };
 type Unit = { id: string; name: string };
@@ -27,7 +27,7 @@ export default function FlashcardImportModal({ token, onClose, onImported }: Pro
   // Load all subjects on mount
   useEffect(() => {
     setLoadingSubjects(true);
-    apiAuthJson<Subject[]>(`${apiBase}/api/subjects`, token)
+    getSubjects(token)
       .then((data) => {
         setSubjects(data ?? []);
         if (data && data.length > 0) setSubjectId(data[0].id);
@@ -61,19 +61,7 @@ export default function FlashcardImportModal({ token, onClose, onImported }: Pro
 
     try {
       const content = await file.text();
-      const res = await fetch(
-        `${apiBase}/api/flashcards/import?unitId=${unitId}&format=${format}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'text/plain; charset=UTF-8',
-          },
-          body: content,
-        }
-      );
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-      const data: ImportResult = await res.json();
+      const data = await importFlashcards(token, unitId, format, content);
       setResult(data);
       if (data.imported > 0) onImported();
     } catch (e: any) {

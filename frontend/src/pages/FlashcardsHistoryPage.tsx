@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiAuthJson, apiBase } from '../api';
+import { getFlashcardsHistory } from '../api';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 
 type HistoryItem = {
@@ -29,7 +29,7 @@ export default function FlashcardsHistoryPage() {
 
   useEffect(() => {
     let mounted = true;
-    apiAuthJson<HistoryItem[]>(`${apiBase}/api/flashcards/history?limit=50`, token)
+    getFlashcardsHistory<HistoryItem[]>(token, 50)
       .then((data) => { if (mounted) setItems(data || []); })
       .catch(() => { if (mounted) setError('No se pudo cargar el historial.'); })
       .finally(() => { if (mounted) setLoading(false); });

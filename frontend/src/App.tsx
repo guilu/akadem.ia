@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
-import { apiBase, apiAuthJson } from './api';
+import { apiAuthJson, getSubjects, startExam as apiStartExam, startRandomExam as apiStartRandomExam, submitExam } from './api';
 import type { Subject, ExamResult, ExamStartResponse, NavUser } from './types';
 import { timeoutMessage } from './utils/messages';
 import { deriveInitials } from './utils/format';
@@ -70,14 +70,14 @@ export default function App() {
       setSubjects([]);
       return Promise.resolve();
     }
-    return authedJson<Subject[]>(`${apiBase}/api/subjects`)
+    return getSubjects(token)
       .then(setSubjects)
       .catch(() => setSubjects([]));
   };
 
   useEffect(() => {
     refreshSubjects();
-  }, [token, apiBase]);
+  }, [token]);
 
   // Handle OAuth2 callback: extract token from URL query param
   useEffect(() => {
@@ -109,12 +109,7 @@ export default function App() {
   // timeoutMessage from utils
   async function startExam(cfg: { unitCounts: Record<string, number>; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
     try {
-      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
-        timeoutMs: 15000
-      });
+      const data = await apiStartExam(token, cfg);
       setAttemptId(data.attemptId);
       setMinutes(Math.round(data.totalTimeSeconds / 60));
       setQuestions(data.questions);
@@ -132,12 +127,7 @@ export default function App() {
 
   async function startRandomExam(cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
     try {
-      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start-random`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
-        timeoutMs: 15000
-      });
+      const data = await apiStartRandomExam(token, cfg);
       setAttemptId(data.attemptId);
       setMinutes(Math.round(data.totalTimeSeconds / 60));
       setQuestions(data.questions);
@@ -161,12 +151,7 @@ export default function App() {
       }
     });
     try {
-      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selections }),
-        timeoutMs: 15000
-      });
+      const data = await submitExam(token, attemptId, selections);
       sessionStorage.removeItem('akdmia.activeAttemptId');
       setActiveAttemptId('');
       setResult(data);
@@ -182,12 +167,7 @@ export default function App() {
 
   async function viewResult(attempt: string) {
     try {
-      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selections: {} }),
-        timeoutMs: 15000
-      });
+      const data = await submitExam(token, attempt, {});
       if (activeAttemptId === attempt) {
         sessionStorage.removeItem('akdmia.activeAttemptId');
         setActiveAttemptId('');

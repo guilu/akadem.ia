@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiAuthJson, apiBase, exportFlashcardsBySubject } from '../api';
+import { exportFlashcardsBySubject, exportFlashcardsByUnit, getFlashcardsUnitsSummary, getFlashcardsStudyQueue } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
@@ -40,7 +40,7 @@ export default function FlashcardsPage() {
   const loadUnits = () => {
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    getFlashcardsUnitsSummary<UnitSummary[]>(token)
       .then((data) => setUnits(data || []))
       .catch(() => setError('No se pudieron cargar las unidades.'))
       .finally(() => setLoading(false));
@@ -50,7 +50,7 @@ export default function FlashcardsPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    getFlashcardsUnitsSummary<UnitSummary[]>(token)
       .then((data) => { if (mounted) setUnits(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las unidades.'); })
       .finally(() => { if (mounted) setLoading(false); });
@@ -60,7 +60,7 @@ export default function FlashcardsPage() {
   useEffect(() => {
     let mounted = true;
     setGlobalLoading(true);
-    apiAuthJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`, token)
+    getFlashcardsStudyQueue<GlobalQueue>(token)
       .then((data) => { if (mounted) setGlobalQueue(data || null); })
       .catch(() => {})
       .finally(() => { if (mounted) setGlobalLoading(false); });
@@ -123,15 +123,7 @@ export default function FlashcardsPage() {
   const handleExport = async (unit: UnitSummary, format: 'csv' | 'json') => {
     setExportError('');
     try {
-      const res = await fetch(
-        `${apiBase}/api/flashcards/export?unitId=${unit.unitId}&format=${format}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) {
-        setExportError('No se pudo exportar. Inténtalo de nuevo.');
-        return;
-      }
-      const content = await res.text();
+      const content = await exportFlashcardsByUnit(token, unit.unitId, format);
       const blob = new Blob([content], {
         type: format === 'json' ? 'application/json' : 'text/csv',
       });

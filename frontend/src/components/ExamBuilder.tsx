@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Minus, Plus, Play } from 'flowbite-react-icons/outline';
-import { apiBase, apiAuthJson } from '../api';
+import { getUnitsAvailability } from '../api';
 import type { UnitAvailability } from '../types';
 
 const inp = 'bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
@@ -22,13 +22,13 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
   useEffect(() => {
     const token = localStorage.getItem('ak_token') || '';
-    const diffQuery = difficulty === 'ALL' ? '' : `&difficulty=${difficulty}`;
+    const diff = difficulty === 'ALL' ? undefined : difficulty;
     setAvailabilityLoading(true);
-    apiAuthJson<UnitAvailability[]>(`${apiBase}/api/units/availability?subjectId=${subjectId}${diffQuery}`, token)
+    getUnitsAvailability(token, subjectId, diff)
       .then(us => { setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))); setPage(0); })
       .catch(err => { if (err?.status === 401) onUnauthorized(); })
       .finally(() => setAvailabilityLoading(false));
-  }, [subjectId, apiBase, difficulty]);
+  }, [subjectId, difficulty]);
 
   const totalPages = Math.ceil(units.length / PAGE_SIZE);
   const pagedUnits = units.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);

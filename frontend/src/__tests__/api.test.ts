@@ -4,6 +4,7 @@ import {
   uploadSource, confirmIndex, getSources, generateQuiz, getDrafts, approveDraft,
   rejectDraft, getUnitsForSubject, deleteSource
 } from '../api';
+import { API_ROUTES } from '../constants/apiRoutes';
 
 // Mock global fetch
 const mockFetch = vi.fn();
@@ -31,7 +32,7 @@ describe('getMyProfile', () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/v1/users/me');
+    expect(url).toContain(API_ROUTES.users.me);
     expect(options.headers.Authorization).toBe('Bearer my-token');
     expect(result).toEqual(profile);
   });
@@ -56,7 +57,7 @@ describe('updateMyProfile', () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/v1/users/me');
+    expect(url).toContain(API_ROUTES.users.me);
     expect(options.method).toBe('PATCH');
     expect(options.headers['Content-Type']).toBe('application/json');
     expect(options.headers.Authorization).toBe('Bearer tok');
@@ -190,7 +191,7 @@ describe('RAG API functions', () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/sources');
+    expect(url).toContain(API_ROUTES.sources.root);
     expect(options.method).toBe('POST');
     expect(options.headers.Authorization).toBe('Bearer token');
     expect(result).toEqual(preview);
@@ -210,7 +211,7 @@ describe('RAG API functions', () => {
     const res = await confirmIndex('token', 'doc-1', []);
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/sources/doc-1/confirm');
+    expect(url).toContain(API_ROUTES.sources.confirm('doc-1'));
     expect(options.method).toBe('POST');
     expect(res).toEqual(result);
   });
@@ -222,7 +223,7 @@ describe('RAG API functions', () => {
     const result = await getSources('token');
 
     const [url] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/sources');
+    expect(url).toContain(API_ROUTES.sources.root);
     expect(result).toEqual(sources);
   });
 
@@ -248,7 +249,7 @@ describe('RAG API functions', () => {
     vi.stubGlobal('clearTimeout', origClearTimeout);
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/ai/quizzes/generate');
+    expect(url).toContain(API_ROUTES.ai.quizzesGenerate);
     expect(options.method).toBe('POST');
     expect(result).toEqual(quizResponse);
   });
@@ -280,7 +281,7 @@ describe('RAG API functions', () => {
     const result = await approveDraft('token', 'd-1');
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/ai/drafts/d-1/approve');
+    expect(url).toContain(API_ROUTES.ai.draftApprove('d-1'));
     expect(options.method).toBe('POST');
     expect(result).toEqual(draft);
   });
@@ -292,7 +293,7 @@ describe('RAG API functions', () => {
     const result = await rejectDraft('token', 'd-1');
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/ai/drafts/d-1/reject');
+    expect(url).toContain(API_ROUTES.ai.draftReject('d-1'));
     expect(options.method).toBe('POST');
     expect(result).toEqual(draft);
   });
@@ -304,7 +305,7 @@ describe('RAG API functions', () => {
     const result = await getUnitsForSubject('token', 'subj-1');
 
     const [url] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/units?subjectId=subj-1');
+    expect(url).toContain(`${API_ROUTES.units.root}?subjectId=subj-1`);
     expect(result).toEqual(units);
   });
 
@@ -314,7 +315,7 @@ describe('RAG API functions', () => {
     await deleteSource('token', 'src-1');
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('/api/sources/src-1');
+    expect(url).toContain(API_ROUTES.sources.single('src-1'));
     expect(options.method).toBe('DELETE');
   });
 });
@@ -335,7 +336,7 @@ describe('exportFlashcardsBySubject', () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain('subjectId=subj-1');
+    expect(url).toContain(`${API_ROUTES.flashcards.export}?subjectId=subj-1`);
     expect(url).toContain('format=csv');
     expect(options.headers.Authorization).toBe('Bearer my-token');
     expect(result).toBe('front,back\nHello,Hola\n');
