@@ -115,6 +115,159 @@ class ExamManagerResumeTest {
     assertEquals(1, summaries.get(0).totalQuestions());
     assertEquals(2, summaries.get(1).totalQuestions());
   }
+
+  // ── Visibility tests ──────────────────────────────────────────────────────
+
+  @Test
+  void startExam_withGlobalUnit_returnsQuestions() {
+    UUID callerId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID qId = UUID.randomUUID();
+
+    // GLOBAL unit and question — visible to everyone
+    Unit unit = new Unit(unitId, UUID.randomUUID(), "Global Unit", null, 1,
+        com.akdemya.domain.model.Visibility.GLOBAL, null);
+    Question question = new Question(qId, unitId, "Q?", null, Question.Difficulty.EASY,
+        com.akdemya.domain.model.Visibility.GLOBAL, null);
+    Answer answer = new Answer(UUID.randomUUID(), qId, "A", true);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(question));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of(answer));
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
+        "user@test.com", callerId, Map.of(unitId, 10), 30, null);
+    var response = manager.startExam(command);
+
+    assertEquals(1, response.questions().size(), "Global questions must be included");
+  }
+
+  @Test
+  void startExam_withOwnPrivateUnit_returnsQuestions() {
+    UUID ownerId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID qId = UUID.randomUUID();
+
+    // PRIVATE unit and question owned by the caller
+    Unit unit = new Unit(unitId, UUID.randomUUID(), "Private Unit", null, 1,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+    Question question = new Question(qId, unitId, "Q?", null, Question.Difficulty.EASY,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+    Answer answer = new Answer(UUID.randomUUID(), qId, "A", true);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(question));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of(answer));
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
+        "owner@test.com", ownerId, Map.of(unitId, 10), 30, null);
+    var response = manager.startExam(command);
+
+    assertEquals(1, response.questions().size(), "Owner's own private questions must be included");
+  }
+
+  @Test
+  void startExam_withAnotherUsersPrivateUnit_returnsNoQuestions() {
+    UUID ownerId = UUID.randomUUID();
+    UUID callerId = UUID.randomUUID(); // different user
+    UUID unitId = UUID.randomUUID();
+    UUID qId = UUID.randomUUID();
+
+    // PRIVATE unit and question owned by a different user
+    Unit unit = new Unit(unitId, UUID.randomUUID(), "Private Unit", null, 1,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+    Question question = new Question(qId, unitId, "Q?", null, Question.Difficulty.EASY,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(question));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of());
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
+        "caller@test.com", callerId, Map.of(unitId, 10), 30, null);
+    var response = manager.startExam(command);
+
+    assertEquals(0, response.questions().size(),
+        "Another user's private questions must not be accessible");
+  }
+
+  @Test
+  void startRandomExam_withAnotherUsersPrivateUnit_returnsNoQuestions() {
+    UUID ownerId = UUID.randomUUID();
+    UUID callerId = UUID.randomUUID(); // different user
+    UUID subjectId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID qId = UUID.randomUUID();
+
+    Subject subject = new Subject(subjectId, "Math", null);
+    // PRIVATE unit owned by a different user
+    Unit unit = new Unit(unitId, subjectId, "Private Unit", null, 1,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+    Question question = new Question(qId, unitId, "Q?", null, Question.Difficulty.EASY,
+        com.akdemya.domain.model.Visibility.PRIVATE, ownerId);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(question));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of());
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var command = new com.akdemya.domain.port.in.ExamUseCase.StartRandomCommand(
+        "caller@test.com", callerId, subjectId, 10, 30, null);
+    var response = manager.startRandomExam(command);
+
+    assertEquals(0, response.questions().size(),
+        "Another user's private units/questions must not be accessible in random exam");
+  }
+
+  @Test
+  void startRandomExam_withGlobalUnit_returnsQuestions() {
+    UUID callerId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID qId = UUID.randomUUID();
+
+    Subject subject = new Subject(subjectId, "Math", null);
+    Unit unit = new Unit(unitId, subjectId, "Global Unit", null, 1,
+        com.akdemya.domain.model.Visibility.GLOBAL, null);
+    Question question = new Question(qId, unitId, "Q?", null, Question.Difficulty.EASY,
+        com.akdemya.domain.model.Visibility.GLOBAL, null);
+    Answer answer = new Answer(UUID.randomUUID(), qId, "A", true);
+
+    InMemoryAttemptRepo attemptRepo = new InMemoryAttemptRepo();
+    InMemoryAttemptAnswerRepo attemptAnswerRepo = new InMemoryAttemptAnswerRepo();
+    InMemoryQuestionRepo questionRepo = new InMemoryQuestionRepo(List.of(question));
+    InMemoryAnswerRepo answerRepo = new InMemoryAnswerRepo(List.of(answer));
+    InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
+    InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
+
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+
+    var command = new com.akdemya.domain.port.in.ExamUseCase.StartRandomCommand(
+        "user@test.com", callerId, subjectId, 10, 30, null);
+    var response = manager.startRandomExam(command);
+
+    assertEquals(1, response.questions().size(), "Global questions must be included in random exam");
+  }
+
   static class InMemoryAttemptRepo implements ExamAttemptRepository {
     private final Map<UUID, ExamAttempt> data = new ConcurrentHashMap<>();
 
@@ -225,6 +378,23 @@ class ExamManagerResumeTest {
               && q.getDifficulty().name().equals(difficulty))
           .count();
     }
+
+    @Override
+    public java.util.List<Question> findVisibleByUserId(UUID userId) {
+      return data.values().stream()
+          .filter(q -> q.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+              || userId.equals(q.getOwnerId()))
+          .toList();
+    }
+
+    @Override
+    public java.util.List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+      return data.values().stream()
+          .filter(q -> q.getUnitId().equals(unitId)
+              && (q.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                  || userId.equals(q.getOwnerId())))
+          .toList();
+    }
   }
 
   static class InMemoryAnswerRepo implements AnswerRepository {
@@ -303,6 +473,15 @@ class ExamManagerResumeTest {
     public void deleteById(UUID id) {
       data.remove(id);
     }
+
+    @Override
+    public java.util.List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) {
+      return data.values().stream()
+          .filter(u -> u.getSubjectId().equals(subjectId)
+              && (u.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                  || userId.equals(u.getOwnerId())))
+          .toList();
+    }
   }
 
   static class InMemorySubjectRepo implements SubjectRepository {
@@ -331,6 +510,14 @@ class ExamManagerResumeTest {
     @Override
     public void deleteById(UUID id) {
       data.remove(id);
+    }
+
+    @Override
+    public List<Subject> findVisibleByUserId(UUID userId) {
+      return data.values().stream()
+          .filter(s -> s.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+              || userId.equals(s.getOwnerId()))
+          .toList();
     }
   }
 }

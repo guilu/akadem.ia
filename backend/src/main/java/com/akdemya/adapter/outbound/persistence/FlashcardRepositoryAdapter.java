@@ -65,4 +65,14 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   public void deleteById(UUID id) {
     jpa.deleteById(id);
   }
+
+  @Override
+  public List<Flashcard> findVisibleByUserId(UUID userId) {
+    return jpa.findVisibleByUserId(userId).stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public List<Flashcard> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+    return jpa.findVisibleByUnitIdAndUserId(unitId, userId).stream().map(mapper::toDomain).toList();
+  }
 }

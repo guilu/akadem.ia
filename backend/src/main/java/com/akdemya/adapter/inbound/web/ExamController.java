@@ -1,12 +1,16 @@
 package com.akdemya.adapter.inbound.web;
 
+import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.in.ExamUseCase;
+import com.akdemya.domain.port.out.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -16,9 +20,11 @@ public class ExamController {
 
     private static final Logger log = LoggerFactory.getLogger(ExamController.class);
     private final ExamUseCase examUseCase;
+    private final UserRepository userRepo;
 
-    public ExamController(ExamUseCase examUseCase) {
+    public ExamController(ExamUseCase examUseCase, UserRepository userRepo) {
         this.examUseCase = examUseCase;
+        this.userRepo = userRepo;
     }
 
     public record StartRequest(java.util.Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
@@ -32,8 +38,9 @@ public class ExamController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
+        UUID userId = resolveUserId(principal);
         var command = new ExamUseCase.StartRandomCommand(
-                principal.getUsername(), req.subjectId(), req.count(), req.minutes(), req.difficulty());
+                principal.getUsername(), userId, req.subjectId(), req.count(), req.minutes(), req.difficulty());
         var response = examUseCase.startRandomExam(command);
         return ResponseEntity.ok(response);
     }
@@ -43,7 +50,8 @@ public class ExamController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(principal.getUsername(), req.unitCounts(), req.minutes(), req.difficulty());
+        UUID userId = resolveUserId(principal);
+        ExamUseCase.StartCommand command = new ExamUseCase.StartCommand(principal.getUsername(), userId, req.unitCounts(), req.minutes(), req.difficulty());
         var response = examUseCase.startExam(command);
         return ResponseEntity.ok(response);
     }
@@ -120,5 +128,11 @@ public class ExamController {
         }
         var result = examUseCase.listAttempts(principal.getUsername());
         return ResponseEntity.ok(result);
+    }
+
+    private UUID resolveUserId(User principal) {
+        return userRepo.findByEmail(principal.getUsername())
+                .map(AppUser::getId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
 }

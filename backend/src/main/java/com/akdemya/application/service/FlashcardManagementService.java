@@ -29,14 +29,28 @@ public class FlashcardManagementService implements FlashcardManagementUseCase {
 
   @Override
   @Transactional
+  public Flashcard createFlashcardWithVisibility(CreateCommandWithVisibility command) {
+    Flashcard flashcard;
+    if (command.visibility() == com.akdemya.domain.model.Visibility.GLOBAL) {
+      flashcard = Flashcard.createGlobal(command.unitId(), command.front(), command.back());
+    } else {
+      flashcard = Flashcard.createPrivate(command.unitId(), command.front(), command.back(), command.ownerId());
+    }
+    return flashcardRepo.save(flashcard);
+  }
+
+  @Override
+  @Transactional
   public Flashcard updateFlashcard(UpdateCommand command) {
     Flashcard existing = flashcardRepo.findById(command.id())
         .orElseThrow(() -> new NoSuchElementException("Flashcard not found"));
     UUID unitId = command.unitId() != null ? command.unitId() : existing.getUnitId();
     String front = command.front() != null ? command.front() : existing.getFront();
     String back = command.back() != null ? command.back() : existing.getBack();
+    // Preserve visibility and ownerId from existing flashcard to avoid dropping metadata on update
     Flashcard updated = new Flashcard(existing.getId(), unitId, front, back,
-        existing.getCreatedAt(), LocalDateTime.now());
+        existing.getCreatedAt(), LocalDateTime.now(),
+        existing.getVisibility(), existing.getOwnerId());
     return flashcardRepo.save(updated);
   }
 
@@ -49,5 +63,10 @@ public class FlashcardManagementService implements FlashcardManagementUseCase {
   @Override
   public List<Flashcard> listByUnit(UUID unitId) {
     return flashcardRepo.findByUnitId(unitId);
+  }
+
+  @Override
+  public List<Flashcard> listVisibleByUnit(UUID unitId, UUID userId) {
+    return flashcardRepo.findVisibleByUnitIdAndUserId(unitId, userId);
   }
 }

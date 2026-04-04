@@ -17,10 +17,10 @@ public interface ExamUseCase {
 
   void updateAnswer(UpdateAnswerCommand command, String userEmail);
 
-  record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
+  record StartCommand(String userEmail, UUID userId, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
   }
 
-  record StartRandomCommand(String userEmail, UUID subjectId, int count, int minutes, String difficulty) {
+  record StartRandomCommand(String userEmail, UUID userId, UUID subjectId, int count, int minutes, String difficulty) {
   }
 
   record StartResponse(UUID attemptId, int totalTimeSeconds, List<QuestionData> questions) {

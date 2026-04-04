@@ -1,6 +1,8 @@
 package com.akdemya.domain.port.out;
 
 import com.akdemya.domain.model.Question;
+import com.akdemya.domain.model.Visibility;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,4 +23,10 @@ public interface QuestionRepository {
   long countByUnitId(UUID unitId);
 
   long countByUnitIdAndDifficulty(UUID unitId, String difficulty);
+
+  /** Returns all GLOBAL questions plus the caller's own PRIVATE questions. */
+  List<Question> findVisibleByUserId(UUID userId);
+
+  /** Returns GLOBAL questions plus the caller's own PRIVATE questions for the given unit. */
+  List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId);
 }

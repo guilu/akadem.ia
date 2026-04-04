@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
@@ -82,8 +83,17 @@ public class FlashcardController {
   }
 
   @GetMapping
-  public List<FlashcardDto.FlashcardResponse> listByUnit(@RequestParam UUID unitId) {
-    return managementUseCase.listByUnit(unitId).stream()
+  public List<FlashcardDto.FlashcardResponse> listByUnit(@RequestParam UUID unitId,
+                                                         @AuthenticationPrincipal User principal) {
+    List<Flashcard> flashcards;
+    if (principal == null) {
+      // Unauthenticated — return only global flashcards
+      flashcards = managementUseCase.listByUnit(unitId);
+    } else {
+      UUID userId = requireUserId(principal);
+      flashcards = managementUseCase.listVisibleByUnit(unitId, userId);
+    }
+    return flashcards.stream()
         .map(this::toFlashcardResponse)
         .toList();
   }
@@ -91,13 +101,21 @@ public class FlashcardController {
   @PostMapping
   public ResponseEntity<FlashcardDto.FlashcardResponse> create(@RequestBody FlashcardDto.CreateRequest req,
                                                                @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
     if (req == null || req.unitId() == null) {
       return ResponseEntity.badRequest().build();
     }
+    Visibility visibility = req.visibility() != null ? req.visibility() : Visibility.PRIVATE;
+
+    // Only ADMINs can create GLOBAL flashcards
+    if (visibility == Visibility.GLOBAL && !isAdmin(principal)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     try {
-      Flashcard saved = managementUseCase.createFlashcard(
-          new FlashcardManagementUseCase.CreateCommand(req.unitId(), req.front(), req.back()));
+      Flashcard saved = managementUseCase.createFlashcardWithVisibility(
+          new FlashcardManagementUseCase.CreateCommandWithVisibility(
+              req.unitId(), req.front(), req.back(), visibility, userId));
       return ResponseEntity.status(HttpStatus.CREATED).body(toFlashcardResponse(saved));
     } catch (IllegalArgumentException ex) {
       return ResponseEntity.badRequest().build();
@@ -233,13 +251,13 @@ public class FlashcardController {
       @RequestParam(required = false) UUID subjectId,
       @RequestParam(defaultValue = "csv") String format,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
     if (unitId == null && subjectId == null) {
       return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
     }
     String content = unitId != null
         ? importExportUseCase.exportFlashcards(unitId, format)
-        : importExportUseCase.exportFlashcardsBySubject(subjectId, format);
+        : importExportUseCase.exportFlashcardsBySubject(subjectId, userId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";
     String filename = isJson ? "flashcards.json" : "flashcards.csv";
@@ -314,6 +332,11 @@ public class FlashcardController {
     return userRepo.findByEmail(principal.getUsername())
         .map(AppUser::getId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+  }
+
+  private boolean isAdmin(User principal) {
+    return principal != null && principal.getAuthorities().stream()
+        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
   }
 
   private int resolveLimit(Integer limit) {

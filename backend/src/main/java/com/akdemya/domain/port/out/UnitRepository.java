@@ -19,4 +19,7 @@ public interface UnitRepository {
   Unit save(Unit unit);
 
   void deleteById(UUID id);
+
+  /** Returns all GLOBAL units plus the caller's own PRIVATE units for the given subject. */
+  List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId);
 }

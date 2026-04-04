@@ -23,4 +23,10 @@ public interface FlashcardRepository {
   Flashcard save(Flashcard flashcard);
 
   void deleteById(UUID id);
+
+  /** Returns all GLOBAL flashcards plus the caller's own PRIVATE flashcards. */
+  List<Flashcard> findVisibleByUserId(UUID userId);
+
+  /** Returns GLOBAL flashcards plus the caller's own PRIVATE flashcards for the given unit. */
+  List<Flashcard> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId);
 }

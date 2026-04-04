@@ -2,6 +2,7 @@ package com.akdemya.adapter.inbound.web.dto;
 
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public class FlashcardDto {
                                   LocalDateTime createdAt, LocalDateTime updatedAt) {
   }
 
-  public record CreateRequest(UUID unitId, String front, String back) {
+  public record CreateRequest(UUID unitId, String front, String back, Visibility visibility) {
   }
 
   public record UpdateRequest(UUID unitId, String front, String back) {

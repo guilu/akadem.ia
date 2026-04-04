@@ -265,6 +265,23 @@ class FlashcardStudyServiceTest {
     public void deleteById(UUID id) {
       data.remove(id);
     }
+
+    @Override
+    public java.util.List<Flashcard> findVisibleByUserId(UUID userId) {
+      return data.values().stream()
+          .filter(f -> f.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+              || userId.equals(f.getOwnerId()))
+          .toList();
+    }
+
+    @Override
+    public java.util.List<Flashcard> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+      return data.values().stream()
+          .filter(f -> f.getUnitId().equals(unitId)
+              && (f.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                  || userId.equals(f.getOwnerId())))
+          .toList();
+    }
   }
 
   @Test

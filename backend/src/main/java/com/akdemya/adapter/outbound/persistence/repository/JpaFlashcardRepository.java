@@ -47,4 +47,10 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
       )
       """)
   long countNewByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT f FROM FlashcardEntity f WHERE f.visibility = 'GLOBAL' OR f.ownerId = :userId")
+  List<FlashcardEntity> findVisibleByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT f FROM FlashcardEntity f WHERE f.unitId = :unitId AND (f.visibility = 'GLOBAL' OR f.ownerId = :userId)")
+  List<FlashcardEntity> findVisibleByUnitIdAndUserId(@Param("unitId") UUID unitId, @Param("userId") UUID userId);
 }

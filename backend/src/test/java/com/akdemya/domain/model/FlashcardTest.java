@@ -77,4 +77,34 @@ class FlashcardTest {
     assertEquals("front", f.getFront());
     assertEquals("back", f.getBack());
   }
+
+  // --- visibility / ownerId ---
+
+  @Test
+  void createDefaultsToGlobalVisibility() {
+    var f = Flashcard.create(unitId, "front", "back");
+    assertEquals(Visibility.GLOBAL, f.getVisibility());
+    assertNull(f.getOwnerId());
+  }
+
+  @Test
+  void createGlobalHasGlobalVisibility() {
+    var f = Flashcard.createGlobal(unitId, "front", "back");
+    assertEquals(Visibility.GLOBAL, f.getVisibility());
+    assertNull(f.getOwnerId());
+  }
+
+  @Test
+  void createPrivateHasPrivateVisibilityAndOwner() {
+    UUID ownerId = UUID.randomUUID();
+    var f = Flashcard.createPrivate(unitId, "front", "back", ownerId);
+    assertEquals(Visibility.PRIVATE, f.getVisibility());
+    assertEquals(ownerId, f.getOwnerId());
+  }
+
+  @Test
+  void createPrivateWithNullOwnerThrows() {
+    assertThrows(IllegalArgumentException.class,
+        () -> Flashcard.createPrivate(unitId, "front", "back", null));
+  }
 }

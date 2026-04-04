@@ -1,6 +1,7 @@
 package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.domain.model.Subject;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.SubjectRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import java.util.List;
@@ -31,7 +32,7 @@ public class AdminSubjectController {
     if (req.name() == null || req.name().trim().isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
-    Subject subject = Subject.create(req.name().trim(), req.description());
+    Subject subject = Subject.createGlobal(req.name().trim(), req.description());
     return ResponseEntity.ok(SubjectResponse.from(subjects.save(subject), 0));
   }
 
@@ -43,7 +44,7 @@ public class AdminSubjectController {
     if (name.isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
-    Subject updated = new Subject(id, name, req.description());
+    Subject updated = new Subject(id, name, req.description(), current.getVisibility(), current.getOwnerId());
     int unitCount = units.findBySubjectId(id).size();
     return ResponseEntity.ok(SubjectResponse.from(subjects.save(updated), unitCount));
   }
@@ -55,9 +56,9 @@ public class AdminSubjectController {
   }
 
   record SubjectRequest(String name, String description) {}
-  record SubjectResponse(UUID id, String name, String description, int unitCount) {
+  record SubjectResponse(UUID id, String name, String description, int unitCount, Visibility visibility) {
     static SubjectResponse from(Subject s, int unitCount) {
-      return new SubjectResponse(s.getId(), s.getName(), s.getDescription(), unitCount);
+      return new SubjectResponse(s.getId(), s.getName(), s.getDescription(), unitCount, s.getVisibility());
     }
   }
 }
