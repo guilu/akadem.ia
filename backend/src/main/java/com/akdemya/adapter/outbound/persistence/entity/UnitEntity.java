@@ -18,6 +18,12 @@ public class UnitEntity {
     @JoinColumn(name = "subject_id", nullable = false)
     private SubjectEntity subject;
 
+    @Column(nullable = false)
+    private String visibility = "GLOBAL";
+
+    @Column(name = "owner_id")
+    private UUID ownerId;
+
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<QuestionEntity> questions = new java.util.ArrayList<>();
 
@@ -81,5 +87,21 @@ public class UnitEntity {
 
     public void setSubject(SubjectEntity s) {
         this.subject = s;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 }

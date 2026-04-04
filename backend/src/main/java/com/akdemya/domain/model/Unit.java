@@ -8,17 +8,36 @@ public class Unit {
   private final String name;
   private final String description;
   private final int orderIndex;
+  private final Visibility visibility;
+  private final UUID ownerId;
 
-  public Unit(UUID id, UUID subjectId, String name, String description, int orderIndex) {
+  public Unit(UUID id, UUID subjectId, String name, String description, int orderIndex,
+              Visibility visibility, UUID ownerId) {
     this.id = id;
     this.subjectId = subjectId;
     this.name = name;
     this.description = description;
     this.orderIndex = orderIndex;
+    this.visibility = visibility;
+    this.ownerId = ownerId;
+  }
+
+  /** Backward-compatible constructor: defaults to GLOBAL, no owner. */
+  public Unit(UUID id, UUID subjectId, String name, String description, int orderIndex) {
+    this(id, subjectId, name, description, orderIndex, Visibility.GLOBAL, null);
   }
 
   public static Unit create(UUID subjectId, String name, String description, int orderIndex) {
-    return new Unit(UUID.randomUUID(), subjectId, name, description, orderIndex);
+    return new Unit(UUID.randomUUID(), subjectId, name, description, orderIndex, Visibility.GLOBAL, null);
+  }
+
+  public static Unit createGlobal(UUID subjectId, String name, String description, int orderIndex) {
+    return new Unit(UUID.randomUUID(), subjectId, name, description, orderIndex, Visibility.GLOBAL, null);
+  }
+
+  public static Unit createPrivate(UUID subjectId, String name, String description, int orderIndex, UUID ownerId) {
+    if (ownerId == null) throw new IllegalArgumentException("ownerId cannot be null for PRIVATE unit");
+    return new Unit(UUID.randomUUID(), subjectId, name, description, orderIndex, Visibility.PRIVATE, ownerId);
   }
 
   public UUID getId() {
@@ -39,5 +58,13 @@ public class Unit {
 
   public int getOrderIndex() {
     return orderIndex;
+  }
+
+  public Visibility getVisibility() {
+    return visibility;
+  }
+
+  public UUID getOwnerId() {
+    return ownerId;
   }
 }

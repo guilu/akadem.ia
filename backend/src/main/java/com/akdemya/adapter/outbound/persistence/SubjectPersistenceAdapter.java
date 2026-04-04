@@ -43,4 +43,11 @@ public class SubjectPersistenceAdapter implements SubjectRepository {
   public void deleteById(UUID id) {
     repository.deleteById(id);
   }
+
+  @Override
+  public List<Subject> findVisibleByUserId(UUID userId) {
+    return repository.findVisibleByUserId(userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }

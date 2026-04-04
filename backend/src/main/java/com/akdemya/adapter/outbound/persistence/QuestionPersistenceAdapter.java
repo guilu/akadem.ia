@@ -75,4 +75,11 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   public long countByUnitIdAndDifficulty(UUID unitId, String difficulty) {
     return repository.countByUnit_IdAndDifficulty(unitId, difficulty);
   }
+
+  @Override
+  public List<Question> findVisibleByUserId(UUID userId) {
+    return repository.findVisibleByUserId(userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }

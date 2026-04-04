@@ -28,6 +28,10 @@ public class ContentManagement {
     return subjectRepo.findAll();
   }
 
+  public List<Subject> getVisibleSubjects(UUID userId) {
+    return subjectRepo.findVisibleByUserId(userId);
+  }
+
   public Subject createSubject(Subject s) {
     return subjectRepo.save(s);
   }
