@@ -85,6 +85,8 @@ export type GenerateQuizResponse = {
 
 export type AdminUnit = { id: string; name: string };
 
+export type ContentVisibility = 'GLOBAL' | 'PRIVATE';
+
 export interface NavUser {
   email: string;
   initials: string;

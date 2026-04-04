@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, Users, BookOpen, FolderOpen, FileLines, Cog } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
+import ScopeFilter, { type ContentScope } from './ScopeFilter';
 
 export type AdminUser = {
   id: string;
@@ -16,6 +17,8 @@ export type AdminSubject = {
   name: string;
   description?: string | null;
   unitCount?: number;
+  visibility?: 'GLOBAL' | 'PRIVATE';
+  isEditable?: boolean;
 };
 
 export type AdminUnit = {
@@ -25,6 +28,8 @@ export type AdminUnit = {
   description?: string | null;
   orderIndex: number;
   questionCount?: number;
+  visibility?: 'GLOBAL' | 'PRIVATE';
+  isEditable?: boolean;
 };
 
 export type AdminAnswer = { id?: string; text: string; correct: boolean };
@@ -35,9 +40,12 @@ export type AdminQuestion = {
   explanation?: string | null;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   answers: AdminAnswer[];
+  visibility?: 'GLOBAL' | 'PRIVATE';
+  isEditable?: boolean;
 };
 
 type Tab = 'general' | 'users' | 'subjects' | 'units' | 'questions';
+type Scope = ContentScope;
 
 type UserSettings = {
   newCardsLimit: number;
@@ -202,6 +210,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
   const [importDone, setImportDone] = useState(false);
   const [importStats, setImportStats] = useState<{ created: number; errors: number } | null>(null);
 
+  const [subjectScope, setSubjectScope] = useState<Scope>('ALL');
+  const [unitScope, setUnitScope] = useState<Scope>('ALL');
+  const [questionScope, setQuestionScope] = useState<Scope>('ALL');
+
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
   const subjectOptions = useMemo(() => subjects.map(s => ({ value: s.id, label: s.name })), [subjects]);
@@ -218,32 +230,37 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(`${apiBase}/api/admin/users?page=${page - 1}&size=10`, token);
     setUsers(data.items); setUserPage(data.page + 1); setUserTotalPages(data.totalPages || 1);
   }
-  async function loadSubjects() {
-    const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/admin/subjects`, token);
+  async function loadSubjects(scope: Scope = subjectScope) {
+    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
+    const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1${scopeParam}`, token);
     setSubjects(data);
   }
-  async function loadUnits(subjectId: string) {
+  async function loadUnits(subjectId: string, scope: Scope = unitScope) {
     if (!subjectId) { setUnits([]); return; }
-    const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/admin/units?subjectId=${subjectId}`, token);
+    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
+    const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}${scopeParam}`, token);
     setUnits(data);
   }
-  async function loadQuestions(unitId: string, page = questionPage) {
+  async function loadQuestions(unitId: string, page = questionPage, scope: Scope = questionScope) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/admin/questions?unitId=${unitId}&page=${page - 1}&size=10`, token);
+    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
+    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page - 1}&size=10${scopeParam}`, token);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
   useEffect(() => {
     loadUserSettings();
-    if (isAdmin) { loadUsers(1).catch(() => setUsers([])); loadSubjects().catch(() => setSubjects([])); }
+    loadSubjects('ALL').catch(() => setSubjects([]));
+    if (isAdmin) { loadUsers(1).catch(() => setUsers([])); }
   }, []);
-  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId).catch(() => setUnits([])); }, [tab, unitForm.subjectId]);
+  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId, unitScope).catch(() => setUnits([])); }, [tab, unitForm.subjectId, unitScope]);
   useEffect(() => {
     if (tab === 'questions') {
-      loadUnits(questionSubjectId).catch(() => setUnits([]));
-      loadQuestions(questionUnitId, 1).catch(() => setQuestions([]));
+      loadUnits(questionSubjectId, 'ALL').catch(() => setUnits([]));
+      loadQuestions(questionUnitId, 1, questionScope).catch(() => setQuestions([]));
     }
-  }, [tab, questionSubjectId, questionUnitId]);
+  }, [tab, questionSubjectId, questionUnitId, questionScope]);
+  useEffect(() => { if (tab === 'subjects') loadSubjects(subjectScope).catch(() => setSubjects([])); }, [tab, subjectScope]);
 
   async function saveUser() {
     if (!form.email.trim()) return;
@@ -260,28 +277,30 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (!subjectForm.name.trim()) return;
     setSubjectLoading(true);
     try {
-      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null });
+      const visibility = isAdmin && subjectScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
+      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
-      await apiAuthJson(isSubjectEditing ? `${apiBase}/api/admin/subjects/${subjectForm.id}` : `${apiBase}/api/admin/subjects`, token, opts);
-      resetSubjectForm(); await loadSubjects(); onSubjectsChanged?.();
+      await apiAuthJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, token, opts);
+      resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
   async function removeUser(id: string) { await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' }); await loadUsers(userPage); }
-  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/admin/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(); onSubjectsChanged?.(); }
+  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/manage/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(subjectScope); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
     setUnitLoading(true);
     try {
-      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0 };
+      const visibility = isAdmin && unitScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
+      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0, visibility };
       const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isUnitEditing ? `${apiBase}/api/admin/units/${unitForm.id}` : `${apiBase}/api/admin/units`, token, opts);
-      resetUnitForm(); await loadUnits(unitForm.subjectId); await loadSubjects();
+      await apiAuthJson(isUnitEditing ? `${apiBase}/api/manage/units/${unitForm.id}` : `${apiBase}/api/manage/units`, token, opts);
+      resetUnitForm(); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope);
     } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) { await apiAuthJson(`${apiBase}/api/admin/units/${id}`, token, { method: 'DELETE' }); await loadUnits(unitForm.subjectId); await loadSubjects(); }
+  async function removeUnit(id: string) { await apiAuthJson(`${apiBase}/api/manage/units/${id}`, token, { method: 'DELETE' }); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
@@ -290,20 +309,21 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     if (questionForm.answers.filter(a => a.correct).length !== 1) return;
     setQuestionLoading(true);
     try {
-      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })) };
+      const visibility = isAdmin && questionScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
+      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })), visibility };
       const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isQuestionEditing ? `${apiBase}/api/admin/questions/${questionForm.id}` : `${apiBase}/api/admin/questions`, token, opts);
-      resetQuestionForm(); await loadQuestions(unitId, 1); await loadUnits(questionSubjectId);
+      await apiAuthJson(isQuestionEditing ? `${apiBase}/api/manage/questions/${questionForm.id}` : `${apiBase}/api/manage/questions`, token, opts);
+      resetQuestionForm(); await loadQuestions(unitId, 1, questionScope); await loadUnits(questionSubjectId, 'ALL');
     } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) { await apiAuthJson(`${apiBase}/api/admin/questions/${id}`, token, { method: 'DELETE' }); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
+  async function removeQuestion(id: string, unitId: string) { await apiAuthJson(`${apiBase}/api/manage/questions/${id}`, token, { method: 'DELETE' }); await loadQuestions(unitId, questionPage, questionScope); await loadUnits(questionSubjectId, 'ALL'); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
     try {
       const query = questionUnitId ? `?unitId=${questionUnitId}&format=${format}` : `?format=${format}`;
-      const res = await fetch(`${apiBase}/api/admin/questions/export${query}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${apiBase}/api/manage/questions/export${query}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('export_failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -322,7 +342,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     try {
       const formData = new FormData();
       formData.append('file', importFile);
-      const res = await fetch(`${apiBase}/api/admin/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const res = await fetch(`${apiBase}/api/manage/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'import_failed');
       const created = data.created || 0;
@@ -339,11 +359,14 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
     { id: 'general' as Tab, label: 'General', icon: <Cog className="w-4 h-4" /> },
   ];
 
-  const adminNavItems = [
-    { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
+  const contentNavItems = [
     { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
     { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
+  ];
+
+  const adminNavItems = [
+    { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
   ];
 
   return (
@@ -353,6 +376,18 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
       <aside className={`${card} h-fit lg:mt-[4.5rem]`}>
         <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Ajustes</div>
         {generalNavItems.map(({ id, label, icon }) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm transition-colors mb-1 ${
+              tab === id ? 'bg-primary/10 text-primary font-semibold' : 'text-text/70 hover:bg-secondary/10'
+            }`}
+          >
+            {icon}{label}
+          </button>
+        ))}
+        <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mt-5 mb-3">Gestionar contenido</div>
+        {contentNavItems.map(({ id, label, icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
@@ -503,7 +538,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
         {/* ── Materias ── */}
         {tab === 'subjects' && (
           <div className="grid gap-5 py-[1.5rem]">
-            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
+              <ScopeFilter scope={subjectScope} onChange={setSubjectScope} isAdmin={isAdmin} />
+            </div>
 
             <div className={card}>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
@@ -529,6 +567,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                   <thead><tr className="border-b border-secondary/20">
                     <Th>Materia</Th>
                     <Th className="hidden sm:table-cell">Descripción</Th>
+                    <Th className="hidden sm:table-cell">Visibilidad</Th>
                     <Th />
                   </tr></thead>
                   <tbody>
@@ -536,11 +575,18 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
                         <Td className="hidden sm:table-cell">{s.description || '-'}</Td>
+                        <Td className="hidden sm:table-cell">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.visibility === 'GLOBAL' ? 'bg-blue-500/15 text-blue-600' : 'bg-secondary/20 text-text/60'}`}>
+                            {s.visibility === 'GLOBAL' ? 'Global' : 'Personal'}
+                          </span>
+                        </Td>
                         <Td>
-                          <div className="flex gap-2">
-                            <button onClick={() => setSubjectForm(s)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                            <button onClick={() => { setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
-                          </div>
+                          {s.isEditable !== false && (
+                            <div className="flex gap-2">
+                              <button onClick={() => setSubjectForm(s)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                              <button onClick={() => { setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))}
@@ -554,7 +600,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
         {/* ── Unidades ── */}
         {tab === 'units' && (
           <div className="grid gap-5 py-[1.5rem]">
-            <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
+              <ScopeFilter scope={unitScope} onChange={setUnitScope} isAdmin={isAdmin} />
+            </div>
 
             <div className={card}>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
@@ -587,6 +636,7 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                     <Th>Unidad</Th>
                     <Th className="hidden sm:table-cell">Descripción</Th>
                     <Th className="hidden sm:table-cell">Orden</Th>
+                    <Th className="hidden sm:table-cell">Visibilidad</Th>
                     <Th />
                   </tr></thead>
                   <tbody>
@@ -596,11 +646,18 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                         <Td>{u.name}</Td>
                         <Td className="hidden sm:table-cell">{u.description || '-'}</Td>
                         <Td className="hidden sm:table-cell">{u.orderIndex}</Td>
+                        <Td className="hidden sm:table-cell">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${u.visibility === 'GLOBAL' ? 'bg-blue-500/15 text-blue-600' : 'bg-secondary/20 text-text/60'}`}>
+                            {u.visibility === 'GLOBAL' ? 'Global' : 'Personal'}
+                          </span>
+                        </Td>
                         <Td>
-                          <div className="flex gap-2">
-                            <button onClick={() => setUnitForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                            <button onClick={() => { setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
-                          </div>
+                          {u.isEditable !== false && (
+                            <div className="flex gap-2">
+                              <button onClick={() => setUnitForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                              <button onClick={() => { setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))}
@@ -614,7 +671,10 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
         {/* ── Preguntas ── */}
         {tab === 'questions' && (
           <div className="grid gap-5 py-[1.5rem]">
-            <h2 className="text-xl font-extrabold tracking-tight"> Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
+              <ScopeFilter scope={questionScope} onChange={setQuestionScope} isAdmin={isAdmin} />
+            </div>
 
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
@@ -704,15 +764,17 @@ export default function Settings({ isAdmin, token, onSubjectsChanged }: { isAdmi
                         <Td className="hidden sm:table-cell">{q.difficulty}</Td>
                         <Td className="hidden sm:table-cell"><span className="line-clamp-1">{q.answers.map(a => a.text).join(', ')}</span></Td>
                         <Td>
-                          <div className="flex gap-2">
-                            <button onClick={() => {
-                              const unit = unitById[q.unitId];
-                              if (unit?.subjectId) setQuestionSubjectId(unit.subjectId);
-                              setQuestionUnitId(q.unitId);
-                              setQuestionForm({ id: q.id, unitId: q.unitId, text: q.text, explanation: q.explanation || '', difficulty: q.difficulty, answers: q.answers.map(a => ({ text: a.text, correct: a.correct })) });
-                            }} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                            <button onClick={() => { setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
-                          </div>
+                          {q.isEditable !== false && (
+                            <div className="flex gap-2">
+                              <button onClick={() => {
+                                const unit = unitById[q.unitId];
+                                if (unit?.subjectId) setQuestionSubjectId(unit.subjectId);
+                                setQuestionUnitId(q.unitId);
+                                setQuestionForm({ id: q.id, unitId: q.unitId, text: q.text, explanation: q.explanation || '', difficulty: q.difficulty, answers: q.answers.map(a => ({ text: a.text, correct: a.correct })) });
+                              }} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                              <button onClick={() => { setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))}
