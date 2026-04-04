@@ -251,13 +251,13 @@ public class FlashcardController {
       @RequestParam(required = false) UUID subjectId,
       @RequestParam(defaultValue = "csv") String format,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
     if (unitId == null && subjectId == null) {
       return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
     }
     String content = unitId != null
         ? importExportUseCase.exportFlashcards(unitId, format)
-        : importExportUseCase.exportFlashcardsBySubject(subjectId, format);
+        : importExportUseCase.exportFlashcardsBySubject(subjectId, userId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";
     String filename = isJson ? "flashcards.json" : "flashcards.csv";

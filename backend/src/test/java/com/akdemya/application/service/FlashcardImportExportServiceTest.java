@@ -39,16 +39,17 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcardsBySubject_csvMergesAllUnits() {
     UUID subjectId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Unit unit1 = unit(subjectId);
     Unit unit2 = unit(subjectId);
     Flashcard card1 = flashcard(unit1.getId(), "Hello", "Hola");
     Flashcard card2 = flashcard(unit2.getId(), "Goodbye", "Adiós");
 
-    when(unitRepository.findBySubjectId(subjectId)).thenReturn(List.of(unit1, unit2));
-    when(managementUseCase.listByUnit(unit1.getId())).thenReturn(List.of(card1));
-    when(managementUseCase.listByUnit(unit2.getId())).thenReturn(List.of(card2));
+    when(unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId)).thenReturn(List.of(unit1, unit2));
+    when(managementUseCase.listVisibleByUnit(unit1.getId(), userId)).thenReturn(List.of(card1));
+    when(managementUseCase.listVisibleByUnit(unit2.getId(), userId)).thenReturn(List.of(card2));
 
-    String result = service.exportFlashcardsBySubject(subjectId, "csv");
+    String result = service.exportFlashcardsBySubject(subjectId, userId, "csv");
 
     assertTrue(result.startsWith("front,back\n"));
     assertTrue(result.contains("Hello,Hola"));
@@ -58,16 +59,17 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcardsBySubject_jsonMergesAllUnits() throws Exception {
     UUID subjectId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Unit unit1 = unit(subjectId);
     Unit unit2 = unit(subjectId);
     Flashcard card1 = flashcard(unit1.getId(), "Cat", "Gato");
     Flashcard card2 = flashcard(unit2.getId(), "Dog", "Perro");
 
-    when(unitRepository.findBySubjectId(subjectId)).thenReturn(List.of(unit1, unit2));
-    when(managementUseCase.listByUnit(unit1.getId())).thenReturn(List.of(card1));
-    when(managementUseCase.listByUnit(unit2.getId())).thenReturn(List.of(card2));
+    when(unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId)).thenReturn(List.of(unit1, unit2));
+    when(managementUseCase.listVisibleByUnit(unit1.getId(), userId)).thenReturn(List.of(card1));
+    when(managementUseCase.listVisibleByUnit(unit2.getId(), userId)).thenReturn(List.of(card2));
 
-    String result = service.exportFlashcardsBySubject(subjectId, "json");
+    String result = service.exportFlashcardsBySubject(subjectId, userId, "json");
 
     var parsed = objectMapper.readValue(result, List.class);
     assertEquals(2, parsed.size());
@@ -76,9 +78,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcardsBySubject_noUnitsReturnsCsvHeader() {
     UUID subjectId = UUID.randomUUID();
-    when(unitRepository.findBySubjectId(subjectId)).thenReturn(List.of());
+    UUID userId = UUID.randomUUID();
+    when(unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId)).thenReturn(List.of());
 
-    String result = service.exportFlashcardsBySubject(subjectId, "csv");
+    String result = service.exportFlashcardsBySubject(subjectId, userId, "csv");
 
     assertEquals("front,back\n", result);
   }
@@ -86,9 +89,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcardsBySubject_noUnitsReturnsEmptyJsonArray() {
     UUID subjectId = UUID.randomUUID();
-    when(unitRepository.findBySubjectId(subjectId)).thenReturn(List.of());
+    UUID userId = UUID.randomUUID();
+    when(unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId)).thenReturn(List.of());
 
-    String result = service.exportFlashcardsBySubject(subjectId, "json");
+    String result = service.exportFlashcardsBySubject(subjectId, userId, "json");
 
     assertEquals("[]", result);
   }
@@ -96,12 +100,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcardsBySubject_unitsWithNoFlashcardsReturnsCsvHeader() {
     UUID subjectId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Unit unit1 = unit(subjectId);
 
-    when(unitRepository.findBySubjectId(subjectId)).thenReturn(List.of(unit1));
-    when(managementUseCase.listByUnit(unit1.getId())).thenReturn(List.of());
+    when(unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId)).thenReturn(List.of(unit1));
+    when(managementUseCase.listVisibleByUnit(unit1.getId(), userId)).thenReturn(List.of());
 
-    String result = service.exportFlashcardsBySubject(subjectId, "csv");
+    String result = service.exportFlashcardsBySubject(subjectId, userId, "csv");
 
     assertEquals("front,back\n", result);
   }

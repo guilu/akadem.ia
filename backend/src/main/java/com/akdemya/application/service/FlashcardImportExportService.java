@@ -98,9 +98,9 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
   }
 
   @Override
-  public String exportFlashcardsBySubject(UUID subjectId, String format) {
-    List<Flashcard> flashcards = unitRepository.findBySubjectId(subjectId).stream()
-        .flatMap(unit -> managementUseCase.listByUnit(unit.getId()).stream())
+  public String exportFlashcardsBySubject(UUID subjectId, UUID userId, String format) {
+    List<Flashcard> flashcards = unitRepository.findVisibleBySubjectIdAndUserId(subjectId, userId).stream()
+        .flatMap(unit -> managementUseCase.listVisibleByUnit(unit.getId(), userId).stream())
         .toList();
 
     if ("json".equalsIgnoreCase(format)) {

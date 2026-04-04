@@ -162,7 +162,7 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    when(importExportUseCase.exportFlashcardsBySubject(subjectId, "csv"))
+    when(importExportUseCase.exportFlashcardsBySubject(subjectId, userId, "csv"))
         .thenReturn("front,back\nHello,Hola\n");
 
     ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "csv", principal);
@@ -170,7 +170,7 @@ class FlashcardControllerTest {
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
     org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello,Hola"));
-    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, "csv");
+    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, userId, "csv");
   }
 
   @Test
@@ -180,7 +180,7 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    when(importExportUseCase.exportFlashcardsBySubject(subjectId, "json"))
+    when(importExportUseCase.exportFlashcardsBySubject(subjectId, userId, "json"))
         .thenReturn("[{\"front\":\"Hello\",\"back\":\"Hola\"}]");
 
     ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "json", principal);
@@ -188,7 +188,7 @@ class FlashcardControllerTest {
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
     org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello"));
-    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, "json");
+    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, userId, "json");
   }
 
   @Test
