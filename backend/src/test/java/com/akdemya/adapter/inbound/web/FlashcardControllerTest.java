@@ -221,7 +221,7 @@ class FlashcardControllerTest {
 
   @Test
   void createWithoutAuthReturns401() {
-    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back");
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
     assertThrows(ResponseStatusException.class, () -> controller.create(req, null));
   }
 
@@ -249,9 +249,9 @@ class FlashcardControllerTest {
 
     Flashcard saved = new Flashcard(flashcardId, unitId, "front", "back",
         LocalDateTime.now(), LocalDateTime.now());
-    when(managementUseCase.createFlashcard(any())).thenReturn(saved);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(saved);
 
-    var req = new FlashcardDto.CreateRequest(unitId, "front", "back");
+    var req = new FlashcardDto.CreateRequest(unitId, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
     assertEquals(201, response.getStatusCodeValue());
@@ -266,7 +266,7 @@ class FlashcardControllerTest {
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
-    var req = new FlashcardDto.CreateRequest(null, "front", "back");
+    var req = new FlashcardDto.CreateRequest(null, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
     assertEquals(400, response.getStatusCodeValue());
@@ -278,9 +278,9 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    when(managementUseCase.createFlashcard(any())).thenThrow(new IllegalArgumentException("invalid"));
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenThrow(new IllegalArgumentException("invalid"));
 
-    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back");
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
     assertEquals(400, response.getStatusCodeValue());
@@ -370,12 +370,17 @@ class FlashcardControllerTest {
 
   @Test
   void listByUnitReturnsFlashcards() {
+    UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+
     Flashcard card = new Flashcard(UUID.randomUUID(), unitId, "front", "back",
         LocalDateTime.now(), LocalDateTime.now());
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of(card));
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of(card));
 
-    List<FlashcardDto.FlashcardResponse> response = controller.listByUnit(unitId);
+    List<FlashcardDto.FlashcardResponse> response = controller.listByUnit(unitId, principal);
 
     assertEquals(1, response.size());
     assertEquals("front", response.get(0).front());

@@ -70,4 +70,9 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   public List<Flashcard> findVisibleByUserId(UUID userId) {
     return jpa.findVisibleByUserId(userId).stream().map(mapper::toDomain).toList();
   }
+
+  @Override
+  public List<Flashcard> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+    return jpa.findVisibleByUnitIdAndUserId(unitId, userId).stream().map(mapper::toDomain).toList();
+  }
 }

@@ -1,6 +1,7 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.*;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.*;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +47,10 @@ class ContentManagementServiceTest {
   @Test
   void createUnitSavesAndReturns() {
     UUID subjectId = UUID.randomUUID();
+    Subject globalSubject = Subject.createGlobal("Math", "desc");
+    // Use the subject's own ID so the unit's subjectId matches
+    Subject parentSubject = new Subject(subjectId, "Math", "desc", Visibility.GLOBAL, null);
+    when(subjectRepo.findById(subjectId)).thenReturn(java.util.Optional.of(parentSubject));
     Unit unit = Unit.createGlobal(subjectId, "Algebra", "desc", 1);
     when(unitRepo.save(unit)).thenReturn(unit);
 
@@ -112,6 +117,10 @@ class ContentManagementServiceTest {
   @Test
   void createQuestionSavesAndReturns() {
     UUID unitId = UUID.randomUUID();
+    Unit parentUnit = Unit.createGlobal(UUID.randomUUID(), "Algebra", "desc", 1);
+    // Create a parent unit with the same unitId
+    Unit parentUnitWithId = new Unit(unitId, UUID.randomUUID(), "Algebra", "desc", 1, Visibility.GLOBAL, null);
+    when(unitRepo.findById(unitId)).thenReturn(java.util.Optional.of(parentUnitWithId));
     Question q = Question.createGlobal(unitId, "Q?", "exp", Question.Difficulty.HARD);
     when(questionRepo.save(q)).thenReturn(q);
 

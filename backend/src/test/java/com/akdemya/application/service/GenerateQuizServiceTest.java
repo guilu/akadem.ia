@@ -208,6 +208,13 @@ class GenerateQuizServiceTest {
         @Override public List<Unit> findAll() { return List.copyOf(store.values()); }
         @Override public List<Unit> findAllWithFlashcards() { return List.of(); }
         @Override public void deleteById(UUID id) { store.remove(id); }
+        @Override public List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) {
+            return store.values().stream()
+                .filter(u -> u.getSubjectId().equals(subjectId)
+                    && (u.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                        || userId.equals(u.getOwnerId())))
+                .toList();
+        }
     }
 
     static class StubGeneratedQuestionDraftRepository implements GeneratedQuestionDraftRepository {

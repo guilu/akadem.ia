@@ -82,4 +82,11 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+    return repository.findVisibleByUnitIdAndUserId(unitId, userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }

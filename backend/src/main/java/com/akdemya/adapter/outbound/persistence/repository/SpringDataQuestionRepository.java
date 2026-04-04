@@ -16,4 +16,7 @@ public interface SpringDataQuestionRepository extends JpaRepository<QuestionEnti
 
     @Query("SELECT q FROM QuestionEntity q WHERE q.visibility = 'GLOBAL' OR q.ownerId = :userId")
     List<QuestionEntity> findVisibleByUserId(@Param("userId") UUID userId);
+
+    @Query("SELECT q FROM QuestionEntity q WHERE q.unit.id = :unitId AND (q.visibility = 'GLOBAL' OR q.ownerId = :userId)")
+    List<QuestionEntity> findVisibleByUnitIdAndUserId(@Param("unitId") UUID unitId, @Param("userId") UUID userId);
 }

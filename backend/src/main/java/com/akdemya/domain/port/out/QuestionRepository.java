@@ -26,4 +26,7 @@ public interface QuestionRepository {
 
   /** Returns all GLOBAL questions plus the caller's own PRIVATE questions. */
   List<Question> findVisibleByUserId(UUID userId);
+
+  /** Returns GLOBAL questions plus the caller's own PRIVATE questions for the given unit. */
+  List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId);
 }

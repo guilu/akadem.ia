@@ -233,6 +233,15 @@ class ExamManagerResumeTest {
               || userId.equals(q.getOwnerId()))
           .toList();
     }
+
+    @Override
+    public java.util.List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+      return data.values().stream()
+          .filter(q -> q.getUnitId().equals(unitId)
+              && (q.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                  || userId.equals(q.getOwnerId())))
+          .toList();
+    }
   }
 
   static class InMemoryAnswerRepo implements AnswerRepository {
@@ -310,6 +319,15 @@ class ExamManagerResumeTest {
     @Override
     public void deleteById(UUID id) {
       data.remove(id);
+    }
+
+    @Override
+    public java.util.List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) {
+      return data.values().stream()
+          .filter(u -> u.getSubjectId().equals(subjectId)
+              && (u.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
+                  || userId.equals(u.getOwnerId())))
+          .toList();
     }
   }
 

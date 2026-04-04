@@ -76,4 +76,11 @@ public class UnitPersistenceAdapter implements UnitRepository {
   public void deleteById(UUID id) {
     repository.deleteById(id);
   }
+
+  @Override
+  public List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) {
+    return repository.findVisibleBySubjectIdAndUserId(subjectId, userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }
