@@ -395,6 +395,23 @@ class ExamManagerResumeTest {
                   || userId.equals(q.getOwnerId())))
           .toList();
     }
+
+    @Override
+    public org.springframework.data.domain.Page<Question> findPageByUnitIdAndScope(UUID unitId, UUID userId, com.akdemya.domain.model.Visibility scope, int page, int size) {
+      var list = data.values().stream()
+          .filter(q -> q.getUnitId().equals(unitId))
+          .filter(q -> {
+            if (scope == null) return true;
+            return switch (scope) {
+              case GLOBAL -> q.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL;
+              case PRIVATE -> q.getVisibility() == com.akdemya.domain.model.Visibility.PRIVATE && userId.equals(q.getOwnerId());
+            };
+          })
+          .toList();
+      int from = Math.min(page * size, list.size());
+      int to = Math.min(from + size, list.size());
+      return new org.springframework.data.domain.PageImpl<>(list.subList(from, to), org.springframework.data.domain.PageRequest.of(page, size), list.size());
+    }
   }
 
   static class InMemoryAnswerRepo implements AnswerRepository {
@@ -482,6 +499,20 @@ class ExamManagerResumeTest {
                   || userId.equals(u.getOwnerId())))
           .toList();
     }
+
+    @Override
+    public java.util.List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, com.akdemya.domain.model.Visibility scope) {
+      return data.values().stream()
+          .filter(u -> u.getSubjectId().equals(subjectId))
+          .filter(u -> {
+            if (scope == null) return true;
+            return switch (scope) {
+              case GLOBAL -> u.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL;
+              case PRIVATE -> u.getVisibility() == com.akdemya.domain.model.Visibility.PRIVATE && userId.equals(u.getOwnerId());
+            };
+          })
+          .toList();
+    }
   }
 
   static class InMemorySubjectRepo implements SubjectRepository {
@@ -517,6 +548,19 @@ class ExamManagerResumeTest {
       return data.values().stream()
           .filter(s -> s.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL
               || userId.equals(s.getOwnerId()))
+          .toList();
+    }
+
+    @Override
+    public List<Subject> findByScope(UUID userId, com.akdemya.domain.model.Visibility scope) {
+      return data.values().stream()
+          .filter(s -> {
+            if (scope == null) return true;
+            return switch (scope) {
+              case GLOBAL -> s.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL;
+              case PRIVATE -> s.getVisibility() == com.akdemya.domain.model.Visibility.PRIVATE && userId.equals(s.getOwnerId());
+            };
+          })
           .toList();
     }
   }
