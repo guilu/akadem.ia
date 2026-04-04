@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.akdemya.adapter.outbound.persistence.mapper.UnitMapper;
 import com.akdemya.adapter.outbound.persistence.repository.SpringDataUnitRepository;
 import com.akdemya.domain.model.Unit;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UnitRepository;
 
 import jakarta.persistence.EntityManager;
@@ -82,5 +83,19 @@ public class UnitPersistenceAdapter implements UnitRepository {
     return repository.findVisibleBySubjectIdAndUserId(subjectId, userId).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, Visibility scope) {
+    if (scope == null) {
+      // null = ALL: GLOBAL + user's PRIVATE
+      return repository.findAllBySubjectIdAndScope(subjectId, userId).stream()
+          .map(mapper::toDomain).collect(Collectors.toList());
+    }
+    var entities = switch (scope) {
+      case GLOBAL -> repository.findGlobalBySubjectId(subjectId);
+      case PRIVATE -> repository.findPrivateBySubjectIdAndOwner(subjectId, userId);
+    };
+    return entities.stream().map(mapper::toDomain).collect(Collectors.toList());
   }
 }

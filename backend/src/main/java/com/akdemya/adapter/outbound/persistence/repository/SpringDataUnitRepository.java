@@ -13,6 +13,15 @@ public interface SpringDataUnitRepository extends JpaRepository<UnitEntity, UUID
     @Query("SELECT u FROM UnitEntity u WHERE u.subject.id = :subjectId AND (u.visibility = 'GLOBAL' OR u.ownerId = :userId) ORDER BY u.orderIndex ASC, u.name ASC")
     List<UnitEntity> findVisibleBySubjectIdAndUserId(@Param("subjectId") UUID subjectId, @Param("userId") UUID userId);
 
+    @Query("SELECT u FROM UnitEntity u WHERE u.subject.id = :subjectId AND u.visibility = 'GLOBAL' ORDER BY u.orderIndex ASC, u.name ASC")
+    List<UnitEntity> findGlobalBySubjectId(@Param("subjectId") UUID subjectId);
+
+    @Query("SELECT u FROM UnitEntity u WHERE u.subject.id = :subjectId AND u.visibility = 'PRIVATE' AND u.ownerId = :userId ORDER BY u.orderIndex ASC, u.name ASC")
+    List<UnitEntity> findPrivateBySubjectIdAndOwner(@Param("subjectId") UUID subjectId, @Param("userId") UUID userId);
+
+    @Query("SELECT u FROM UnitEntity u WHERE u.subject.id = :subjectId AND (u.visibility = 'GLOBAL' OR (u.visibility = 'PRIVATE' AND u.ownerId = :userId)) ORDER BY u.orderIndex ASC, u.name ASC")
+    List<UnitEntity> findAllBySubjectIdAndScope(@Param("subjectId") UUID subjectId, @Param("userId") UUID userId);
+
     @Query("""
         select u from UnitEntity u
         where u.subject.id = :subjectId

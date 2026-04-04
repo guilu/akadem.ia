@@ -29,4 +29,12 @@ public interface QuestionRepository {
 
   /** Returns GLOBAL questions plus the caller's own PRIVATE questions for the given unit. */
   List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId);
+
+  /**
+   * Scope-aware paginated query for a given unit:
+   * - GLOBAL → visibility=GLOBAL
+   * - PRIVATE → visibility=PRIVATE AND ownerId=userId
+   * - ALL → visibility=GLOBAL OR (visibility=PRIVATE AND ownerId=userId)
+   */
+  org.springframework.data.domain.Page<Question> findPageByUnitIdAndScope(UUID unitId, UUID userId, Visibility scope, int page, int size);
 }
