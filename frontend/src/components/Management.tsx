@@ -348,7 +348,9 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {subjects.map(s => (
+                    {subjects.length === 0 ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55">No hay materias disponibles.</td></tr>
+                    ) : subjects.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
                         <Td className="hidden sm:table-cell">{s.description || '-'}</Td>
@@ -417,7 +419,9 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {units.map(u => (
+                    {units.length === 0 ? (
+                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55">No hay unidades disponibles.</td></tr>
+                    ) : units.map(u => (
                       <tr key={u.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
                         <Td>{u.name}</Td>
@@ -535,7 +539,11 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {questions.map(q => (
+                    {questions.length === 0 ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55">
+                        {questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona una materia y unidad para ver las preguntas.'}
+                      </td></tr>
+                    ) : questions.map(q => (
                       <tr key={q.id} className="border-b border-secondary/10 last:border-0">
                         <Td><span className="line-clamp-2">{q.text}</span></Td>
                         <Td className="hidden sm:table-cell">{q.difficulty}</Td>
