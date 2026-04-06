@@ -8,6 +8,7 @@ export const ROUTES = {
   examAttempt: (attemptId: string) => `/exams/attempts/${attemptId}`,
   examResult: '/result',
   settings: '/settings',
+  manage: '/manage',
   profile: '/profile',
   flashcards: '/flashcards',
   flashcardsStudy: '/flashcards/study',

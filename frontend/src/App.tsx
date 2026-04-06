@@ -15,6 +15,7 @@ import ExamRunnerPage from './pages/ExamRunnerPage';
 import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
+import ManagePage from './pages/ManagePage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
 import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
@@ -268,7 +269,12 @@ export default function App() {
           } />
           <Route path={ROUTES.settings} element={
             <ProtectedRoute allow={isAuthed}>
-              <SettingsPage isAdmin={role === 'ADMIN'} token={token} onSubjectsChanged={refreshSubjects} />
+              <SettingsPage isAdmin={role === 'ADMIN'} token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.manage} element={
+            <ProtectedRoute allow={isAuthed}>
+              <ManagePage isAdmin={role === 'ADMIN'} token={token} onSubjectsChanged={refreshSubjects} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.flashcards} element={

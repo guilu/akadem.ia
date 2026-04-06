@@ -98,7 +98,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 <BookOpen className="w-4 h-4" />
                 Exámenes
               </button>
-              <button onClick={() => go(ROUTES.settings)} className={linkCls(ROUTES.settings)}>
+              <button onClick={() => go(ROUTES.manage)} className={linkCls(ROUTES.manage)}>
                 <FolderOpen className="w-4 h-4" />
                 Gestionar
               </button>
@@ -190,7 +190,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 <BookOpen className="w-4 h-4" />
                 Exámenes
               </button>
-              <button onClick={() => go(ROUTES.settings)} className={mobileLinkCls(ROUTES.settings)}>
+              <button onClick={() => go(ROUTES.manage)} className={mobileLinkCls(ROUTES.manage)}>
                 <FolderOpen className="w-4 h-4" />
                 Gestionar
               </button>
