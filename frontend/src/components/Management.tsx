@@ -187,7 +187,7 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
   async function loadQuestions(unitId: string, page = questionPage, scope: Scope = questionScope) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
     const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page - 1}&size=10${scopeParam}`, token);
+    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10${scopeParam}`, token);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
