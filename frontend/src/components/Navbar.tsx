@@ -67,7 +67,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
         >
           <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-8 h-8" />
-          Akdmia
+          Akadem.ia
         </button>
 
         {/* Desktop links */}
