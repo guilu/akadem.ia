@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, ArrowUpFromBracket, Close, CheckCircle, CirclePlus, Refresh, Clock } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase, exportFlashcardsBySubject } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
@@ -183,10 +184,10 @@ export default function FlashcardsPage() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors text-sm"
+                className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors"
                 aria-label="Volver a materias"
               >
-                ←
+                <ArrowLeft className="w-4 h-4" />
               </button>
             )}
             <div>
@@ -208,7 +209,8 @@ export default function FlashcardsPage() {
             onClick={openImport}
             className="mt-1 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-primary/40 hover:text-text transition-colors"
           >
-            <span>⬆</span> Importar
+            <ArrowUpFromBracket className="w-4 h-4" />
+            Importar
           </button>
         </div>
         <FlashcardsTabs active={mode} onTab={(tab) => {
@@ -228,10 +230,10 @@ export default function FlashcardsPage() {
           <button
             type="button"
             onClick={() => setExportError('')}
-            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            ✕
+            <Close className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -241,14 +243,24 @@ export default function FlashcardsPage() {
         globalLoading ? (
           <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
         ) : globalQueue && totalPending === 0 ? (
-          <div className="border border-secondary/25 rounded-2xl px-5 py-3 text-center text-sm text-text/60">
-            Nada pendiente hoy 🎉
+          <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-center gap-2 text-sm text-text/60">
+            <CheckCircle className="w-4 h-4 text-lime-500" />
+            Nada pendiente hoy
           </div>
         ) : globalQueue ? (
           <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
-            <span className="text-lime-500">🆕 {globalQueue.new} nuevas</span>
-            <span className="text-accent">⚡ {globalQueue.learning} aprendiendo</span>
-            <span className="text-primary">🔁 {globalQueue.due} pendientes</span>
+            <span className="flex items-center gap-1.5 text-lime-500">
+              <CirclePlus className="w-4 h-4" />
+              {globalQueue.new} nuevas
+            </span>
+            <span className="flex items-center gap-1.5 text-accent">
+              <Refresh className="w-4 h-4" />
+              {globalQueue.learning} aprendiendo
+            </span>
+            <span className="flex items-center gap-1.5 text-primary">
+              <Clock className="w-4 h-4" />
+              {globalQueue.due} pendientes
+            </span>
           </div>
         ) : null
       )}

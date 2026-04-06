@@ -1,4 +1,4 @@
-import { BookOpen } from 'flowbite-react-icons/outline';
+import { BookOpen, CirclePlus, Clock, ChevronRight } from 'flowbite-react-icons/outline';
 import { useNavigate } from 'react-router-dom';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
@@ -35,12 +35,18 @@ export default function UnitCard({ unit, onClick, onExport }: Props) {
               </div>
             </div>
           </div>
-          <div className="text-text/30 text-lg">›</div>
+          <ChevronRight className="w-4 h-4 text-text/30 shrink-0" />
         </div>
 
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-text/55">
-          <span>🟡 {reviewCount} en repaso{dueCount > 0 ? ` (${dueCount} pendientes)` : ''}</span>
-          <span>🆕 {newCount} nuevas</span>
+          <span className="flex items-center gap-1 text-yellow-500">
+            <Clock className="w-3.5 h-3.5" />
+            {reviewCount} en repaso{dueCount > 0 ? ` (${dueCount} pendientes)` : ''}
+          </span>
+          <span className="flex items-center gap-1 text-lime-500">
+            <CirclePlus className="w-3.5 h-3.5" />
+            {newCount} nuevas
+          </span>
         </div>
       </button>
 

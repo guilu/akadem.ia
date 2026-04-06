@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CircleMinus, CheckCircle } from 'flowbite-react-icons/outline';
+import { ArrowLeft, CircleMinus, CheckCircle, Close, CloseCircle, Refresh, Rocket, Star } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 
 type IntervalHints = { again: string; good: string; easy: string };
@@ -125,7 +125,10 @@ export default function FlashcardsStudyPage() {
           </h1>
         </header>
         <div className="border border-secondary/25 rounded-2xl p-8 text-center">
-          <div className="text-5xl mb-4">{nothingToReview ? '✅' : '🎉'}</div>
+          {nothingToReview
+            ? <CheckCircle className="w-14 h-14 mx-auto mb-4 text-lime-500" />
+            : <Star className="w-14 h-14 mx-auto mb-4 text-primary" />
+          }
           <div className="text-xl font-bold mb-2">
             {nothingToReview ? 'Nada que repasar hoy' : '¡Bien hecho!'}
           </div>
@@ -166,9 +169,18 @@ export default function FlashcardsStudyPage() {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs text-text/50">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-red-400">🔴 {queueCounts.learning} aprendiendo</span>
-            <span className="text-accent">🟡 {queueCounts.due} pendientes</span>
-            <span className="text-lime-500">🟢 {queueCounts.new} nuevas</span>
+            <span className="flex items-center gap-1 text-red-400">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-400 shrink-0" />
+              {queueCounts.learning} aprendiendo
+            </span>
+            <span className="flex items-center gap-1 text-yellow-500">
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 shrink-0" />
+              {queueCounts.due} pendientes
+            </span>
+            <span className="flex items-center gap-1 text-lime-500">
+              <span className="inline-block w-2 h-2 rounded-full bg-lime-400 shrink-0" />
+              {queueCounts.new} nuevas
+            </span>
           </div>
           <span className="font-medium">{progressPct}%</span>
         </div>
@@ -187,10 +199,10 @@ export default function FlashcardsStudyPage() {
           <button
             type="button"
             onClick={() => setReviewError(null)}
-            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            ✕
+            <Close className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -223,7 +235,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>❌ Repetir</span>
+                    <CloseCircle className="w-4 h-4 mx-auto mb-0.5" />
+                    <span>Repetir</span>
                     <span className="text-xs text-red-400/60">{currentItem?.intervalHints?.again}</span>
                   </div>
                 </button>
@@ -233,7 +246,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>⚡ Revisar</span>
+                    <Refresh className="w-4 h-4 mx-auto mb-0.5" />
+                    <span>Revisar</span>
                     <span className="text-xs text-yellow-500/60">{currentItem?.intervalHints?.good}</span>
                   </div>
                 </button>
@@ -243,7 +257,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>🚀 Memorizada</span>
+                    <Rocket className="w-4 h-4 mx-auto mb-0.5" />
+                    <span>Memorizada</span>
                     <span className="text-xs text-lime-500/60">{currentItem?.intervalHints?.easy}</span>
                   </div>
                 </button>
