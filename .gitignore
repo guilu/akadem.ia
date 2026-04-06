@@ -35,6 +35,10 @@ Thumbs.db
 # Coverage
 coverage/
 
+# TypeScript build info
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+
 # Misc
 *.tmp
 ._*
