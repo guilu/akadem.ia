@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Inbox } from 'flowbite-react-icons/outline';
 import { getDrafts, approveDraft, rejectDraft } from '../../api';
 import type { SourceDocument, GeneratedDraft } from '../../types';
 
@@ -100,7 +101,10 @@ export default function DraftList({ token, sources }: Props) {
       {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
 
       {!loading && !error && selectedSourceId && drafts.length === 0 && (
-        <p className="text-sm text-text/50 text-center py-6">No hay borradores para este filtro.</p>
+        <div className="text-center py-6 space-y-2">
+          <Inbox className="w-8 h-8 mx-auto text-text/25" />
+          <p className="text-sm text-text/50">No hay borradores para este filtro.</p>
+        </div>
       )}
 
       {!loading && drafts.length > 0 && (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines } from 'flowbite-react-icons/outline';
+import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
 import { apiBase, apiAuthJson } from '../api';
 import ScopeFilter, { type ContentScope } from './ScopeFilter';
 
@@ -349,7 +349,7 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                   </tr></thead>
                   <tbody>
                     {subjects.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55">No hay materias disponibles.</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias disponibles.</td></tr>
                     ) : subjects.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
@@ -420,7 +420,7 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                   </tr></thead>
                   <tbody>
                     {units.length === 0 ? (
-                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55">No hay unidades disponibles.</td></tr>
+                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay unidades disponibles.</td></tr>
                     ) : units.map(u => (
                       <tr key={u.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
@@ -540,9 +540,7 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
                   </tr></thead>
                   <tbody>
                     {questions.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55">
-                        {questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona una materia y unidad para ver las preguntas.'}
-                      </td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona una materia y unidad para ver las preguntas.'}</td></tr>
                     ) : questions.map(q => (
                       <tr key={q.id} className="border-b border-secondary/10 last:border-0">
                         <Td><span className="line-clamp-2">{q.text}</span></Td>

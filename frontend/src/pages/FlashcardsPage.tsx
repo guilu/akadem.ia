@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowUpFromBracket, Close, CheckCircle, CirclePlus, Refresh, Clock } from 'flowbite-react-icons/outline';
+import { ArrowLeft, ArrowUpFromBracket, Close, CheckCircle, CirclePlus, Refresh, Clock, Inbox } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase, exportFlashcardsBySubject } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
@@ -289,6 +289,7 @@ export default function FlashcardsPage() {
           </div>
         ) : filteredSubjects.length === 0 ? (
           <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center space-y-4">
+            <Inbox className="w-8 h-8 mx-auto text-text/25" />
             <p className="text-sm text-text/55">No hay materias disponibles.</p>
             <button
               type="button"

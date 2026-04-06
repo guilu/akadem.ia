@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Inbox } from 'flowbite-react-icons/outline';
 import type { SourceDocument } from '../../types';
 
 interface Props {
@@ -45,7 +46,12 @@ export default function SourceList({ sources, selectedId, onSelect, loading, onD
   }
 
   if (sources.length === 0) {
-    return <p className="text-sm text-text/50 py-4 text-center">No hay documentos subidos todavía.</p>;
+    return (
+      <div className="text-center py-6 space-y-2">
+        <Inbox className="w-8 h-8 mx-auto text-text/25" />
+        <p className="text-sm text-text/50">No hay documentos subidos todavía.</p>
+      </div>
+    );
   }
 
   return (
