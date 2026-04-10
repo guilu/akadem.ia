@@ -3,6 +3,7 @@ package com.akdemya.application.service;
 import com.akdemya.domain.model.*;
 import com.akdemya.domain.port.in.ExamUseCase;
 import com.akdemya.domain.port.out.*;
+import com.akdemya.domain.model.StudySettingsDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +20,29 @@ public class ExamManager implements ExamUseCase {
   private final AnswerRepository answerRepo;
   private final UnitRepository unitRepo;
   private final SubjectRepository subjectRepo;
+  private final UserRepository userRepo;
+  private final UserSettingsRepository userSettingsRepo;
   private final Random rnd = new Random();
   private final ExamScoringCalculator scoringCalculator = new ExamScoringCalculator();
 
   public ExamManager(ExamAttemptRepository attemptRepo, ExamAttemptAnswerRepository attemptAnsRepo,
-      QuestionRepository questionRepo, AnswerRepository answerRepo, UnitRepository unitRepo, SubjectRepository subjectRepo) {
+      QuestionRepository questionRepo, AnswerRepository answerRepo, UnitRepository unitRepo,
+      SubjectRepository subjectRepo, UserRepository userRepo, UserSettingsRepository userSettingsRepo) {
     this.attemptRepo = attemptRepo;
     this.attemptAnsRepo = attemptAnsRepo;
     this.questionRepo = questionRepo;
     this.answerRepo = answerRepo;
     this.unitRepo = unitRepo;
     this.subjectRepo = subjectRepo;
+    this.userRepo = userRepo;
+    this.userSettingsRepo = userSettingsRepo;
+  }
+
+  private int getPenaltyRatioForEmail(String userEmail) {
+    return userRepo.findByEmail(userEmail)
+        .flatMap(u -> userSettingsRepo.findByUserId(u.getId()))
+        .map(UserSettings::penaltyRatio)
+        .orElse(StudySettingsDefaults.DEFAULT_PENALTY_RATIO);
   }
 
   @Override
@@ -185,7 +198,8 @@ public class ExamManager implements ExamUseCase {
       }
     }
 
-    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
 
     if (attempt.getFinishedAt() == null) {
       attempt.finish(attempt.getTotalTimeSeconds(), scoring.net());
@@ -234,6 +248,7 @@ public class ExamManager implements ExamUseCase {
     List<ExamAttempt> attempts = new ArrayList<>(attemptRepo.findByUserEmail(userEmail));
     attempts.sort(Comparator.comparing(ExamAttempt::getStartedAt).reversed());
 
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
     Map<UUID, Answer> answerCache = new HashMap<>();
     Map<UUID, Question> questionCache = new HashMap<>();
     Map<UUID, Unit> unitCache = new HashMap<>();
@@ -255,7 +270,7 @@ public class ExamManager implements ExamUseCase {
           wrong++;
         }
       }
-      ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
+      ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
 
       String subjectName = "Desconocida";
       if (!entries.isEmpty()) {

@@ -134,6 +134,10 @@ public class ContentManagement {
     return questionRepo.findByUnitId(unitId);
   }
 
+  public List<Question> getAllQuestions() {
+    return questionRepo.findAll();
+  }
+
   public List<Question> getVisibleQuestionsByUnit(UUID unitId, UUID userId) {
     return questionRepo.findVisibleByUnitIdAndUserId(unitId, userId);
   }

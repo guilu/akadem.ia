@@ -182,7 +182,7 @@ public class ManageQuestionController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     List<Question> data = unitId == null
-        ? contentService.getQuestionsByUnit(unitId)
+        ? contentService.getAllQuestions()
         : contentService.getQuestionsByUnit(unitId);
     if (format.equalsIgnoreCase("csv")) {
       String csv = toCsv(data);
@@ -203,7 +203,7 @@ public class ManageQuestionController {
     return ResponseEntity.ok(payload);
   }
 
-  private static final long MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
+  private static final long MAX_UPLOAD_SIZE = 10L * 1024 * 1024;
   private static final java.util.Set<String> ALLOWED_CONTENT_TYPES = java.util.Set.of(
       "application/json", "text/csv", "application/octet-stream", "text/plain"
   );
