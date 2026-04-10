@@ -30,7 +30,8 @@ services:
       SPRING_FLYWAY_ENABLE: true
       SPRING_FLYWAY_OUT_OF_ORDER: true
       SPRING_SQL_INIT_MODE: never
-      JWT_SECRET: "akdemya-secret-key-please-change-me-32bytes"
+      # WARNING: default JWT_SECRET is for local dev ONLY. NEVER use in production. Generate with: openssl rand -base64 32
+      JWT_SECRET: ${JWT_SECRET:-YWtkZW15YS1kZXYtc2VjcmV0LWtleS1mb3ItZGV2LW9ubHktMzJieXRlcw==}
       GROQ_API_KEY: ${GROQ_API_KEY}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
