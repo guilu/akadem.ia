@@ -16,6 +16,7 @@ type Tab = 'general' | 'users';
 type UserSettings = {
   newCardsLimit: number;
   reviewCardsLimit: number;
+  penaltyRatio: number;
 };
 
 const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
@@ -80,7 +81,7 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
   const [tab, setTab] = useState<Tab>('general');
 
   // ── User settings ──
-  const [settingsForm, setSettingsForm] = useState<UserSettings>({ newCardsLimit: 20, reviewCardsLimit: 100 });
+  const [settingsForm, setSettingsForm] = useState<UserSettings>({ newCardsLimit: 20, reviewCardsLimit: 100, penaltyRatio: 3 });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [settingsError, setSettingsError] = useState('');
@@ -219,6 +220,24 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
                     max={9999}
                     value={settingsForm.reviewCardsLimit}
                     onChange={e => setSettingsForm(f => ({ ...f, reviewCardsLimit: Math.max(1, Number(e.target.value)) }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-4">Examen</div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium text-text/80">Preguntas erróneas para restar 1 acierto</label>
+                  <p className="text-xs text-text/45">Número de respuestas incorrectas necesarias para penalizar 1 acierto en la puntuación.</p>
+                  <input
+                    className={inp}
+                    type="number"
+                    min={1}
+                    max={99}
+                    value={settingsForm.penaltyRatio}
+                    onChange={e => setSettingsForm(f => ({ ...f, penaltyRatio: Math.max(1, Number(e.target.value)) }))}
                   />
                 </div>
               </div>

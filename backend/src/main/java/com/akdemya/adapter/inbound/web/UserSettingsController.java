@@ -28,7 +28,7 @@ public class UserSettingsController {
     public ResponseEntity<SettingsResponse> getSettings(@AuthenticationPrincipal User principal) {
         UUID userId = requireUserId(principal);
         var result = settingsUseCase.getSettings(userId);
-        return ResponseEntity.ok(new SettingsResponse(result.newCardsLimit(), result.reviewCardsLimit()));
+        return ResponseEntity.ok(new SettingsResponse(result.newCardsLimit(), result.reviewCardsLimit(), result.penaltyRatio()));
     }
 
     @PutMapping
@@ -37,10 +37,13 @@ public class UserSettingsController {
         if (req == null) {
             return ResponseEntity.badRequest().build();
         }
+        if (req.penaltyRatio() < 1) {
+            return ResponseEntity.badRequest().build();
+        }
         UUID userId = requireUserId(principal);
         var result = settingsUseCase.updateSettings(userId,
-            new UserSettingsUseCase.UpdateSettingsCommand(req.newCardsLimit(), req.reviewCardsLimit()));
-        return ResponseEntity.ok(new SettingsResponse(result.newCardsLimit(), result.reviewCardsLimit()));
+            new UserSettingsUseCase.UpdateSettingsCommand(req.newCardsLimit(), req.reviewCardsLimit(), req.penaltyRatio()));
+        return ResponseEntity.ok(new SettingsResponse(result.newCardsLimit(), result.reviewCardsLimit(), result.penaltyRatio()));
     }
 
     private UUID requireUserId(User principal) {
@@ -52,7 +55,7 @@ public class UserSettingsController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
 
-    record SettingsResponse(int newCardsLimit, int reviewCardsLimit) {}
+    record SettingsResponse(int newCardsLimit, int reviewCardsLimit, int penaltyRatio) {}
 
-    record SettingsRequest(int newCardsLimit, int reviewCardsLimit) {}
+    record SettingsRequest(int newCardsLimit, int reviewCardsLimit, int penaltyRatio) {}
 }

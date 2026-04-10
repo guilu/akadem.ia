@@ -23,26 +23,32 @@ public class UserSettingsService implements UserSettingsUseCase {
     @Transactional(readOnly = true)
     public GetSettingsResponse getSettings(UUID userId) {
         return settingsRepo.findByUserId(userId)
-            .map(s -> new GetSettingsResponse(s.newCardsLimit(), s.reviewCardsLimit()))
+            .map(s -> new GetSettingsResponse(s.newCardsLimit(), s.reviewCardsLimit(), s.penaltyRatio()))
             .orElseGet(() -> new GetSettingsResponse(
                 StudySettingsDefaults.DEFAULT_NEW_LIMIT,
-                StudySettingsDefaults.DEFAULT_REVIEW_LIMIT
+                StudySettingsDefaults.DEFAULT_REVIEW_LIMIT,
+                StudySettingsDefaults.DEFAULT_PENALTY_RATIO
             ));
     }
 
     @Override
     public GetSettingsResponse updateSettings(UUID userId, UpdateSettingsCommand command) {
+        if (command.penaltyRatio() < 1) {
+            throw new IllegalArgumentException("penaltyRatio must be >= 1");
+        }
         UserSettings existing = settingsRepo.findByUserId(userId)
             .orElse(new UserSettings(userId,
                 StudySettingsDefaults.DEFAULT_NEW_LIMIT,
-                StudySettingsDefaults.DEFAULT_REVIEW_LIMIT));
+                StudySettingsDefaults.DEFAULT_REVIEW_LIMIT,
+                StudySettingsDefaults.DEFAULT_PENALTY_RATIO));
 
         UserSettings updated = new UserSettings(
             existing.userId(),
             command.newCardsLimit(),
-            command.reviewCardsLimit()
+            command.reviewCardsLimit(),
+            command.penaltyRatio()
         );
         UserSettings saved = settingsRepo.save(updated);
-        return new GetSettingsResponse(saved.newCardsLimit(), saved.reviewCardsLimit());
+        return new GetSettingsResponse(saved.newCardsLimit(), saved.reviewCardsLimit(), saved.penaltyRatio());
     }
 }

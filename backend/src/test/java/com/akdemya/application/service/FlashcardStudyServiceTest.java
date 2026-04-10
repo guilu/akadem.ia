@@ -294,7 +294,7 @@ class FlashcardStudyServiceTest {
       flashcardRepo.save(flashcard("card" + i, unitId));
     }
 
-    settingsRepo.save(new UserSettings(userId, 3, 100));
+    settingsRepo.save(new UserSettings(userId, 3, 100, 3));
 
     FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
