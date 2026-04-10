@@ -1,5 +1,6 @@
 package com.akdemya.adapter.inbound.web;
 
+import com.akdemya.adapter.infrastructure.security.OAuth2CodeStore;
 import com.akdemya.domain.port.in.AuthUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,9 +11,11 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthUseCase authUseCase;
+    private final OAuth2CodeStore codeStore;
 
-    public AuthController(AuthUseCase authUseCase) {
+    public AuthController(AuthUseCase authUseCase, OAuth2CodeStore codeStore) {
         this.authUseCase = authUseCase;
+        this.codeStore = codeStore;
     }
 
     @PostMapping("/register")
@@ -32,4 +35,15 @@ public class AuthController {
         }
         return ResponseEntity.ok(Map.of("accessToken", response.accessToken(), "role", response.role()));
     }
+
+    @PostMapping("/oauth2/exchange")
+    public ResponseEntity<?> exchangeOAuth2Code(@RequestBody ExchangeCodeRequest req) {
+        return codeStore.exchange(req.code())
+            .map(result -> ResponseEntity.ok(
+                (Object) Map.of("accessToken", result.accessToken(), "role", result.role())))
+            .orElseGet(() -> ResponseEntity.badRequest().body(
+                Map.of("error", "invalid_code")));
+    }
+
+    public record ExchangeCodeRequest(String code) {}
 }
