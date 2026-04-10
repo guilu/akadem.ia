@@ -16,11 +16,14 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AuthUseCase authUseCase;
+    private final OAuth2CodeStore codeStore;
     private final String frontendUrl;
 
     public OAuth2SuccessHandler(AuthUseCase authUseCase,
+                                OAuth2CodeStore codeStore,
                                 @Value("${app.frontend-url}") String frontendUrl) {
         this.authUseCase = authUseCase;
+        this.codeStore = codeStore;
         this.frontendUrl = frontendUrl;
     }
 
@@ -33,6 +36,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String email = oAuth2User.getAttribute("email");
         String name  = oAuth2User.getAttribute("name");
         AuthUseCase.AuthResponse authResponse = authUseCase.loginWithOAuth2(email, name);
-        response.sendRedirect(frontendUrl + "/oauth2/callback?token=" + authResponse.accessToken());
+        String code = codeStore.store(authResponse.accessToken(), authResponse.role());
+        response.sendRedirect(frontendUrl + "/oauth2/callback?code=" + code);
     }
 }

@@ -80,16 +80,26 @@ export default function App() {
     refreshSubjects();
   }, [token, apiBase]);
 
-  // Handle OAuth2 callback: extract token from URL query param
+  // Handle OAuth2 callback: exchange ephemeral code for JWT
   useEffect(() => {
     if (location.pathname === ROUTES.oauth2Callback) {
       const params = new URLSearchParams(location.search);
-      const callbackToken = params.get('token');
-      if (callbackToken) {
-        onToken(callbackToken);
-      } else {
+      const code = params.get('code');
+      if (!code) {
         navigate(ROUTES.login);
+        return;
       }
+      fetch(`${apiBase}/api/auth/oauth2/exchange`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('exchange_failed');
+          return res.json() as Promise<{ accessToken: string; role: string }>;
+        })
+        .then((data) => onToken(data.accessToken))
+        .catch(() => navigate(ROUTES.login));
     }
   }, [location.pathname]);
 
