@@ -1,6 +1,7 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.*;
+import com.akdemya.domain.port.in.UserSettingsUseCase;
 import com.akdemya.domain.port.out.*;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,7 @@ class ExamManagerResumeTest {
         new ExamAttemptAnswer(UUID.randomUUID(), attemptId, q2Id, null)
     ));
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var initial = manager.getAttempt(attemptId, "test@akdemya.com");
     assertEquals(0, initial.nextQuestionIndex());
@@ -106,7 +107,7 @@ class ExamManagerResumeTest {
         new ExamAttemptAnswer(UUID.randomUUID(), attemptNew.getId(), q1Id, a2.getId())
     ));
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var summaries = manager.listAttempts("user@akdemya.com");
     assertEquals(2, summaries.size());
@@ -138,7 +139,7 @@ class ExamManagerResumeTest {
     InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
     InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
         "user@test.com", callerId, Map.of(unitId, 10), 30, null);
@@ -167,7 +168,7 @@ class ExamManagerResumeTest {
     InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
     InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
         "owner@test.com", ownerId, Map.of(unitId, 10), 30, null);
@@ -196,7 +197,7 @@ class ExamManagerResumeTest {
     InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
     InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of());
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var command = new com.akdemya.domain.port.in.ExamUseCase.StartCommand(
         "caller@test.com", callerId, Map.of(unitId, 10), 30, null);
@@ -228,7 +229,7 @@ class ExamManagerResumeTest {
     InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
     InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var command = new com.akdemya.domain.port.in.ExamUseCase.StartRandomCommand(
         "caller@test.com", callerId, subjectId, 10, 30, null);
@@ -259,7 +260,7 @@ class ExamManagerResumeTest {
     InMemoryUnitRepo unitRepo = new InMemoryUnitRepo(List.of(unit));
     InMemorySubjectRepo subjectRepo = new InMemorySubjectRepo(List.of(subject));
 
-    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo);
+    ExamManager manager = new ExamManager(attemptRepo, attemptAnswerRepo, questionRepo, answerRepo, unitRepo, subjectRepo, new StubUserRepo(), new StubUserSettingsRepo());
 
     var command = new com.akdemya.domain.port.in.ExamUseCase.StartRandomCommand(
         "user@test.com", callerId, subjectId, 10, 30, null);
@@ -513,6 +514,21 @@ class ExamManagerResumeTest {
           })
           .toList();
     }
+  }
+
+  static class StubUserRepo implements UserRepository {
+    @Override public Optional<com.akdemya.domain.model.AppUser> findByEmail(String email) { return Optional.empty(); }
+    @Override public com.akdemya.domain.model.AppUser save(com.akdemya.domain.model.AppUser user) { return user; }
+    @Override public Optional<com.akdemya.domain.model.AppUser> findById(UUID id) { return Optional.empty(); }
+    @Override public boolean existsByEmail(String email) { return false; }
+    @Override public List<com.akdemya.domain.model.AppUser> findAll() { return List.of(); }
+    @Override public org.springframework.data.domain.Page<com.akdemya.domain.model.AppUser> findPage(int page, int size) { return org.springframework.data.domain.Page.empty(); }
+    @Override public void deleteById(UUID id) {}
+  }
+
+  static class StubUserSettingsRepo implements UserSettingsRepository {
+    @Override public Optional<com.akdemya.domain.model.UserSettings> findByUserId(UUID userId) { return Optional.empty(); }
+    @Override public com.akdemya.domain.model.UserSettings save(com.akdemya.domain.model.UserSettings settings) { return settings; }
   }
 
   static class InMemorySubjectRepo implements SubjectRepository {
