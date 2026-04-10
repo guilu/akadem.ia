@@ -1,9 +1,13 @@
 package com.akdemya.adapter.inbound.web;
 
+import com.akdemya.adapter.infrastructure.security.JwtService;
 import com.akdemya.adapter.infrastructure.security.OAuth2CodeStore;
 import com.akdemya.domain.port.in.AuthUseCase;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,24 +19,35 @@ class AuthControllerOAuth2ExchangeTest {
 
     private final AuthUseCase authUseCase = mock(AuthUseCase.class);
     private final OAuth2CodeStore codeStore = mock(OAuth2CodeStore.class);
-    private final AuthController controller = new AuthController(authUseCase, codeStore);
+    private final JwtService jwtService = mock(JwtService.class);
+    private AuthController controller;
+
+    @BeforeEach
+    void setUp() {
+        controller = new AuthController(authUseCase, codeStore, jwtService, false);
+    }
 
     // --- register ---
 
     @Test
-    void registerSuccess_returns200WithTokenAndRole() {
+    void registerSuccess_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.RegisterCommand("a@b.com", "pass", "pass", "A", "B", "dev");
         when(authUseCase.register(cmd))
             .thenReturn(AuthUseCase.AuthResponse.success("tok", "STUDENT"));
 
-        ResponseEntity<?> resp = controller.register(cmd);
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        ResponseEntity<?> resp = controller.register(cmd, res);
 
         assertEquals(200, resp.getStatusCodeValue());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
-        assertEquals("tok", body.get("accessToken"));
+        assertFalse(body.containsKey("accessToken"), "accessToken must NOT be in body");
         assertEquals("STUDENT", body.get("role"));
+
+        Cookie cookie = res.getCookie("ak_token");
+        assertNotNull(cookie);
+        assertEquals("tok", cookie.getValue());
     }
 
     @Test
@@ -41,7 +56,8 @@ class AuthControllerOAuth2ExchangeTest {
         when(authUseCase.register(cmd))
             .thenReturn(AuthUseCase.AuthResponse.fail("password_too_short"));
 
-        ResponseEntity<?> resp = controller.register(cmd);
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        ResponseEntity<?> resp = controller.register(cmd, res);
 
         assertEquals(400, resp.getStatusCodeValue());
         @SuppressWarnings("unchecked")
@@ -53,19 +69,24 @@ class AuthControllerOAuth2ExchangeTest {
     // --- login ---
 
     @Test
-    void loginSuccess_returns200WithTokenAndRole() {
+    void loginSuccess_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.LoginCommand("a@b.com", "pass");
         when(authUseCase.login(cmd))
             .thenReturn(AuthUseCase.AuthResponse.success("tok", "ADMIN"));
 
-        ResponseEntity<?> resp = controller.login(cmd);
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        ResponseEntity<?> resp = controller.login(cmd, res);
 
         assertEquals(200, resp.getStatusCodeValue());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
-        assertEquals("tok", body.get("accessToken"));
+        assertFalse(body.containsKey("accessToken"), "accessToken must NOT be in body");
         assertEquals("ADMIN", body.get("role"));
+
+        Cookie cookie = res.getCookie("ak_token");
+        assertNotNull(cookie);
+        assertEquals("tok", cookie.getValue());
     }
 
     @Test
@@ -74,7 +95,8 @@ class AuthControllerOAuth2ExchangeTest {
         when(authUseCase.login(cmd))
             .thenReturn(AuthUseCase.AuthResponse.fail("invalid_credentials"));
 
-        ResponseEntity<?> resp = controller.login(cmd);
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        ResponseEntity<?> resp = controller.login(cmd, res);
 
         assertEquals(401, resp.getStatusCodeValue());
         @SuppressWarnings("unchecked")
@@ -84,20 +106,25 @@ class AuthControllerOAuth2ExchangeTest {
     }
 
     @Test
-    void exchangeValidCodeReturns200WithAccessTokenAndRole() {
+    void exchangeValidCode_setsCookieAndReturnsRole() {
         String code = "valid-uuid-code";
         when(codeStore.exchange(code))
             .thenReturn(Optional.of(new OAuth2CodeStore.ExchangeResult("jwt.token.here", "STUDENT")));
 
+        MockHttpServletResponse res = new MockHttpServletResponse();
         var request = new AuthController.ExchangeCodeRequest(code);
-        ResponseEntity<?> response = controller.exchangeOAuth2Code(request);
+        ResponseEntity<?> response = controller.exchangeOAuth2Code(request, res);
 
         assertEquals(200, response.getStatusCodeValue());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
-        assertEquals("jwt.token.here", body.get("accessToken"));
+        assertFalse(body.containsKey("accessToken"), "accessToken must NOT be in body");
         assertEquals("STUDENT", body.get("role"));
+
+        Cookie cookie = res.getCookie("ak_token");
+        assertNotNull(cookie);
+        assertEquals("jwt.token.here", cookie.getValue());
     }
 
     @Test
@@ -105,8 +132,9 @@ class AuthControllerOAuth2ExchangeTest {
         String code = "unknown-code";
         when(codeStore.exchange(code)).thenReturn(Optional.empty());
 
+        MockHttpServletResponse res = new MockHttpServletResponse();
         var request = new AuthController.ExchangeCodeRequest(code);
-        ResponseEntity<?> response = controller.exchangeOAuth2Code(request);
+        ResponseEntity<?> response = controller.exchangeOAuth2Code(request, res);
 
         assertEquals(400, response.getStatusCodeValue());
         @SuppressWarnings("unchecked")

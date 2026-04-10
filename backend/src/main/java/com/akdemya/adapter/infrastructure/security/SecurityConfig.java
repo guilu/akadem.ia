@@ -1,6 +1,7 @@
 package com.akdemya.adapter.infrastructure.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -87,7 +89,7 @@ public class SecurityConfig {
             "https://akademia.diegobarrioh.dev"
         ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "Cookie"));
         cfg.setExposedHeaders(List.of("Authorization", "Content-Type"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
@@ -109,9 +111,8 @@ public class SecurityConfig {
         @Override
         protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                 throws ServletException, IOException {
-            String header = req.getHeader(HttpHeaders.AUTHORIZATION);
-            if (header != null && header.startsWith("Bearer ")) {
-                String token = header.substring(7);
+            String token = resolveToken(req);
+            if (token != null) {
                 try {
                     var jws = jwt.parse(token);
                     String email = jws.getBody().getSubject();
@@ -127,6 +128,23 @@ public class SecurityConfig {
                 }
             }
             chain.doFilter(req, res);
+        }
+
+        private String resolveToken(HttpServletRequest req) {
+            String header = req.getHeader(HttpHeaders.AUTHORIZATION);
+            if (header != null && header.startsWith("Bearer ")) {
+                return header.substring(7);
+            }
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                return Arrays.stream(cookies)
+                    .filter(c -> "ak_token".equals(c.getName()))
+                    .map(Cookie::getValue)
+                    .filter(v -> v != null && !v.isBlank())
+                    .findFirst()
+                    .orElse(null);
+            }
+            return null;
         }
     }
 }
