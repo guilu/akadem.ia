@@ -3,9 +3,11 @@ package com.akdemya.adapter.infrastructure.security;
 import com.akdemya.domain.port.out.TokenProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
@@ -16,8 +18,17 @@ public class JwtService implements TokenProvider {
 
     private final long ttlMs = 1000L * 60 * 60 * 24;
 
-    private Key signingKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    @PostConstruct
+    void validateSecret() {
+        byte[] decoded = Base64.getDecoder().decode(jwtSecret);
+        if (decoded.length < 32) {
+            throw new IllegalArgumentException(
+                    "JWT secret must be at least 256 bits (32 bytes) when Base64-decoded");
+        }
+    }
+
+    Key signingKey() {
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret));
     }
 
     public String generate(String subject, Map<String, Object> claims) {
