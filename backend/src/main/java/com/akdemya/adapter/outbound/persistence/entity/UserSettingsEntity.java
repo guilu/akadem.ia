@@ -20,6 +20,9 @@ public class UserSettingsEntity {
     @Column(name = "review_cards_limit", nullable = false)
     private int reviewCardsLimit;
 
+    @Column(name = "penalty_ratio", nullable = false)
+    private int penaltyRatio = 3;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -39,6 +42,9 @@ public class UserSettingsEntity {
 
     public int getReviewCardsLimit() { return reviewCardsLimit; }
     public void setReviewCardsLimit(int reviewCardsLimit) { this.reviewCardsLimit = reviewCardsLimit; }
+
+    public int getPenaltyRatio() { return penaltyRatio; }
+    public void setPenaltyRatio(int penaltyRatio) { this.penaltyRatio = penaltyRatio; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
