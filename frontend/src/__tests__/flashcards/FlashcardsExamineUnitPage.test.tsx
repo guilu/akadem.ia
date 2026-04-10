@@ -8,6 +8,12 @@ vi.mock('react-router-dom', () => ({
   useSearchParams: () => [new URLSearchParams('unitId=unit-1')],
 }));
 
+vi.mock('flowbite-react-icons/outline', () => ({
+  ArrowLeft: () => <span data-testid="arrow-left" />,
+  ArrowRight: () => <span data-testid="arrow-right" />,
+  Inbox: () => <span data-testid="inbox" />,
+}));
+
 vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
@@ -102,7 +108,7 @@ describe('FlashcardsExamineUnitPage', () => {
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
 
     await waitFor(() => {
       expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument();
@@ -117,11 +123,11 @@ describe('FlashcardsExamineUnitPage', () => {
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
     // Go to second card
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument());
 
     // Go back
-    fireEvent.click(screen.getByText('← Anterior'));
+    fireEvent.click(screen.getByRole('button', { name: /anterior/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
   });
 
@@ -132,7 +138,7 @@ describe('FlashcardsExamineUnitPage', () => {
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    const prevBtn = screen.getByText('← Anterior');
+    const prevBtn = screen.getByRole('button', { name: /anterior/i });
     expect(prevBtn).toBeDisabled();
   });
 
@@ -143,10 +149,10 @@ describe('FlashcardsExamineUnitPage', () => {
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument());
 
-    expect(screen.getByText('Siguiente →')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /siguiente/i })).toBeDisabled();
   });
 
   it('resets flip state when navigating to next card', async () => {
@@ -161,7 +167,7 @@ describe('FlashcardsExamineUnitPage', () => {
     await waitFor(() => expect(screen.getByText('Tasa de cambio instantánea.')).toBeInTheDocument());
 
     // Navigate to next — flip should reset
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => {
       expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument();
     });

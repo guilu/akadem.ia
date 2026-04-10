@@ -12,6 +12,11 @@ vi.mock('flowbite-react-icons/outline', () => ({
   ArrowLeft: () => <span data-testid="arrow-left" />,
   CircleMinus: () => <span data-testid="circle-minus" />,
   CheckCircle: () => <span data-testid="check-circle" />,
+  Close: () => <span data-testid="close" />,
+  CloseCircle: () => <span data-testid="close-circle" />,
+  Refresh: () => <span data-testid="refresh" />,
+  Rocket: () => <span data-testid="rocket" />,
+  Star: () => <span data-testid="star" />,
 }));
 
 vi.mock('../../api', async (importOriginal) => {
@@ -78,7 +83,7 @@ describe('FlashcardsStudyPage', () => {
     });
 
     // Click Repetir (AGAIN)
-    fireEvent.click(screen.getByText('❌ Repetir'));
+    fireEvent.click(screen.getByText('Repetir'));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -108,7 +113,7 @@ describe('FlashcardsStudyPage', () => {
     fireEvent.click(screen.getByText('Mostrar respuesta'));
     await waitFor(() => screen.getByText('4'));
 
-    fireEvent.click(screen.getByText('❌ Repetir'));
+    fireEvent.click(screen.getByText('Repetir'));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -153,7 +158,7 @@ describe('FlashcardsStudyPage', () => {
     fireEvent.click(screen.getByText('Mostrar respuesta'));
     await waitFor(() => screen.getByText('4'));
 
-    fireEvent.click(screen.getByText('🚀 Memorizada'));
+    fireEvent.click(screen.getByText('Memorizada'));
 
     await waitFor(() => {
       expect(screen.getByText('Sesión completada')).toBeInTheDocument();
