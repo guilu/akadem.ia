@@ -153,22 +153,162 @@ class ManageUnitControllerTest {
     User principal = userPrincipal("user@example.com");
     UUID unitId = UUID.randomUUID();
     UUID subjectId = UUID.randomUUID();
+    Unit globalUnit = new Unit(unitId, subjectId, "Global Unit", "desc", 1, Visibility.GLOBAL, null);
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of(globalUnit));
 
-    // The update lookup is done via getAllUnits or subject-scoped query
-    // For this test, we expect 403 when trying to update a GLOBAL unit
-    doThrow(new AccessDeniedException("Cannot edit GLOBAL unit"))
-        .when(contentService).createUnit(any());
-
-    var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "GLOBAL");
+    var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(unitId, req, principal);
 
-    // Controller should check ownership before calling createUnit
-    assertNotNull(response);
+    assertEquals(403, response.getStatusCodeValue());
+    verify(contentService, never()).createUnit(any());
   }
 
   @Test
   void nullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.list(UUID.randomUUID(), null, null);
     assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "My Unit", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithNullSubjectIdReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageUnitController.UnitRequest(null, "My Unit", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithNullNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), null, "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithBlankNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "  ", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void adminCanCreateGlobalUnit() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID subjectId = UUID.randomUUID();
+    Unit created = Unit.createGlobal(subjectId, "Global Unit", "desc", 1);
+    when(contentService.createUnit(any())).thenReturn(created);
+
+    var req = new ManageUnitController.UnitRequest(subjectId, "Global Unit", "desc", 1, "GLOBAL");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).createUnit(any());
+  }
+
+  @Test
+  void updateWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "Name", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateWithNullSubjectIdReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageUnitController.UnitRequest(null, "Name", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateWithBlankNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    var req = new ManageUnitController.UnitRequest(subjectId, "  ", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateNonExistentUnitReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of());
+
+    var req = new ManageUnitController.UnitRequest(subjectId, "Name", "desc", 1, "PRIVATE");
+    ResponseEntity<?> response = controller.update(unitId, req, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
+  void adminCanUpdateGlobalUnit() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID unitId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
+    Unit existing = new Unit(unitId, subjectId, "Old Name", "desc", 1, Visibility.GLOBAL, null);
+    Unit updated = new Unit(unitId, subjectId, "New Name", "desc", 1, Visibility.GLOBAL, null);
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of(existing));
+    when(contentService.createUnit(any())).thenReturn(updated);
+    when(contentService.getQuestionsByUnit(any())).thenReturn(List.of());
+
+    var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "GLOBAL");
+    ResponseEntity<?> response = controller.update(unitId, req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
+
+  @Test
+  void deleteWithNullPrincipalReturnsUnauthorized() {
+    ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void deleteNonExistentUnitReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    doThrow(new IllegalArgumentException("Not found"))
+        .when(contentService).deleteUnitIfAuthorized(any(), any(), anyBoolean());
+
+    ResponseEntity<?> response = controller.delete(unitId, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
+  void listWithGlobalScopeFiltersCorrectly() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    when(contentService.getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.GLOBAL)))
+        .thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.list(subjectId, "GLOBAL", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.GLOBAL));
+  }
+
+  @Test
+  void listWithPrivateScopeFiltersCorrectly() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    when(contentService.getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE)))
+        .thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.list(subjectId, "PRIVATE", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 }

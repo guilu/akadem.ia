@@ -167,4 +167,438 @@ class ManageQuestionControllerTest {
 
     assertEquals(400, response.getStatusCodeValue());
   }
+
+  @Test
+  void createWithNullDifficultyReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Question?", null,
+        null, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithNullAnswersReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Question?", null,
+        Question.Difficulty.EASY, null, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithWrongAnswerCountReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var answers = List.of(
+        new ManageQuestionController.AnswerRequest("A", true),
+        new ManageQuestionController.AnswerRequest("B", false)
+    );
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Question?", null,
+        Question.Difficulty.EASY, answers, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithMultipleCorrectAnswersReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var answers = List.of(
+        new ManageQuestionController.AnswerRequest("A", true),
+        new ManageQuestionController.AnswerRequest("B", true),
+        new ManageQuestionController.AnswerRequest("C", false),
+        new ManageQuestionController.AnswerRequest("D", false)
+    );
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Question?", null,
+        Question.Difficulty.EASY, answers, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithBlankAnswerTextReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var answers = List.of(
+        new ManageQuestionController.AnswerRequest("A", true),
+        new ManageQuestionController.AnswerRequest("  ", false),
+        new ManageQuestionController.AnswerRequest("C", false),
+        new ManageQuestionController.AnswerRequest("D", false)
+    );
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Question?", null,
+        Question.Difficulty.EASY, answers, "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void adminCanCreateGlobalQuestion() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question created = Question.createGlobal(unitId, "Global Question?", null, Question.Difficulty.MEDIUM);
+    when(contentService.createQuestion(any())).thenReturn(created);
+    when(answerRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Global Question?", null,
+        Question.Difficulty.MEDIUM, validAnswers(), "GLOBAL");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).createQuestion(any());
+  }
+
+  @Test
+  void createWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageQuestionController.QuestionRequest(UUID.randomUUID(), "Question?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, null);
+
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void createWithNullTextReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, null, null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void deleteWithNullPrincipalReturnsUnauthorized() {
+    ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void deleteNonExistentQuestionReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID questionId = UUID.randomUUID();
+    doThrow(new IllegalArgumentException("Not found"))
+        .when(contentService).deleteQuestionIfAuthorized(any(), any(), anyBoolean());
+
+    ResponseEntity<?> response = controller.delete(questionId, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
+  void listWithGlobalScopeFiltersCorrectly() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    var emptyPage = new PageImpl<Question>(List.of(), PageRequest.of(0, 10), 0);
+    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.GLOBAL), anyInt(), anyInt()))
+        .thenReturn(emptyPage);
+
+    ResponseEntity<?> response = controller.list(unitId, "GLOBAL", 1, 10, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.GLOBAL), anyInt(), anyInt());
+  }
+
+  @Test
+  void listWithPrivateScopeFiltersCorrectly() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    var emptyPage = new PageImpl<Question>(List.of(), PageRequest.of(0, 10), 0);
+    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt()))
+        .thenReturn(emptyPage);
+
+    ResponseEntity<?> response = controller.list(unitId, "PRIVATE", 1, 10, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt());
+  }
+
+  @Test
+  void listIncludesAnswersForEachQuestion() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createPrivate(unitId, "Test question", null, Question.Difficulty.EASY, userId);
+    var page = new PageImpl<Question>(List.of(q), PageRequest.of(0, 10), 1);
+    when(contentService.getQuestionsByScope(any(), any(), anyBoolean(), isNull(), anyInt(), anyInt()))
+        .thenReturn(page);
+    Answer answer = Answer.create(q.getId(), "Answer A", true);
+    when(answerRepo.findByQuestionId(q.getId())).thenReturn(List.of(answer));
+
+    ResponseEntity<?> response = controller.list(unitId, null, 1, 10, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(answerRepo).findByQuestionId(q.getId());
+  }
+
+  @Test
+  void updateWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageQuestionController.QuestionRequest(UUID.randomUUID(), "Q?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
+
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateWithNullUnitIdReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageQuestionController.QuestionRequest(null, "Q?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateWithBlankTextReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    var req = new ManageQuestionController.QuestionRequest(unitId, "  ", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateWithWrongAnswerCountReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    var answers = List.of(
+        new ManageQuestionController.AnswerRequest("A", true),
+        new ManageQuestionController.AnswerRequest("B", false)
+    );
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Q?", null,
+        Question.Difficulty.EASY, answers, "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateNonExistentQuestionReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID questionId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of());
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "Q?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(questionId, req, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  @Test
+  void updateGlobalQuestionAsForbiddenForNonAdmin() {
+    User principal = userPrincipal("user@example.com");
+    UUID questionId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID otherOwnerId = UUID.randomUUID();
+    Question existing = new Question(questionId, unitId, "Old?", null,
+        Question.Difficulty.EASY, Visibility.GLOBAL, otherOwnerId);
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(existing));
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "New?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(questionId, req, principal);
+
+    assertEquals(403, response.getStatusCodeValue());
+  }
+
+  @Test
+  void adminCanUpdateGlobalQuestion() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID questionId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Question existing = new Question(questionId, unitId, "Old?", null,
+        Question.Difficulty.EASY, Visibility.GLOBAL, null);
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(existing));
+    Question updated = new Question(questionId, unitId, "New?", null,
+        Question.Difficulty.EASY, Visibility.GLOBAL, null);
+    when(contentService.createQuestion(any())).thenReturn(updated);
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "New?", null,
+        Question.Difficulty.EASY, validAnswers(), "GLOBAL");
+    ResponseEntity<?> response = controller.update(questionId, req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
+
+  @Test
+  void nonAdminCanUpdateOwnPrivateQuestion() {
+    User principal = userPrincipal("user@example.com");
+    UUID questionId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Question existing = new Question(questionId, unitId, "Old?", null,
+        Question.Difficulty.EASY, Visibility.PRIVATE, userId);
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(existing));
+    Question updated = new Question(questionId, unitId, "New?", null,
+        Question.Difficulty.EASY, Visibility.PRIVATE, userId);
+    when(contentService.createQuestion(any())).thenReturn(updated);
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    var req = new ManageQuestionController.QuestionRequest(unitId, "New?", null,
+        Question.Difficulty.EASY, validAnswers(), "PRIVATE");
+    ResponseEntity<?> response = controller.update(questionId, req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
+
+  @Test
+  void exportWithNullPrincipalReturnsUnauthorized() {
+    ResponseEntity<?> response = controller.export(null, "json", null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void exportJsonReturnsAllQuestionsWhenNoUnitId() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
+    when(contentService.getAllQuestions()).thenReturn(List.of(q));
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.export(null, "json", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getAllQuestions();
+  }
+
+  @Test
+  void exportJsonByUnitIdFiltersQuestions() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(q));
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.export(unitId, "json", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).getQuestionsByUnit(unitId);
+  }
+
+  @Test
+  void exportCsvReturnsCorrectContentType() {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
+    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(q));
+    Answer a1 = Answer.create(q.getId(), "Ans1", true);
+    Answer a2 = Answer.create(q.getId(), "Ans2", false);
+    Answer a3 = Answer.create(q.getId(), "Ans3", false);
+    Answer a4 = Answer.create(q.getId(), "Ans4", false);
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of(a1, a2, a3, a4));
+
+    ResponseEntity<?> response = controller.export(unitId, "csv", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    assertEquals("text/csv", response.getHeaders().getFirst("Content-Type"));
+  }
+
+  @Test
+  void importWithNullPrincipalReturnsUnauthorized() throws Exception {
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    ResponseEntity<?> response = controller.importQuestions(file, "json", null, null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  @Test
+  void importEmptyFileReturnsBadRequest() throws Exception {
+    User principal = userPrincipal("user@example.com");
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    when(file.isEmpty()).thenReturn(true);
+
+    ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void importOversizedFileReturnsBadRequest() throws Exception {
+    User principal = userPrincipal("user@example.com");
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn(20L * 1024 * 1024); // 20 MB
+
+    ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void importWithInvalidContentTypeReturnsBadRequest() throws Exception {
+    User principal = userPrincipal("user@example.com");
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn(1024L);
+    when(file.getContentType()).thenReturn("application/pdf");
+
+    ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void importValidJsonFileCreatesQuestions() throws Exception {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    String json = "[{\"unitId\":\"" + unitId + "\",\"text\":\"Q1?\",\"explanation\":null," +
+        "\"difficulty\":\"EASY\",\"answers\":[" +
+        "{\"text\":\"A\",\"correct\":true},{\"text\":\"B\",\"correct\":false}," +
+        "{\"text\":\"C\",\"correct\":false},{\"text\":\"D\",\"correct\":false}]}]";
+
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) json.length());
+    when(file.getContentType()).thenReturn("application/json");
+    when(file.getBytes()).thenReturn(json.getBytes());
+
+    Question saved = Question.createPrivate(unitId, "Q1?", null, Question.Difficulty.EASY, userId);
+    when(contentService.createQuestion(any())).thenReturn(saved);
+    when(answerRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
+
+  @Test
+  void importValidCsvFileCreatesQuestions() throws Exception {
+    User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    String csv = "unitId,text,explanation,difficulty,answer1,answer2,answer3,answer4,correctIndex\n" +
+        unitId + ",Q1?,Some explanation,EASY,A,B,C,D,1\n";
+
+    var file = mock(org.springframework.web.multipart.MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getContentType()).thenReturn("text/csv");
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    Question saved = Question.createPrivate(unitId, "Q1?", null, Question.Difficulty.EASY, userId);
+    when(contentService.createQuestion(any())).thenReturn(saved);
+    when(answerRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    ResponseEntity<?> response = controller.importQuestions(file, "csv", null, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
 }

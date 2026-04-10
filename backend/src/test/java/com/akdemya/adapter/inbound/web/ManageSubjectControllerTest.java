@@ -159,4 +159,143 @@ class ManageSubjectControllerTest {
     ResponseEntity<?> response = controller.list(null, null);
     assertEquals(401, response.getStatusCodeValue());
   }
+
+  // Test 10: POST with null principal → 401
+  @Test
+  void createWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  // Test 11: POST with null name → 400
+  @Test
+  void createWithNullNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageSubjectController.SubjectRequest(null, "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  // Test 12: POST with blank name → 400
+  @Test
+  void createWithBlankNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.create(req, principal);
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  // Test 13: Admin POST with visibility=GLOBAL → 200
+  @Test
+  void adminCanCreateGlobalSubject() {
+    User principal = adminPrincipal("admin@example.com");
+    Subject created = Subject.createGlobal("Global Subject", "desc");
+    when(contentService.createSubject(any())).thenReturn(created);
+
+    var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL");
+    ResponseEntity<?> response = controller.create(req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(contentService).createSubject(any());
+  }
+
+  // Test 14: PUT with null principal → 401
+  @Test
+  void updateWithNullPrincipalReturnsUnauthorized() {
+    var req = new ManageSubjectController.SubjectRequest("Name", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  // Test 15: PUT for non-existent subject → 404
+  @Test
+  void updateNonExistentSubjectReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    when(contentService.getAllSubjects()).thenReturn(List.of());
+
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.update(subjectId, req, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  // Test 16: Non-admin PUT on GLOBAL subject → 403
+  @Test
+  void nonAdminCannotUpdateGlobalSubject() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    Subject globalSubject = new Subject(subjectId, "Global", "desc", Visibility.GLOBAL, null);
+    when(contentService.getAllSubjects()).thenReturn(List.of(globalSubject));
+
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.update(subjectId, req, principal);
+
+    assertEquals(403, response.getStatusCodeValue());
+  }
+
+  // Test 17: Non-admin PUT on own PRIVATE subject → 200
+  @Test
+  void nonAdminCanUpdateOwnPrivateSubject() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId);
+    Subject updated = new Subject(subjectId, "New Name", "desc", Visibility.PRIVATE, userId);
+    when(contentService.getAllSubjects()).thenReturn(List.of(privateSubject));
+    when(contentService.createSubject(any())).thenReturn(updated);
+    when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
+
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.update(subjectId, req, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
+
+  // Test 18: PUT with blank name → 400
+  @Test
+  void updateWithBlankNameReturnsBadRequest() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId);
+    when(contentService.getAllSubjects()).thenReturn(List.of(privateSubject));
+
+    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE");
+    ResponseEntity<?> response = controller.update(subjectId, req, principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  // Test 19: DELETE with null principal → 401
+  @Test
+  void deleteWithNullPrincipalReturnsUnauthorized() {
+    ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
+    assertEquals(401, response.getStatusCodeValue());
+  }
+
+  // Test 20: DELETE non-existent → 404
+  @Test
+  void deleteNonExistentSubjectReturnsNotFound() {
+    User principal = userPrincipal("user@example.com");
+    UUID subjectId = UUID.randomUUID();
+    doThrow(new IllegalArgumentException("Not found"))
+        .when(contentService).deleteSubjectIfAuthorized(any(), any(), anyBoolean());
+
+    ResponseEntity<?> response = controller.delete(subjectId, principal);
+
+    assertEquals(404, response.getStatusCodeValue());
+  }
+
+  // Test 21: list returns isEditable=true for admin on global subject
+  @Test
+  void adminSeesGlobalSubjectsAsEditable() {
+    User principal = adminPrincipal("admin@example.com");
+    Subject globalSubject = Subject.createGlobal("Global Subject", "desc");
+    when(contentService.getSubjectsByScope(any(), eq(true), isNull())).thenReturn(List.of(globalSubject));
+    when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.list(null, principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+  }
 }
