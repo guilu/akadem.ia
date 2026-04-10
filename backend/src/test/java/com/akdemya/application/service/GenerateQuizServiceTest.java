@@ -215,6 +215,18 @@ class GenerateQuizServiceTest {
                         || userId.equals(u.getOwnerId())))
                 .toList();
         }
+        @Override public List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, com.akdemya.domain.model.Visibility scope) {
+            return store.values().stream()
+                .filter(u -> u.getSubjectId().equals(subjectId))
+                .filter(u -> {
+                    if (scope == null) return true;
+                    return switch (scope) {
+                        case GLOBAL -> u.getVisibility() == com.akdemya.domain.model.Visibility.GLOBAL;
+                        case PRIVATE -> u.getVisibility() == com.akdemya.domain.model.Visibility.PRIVATE && userId.equals(u.getOwnerId());
+                    };
+                })
+                .toList();
+        }
     }
 
     static class StubGeneratedQuestionDraftRepository implements GeneratedQuestionDraftRepository {

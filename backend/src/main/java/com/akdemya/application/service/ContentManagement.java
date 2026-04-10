@@ -2,6 +2,7 @@ package com.akdemya.application.service;
 
 import com.akdemya.domain.model.*;
 import com.akdemya.domain.port.out.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +33,38 @@ public class ContentManagement {
     return subjectRepo.findVisibleByUserId(userId);
   }
 
+  /**
+   * Returns subjects filtered by scope.
+   * scope=null means ALL (GLOBAL + user's PRIVATE).
+   * If scope=GLOBAL and isAdmin, returns all global subjects.
+   * scope=PRIVATE → user's own private subjects only.
+   */
+  public List<Subject> getSubjectsByScope(UUID userId, boolean isAdmin, Visibility scope) {
+    return subjectRepo.findByScope(userId, scope);
+  }
+
   public Subject createSubject(Subject s) {
     return subjectRepo.save(s);
   }
 
   public void deleteSubject(UUID id) {
+    subjectRepo.deleteById(id);
+  }
+
+  /**
+   * Deletes a subject if the caller is authorized.
+   * - GLOBAL: only admin can delete
+   * - PRIVATE: only the owner can delete
+   */
+  public void deleteSubjectIfAuthorized(UUID id, UUID callerId, boolean isAdmin) {
+    Subject subject = subjectRepo.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Subject not found: " + id));
+    if (subject.getVisibility() == Visibility.GLOBAL && !isAdmin) {
+      throw new AccessDeniedException("Only admins can delete GLOBAL subjects");
+    }
+    if (subject.getVisibility() == Visibility.PRIVATE && !subject.getOwnerId().equals(callerId)) {
+      throw new AccessDeniedException("Cannot delete another user's PRIVATE subject");
+    }
     subjectRepo.deleteById(id);
   }
 
@@ -46,6 +74,11 @@ public class ContentManagement {
 
   public List<Unit> getVisibleUnitsBySubject(UUID subjectId, UUID userId) {
     return unitRepo.findVisibleBySubjectIdAndUserId(subjectId, userId);
+  }
+
+  /** Returns units for a subject filtered by scope. */
+  public List<Unit> getUnitsByScope(UUID subjectId, UUID userId, boolean isAdmin, Visibility scope) {
+    return unitRepo.findBySubjectIdAndScope(subjectId, userId, scope);
   }
 
   public List<UnitAvailability> getUnitAvailability(UUID subjectId) {
@@ -80,12 +113,35 @@ public class ContentManagement {
     unitRepo.deleteById(id);
   }
 
+  /**
+   * Deletes a unit if the caller is authorized.
+   * - GLOBAL: only admin can delete
+   * - PRIVATE: only the owner can delete
+   */
+  public void deleteUnitIfAuthorized(UUID id, UUID callerId, boolean isAdmin) {
+    Unit unit = unitRepo.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Unit not found: " + id));
+    if (unit.getVisibility() == Visibility.GLOBAL && !isAdmin) {
+      throw new AccessDeniedException("Only admins can delete GLOBAL units");
+    }
+    if (unit.getVisibility() == Visibility.PRIVATE && !unit.getOwnerId().equals(callerId)) {
+      throw new AccessDeniedException("Cannot delete another user's PRIVATE unit");
+    }
+    unitRepo.deleteById(id);
+  }
+
   public List<Question> getQuestionsByUnit(UUID unitId) {
     return questionRepo.findByUnitId(unitId);
   }
 
   public List<Question> getVisibleQuestionsByUnit(UUID unitId, UUID userId) {
     return questionRepo.findVisibleByUnitIdAndUserId(unitId, userId);
+  }
+
+  /** Returns paginated questions for a unit filtered by scope. */
+  public org.springframework.data.domain.Page<Question> getQuestionsByScope(
+      UUID unitId, UUID userId, boolean isAdmin, Visibility scope, int page, int size) {
+    return questionRepo.findPageByUnitIdAndScope(unitId, userId, scope, page, size);
   }
 
   /**
@@ -103,6 +159,23 @@ public class ContentManagement {
   }
 
   public void deleteQuestion(UUID id) {
+    questionRepo.deleteById(id);
+  }
+
+  /**
+   * Deletes a question if the caller is authorized.
+   * - GLOBAL: only admin can delete
+   * - PRIVATE: only the owner can delete
+   */
+  public void deleteQuestionIfAuthorized(UUID id, UUID callerId, boolean isAdmin) {
+    Question question = questionRepo.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Question not found: " + id));
+    if (question.getVisibility() == Visibility.GLOBAL && !isAdmin) {
+      throw new AccessDeniedException("Only admins can delete GLOBAL questions");
+    }
+    if (question.getVisibility() == Visibility.PRIVATE && !question.getOwnerId().equals(callerId)) {
+      throw new AccessDeniedException("Cannot delete another user's PRIVATE question");
+    }
     questionRepo.deleteById(id);
   }
 

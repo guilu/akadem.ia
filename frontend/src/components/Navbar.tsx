@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User } from 'flowbite-react-icons/outline';
+import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User, FolderOpen } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
 import type { NavUser } from '../types';
 import { UserMenuDropdown } from './UserMenuDropdown';
@@ -67,7 +67,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
         >
           <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-8 h-8" />
-          Akdmia
+          Akadem.ia
         </button>
 
         {/* Desktop links */}
@@ -97,6 +97,10 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
               <button onClick={() => go(ROUTES.subjects)} className={linkCls(ROUTES.subjects)}>
                 <BookOpen className="w-4 h-4" />
                 Exámenes
+              </button>
+              <button onClick={() => go(ROUTES.manage)} className={linkCls(ROUTES.manage)}>
+                <FolderOpen className="w-4 h-4" />
+                Gestionar
               </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={linkCls(ROUTES.rag)}>
@@ -185,6 +189,10 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
               <button onClick={() => go(ROUTES.subjects)} className={mobileLinkCls(ROUTES.subjects)}>
                 <BookOpen className="w-4 h-4" />
                 Exámenes
+              </button>
+              <button onClick={() => go(ROUTES.manage)} className={mobileLinkCls(ROUTES.manage)}>
+                <FolderOpen className="w-4 h-4" />
+                Gestionar
               </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={mobileLinkCls(ROUTES.rag)}>

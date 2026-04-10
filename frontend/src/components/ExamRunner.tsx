@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle, CircleMinus } from 'flowbite-react-icons/outline';
+import { ArrowLeft, ArrowRight, CheckCircle, CircleMinus, Inbox } from 'flowbite-react-icons/outline';
 
 export type Answer = { id: string; text: string };
 export type Question = { id: string; text: string; answers: Answer[] };
@@ -63,7 +63,8 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
   );
 
   if (shuffled.length === 0) return (
-    <div className="max-w-xl mx-auto border border-secondary/25 rounded-2xl p-8">
+    <div className="max-w-xl mx-auto border border-secondary/25 rounded-2xl p-8 text-center">
+      <Inbox className="w-10 h-10 mx-auto mb-3 text-text/25" />
       <h2 className="text-xl font-bold mb-2">No hay preguntas disponibles</h2>
       <p className="text-text/60">Selecciona otra configuración y vuelve a intentarlo.</p>
     </div>

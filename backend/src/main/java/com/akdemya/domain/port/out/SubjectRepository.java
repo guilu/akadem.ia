@@ -18,4 +18,12 @@ public interface SubjectRepository {
 
   /** Returns all GLOBAL subjects plus the caller's own PRIVATE subjects. */
   List<Subject> findVisibleByUserId(UUID userId);
+
+  /**
+   * Scope-aware query:
+   * - GLOBAL → visibility=GLOBAL
+   * - PRIVATE → visibility=PRIVATE AND ownerId=userId
+   * - ALL → visibility=GLOBAL OR (visibility=PRIVATE AND ownerId=userId)
+   */
+  List<Subject> findByScope(UUID userId, Visibility scope);
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft } from 'flowbite-react-icons/outline';
+import { ArrowLeft, ArrowRight, Inbox } from 'flowbite-react-icons/outline';
 import { apiAuthJson, apiBase } from '../api';
 
 type Flashcard = {
@@ -65,7 +65,7 @@ export default function FlashcardsExamineUnitPage() {
   if (!card) return (
     <div className="space-y-4 max-w-2xl mx-auto">
       <div className="border border-secondary/25 rounded-2xl px-5 py-12 text-center">
-        <div className="text-4xl mb-3">📭</div>
+        <Inbox className="w-12 h-12 mx-auto mb-3 text-text/25" />
         <p className="text-text/55 text-sm">No hay tarjetas en esta unidad.</p>
       </div>
       <div className="flex items-center gap-3 flex-wrap">
@@ -137,16 +137,18 @@ export default function FlashcardsExamineUnitPage() {
         <button
           onClick={prev}
           disabled={index === 0}
-          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30"
+          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
-          ← Anterior
+          <ArrowLeft className="w-4 h-4" />
+          Anterior
         </button>
         <button
           onClick={next}
           disabled={index === total - 1}
-          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30"
+          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
-          Siguiente →
+          Siguiente
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
