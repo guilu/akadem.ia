@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
   Minus, Plus, Play, AdjustmentsHorizontal, Shuffle,
-  ClipboardList, Lightbulb, ChevronLeft, ChevronRight, ChevronDown,
+  ClipboardList, Lightbulb, ChevronLeft, ChevronRight,
 } from 'flowbite-react-icons/outline';
 import { apiBase, apiJson } from '../api';
 import type { UnitAvailability } from '../types';
 
-const inputUnderline = 'w-full bg-transparent border-0 border-b-2 border-secondary/20 focus:border-primary focus:ring-0 rounded-t-xl px-4 py-3 text-text font-medium transition-colors outline-none';
+const inp = 'bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
 export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnauthorized }: {
   subjectId: string;
@@ -21,7 +21,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [randomCount, setRandomCount] = useState(10);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 6;
 
   useEffect(() => {
     const diffQuery = difficulty === 'ALL' ? '' : `&difficulty=${difficulty}`;
@@ -45,7 +45,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
   const totalAvailable = units.reduce((sum, u) => sum + (u.available || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto pb-32">
+    <div className="max-w-8xl mx-auto pb-32">
 
       {/* ── Hero ── */}
       <div className="mb-12">
@@ -67,7 +67,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
         <div className="lg:col-span-4 space-y-6">
           <div className="border border-secondary/25 rounded-3xl p-8 flex flex-col gap-6">
             <div className="flex items-center gap-3">
-              <AdjustmentsHorizontal className="w-5 h-5 text-accent" />
+              <AdjustmentsHorizontal className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Configuración General</h2>
             </div>
 
@@ -77,19 +77,16 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 Dificultad
                 {availabilityLoading && <span className="ml-1.5 text-text/35 font-normal">· actualizando…</span>}
               </label>
-              <div className="relative">
-                <select
-                  className={inputUnderline + ' appearance-none pr-10'}
-                  value={difficulty}
-                  onChange={e => setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
-                >
-                  <option value="ALL">Todas</option>
-                  <option value="EASY">Fácil</option>
-                  <option value="MEDIUM">Media</option>
-                  <option value="HARD">Difícil</option>
-                </select>
-                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text/40" />
-              </div>
+              <select
+                className={inp + ' w-full'}
+                value={difficulty}
+                onChange={e => setDifficulty(e.target.value as 'EASY' | 'MEDIUM' | 'HARD' | 'ALL')}
+              >
+                <option value="ALL">Todas</option>
+                <option value="EASY">Fácil</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HARD">Difícil</option>
+              </select>
             </div>
 
             {/* Time */}
@@ -100,7 +97,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 min={1}
                 value={time}
                 onChange={e => setTime(Number(e.target.value))}
-                className={inputUnderline}
+                className={inp + ' w-full'}
                 placeholder="Ej. 60"
               />
             </div>
@@ -111,8 +108,8 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 Preguntas aleatorias{' '}
                 <span className="text-text/35 font-normal">(máx. {totalAvailable})</span>
               </label>
-              <div className="flex items-center border-b-2 border-secondary/20 focus-within:border-primary rounded-t-xl overflow-hidden transition-colors">
-                <Shuffle className="w-5 h-5 mx-4 text-text/40 shrink-0" />
+              <div className="flex items-center gap-2">
+                <Shuffle className="w-4 h-4 text-text/40 shrink-0" />
                 <input
                   type="number"
                   min={1}
@@ -120,7 +117,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                   value={randomCount}
                   onChange={e => setRandomCount(Math.max(1, Math.min(Number(e.target.value), totalAvailable || 1)))}
                   disabled={totalAvailable === 0}
-                  className="w-full bg-transparent border-none focus:ring-0 py-3 text-text outline-none disabled:opacity-40"
+                  className={inp + ' flex-1 disabled:opacity-40'}
                 />
               </div>
             </div>
@@ -136,11 +133,11 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
           </div>
 
           {/* Tip card */}
-          <div className="bg-accent/10 rounded-3xl p-6 border border-accent/20">
+          <div className="bg-primary/10 rounded-3xl p-6 border border-primary/20">
             <div className="flex items-start gap-4">
-              <Lightbulb className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="text-accent font-bold mb-1">Tip de estudio</p>
+                <p className="text-primary font-bold mb-1">Tip de estudio</p>
                 <p className="text-sm text-text/60">
                   Configurar exámenes con tiempo reducido ayuda a simular la presión real del examen
                   y mejora tu gestión del tiempo.
@@ -154,7 +151,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
         <div className="lg:col-span-8">
           <div className="border border-secondary/25 rounded-3xl p-8">
             <div className="flex items-center gap-3 mb-8">
-              <ClipboardList className="w-5 h-5 text-accent" />
+              <ClipboardList className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Preguntas por unidad</h2>
             </div>
 
@@ -168,12 +165,12 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                     className={`flex items-center justify-between p-6 border rounded-2xl transition-all ${
                       disabled
                         ? 'border-secondary/10 opacity-50'
-                        : 'border-secondary/20 hover:border-accent/30'
+                        : 'border-secondary/20 hover:border-primary/30'
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                        <span className="text-accent font-bold text-sm">{page * PAGE_SIZE + i + 1}</span>
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-primary font-bold text-sm">{page * PAGE_SIZE + i + 1}</span>
                       </div>
                       <div>
                         <h3 className="font-bold text-sm">{u.name}</h3>
@@ -187,7 +184,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                       <button
                         onClick={() => setCount(u.id, current - 1)}
                         disabled={disabled || current === 0}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-secondary/25 hover:border-accent/50 hover:text-accent transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-secondary/25 hover:border-primary/50 hover:text-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         aria-label="Disminuir"
                       >
                         <Minus className="w-3.5 h-3.5" />
@@ -204,7 +201,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                       <button
                         onClick={() => setCount(u.id, current + 1)}
                         disabled={disabled || current >= (u.available || 0)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-secondary/25 hover:border-accent/50 hover:text-accent transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-secondary/25 hover:border-primary/50 hover:text-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         aria-label="Aumentar"
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -231,7 +228,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                       key={i}
                       onClick={() => setPage(i)}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${
-                        i === page ? 'bg-accent text-bg' : 'hover:bg-secondary/15'
+                        i === page ? 'bg-primary text-bg' : 'hover:bg-secondary/15'
                       }`}
                     >
                       {i + 1}
@@ -254,20 +251,20 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
       {/* ── Sticky bottom bar ── */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-2xl border-t border-secondary/20 px-8 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="max-w-8xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="flex flex-col">
               <span className="text-xs font-bold uppercase tracking-widest text-text/40 mb-1">
                 Resumen de selección
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-accent">{total()}</span>
+                <span className="text-3xl font-black text-primary">{total()}</span>
                 <span className="text-sm font-semibold text-text/55">Total seleccionadas</span>
               </div>
             </div>
             <div className="h-12 w-px bg-secondary/20 hidden md:block" />
             <div className="hidden md:flex items-center gap-3">
-              <Play className="w-5 h-5 text-accent" />
+              <Play className="w-5 h-5 text-primary" />
               <span className="text-sm font-medium text-text/55">{time} min configurados</span>
             </div>
           </div>
