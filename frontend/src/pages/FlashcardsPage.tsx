@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpFromBracket, Close, CheckCircle, CirclePlus, Refresh, Clock, Inbox } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase, exportFlashcardsBySubject } from '../api';
+import { apiJson, apiBase, exportFlashcardsBySubject } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
@@ -36,12 +36,10 @@ export default function FlashcardsPage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string>('');
 
-  const token = localStorage.getItem('ak_token') || '';
-
   const loadUnits = () => {
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    apiJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`)
       .then((data) => setUnits(data || []))
       .catch(() => setError('No se pudieron cargar las unidades.'))
       .finally(() => setLoading(false));
@@ -51,22 +49,22 @@ export default function FlashcardsPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    apiAuthJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`, token)
+    apiJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`)
       .then((data) => { if (mounted) setUnits(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las unidades.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     setGlobalLoading(true);
-    apiAuthJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`, token)
+    apiJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`)
       .then((data) => { if (mounted) setGlobalQueue(data || null); })
       .catch(() => {})
       .finally(() => { if (mounted) setGlobalLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   // Derive subject summaries from unit data
   const subjects = useMemo<SubjectSummary[]>(() => {
@@ -126,7 +124,7 @@ export default function FlashcardsPage() {
     try {
       const res = await fetch(
         `${apiBase}/api/flashcards/export?unitId=${unit.unitId}&format=${format}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { credentials: 'include' }
       );
       if (!res.ok) {
         setExportError('No se pudo exportar. Inténtalo de nuevo.');
@@ -149,7 +147,7 @@ export default function FlashcardsPage() {
   const handleSubjectExport = async (subject: SubjectSummary, format: 'csv' | 'json') => {
     setExportError('');
     try {
-      const content = await exportFlashcardsBySubject(token, subject.subjectId, format);
+      const content = await exportFlashcardsBySubject(subject.subjectId, format);
       const blob = new Blob([content], {
         type: format === 'json' ? 'application/json' : 'text/csv',
       });
@@ -315,7 +313,6 @@ export default function FlashcardsPage() {
 
       {showImport && (
         <FlashcardImportModal
-          token={token}
           onClose={() => setShowImport(false)}
           onImported={loadUnits}
         />

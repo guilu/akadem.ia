@@ -24,7 +24,7 @@ describe('ProfilePage', () => {
   it('renders form with email, firstName and lastName fields', async () => {
     vi.mocked(api.getMyProfile).mockResolvedValue(mockProfile);
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
@@ -34,10 +34,10 @@ describe('ProfilePage', () => {
   it('on mount calls getMyProfile and populates fields', async () => {
     vi.mocked(api.getMyProfile).mockResolvedValue(mockProfile);
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     await waitFor(() => {
-      expect(api.getMyProfile).toHaveBeenCalledWith('tok');
+      expect(api.getMyProfile).toHaveBeenCalledWith();
     });
 
     expect(screen.getByLabelText(/correo electrónico/i)).toHaveValue('test@example.com');
@@ -49,7 +49,7 @@ describe('ProfilePage', () => {
     vi.mocked(api.getMyProfile).mockResolvedValue(mockProfile);
     vi.mocked(api.updateMyProfile).mockResolvedValue({ ...mockProfile, firstName: 'Ana', lastName: 'García' });
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana'));
 
@@ -57,7 +57,7 @@ describe('ProfilePage', () => {
     fireEvent.submit(screen.getByRole('button', { name: /guardar cambios/i }).closest('form')!);
 
     await waitFor(() => {
-      expect(api.updateMyProfile).toHaveBeenCalledWith('tok', {
+      expect(api.updateMyProfile).toHaveBeenCalledWith({
         firstName: 'María',
         lastName: 'García',
       });
@@ -70,7 +70,7 @@ describe('ProfilePage', () => {
     vi.mocked(api.getMyProfile).mockResolvedValue(mockProfile);
     vi.mocked(api.updateMyProfile).mockRejectedValue(new Error('api_error'));
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana'));
 
@@ -82,7 +82,7 @@ describe('ProfilePage', () => {
   it('on API error from getMyProfile shows error message', async () => {
     vi.mocked(api.getMyProfile).mockRejectedValue(new Error('api_error'));
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo cargar el perfil/i);
   });
@@ -91,7 +91,7 @@ describe('ProfilePage', () => {
     // Never resolves so loading stays true
     vi.mocked(api.getMyProfile).mockReturnValue(new Promise(() => {}));
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     const btn = screen.getByRole('button', { name: /guardando/i });
     expect(btn).toBeDisabled();
@@ -100,7 +100,7 @@ describe('ProfilePage', () => {
   it('handles null firstName and lastName gracefully', async () => {
     vi.mocked(api.getMyProfile).mockResolvedValue({ ...mockProfile, firstName: null, lastName: null });
 
-    render(<ProfilePage token="tok" />);
+    render(<ProfilePage />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/nombre/i)).toHaveValue('');

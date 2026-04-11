@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Inbox } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { apiJson, apiBase } from '../api';
 
 type Flashcard = {
   id: string;
@@ -20,17 +20,15 @@ export default function FlashcardsExamineUnitPage() {
   const [error, setError] = useState('');
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const token = localStorage.getItem('ak_token') || '';
-
   useEffect(() => {
     if (!unitId) { setError('Falta el unitId.'); setLoading(false); return; }
     let mounted = true;
-    apiAuthJson<Flashcard[]>(`${apiBase}/api/flashcards?unitId=${unitId}`, token)
+    apiJson<Flashcard[]>(`${apiBase}/api/flashcards?unitId=${unitId}`)
       .then((data) => { if (mounted) setCards(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las tarjetas.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token, unitId]);
+  }, [unitId]);
 
   const card = cards[index];
   const total = cards.length;

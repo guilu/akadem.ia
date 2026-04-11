@@ -23,7 +23,7 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    apiAuthJson: vi.fn(),
+    apiJson: vi.fn(),
   };
 });
 
@@ -40,11 +40,10 @@ const mockItem = {
 describe('FlashcardsStudyPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
   });
 
   it('shows skeleton while loading', () => {
-    vi.mocked(api.apiAuthJson).mockReturnValue(new Promise(() => {}));
+    vi.mocked(api.apiJson).mockReturnValue(new Promise(() => {}));
 
     const { container } = render(<FlashcardsStudyPage />);
 
@@ -53,7 +52,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('renders study session when loaded', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue) // fetchQueue
       .mockResolvedValueOnce(mockItem); // fetchNext
 
@@ -65,7 +64,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows inline review error without replacing session', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue) // initial fetchQueue
       .mockResolvedValueOnce(mockItem) // initial fetchNext
       .mockRejectedValueOnce(new Error('api_error')); // POST review fails
@@ -99,7 +98,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('review error can be dismissed', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue)
       .mockResolvedValueOnce(mockItem)
       .mockRejectedValueOnce(new Error('api_error'));
@@ -125,7 +124,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows "Nada que repasar hoy" when finished with 0 answered cards', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(emptyQueue) // fetchQueue — empty
       .mockResolvedValueOnce(undefined); // fetchNext — nothing
 
@@ -142,7 +141,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows answered count when finished after reviewing cards', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue) // initial fetchQueue
       .mockResolvedValueOnce(mockItem) // initial fetchNext
       .mockResolvedValueOnce(undefined) // POST review (204 no content)
@@ -168,7 +167,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('opens confirm modal when Terminar sesión is clicked', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue)
       .mockResolvedValueOnce(mockItem);
 
@@ -182,7 +181,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('can cancel the confirm modal', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue)
       .mockResolvedValueOnce(mockItem);
 
@@ -198,7 +197,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('finishes session when Terminar is confirmed in modal', async () => {
-    vi.mocked(api.apiAuthJson)
+    vi.mocked(api.apiJson)
       .mockResolvedValueOnce(mockQueue)
       .mockResolvedValueOnce(mockItem);
 
@@ -221,7 +220,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows error state when initial load fails', async () => {
-    vi.mocked(api.apiAuthJson).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsStudyPage />);
 

@@ -18,7 +18,7 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    apiAuthJson: vi.fn(),
+    apiJson: vi.fn(),
   };
 });
 
@@ -30,11 +30,10 @@ const mockCards = [
 describe('FlashcardsExamineUnitPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
   });
 
   it('shows skeleton while loading', () => {
-    vi.mocked(api.apiAuthJson).mockReturnValue(new Promise(() => {}));
+    vi.mocked(api.apiJson).mockReturnValue(new Promise(() => {}));
 
     const { container } = render(<FlashcardsExamineUnitPage />);
 
@@ -43,7 +42,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('renders cards when loaded', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -53,7 +52,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('shows empty state with Volver and import CTA when no cards', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -66,7 +65,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('shows error state on API failure', async () => {
-    vi.mocked(api.apiAuthJson).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -76,7 +75,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('flips card when clicked to show back, and again to show front', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -102,7 +101,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('navigates to next card when Siguiente is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -116,7 +115,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('navigates to previous card when Anterior is clicked', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -132,7 +131,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('disables Anterior button on first card', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -143,7 +142,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('disables Siguiente button on last card', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -156,7 +155,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('resets flip state when navigating to next card', async () => {
-    vi.mocked(api.apiAuthJson).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 

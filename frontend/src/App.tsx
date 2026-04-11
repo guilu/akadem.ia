@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
-import { apiBase, apiAuthJson } from './api';
+import { apiBase, apiJson, getMe, logout } from './api';
 import type { Subject, ExamResult, ExamStartResponse, NavUser } from './types';
 import { timeoutMessage } from './utils/messages';
 import { deriveInitials } from './utils/format';
@@ -34,7 +34,8 @@ export default function App() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [minutes, setMinutes] = useState(20);
   const [attemptId, setAttemptId] = useState<string>('');
-  const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
+  const [authUser, setAuthUser] = useState<{ email: string; role: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [result, setResult] = useState<ExamResult | null>(null);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
   const [toastError, setToastError] = useState<string>('');
@@ -44,30 +45,36 @@ export default function App() {
     setTimeout(() => setToastError(''), 5000);
   }
 
-  const isAuthed = useMemo(() => Boolean(token), [token]);
+  // On mount: check if there is a valid session via cookie
+  useEffect(() => {
+    getMe()
+      .then((data) => setAuthUser(data))
+      .catch(() => setAuthUser(null))
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  const isAuthed = Boolean(authUser) && !authLoading;
+
   const { role, user } = useMemo<{ role: string | null; user: NavUser | null }>(() => {
-    try {
-      if (!token) return { role: null, user: null };
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const email: string = payload.sub || '';
-      const initials = deriveInitials(email);
-      return { role: payload.role || null, user: { email, initials } };
-    } catch {
-      return { role: null, user: null };
-    }
-  }, [token]);
+    if (!authUser) return { role: null, user: null };
+    const email = authUser.email;
+    const initials = deriveInitials(email);
+    return { role: authUser.role || null, user: { email, initials } };
+  }, [authUser]);
 
   async function authedJson<T>(url: string, options: RequestInit & { timeoutMs?: number } = {}) {
     try {
-      return await apiAuthJson<T>(url, token, options);
-    } catch (err: any) {
-      if (err?.status === 401) onLogout();
+      return await apiJson<T>(url, options);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+        onLogout();
+      }
       throw err;
     }
   }
 
   const refreshSubjects = () => {
-    if (!token) {
+    if (!authUser) {
       setSubjects([]);
       return Promise.resolve();
     }
@@ -78,9 +85,9 @@ export default function App() {
 
   useEffect(() => {
     refreshSubjects();
-  }, [token, apiBase]);
+  }, [authUser, apiBase]);
 
-  // Handle OAuth2 callback: exchange ephemeral code for JWT
+  // Handle OAuth2 callback: exchange ephemeral code for JWT cookie
   useEffect(() => {
     if (location.pathname === ROUTES.oauth2Callback) {
       const params = new URLSearchParams(location.search);
@@ -93,27 +100,27 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
+        credentials: 'include',
       })
         .then((res) => {
           if (!res.ok) throw new Error('exchange_failed');
-          return res.json() as Promise<{ accessToken: string; role: string }>;
+          return getMe();
         })
-        .then((data) => onToken(data.accessToken))
+        .then((data) => onAuthSuccess(data))
         .catch(() => navigate(ROUTES.login));
     }
   }, [location.pathname]);
 
-  function onToken(t: string) {
-    setToken(t);
-    localStorage.setItem('ak_token', t);
+  function onAuthSuccess(userData: { email: string; role: string }) {
+    setAuthUser(userData);
     navigate(ROUTES.subjects);
   }
 
-  function onLogout(){
-    localStorage.removeItem('ak_token');
+  function onLogout() {
+    logout().catch(() => {});
     sessionStorage.removeItem('akdmia.activeAttemptId');
     setActiveAttemptId('');
-    setToken('');
+    setAuthUser(null);
     navigate(ROUTES.home);
   }
 
@@ -132,8 +139,8 @@ export default function App() {
       sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
       setActiveAttemptId(data.attemptId);
       navigate(ROUTES.examAttempt(data.attemptId));
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -155,8 +162,8 @@ export default function App() {
       sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
       setActiveAttemptId(data.attemptId);
       navigate(ROUTES.examAttempt(data.attemptId));
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -182,8 +189,8 @@ export default function App() {
       setActiveAttemptId('');
       setResult(data);
       navigate(ROUTES.examResult);
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -205,8 +212,8 @@ export default function App() {
       }
       setResult(data);
       navigate(ROUTES.examResult);
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -218,6 +225,11 @@ export default function App() {
     sessionStorage.setItem('akdmia.activeAttemptId', attempt);
     setActiveAttemptId(attempt);
     navigate(ROUTES.examAttempt(attempt));
+  }
+
+  // While session is being verified, don't redirect protected routes
+  if (authLoading) {
+    return null;
   }
 
   return (
@@ -239,14 +251,13 @@ export default function App() {
       <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
-          <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
-          <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
+          <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
+          <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.subjects} element={
             <ProtectedRoute allow={isAuthed}>
               <SubjectsPage
                 subjects={subjects}
                 activeAttemptId={activeAttemptId}
-                token={token}
                 onUnauthorized={onLogout}
                 onViewResult={viewResult}
                 onResumeAttempt={resumeAttempt}
@@ -265,7 +276,7 @@ export default function App() {
           } />
           <Route path="/exams/attempts/:attemptId" element={
             <ProtectedRoute allow={isAuthed}>
-              <ExamAttemptPage token={token} onUnauthorized={onLogout} onFinish={(res) => {
+              <ExamAttemptPage onUnauthorized={onLogout} onFinish={(res) => {
                 sessionStorage.removeItem('akdmia.activeAttemptId');
                 setActiveAttemptId('');
                 setResult(res);
@@ -279,12 +290,12 @@ export default function App() {
           } />
           <Route path={ROUTES.settings} element={
             <ProtectedRoute allow={isAuthed}>
-              <SettingsPage isAdmin={role === 'ADMIN'} token={token} />
+              <SettingsPage isAdmin={role === 'ADMIN'} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.manage} element={
             <ProtectedRoute allow={isAuthed}>
-              <ManagePage isAdmin={role === 'ADMIN'} token={token} onSubjectsChanged={refreshSubjects} />
+              <ManagePage isAdmin={role === 'ADMIN'} onSubjectsChanged={refreshSubjects} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.flashcards} element={
@@ -309,12 +320,12 @@ export default function App() {
           } />
           <Route path={ROUTES.rag} element={
             <ProtectedRoute allow={isAuthed && role === 'ADMIN'}>
-              <RagPage token={token} subjects={subjects} />
+              <RagPage subjects={subjects} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.profile} element={
             <ProtectedRoute allow={isAuthed}>
-              <ProfilePage token={token} />
+              <ProfilePage />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.oauth2Callback} element={null} />

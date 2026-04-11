@@ -7,7 +7,7 @@ const card = 'border border-secondary/25 rounded-2xl p-6';
 const btnPrimary =
   'btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2 disabled:opacity-60';
 
-export default function ProfilePage({ token }: { token: string }) {
+export default function ProfilePage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export default function ProfilePage({ token }: { token: string }) {
 
   useEffect(() => {
     setLoading(true);
-    getMyProfile(token)
+    getMyProfile()
       .then((profile) => {
         setEmail(profile.email);
         setFirstName(profile.firstName ?? '');
@@ -27,7 +27,7 @@ export default function ProfilePage({ token }: { token: string }) {
         setErrorMsg('No se pudo cargar el perfil.');
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +35,7 @@ export default function ProfilePage({ token }: { token: string }) {
     setErrorMsg('');
     setLoading(true);
     try {
-      await updateMyProfile(token, {
+      await updateMyProfile({
         firstName: firstName.trim() || null,
         lastName: lastName.trim() || null,
       });
