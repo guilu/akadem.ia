@@ -154,7 +154,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
         {/* ── Right column: units ── */}
         <div className="lg:col-span-8">
-          <div className="border border-secondary/25 rounded-3xl p-8 mb-8">
+          <div className="border border-secondary/25 rounded-3xl p-8 mb-10">
             <div className="flex items-center gap-3 mb-8">
               <ClipboardList className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Preguntas por unidad</h2>
