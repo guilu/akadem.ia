@@ -154,7 +154,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
         {/* ── Right column: units ── */}
         <div className="lg:col-span-8">
-          <div className="border border-secondary/25 rounded-3xl p-8">
+          <div className="border border-secondary/25 rounded-3xl p-8 mb-8">
             <div className="flex items-center gap-3 mb-8">
               <ClipboardList className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Preguntas por unidad</h2>
@@ -218,7 +218,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
             </div>
 
             {totalPages > 1 && (
-              <div className="mt-8 mb-8 flex items-center justify-center gap-4">
+              <div className="mt-8 flex items-center justify-center gap-4">
                 <button
                   onClick={() => setPage(p => p - 1)}
                   disabled={page === 0}
