@@ -50,7 +50,7 @@ class FlashcardControllerVisibilityTest {
 
   private final FlashcardController controller = new FlashcardController(
       studyUseCase, reviewUseCase, managementUseCase, importExportUseCase,
-      flashcardRepo, reviewRepo, reviewLogRepo, userRepo, unitRepo, subjectRepo);
+      flashcardRepo, reviewLogRepo, userRepo);
 
   private UUID setupUser(String email) {
     UUID userId = UUID.randomUUID();

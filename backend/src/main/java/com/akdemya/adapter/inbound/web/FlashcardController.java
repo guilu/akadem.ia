@@ -5,18 +5,13 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
-import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
-import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
-import com.akdemya.domain.port.out.FlashcardReviewRepository;
-import com.akdemya.domain.port.out.SubjectRepository;
-import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -54,32 +48,23 @@ public class FlashcardController {
   private final FlashcardManagementUseCase managementUseCase;
   private final FlashcardImportExportUseCase importExportUseCase;
   private final FlashcardRepository flashcardRepo;
-  private final FlashcardReviewRepository reviewRepo;
   private final FlashcardReviewLogRepository reviewLogRepo;
   private final UserRepository userRepo;
-  private final UnitRepository unitRepo;
-  private final SubjectRepository subjectRepo;
 
   public FlashcardController(FlashcardStudyUseCase studyUseCase,
                              FlashcardReviewUseCase reviewUseCase,
                              FlashcardManagementUseCase managementUseCase,
                              FlashcardImportExportUseCase importExportUseCase,
                              FlashcardRepository flashcardRepo,
-                             FlashcardReviewRepository reviewRepo,
                              FlashcardReviewLogRepository reviewLogRepo,
-                             UserRepository userRepo,
-                             UnitRepository unitRepo,
-                             SubjectRepository subjectRepo) {
+                             UserRepository userRepo) {
     this.studyUseCase = studyUseCase;
     this.reviewUseCase = reviewUseCase;
     this.managementUseCase = managementUseCase;
     this.importExportUseCase = importExportUseCase;
     this.flashcardRepo = flashcardRepo;
-    this.reviewRepo = reviewRepo;
     this.reviewLogRepo = reviewLogRepo;
     this.userRepo = userRepo;
-    this.unitRepo = unitRepo;
-    this.subjectRepo = subjectRepo;
   }
 
   @GetMapping
@@ -216,19 +201,11 @@ public class FlashcardController {
   @GetMapping("/units/summary")
   public List<FlashcardDto.UnitSummary> getUnitSummary(@AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);
-    LocalDateTime now = LocalDateTime.now();
-    Map<UUID, String> subjectNames = subjectRepo.findAll().stream()
-        .collect(Collectors.toMap(Subject::getId, Subject::getName));
-    return unitRepo.findAllWithFlashcards().stream()
-        .map(unit -> {
-          long newCount = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
-          long reviewCount = reviewRepo.countByUserIdAndUnitIdAndStateIn(userId, unit.getId(),
-              List.of(ReviewState.LEARNING, ReviewState.REVIEW));
-          long dueCount = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
-          String subjectName = subjectNames.getOrDefault(unit.getSubjectId(), "");
-          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(),
-              unit.getSubjectId(), subjectName, newCount, reviewCount, dueCount);
-        })
+    return studyUseCase.getUnitSummaries(new FlashcardStudyUseCase.UnitSummaryCommand(userId, null))
+        .stream()
+        .map(r -> new FlashcardDto.UnitSummary(
+            r.unitId(), r.unitName(), r.subjectId(), r.subjectName(),
+            r.newCount(), r.reviewCount(), r.dueCount()))
         .toList();
   }
 

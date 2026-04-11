@@ -5,6 +5,7 @@ import com.akdemya.domain.model.ReviewState;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,4 +31,10 @@ public interface FlashcardReviewRepository {
   long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states);
 
   FlashcardReview save(FlashcardReview review);
+
+  /** Returns count of reviews per unitId where state is in {@code states}, for the given user. */
+  Map<UUID, Long> countByUserIdAndStateInGroupByUnit(UUID userId, List<ReviewState> states);
+
+  /** Returns count of due reviews per unitId (dueAt &lt;= upTo), for the given user. */
+  Map<UUID, Long> countDueByUserIdUpToGroupByUnit(UUID userId, LocalDateTime upTo);
 }

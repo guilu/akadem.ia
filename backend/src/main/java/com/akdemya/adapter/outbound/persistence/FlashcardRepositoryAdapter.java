@@ -8,8 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class FlashcardRepositoryAdapter implements FlashcardRepository {
@@ -74,5 +76,12 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   @Override
   public List<Flashcard> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
     return jpa.findVisibleByUnitIdAndUserId(unitId, userId).stream().map(mapper::toDomain).toList();
+  }
+
+  @Override
+  public Map<UUID, Long> countNewByUserIdGroupByUnit(UUID userId) {
+    return jpa.countNewByUserIdGroupByUnit(userId)
+        .stream()
+        .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
   }
 }

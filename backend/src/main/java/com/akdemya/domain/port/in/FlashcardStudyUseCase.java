@@ -3,6 +3,7 @@ package com.akdemya.domain.port.in;
 import com.akdemya.domain.model.ReviewState;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface FlashcardStudyUseCase {
@@ -12,6 +13,8 @@ public interface FlashcardStudyUseCase {
   StudyNextResponse getStudyNext(StudyNextCommand command);
 
   DashboardResponse getDashboard(DashboardCommand command);
+
+  List<UnitSummaryResult> getUnitSummaries(UnitSummaryCommand command);
 
   record StudyQueueCommand(UUID userId, UUID unitId, int limit, LocalDateTime now) {}
 
@@ -33,4 +36,9 @@ public interface FlashcardStudyUseCase {
                            long dueIn8to30Days,
                            long newCards,
                            long totalDue) {}
+
+  record UnitSummaryCommand(UUID userId, LocalDateTime now) {}
+
+  record UnitSummaryResult(UUID unitId, String unitName, UUID subjectId, String subjectName,
+                           long newCount, long reviewCount, long dueCount) {}
 }

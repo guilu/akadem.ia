@@ -56,11 +56,8 @@ class FlashcardControllerTest {
        managementUseCase,
        importExportUseCase,
        flashcardRepo,
-       reviewRepo,
        reviewLogRepo,
-       userRepo,
-       unitRepo,
-       subjectRepo);
+       userRepo);
 
   @Test
   void studyQueueReturnsCounts() {
@@ -111,15 +108,14 @@ class FlashcardControllerTest {
   void unitSummaryReturnsNewAndReviewCounts() {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
-    Unit unit = new Unit(unitId, UUID.randomUUID(), "Unidad 1", "", 1);
-    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit));
-    when(flashcardRepo.countNewByUserIdAndUnitId(userId, unitId)).thenReturn(5L);
-    when(reviewRepo.countByUserIdAndUnitIdAndStateIn(eq(userId), eq(unitId), anyList())).thenReturn(0L);
-    when(reviewRepo.countDueByUserIdAndUnitIdUpTo(eq(userId), eq(unitId), any())).thenReturn(0L);
+    var summaryResult = new FlashcardStudyUseCase.UnitSummaryResult(
+        unitId, "Unidad 1", subjectId, "Math", 5L, 0L, 0L);
+    when(studyUseCase.getUnitSummaries(any())).thenReturn(List.of(summaryResult));
 
     List<FlashcardDto.UnitSummary> response = controller.getUnitSummary(principal);
 

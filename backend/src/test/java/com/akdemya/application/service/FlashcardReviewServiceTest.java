@@ -130,6 +130,11 @@ class FlashcardReviewServiceTest {
                   || userId.equals(f.getOwnerId())))
           .toList();
     }
+
+    @Override
+    public Map<UUID, Long> countNewByUserIdGroupByUnit(UUID userId) {
+      return Map.of();
+    }
   }
 
   static class InMemoryReviewRepo implements FlashcardReviewRepository {
@@ -183,6 +188,16 @@ class FlashcardReviewServiceTest {
     public FlashcardReview save(FlashcardReview review) {
       data.put(review.getId(), review);
       return review;
+    }
+
+    @Override
+    public Map<UUID, Long> countByUserIdAndStateInGroupByUnit(UUID userId, List<ReviewState> states) {
+      return Map.of();
+    }
+
+    @Override
+    public Map<UUID, Long> countDueByUserIdUpToGroupByUnit(UUID userId, LocalDateTime upTo) {
+      return Map.of();
     }
   }
 
