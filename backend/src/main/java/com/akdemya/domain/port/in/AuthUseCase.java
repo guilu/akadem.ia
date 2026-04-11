@@ -13,13 +13,13 @@ public interface AuthUseCase {
   record LoginCommand(String email, String password) {
   }
 
-  record AuthResponse(String accessToken, String role, String error) {
-    public static AuthResponse success(String token, String role) {
-      return new AuthResponse(token, role, null);
+  record AuthResponse(String accessToken, String refreshToken, String role, String error) {
+    public static AuthResponse success(String token, String refreshToken, String role) {
+      return new AuthResponse(token, refreshToken, role, null);
     }
 
     public static AuthResponse fail(String error) {
-      return new AuthResponse(null, null, error);
+      return new AuthResponse(null, null, null, error);
     }
   }
 }

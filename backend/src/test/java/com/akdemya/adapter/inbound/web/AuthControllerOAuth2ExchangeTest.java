@@ -3,6 +3,7 @@ package com.akdemya.adapter.inbound.web;
 import com.akdemya.adapter.infrastructure.security.JwtService;
 import com.akdemya.adapter.infrastructure.security.OAuth2CodeStore;
 import com.akdemya.domain.port.in.AuthUseCase;
+import com.akdemya.domain.port.in.RefreshTokenUseCase;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,11 +21,12 @@ class AuthControllerOAuth2ExchangeTest {
     private final AuthUseCase authUseCase = mock(AuthUseCase.class);
     private final OAuth2CodeStore codeStore = mock(OAuth2CodeStore.class);
     private final JwtService jwtService = mock(JwtService.class);
+    private final RefreshTokenUseCase refreshTokenUseCase = mock(RefreshTokenUseCase.class);
     private AuthController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new AuthController(authUseCase, codeStore, jwtService, false);
+        controller = new AuthController(authUseCase, codeStore, jwtService, refreshTokenUseCase, false);
     }
 
     // --- register ---
@@ -33,7 +35,7 @@ class AuthControllerOAuth2ExchangeTest {
     void registerSuccess_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.RegisterCommand("a@b.com", "pass", "pass", "A", "B", "dev");
         when(authUseCase.register(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("tok", "STUDENT"));
+            .thenReturn(AuthUseCase.AuthResponse.success("tok", "refresh-token", "STUDENT"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.register(cmd, res);
@@ -48,6 +50,13 @@ class AuthControllerOAuth2ExchangeTest {
         Cookie cookie = res.getCookie("ak_token");
         assertNotNull(cookie);
         assertEquals("tok", cookie.getValue());
+
+        String refreshCookieHeader = res.getHeaders("Set-Cookie").stream()
+            .filter(h -> h.contains("ak_refresh="))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(refreshCookieHeader);
+        assertTrue(refreshCookieHeader.contains("ak_refresh=refresh-token"));
     }
 
     @Test
@@ -72,7 +81,7 @@ class AuthControllerOAuth2ExchangeTest {
     void loginSuccess_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.LoginCommand("a@b.com", "pass");
         when(authUseCase.login(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("tok", "ADMIN"));
+            .thenReturn(AuthUseCase.AuthResponse.success("tok", "refresh-token", "ADMIN"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.login(cmd, res);
@@ -87,6 +96,13 @@ class AuthControllerOAuth2ExchangeTest {
         Cookie cookie = res.getCookie("ak_token");
         assertNotNull(cookie);
         assertEquals("tok", cookie.getValue());
+
+        String refreshCookieHeader = res.getHeaders("Set-Cookie").stream()
+            .filter(h -> h.contains("ak_refresh="))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(refreshCookieHeader);
+        assertTrue(refreshCookieHeader.contains("ak_refresh=refresh-token"));
     }
 
     @Test
@@ -109,7 +125,7 @@ class AuthControllerOAuth2ExchangeTest {
     void exchangeValidCode_setsCookieAndReturnsRole() {
         String code = "valid-uuid-code";
         when(codeStore.exchange(code))
-            .thenReturn(Optional.of(new OAuth2CodeStore.ExchangeResult("jwt.token.here", "STUDENT")));
+            .thenReturn(Optional.of(new OAuth2CodeStore.ExchangeResult("jwt.token.here", "refresh-token", "STUDENT")));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         var request = new AuthController.ExchangeCodeRequest(code);
@@ -125,6 +141,13 @@ class AuthControllerOAuth2ExchangeTest {
         Cookie cookie = res.getCookie("ak_token");
         assertNotNull(cookie);
         assertEquals("jwt.token.here", cookie.getValue());
+
+        String refreshCookieHeader = res.getHeaders("Set-Cookie").stream()
+            .filter(h -> h.contains("ak_refresh="))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(refreshCookieHeader);
+        assertTrue(refreshCookieHeader.contains("ak_refresh=refresh-token"));
     }
 
     @Test

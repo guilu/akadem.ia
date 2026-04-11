@@ -19,11 +19,65 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
   return { signal, clear: () => window.clearTimeout(timeoutId) };
 }
 
+let isRefreshing = false;
+let refreshSubscribers: Array<() => void> = [];
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (isRefreshing) {
+    return new Promise<boolean>((resolve) => {
+      refreshSubscribers.push(() => resolve(true));
+    });
+  }
+  isRefreshing = true;
+  try {
+    const res = await fetch(`${apiBase}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      refreshSubscribers.forEach((cb) => cb());
+      refreshSubscribers = [];
+      return true;
+    }
+    refreshSubscribers = [];
+    return false;
+  } finally {
+    isRefreshing = false;
+  }
+}
+
 export async function apiJson<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs, ...fetchOptions } = options;
   const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
   try {
     const res = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
+    if (res.status === 401) {
+      // Avoid refresh loops on the refresh endpoint itself
+      if (!url.includes('/api/auth/')) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+          const retryRes = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
+          if (!retryRes.ok) {
+            const err = {
+              message: 'api_error',
+              status: retryRes.status,
+              body: await retryRes.json().catch(() => ({})),
+            };
+            throw err;
+          }
+          if (retryRes.status === 204) return undefined as T;
+          const retryText = await retryRes.text();
+          if (!retryText) return undefined as T;
+          return JSON.parse(retryText) as T;
+        }
+      }
+      const err: { message: string; status: number; body: unknown; name?: string } = {
+        message: 'api_error',
+        status: res.status,
+        body: await res.json().catch(() => ({})),
+      };
+      throw err;
+    }
     if (!res.ok) {
       const err: { message: string; status: number; body: unknown; name?: string } = {
         message: 'api_error',

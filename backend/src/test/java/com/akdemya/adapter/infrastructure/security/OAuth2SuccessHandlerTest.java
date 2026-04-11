@@ -35,9 +35,9 @@ class OAuth2SuccessHandlerTest {
         OAuth2AuthenticationToken token = mock(OAuth2AuthenticationToken.class);
         when(token.getPrincipal()).thenReturn(oAuth2User);
 
-        AuthUseCase.AuthResponse authResponse = AuthUseCase.AuthResponse.success("jwt.token.here", "STUDENT");
+        AuthUseCase.AuthResponse authResponse = AuthUseCase.AuthResponse.success("jwt.token.here", "refresh-token", "STUDENT");
         when(authUseCase.loginWithOAuth2("user@example.com", "Test User")).thenReturn(authResponse);
-        when(codeStore.store("jwt.token.here", "STUDENT")).thenReturn("ephemeral-code-123");
+        when(codeStore.store("jwt.token.here", "refresh-token", "STUDENT")).thenReturn("ephemeral-code-123");
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -47,7 +47,7 @@ class OAuth2SuccessHandlerTest {
 
         // Assert
         verify(authUseCase).loginWithOAuth2("user@example.com", "Test User");
-        verify(codeStore).store("jwt.token.here", "STUDENT");
+        verify(codeStore).store("jwt.token.here", "refresh-token", "STUDENT");
         verify(response).sendRedirect("http://localhost:5173/oauth2/callback?code=ephemeral-code-123");
     }
 }

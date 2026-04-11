@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.akdemya.domain.model.AppUser;
+import com.akdemya.domain.model.RefreshToken;
 import com.akdemya.domain.port.in.AuthUseCase.AuthResponse;
 import com.akdemya.domain.port.in.AuthUseCase.LoginCommand;
 import com.akdemya.domain.port.in.AuthUseCase.RegisterCommand;
 import com.akdemya.domain.port.out.PasswordHasher;
+import com.akdemya.domain.port.out.RefreshTokenRepository;
 import com.akdemya.domain.port.out.TokenProvider;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ class AuthManagerTest {
   private InMemoryUserRepository userRepo;
   private FakePasswordHasher passwordHasher;
   private FakeTokenProvider tokenProvider;
+  private InMemoryRefreshTokenRepository refreshTokenRepo;
   private AuthManager authManager;
 
   @BeforeEach
@@ -37,7 +41,9 @@ class AuthManagerTest {
     userRepo = new InMemoryUserRepository();
     passwordHasher = new FakePasswordHasher();
     tokenProvider = new FakeTokenProvider();
-    authManager = new AuthManager(userRepo, passwordHasher, tokenProvider);
+    refreshTokenRepo = new InMemoryRefreshTokenRepository();
+    authManager = new AuthManager(userRepo, passwordHasher, tokenProvider, refreshTokenRepo);
+    ReflectionTestUtils.setField(authManager, "refreshTokenTtlDays", 7);
   }
 
   // -------------------------------------------------------------------------
@@ -302,6 +308,13 @@ class AuthManagerTest {
     public boolean matches(String rawPassword, String encodedPassword) {
       return encodedPassword != null && encodedPassword.equals("hashed:" + rawPassword);
     }
+  }
+
+  static class InMemoryRefreshTokenRepository implements RefreshTokenRepository {
+    @Override public void save(RefreshToken token) {}
+    @Override public java.util.Optional<RefreshToken> findByTokenHash(String hash) { return java.util.Optional.empty(); }
+    @Override public void revokeByTokenHash(String hash) {}
+    @Override public void deleteExpired() {}
   }
 
   static class FakeTokenProvider implements TokenProvider {
