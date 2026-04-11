@@ -185,7 +185,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 border border-secondary/15 p-2 rounded-2xl self-start sm:self-auto">
+                    <div className="flex items-center gap-3 border border-secondary/15 p-2 rounded-2xl self-center sm:self-auto">
                       <button
                         onClick={() => setCount(u.id, current - 1)}
                         disabled={disabled || current === 0}
@@ -218,7 +218,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
             </div>
 
             {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-4">
+              <div className="mt-8 mb-8 flex items-center justify-center gap-4">
                 <button
                   onClick={() => setPage(p => p - 1)}
                   disabled={page === 0}
@@ -228,17 +228,22 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                   <span className="hidden sm:inline">Anterior</span>
                 </button>
                 <div className="flex gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPage(i)}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${
-                        i === page ? 'bg-primary text-bg' : 'hover:bg-secondary/15'
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+                  {(() => {
+                    const WINDOW = 4;
+                    const start = Math.max(0, Math.min(page - 1, totalPages - WINDOW));
+                    const end = Math.min(start + WINDOW, totalPages);
+                    return Array.from({ length: end - start }, (_, i) => start + i).map(i => (
+                      <button
+                        key={i}
+                        onClick={() => setPage(i)}
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${
+                          i === page ? 'bg-primary text-bg' : 'hover:bg-secondary/15'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ));
+                  })()}
                 </div>
                 <button
                   onClick={() => setPage(p => p + 1)}
