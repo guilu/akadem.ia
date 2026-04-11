@@ -167,7 +167,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 return (
                   <div
                     key={u.id}
-                    className={`flex items-center justify-between p-6 border rounded-2xl transition-all ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 border rounded-2xl transition-all gap-4 ${
                       disabled
                         ? 'border-secondary/10 opacity-50'
                         : 'border-secondary/20 hover:border-primary/30'
@@ -185,7 +185,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 border border-secondary/15 p-2 rounded-2xl">
+                    <div className="flex items-center gap-3 border border-secondary/15 p-2 rounded-2xl self-start sm:self-auto">
                       <button
                         onClick={() => setCount(u.id, current - 1)}
                         disabled={disabled || current === 0}
@@ -222,10 +222,10 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 <button
                   onClick={() => setPage(p => p - 1)}
                   disabled={page === 0}
-                  className="flex items-center gap-2 px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-5 h-5" />
-                  Anterior
+                  <span className="hidden sm:inline">Anterior</span>
                 </button>
                 <div className="flex gap-2">
                   {Array.from({ length: totalPages }, (_, i) => (
@@ -243,9 +243,9 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page >= totalPages - 1}
-                  className="flex items-center gap-2 px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  Siguiente
+                  <span className="hidden sm:inline">Siguiente</span>
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -295,7 +295,8 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
               disabled={totalAvailable === 0 || total() === 0}
               className="flex-[2] md:flex-none btn btn-primary px-12 py-4 rounded-3xl font-extrabold text-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Empezar examen
+              <span className="sm:hidden">Empezar</span>
+              <span className="hidden sm:inline">Empezar examen</span>
             </button>
           </div>
         </div>
