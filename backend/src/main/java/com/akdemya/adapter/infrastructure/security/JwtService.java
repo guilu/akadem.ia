@@ -16,7 +16,10 @@ public class JwtService implements TokenProvider {
     @Value("${security.jwt.secret}")
     private String jwtSecret;
 
-    private final long ttlMs = 1000L * 60 * 60 * 24;
+    @Value("${security.jwt.ttl-minutes:15}")
+    private int ttlMinutes;
+
+    private long ttlMs() { return ttlMinutes * 60 * 1000L; }
 
     @PostConstruct
     void validateSecret() {
@@ -37,7 +40,7 @@ public class JwtService implements TokenProvider {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + ttlMs))
+                .setExpiration(new Date(now + ttlMs()))
                 .signWith(signingKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
