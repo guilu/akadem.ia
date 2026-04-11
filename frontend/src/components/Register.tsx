@@ -7,7 +7,7 @@ import { ROUTES } from '../constants/routes';
 const inputClass =
   'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-3 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 
-export default function Register({ onToken }: { onToken: (t: string) => void }) {
+export default function Register({ onAuthSuccess }: { onAuthSuccess: (user: { email: string; role: string }) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,11 +44,12 @@ export default function Register({ onToken }: { onToken: (t: string) => void }) 
           firstName: firstName.trim() || null,
           lastName: lastName.trim() || null,
           occupation: occupation || null
-        })
+        }),
+        credentials: 'include'
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.accessToken) {
-        onToken(data.accessToken);
+      if (res.ok) {
+        onAuthSuccess({ email: data.email ?? email, role: data.role ?? '' });
       } else {
         setErr(data.error || 'No se pudo registrar');
       }

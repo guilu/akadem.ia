@@ -23,23 +23,23 @@ describe('getMyProfile', () => {
     mockFetch.mockReset();
   });
 
-  it('calls the correct endpoint with Authorization header and returns parsed profile', async () => {
+  it('calls the correct endpoint with credentials and returns parsed profile', async () => {
     const profile = { id: 'u1', email: 'a@b.com', firstName: 'Ana', lastName: 'García' };
     mockFetch.mockResolvedValue(makeResponse(profile));
 
-    const result = await getMyProfile('my-token');
+    const result = await getMyProfile();
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/v1/users/me');
-    expect(options.headers.Authorization).toBe('Bearer my-token');
+    expect(options.credentials).toBe('include');
     expect(result).toEqual(profile);
   });
 
   it('throws api_error when response is not ok', async () => {
     mockFetch.mockResolvedValue(makeResponse({ message: 'Unauthorized' }, 401, false));
 
-    await expect(getMyProfile('bad-token')).rejects.toMatchObject({ message: 'api_error', status: 401 });
+    await expect(getMyProfile()).rejects.toMatchObject({ message: 'api_error', status: 401 });
   });
 });
 
@@ -52,14 +52,14 @@ describe('updateMyProfile', () => {
     const updated = { id: 'u1', email: 'a@b.com', firstName: 'María', lastName: 'García' };
     mockFetch.mockResolvedValue(makeResponse(updated));
 
-    const result = await updateMyProfile('tok', { firstName: 'María', lastName: 'García' });
+    const result = await updateMyProfile({ firstName: 'María', lastName: 'García' });
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/v1/users/me');
     expect(options.method).toBe('PATCH');
     expect(options.headers['Content-Type']).toBe('application/json');
-    expect(options.headers.Authorization).toBe('Bearer tok');
+    expect(options.credentials).toBe('include');
     expect(JSON.parse(options.body)).toEqual({ firstName: 'María', lastName: 'García' });
     expect(result).toEqual(updated);
   });
@@ -68,7 +68,7 @@ describe('updateMyProfile', () => {
     const updated = { id: 'u1', email: 'a@b.com', firstName: null, lastName: null };
     mockFetch.mockResolvedValue(makeResponse(updated));
 
-    await updateMyProfile('tok', { firstName: null, lastName: null });
+    await updateMyProfile({ firstName: null, lastName: null });
 
     const [, options] = mockFetch.mock.calls[0];
     expect(JSON.parse(options.body)).toEqual({ firstName: null, lastName: null });
@@ -77,7 +77,7 @@ describe('updateMyProfile', () => {
   it('throws api_error on non-ok response', async () => {
     mockFetch.mockResolvedValue(makeResponse({ message: 'Bad Request' }, 400, false));
 
-    await expect(updateMyProfile('tok', { firstName: null, lastName: null })).rejects.toMatchObject({
+    await expect(updateMyProfile({ firstName: null, lastName: null })).rejects.toMatchObject({
       message: 'api_error',
       status: 400,
     });
@@ -92,28 +92,28 @@ describe('apiAuthJson', () => {
   it('returns undefined for 204 response', async () => {
     mockFetch.mockResolvedValue({ ok: true, status: 204, text: () => Promise.resolve(''), json: () => Promise.resolve(undefined) } as unknown as Response);
 
-    const result = await apiAuthJson<void>('http://localhost/test', 'token');
+    const result = await apiAuthJson<void>('http://localhost/test');
     expect(result).toBeUndefined();
   });
 
   it('returns undefined when response body is empty', async () => {
     mockFetch.mockResolvedValue({ ok: true, status: 200, text: () => Promise.resolve(''), json: () => Promise.resolve(undefined) } as unknown as Response);
 
-    const result = await apiAuthJson<void>('http://localhost/test', 'token');
+    const result = await apiAuthJson<void>('http://localhost/test');
     expect(result).toBeUndefined();
   });
 
   it('rethrows non-AbortError errors', async () => {
     mockFetch.mockRejectedValue(new Error('network failure'));
 
-    await expect(apiAuthJson('http://localhost/test', 'token')).rejects.toThrow('network failure');
+    await expect(apiAuthJson('http://localhost/test')).rejects.toThrow('network failure');
   });
 
   it('converts AbortError to timeout error', async () => {
     const abortErr = Object.assign(new Error('aborted'), { name: 'AbortError' });
     mockFetch.mockRejectedValue(abortErr);
 
-    await expect(apiAuthJson('http://localhost/test', 'token')).rejects.toMatchObject({
+    await expect(apiAuthJson('http://localhost/test')).rejects.toMatchObject({
       message: 'timeout',
       code: 'timeout',
     });
@@ -168,7 +168,7 @@ describe('apiAuthJson with timeoutMs', () => {
     const clearSpy = vi.spyOn(window, 'clearTimeout');
     mockFetch.mockResolvedValue(makeResponse({ data: 'ok' }));
 
-    const result = await apiAuthJson<{ data: string }>('http://localhost/test', 'token', { timeoutMs: 5000 });
+    const result = await apiAuthJson<{ data: string }>('http://localhost/test', { timeoutMs: 5000 });
 
     expect(result).toEqual({ data: 'ok' });
     expect(clearSpy).toHaveBeenCalled();
@@ -186,13 +186,13 @@ describe('RAG API functions', () => {
     mockFetch.mockResolvedValue(makeResponse(preview));
 
     const file = new File(['content'], 'test.pdf', { type: 'application/pdf' });
-    const result = await uploadSource('token', file, 'subj-1');
+    const result = await uploadSource(file, 'subj-1');
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/sources');
     expect(options.method).toBe('POST');
-    expect(options.headers.Authorization).toBe('Bearer token');
+    expect(options.credentials).toBe('include');
     expect(result).toEqual(preview);
   });
 
@@ -200,14 +200,14 @@ describe('RAG API functions', () => {
     mockFetch.mockResolvedValue({ ok: false, status: 400, json: () => Promise.resolve({}) } as unknown as Response);
 
     const file = new File([''], 'test.pdf');
-    await expect(uploadSource('token', file, 'subj-1')).rejects.toMatchObject({ message: 'api_error', status: 400 });
+    await expect(uploadSource(file, 'subj-1')).rejects.toMatchObject({ message: 'api_error', status: 400 });
   });
 
   it('confirmIndex posts to confirm endpoint and returns result', async () => {
     const result = { document: { id: 'doc-1' }, savedUnits: [] };
     mockFetch.mockResolvedValue(makeResponse(result));
 
-    const res = await confirmIndex('token', 'doc-1', []);
+    const res = await confirmIndex('doc-1', []);
 
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/sources/doc-1/confirm');
@@ -219,7 +219,7 @@ describe('RAG API functions', () => {
     const sources = [{ id: 'src-1', name: 'Document' }];
     mockFetch.mockResolvedValue(makeResponse(sources));
 
-    const result = await getSources('token');
+    const result = await getSources();
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/sources');
@@ -229,7 +229,7 @@ describe('RAG API functions', () => {
   it('getSources with subjectId appends query param', async () => {
     mockFetch.mockResolvedValue(makeResponse([]));
 
-    await getSources('token', 'subj-1');
+    await getSources('subj-1');
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('subjectId=subj-1');
@@ -243,7 +243,14 @@ describe('RAG API functions', () => {
     const origClearTimeout = window.clearTimeout;
     vi.stubGlobal('clearTimeout', vi.fn());
 
-    const result = await generateQuiz('token', { sourceId: 'src-1', count: 5 } as any);
+    const result = await generateQuiz({
+      sourceId: 'src-1',
+      unitId: 'unit-1',
+      difficulty: 'MEDIUM',
+      questionCount: 5,
+      includeHints: false,
+      storeAsDraft: false,
+    });
 
     vi.stubGlobal('clearTimeout', origClearTimeout);
 
@@ -257,7 +264,7 @@ describe('RAG API functions', () => {
     const drafts = [{ id: 'd-1', status: 'PENDING' }];
     mockFetch.mockResolvedValue(makeResponse(drafts));
 
-    const result = await getDrafts('token', 'src-1');
+    const result = await getDrafts('src-1');
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('sourceId=src-1');
@@ -267,7 +274,7 @@ describe('RAG API functions', () => {
   it('getDrafts appends status query param when provided', async () => {
     mockFetch.mockResolvedValue(makeResponse([]));
 
-    await getDrafts('token', 'src-1', 'PENDING');
+    await getDrafts('src-1', 'PENDING');
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('status=PENDING');
@@ -277,7 +284,7 @@ describe('RAG API functions', () => {
     const draft = { id: 'd-1', status: 'APPROVED' };
     mockFetch.mockResolvedValue(makeResponse(draft));
 
-    const result = await approveDraft('token', 'd-1');
+    const result = await approveDraft('d-1');
 
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/ai/drafts/d-1/approve');
@@ -289,7 +296,7 @@ describe('RAG API functions', () => {
     const draft = { id: 'd-1', status: 'REJECTED' };
     mockFetch.mockResolvedValue(makeResponse(draft));
 
-    const result = await rejectDraft('token', 'd-1');
+    const result = await rejectDraft('d-1');
 
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/ai/drafts/d-1/reject');
@@ -301,7 +308,7 @@ describe('RAG API functions', () => {
     const units = [{ id: 'u-1', name: 'Unit 1' }];
     mockFetch.mockResolvedValue(makeResponse(units));
 
-    const result = await getUnitsForSubject('token', 'subj-1');
+    const result = await getUnitsForSubject('subj-1');
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/units?subjectId=subj-1');
@@ -311,7 +318,7 @@ describe('RAG API functions', () => {
   it('deleteSource sends DELETE request', async () => {
     mockFetch.mockResolvedValue({ ok: true, status: 204, text: () => Promise.resolve(''), json: () => Promise.resolve(undefined) } as unknown as Response);
 
-    await deleteSource('token', 'src-1');
+    await deleteSource('src-1');
 
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('/api/sources/src-1');
@@ -331,13 +338,13 @@ describe('exportFlashcardsBySubject', () => {
       text: () => Promise.resolve('front,back\nHello,Hola\n'),
     } as unknown as Response);
 
-    const result = await exportFlashcardsBySubject('my-token', 'subj-1', 'csv');
+    const result = await exportFlashcardsBySubject('subj-1', 'csv');
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain('subjectId=subj-1');
     expect(url).toContain('format=csv');
-    expect(options.headers.Authorization).toBe('Bearer my-token');
+    expect(options.credentials).toBe('include');
     expect(result).toBe('front,back\nHello,Hola\n');
   });
 
@@ -349,7 +356,7 @@ describe('exportFlashcardsBySubject', () => {
       text: () => Promise.resolve(jsonContent),
     } as unknown as Response);
 
-    const result = await exportFlashcardsBySubject('token', 'subj-2', 'json');
+    const result = await exportFlashcardsBySubject('subj-2', 'json');
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toContain('format=json');
@@ -362,7 +369,7 @@ describe('exportFlashcardsBySubject', () => {
       status: 403,
     } as unknown as Response);
 
-    await expect(exportFlashcardsBySubject('token', 'subj-3', 'csv')).rejects.toMatchObject({
+    await expect(exportFlashcardsBySubject('subj-3', 'csv')).rejects.toMatchObject({
       message: 'api_error',
       status: 403,
     });
@@ -371,6 +378,6 @@ describe('exportFlashcardsBySubject', () => {
   it('throws network error when fetch rejects', async () => {
     mockFetch.mockRejectedValue(new Error('network failure'));
 
-    await expect(exportFlashcardsBySubject('token', 'subj-4', 'csv')).rejects.toThrow('network failure');
+    await expect(exportFlashcardsBySubject('subj-4', 'csv')).rejects.toThrow('network failure');
   });
 });

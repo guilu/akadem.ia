@@ -4,12 +4,11 @@ import type { IndexPreview, SourceDocument, ApprovedUnit } from '../../types';
 
 interface Props {
   preview: IndexPreview;
-  token: string;
   onConfirmed: (doc: SourceDocument) => void;
   onCancel: () => void;
 }
 
-export default function SourceIndexPreview({ preview, token, onConfirmed, onCancel }: Props) {
+export default function SourceIndexPreview({ preview, onConfirmed, onCancel }: Props) {
   const [units, setUnits] = useState<ApprovedUnit[]>(
     preview.detectedUnits.map((u) => ({ headingKey: u.headingKey, name: u.name, description: '' }))
   );
@@ -33,10 +32,11 @@ export default function SourceIndexPreview({ preview, token, onConfirmed, onCanc
     setError('');
     setConfirming(true);
     try {
-      const result = await confirmIndex(token, preview.document.id, valid);
+      const result = await confirmIndex(preview.document.id, valid);
       onConfirmed(result.document);
-    } catch (err: any) {
-      setError(err?.body?.message || 'Error al confirmar el índice.');
+    } catch (err: unknown) {
+      const e = err as { body?: { message?: string } };
+      setError(e?.body?.message || 'Error al confirmar el índice.');
     } finally {
       setConfirming(false);
     }

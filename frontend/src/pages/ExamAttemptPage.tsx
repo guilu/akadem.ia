@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import ExamRunner, { Question } from '../components/ExamRunner';
-import { apiAuthJson, apiBase } from '../api';
+import { apiJson, apiBase } from '../api';
 import { timeoutMessage } from '../utils/messages';
 import { ROUTES } from '../constants/routes';
 import type { ExamResult } from '../types';
@@ -14,8 +14,7 @@ type AttemptResponse = {
   finished: boolean;
 };
 
-export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
-  token: string;
+export default function ExamAttemptPage({ onUnauthorized, onFinish }:{
   onUnauthorized: () => void;
   onFinish: (result: ExamResult) => void;
 }){
@@ -37,18 +36,18 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     if (!attemptId) return;
     setLoading(true);
     setError('');
-    apiAuthJson<AttemptResponse>(`${apiBase}/api/exams/attempts/${attemptId}`, token, { timeoutMs: 15000 })
+    apiJson<AttemptResponse>(`${apiBase}/api/exams/attempts/${attemptId}`, { timeoutMs: 15000 })
       .then(data => setAttempt(data))
-      .catch(err => {
-        if (err?.status === 401) onUnauthorized();
-        if (err?.code === 'timeout') {
+      .catch((err: unknown) => {
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
+        if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
           setError(timeoutMessage);
           return;
         }
         setError('No se pudo cargar el intento');
       })
       .finally(() => setLoading(false));
-  }, [attemptId, token, apiBase]);
+  }, [attemptId, apiBase]);
 
   if (!attemptId) return <Navigate to={ROUTES.subjects} replace />;
 
@@ -76,15 +75,15 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     const current = selections[questionId];
     if (current === answerId) return;
     try {
-      await apiAuthJson(`${apiBase}/api/exams/attempts/${attemptId}/answers/${questionId}`, token, {
+      await apiJson(`${apiBase}/api/exams/attempts/${attemptId}/answers/${questionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selectedAnswerId: answerId }),
         timeoutMs: 15000
       });
-    } catch (err: any) {
-      if (err?.status === 401) onUnauthorized();
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         alert(timeoutMessage);
         return;
       }
@@ -96,7 +95,7 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
     const filtered: Record<string,string> = {};
     Object.entries(payload.selections).forEach(([q, a]) => { if(a) filtered[q] = a; });
     try {
-      const result = await apiAuthJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, token, {
+      const result = await apiJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ selections: filtered }),
@@ -105,9 +104,9 @@ export default function ExamAttemptPage({ token, onUnauthorized, onFinish }:{
       sessionStorage.removeItem('akdmia.activeAttemptId');
       onFinish(result);
       navigate(ROUTES.examResult);
-    } catch (err: any) {
-      if (err?.status === 401) onUnauthorized();
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         alert(timeoutMessage);
         return;
       }

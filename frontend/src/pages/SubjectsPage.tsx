@@ -2,14 +2,13 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { formatDuration } from '../utils/format';
 import { Plus, ArrowsRepeat, ClipboardCheck, BookOpen } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { apiJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
 import { ROUTES } from '../constants/routes';
 
-export default function SubjectsPage({ subjects, activeAttemptId, token, onUnauthorized, onViewResult, onResumeAttempt }: {
+export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized, onViewResult, onResumeAttempt }: {
   subjects: Subject[];
   activeAttemptId?: string;
-  token: string;
   onUnauthorized: () => void;
   onViewResult: (attemptId: string) => void;
   onResumeAttempt: (attemptId: string) => void;
@@ -31,15 +30,15 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
   useEffect(() => {
     setLoading(true);
     setError('');
-    apiAuthJson<ExamAttemptSummary[]>(`${apiBase}/api/exams/attempts`, token)
+    apiJson<ExamAttemptSummary[]>(`${apiBase}/api/exams/attempts`)
       .then(setHistory)
-      .catch(err => {
-        if (err?.status === 401) onUnauthorized();
+      .catch((err: unknown) => {
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
         setError('No se pudo cargar el historial.');
         setHistory([]);
       })
       .finally(() => setLoading(false));
-  }, [token, apiBase]);
+  }, [apiBase]);
 
   return (
     <section className="mb-8">

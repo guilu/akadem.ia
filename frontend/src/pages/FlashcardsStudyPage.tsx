@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CircleMinus, CheckCircle, Close, CloseCircle, Refresh, Rocket, Star } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { apiJson, apiBase } from '../api';
 
 type IntervalHints = { again: string; good: string; easy: string };
 type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
@@ -26,13 +26,11 @@ export default function FlashcardsStudyPage() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [queueCounts, setQueueCounts] = useState({ new: 0, due: 0, learning: 0 });
 
-  const token = localStorage.getItem('ak_token') || '';
-
   const fetchNext = async () => {
-    const data = await apiAuthJson<StudyItem | undefined>(`${apiBase}/api/flashcards/study/next?unitId=${unitId}`, token);
+    const data = await apiJson<StudyItem | undefined>(`${apiBase}/api/flashcards/study/next?unitId=${unitId}`);
     return data || null;
   };
-  const fetchQueue = async () => apiAuthJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}`, token);
+  const fetchQueue = async () => apiJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}`);
 
   const currentItem = items[currentIndex];
   const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
@@ -56,7 +54,7 @@ export default function FlashcardsStudyPage() {
       .catch(() => { if (mounted) setError('No se pudo cargar la sesión de estudio.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token, unitId]);
+  }, [unitId]);
 
   useEffect(() => {
     if (!loading && remaining === 0 && !currentItem) setFinished(true);
@@ -67,7 +65,7 @@ export default function FlashcardsStudyPage() {
     setSubmitting(true);
     setReviewError(null);
     try {
-      await apiAuthJson(`${apiBase}/api/flashcards/study/review`, token, {
+      await apiJson(`${apiBase}/api/flashcards/study/review`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest)

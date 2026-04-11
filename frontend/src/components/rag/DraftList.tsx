@@ -4,7 +4,6 @@ import { getDrafts, approveDraft, rejectDraft } from '../../api';
 import type { SourceDocument, GeneratedDraft } from '../../types';
 
 interface Props {
-  token: string;
   sources: SourceDocument[];
 }
 
@@ -24,7 +23,7 @@ const STATUS_COLOR: Record<string, string> = {
   REJECTED: 'bg-red-400/15 text-red-600 dark:text-red-400'
 };
 
-export default function DraftList({ token, sources }: Props) {
+export default function DraftList({ sources }: Props) {
   const processed = sources.filter((s) => s.status === 'PROCESSED');
   const [selectedSourceId, setSelectedSourceId] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('GENERATED');
@@ -37,19 +36,20 @@ export default function DraftList({ token, sources }: Props) {
     if (!selectedSourceId) { setDrafts([]); return; }
     setLoading(true);
     setError('');
-    getDrafts(token, selectedSourceId, statusFilter || undefined)
+    getDrafts(selectedSourceId, statusFilter || undefined)
       .then(setDrafts)
       .catch(() => { setError('Error al cargar los borradores.'); setDrafts([]); })
       .finally(() => setLoading(false));
-  }, [selectedSourceId, statusFilter, token]);
+  }, [selectedSourceId, statusFilter]);
 
   async function handleApprove(draftId: string) {
     setActionLoading((prev) => ({ ...prev, [draftId]: true }));
     try {
-      const updated = await approveDraft(token, draftId);
+      const updated = await approveDraft(draftId);
       setDrafts((prev) => prev.map((d) => d.id === draftId ? updated : d));
-    } catch (err: any) {
-      alert(err?.body?.message || 'Error al aprobar la pregunta.');
+    } catch (err: unknown) {
+      const e = err as { body?: { message?: string } };
+      alert(e?.body?.message || 'Error al aprobar la pregunta.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [draftId]: false }));
     }
@@ -58,10 +58,11 @@ export default function DraftList({ token, sources }: Props) {
   async function handleReject(draftId: string) {
     setActionLoading((prev) => ({ ...prev, [draftId]: true }));
     try {
-      const updated = await rejectDraft(token, draftId);
+      const updated = await rejectDraft(draftId);
       setDrafts((prev) => prev.map((d) => d.id === draftId ? updated : d));
-    } catch (err: any) {
-      alert(err?.body?.message || 'Error al rechazar la pregunta.');
+    } catch (err: unknown) {
+      const e = err as { body?: { message?: string } };
+      alert(e?.body?.message || 'Error al rechazar la pregunta.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [draftId]: false }));
     }

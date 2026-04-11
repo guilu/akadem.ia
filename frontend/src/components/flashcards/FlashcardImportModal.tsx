@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiAuthJson, apiBase, getUnitsForSubject } from '../../api';
+import { apiJson, apiBase, getUnitsForSubject } from '../../api';
 
 type Subject = { id: string; name: string; description?: string };
 type Unit = { id: string; name: string };
 type ImportResult = { imported: number; skipped: number; errors: string[] };
 
 type Props = {
-  token: string;
   onClose: () => void;
   onImported: () => void;
 };
 
-export default function FlashcardImportModal({ token, onClose, onImported }: Props) {
+export default function FlashcardImportModal({ onClose, onImported }: Props) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [subjectId, setSubjectId] = useState('');
@@ -27,28 +26,28 @@ export default function FlashcardImportModal({ token, onClose, onImported }: Pro
   // Load all subjects on mount
   useEffect(() => {
     setLoadingSubjects(true);
-    apiAuthJson<Subject[]>(`${apiBase}/api/subjects`, token)
+    apiJson<Subject[]>(`${apiBase}/api/subjects`)
       .then((data) => {
         setSubjects(data ?? []);
         if (data && data.length > 0) setSubjectId(data[0].id);
       })
       .catch(() => setError('No se pudieron cargar las materias.'))
       .finally(() => setLoadingSubjects(false));
-  }, [token]);
+  }, []);
 
   // Load units when subject changes
   useEffect(() => {
     if (!subjectId) { setUnits([]); setUnitId(''); return; }
     setLoadingUnits(true);
     setUnitId('');
-    getUnitsForSubject(token, subjectId)
+    getUnitsForSubject(subjectId)
       .then((data) => {
         setUnits(data ?? []);
         if (data && data.length > 0) setUnitId(data[0].id);
       })
       .catch(() => setUnits([]))
       .finally(() => setLoadingUnits(false));
-  }, [subjectId, token]);
+  }, [subjectId]);
 
   const handleSubmit = async () => {
     const file = fileRef.current?.files?.[0];
@@ -66,18 +65,19 @@ export default function FlashcardImportModal({ token, onClose, onImported }: Pro
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'text/plain; charset=UTF-8',
           },
+          credentials: 'include',
           body: content,
         }
       );
       if (!res.ok) throw new Error(`Error ${res.status}`);
-      const data: ImportResult = await res.json();
+      const data: ImportResult = await res.json() as ImportResult;
       setResult(data);
       if (data.imported > 0) onImported();
-    } catch (e: any) {
-      setError(e.message ?? 'Error al importar.');
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e.message : 'Error al importar.';
+      setError(err);
     } finally {
       setLoading(false);
     }

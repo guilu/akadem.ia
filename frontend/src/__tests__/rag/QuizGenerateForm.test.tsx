@@ -24,26 +24,26 @@ describe('QuizGenerateForm', () => {
   });
 
   it('renders form fields', async () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     expect(screen.getByText(/documento fuente/i)).toBeInTheDocument();
     expect(screen.getByText(/unidad temática/i)).toBeInTheDocument();
     expect(screen.getByText(/dificultad/i)).toBeInTheDocument();
   });
 
   it('shows warning when no processed sources', () => {
-    render(<QuizGenerateForm token="tok" sources={[]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm sources={[]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     expect(screen.getByText(/no hay documentos procesados/i)).toBeInTheDocument();
   });
 
   it('validates missing source and unit', async () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     fireEvent.click(screen.getByRole('button', { name: /generar preguntas/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/selecciona un documento/i);
     expect(onGenerate).not.toHaveBeenCalled();
   });
 
   it('calls onGenerate with correct command', async () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
     // Wait for units to load
     await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalled());
     fireEvent.change(screen.getByRole('combobox', { name: /documento fuente \*/i }), { target: { value: 'src-1' } });
@@ -58,7 +58,7 @@ describe('QuizGenerateForm', () => {
   });
 
   it('disables submit button while loading', () => {
-    render(<QuizGenerateForm token="tok" sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={true} />);
+    render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={true} />);
     expect(screen.getByRole('button', { name: /generando/i })).toBeDisabled();
   });
 });

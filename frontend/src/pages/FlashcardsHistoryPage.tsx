@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Inbox } from 'flowbite-react-icons/outline';
-import { apiAuthJson, apiBase } from '../api';
+import { apiJson, apiBase } from '../api';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 
 type HistoryItem = {
@@ -26,16 +26,14 @@ export default function FlashcardsHistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const token = localStorage.getItem('ak_token') || '';
-
   useEffect(() => {
     let mounted = true;
-    apiAuthJson<HistoryItem[]>(`${apiBase}/api/flashcards/history?limit=50`, token)
+    apiJson<HistoryItem[]>(`${apiBase}/api/flashcards/history?limit=50`)
       .then((data) => { if (mounted) setItems(data || []); })
       .catch(() => { if (mounted) setError('No se pudo cargar el historial.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   return (
     <div className="space-y-6">

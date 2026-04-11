@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
-import { apiBase, apiAuthJson } from '../api';
+import { apiBase, apiJson } from '../api';
 import ScopeFilter, { type ContentScope } from './ScopeFilter';
 
 export type AdminSubject = {
@@ -109,7 +109,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   );
 }
 
-export default function Management({ isAdmin, token, onSubjectsChanged }: { isAdmin: boolean; token: string; onSubjectsChanged?: () => void }) {
+export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: boolean; onSubjectsChanged?: () => void }) {
   const [tab, setTab] = useState<Tab>('subjects');
 
   const [subjects, setSubjects] = useState<AdminSubject[]>([]);
@@ -175,19 +175,19 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
 
   async function loadSubjects(scope: Scope = subjectScope) {
     const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiAuthJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1${scopeParam}`, token);
+    const data = await apiJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1${scopeParam}`);
     setSubjects(data);
   }
   async function loadUnits(subjectId: string, scope: Scope = unitScope) {
     if (!subjectId) { setUnits([]); return; }
     const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiAuthJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}${scopeParam}`, token);
+    const data = await apiJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}${scopeParam}`);
     setUnits(data);
   }
   async function loadQuestions(unitId: string, page = questionPage, scope: Scope = questionScope) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
     const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiAuthJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10${scopeParam}`, token);
+    const data = await apiJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10${scopeParam}`);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
@@ -210,12 +210,12 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
       const visibility = isAdmin && subjectScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
       const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
-      await apiAuthJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, token, opts);
+      await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
       resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
-  async function removeSubject(id: string) { await apiAuthJson(`${apiBase}/api/manage/subjects/${id}`, token, { method: 'DELETE' }); await loadSubjects(subjectScope); onSubjectsChanged?.(); }
+  async function removeSubject(id: string) { await apiJson(`${apiBase}/api/manage/subjects/${id}`, { method: 'DELETE' }); await loadSubjects(subjectScope); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
@@ -224,12 +224,12 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
       const visibility = isAdmin && unitScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
       const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0, visibility };
       const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isUnitEditing ? `${apiBase}/api/manage/units/${unitForm.id}` : `${apiBase}/api/manage/units`, token, opts);
+      await apiJson(isUnitEditing ? `${apiBase}/api/manage/units/${unitForm.id}` : `${apiBase}/api/manage/units`, opts);
       resetUnitForm(); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope);
     } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) { await apiAuthJson(`${apiBase}/api/manage/units/${id}`, token, { method: 'DELETE' }); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope); }
+  async function removeUnit(id: string) { await apiJson(`${apiBase}/api/manage/units/${id}`, { method: 'DELETE' }); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
@@ -241,18 +241,18 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
       const visibility = isAdmin && questionScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
       const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })), visibility };
       const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-      await apiAuthJson(isQuestionEditing ? `${apiBase}/api/manage/questions/${questionForm.id}` : `${apiBase}/api/manage/questions`, token, opts);
+      await apiJson(isQuestionEditing ? `${apiBase}/api/manage/questions/${questionForm.id}` : `${apiBase}/api/manage/questions`, opts);
       resetQuestionForm(); await loadQuestions(unitId, 1, questionScope); await loadUnits(questionSubjectId, 'ALL');
     } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) { await apiAuthJson(`${apiBase}/api/manage/questions/${id}`, token, { method: 'DELETE' }); await loadQuestions(unitId, questionPage, questionScope); await loadUnits(questionSubjectId, 'ALL'); }
+  async function removeQuestion(id: string, unitId: string) { await apiJson(`${apiBase}/api/manage/questions/${id}`, { method: 'DELETE' }); await loadQuestions(unitId, questionPage, questionScope); await loadUnits(questionSubjectId, 'ALL'); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
     try {
       const query = questionUnitId ? `?unitId=${questionUnitId}&format=${format}` : `?format=${format}`;
-      const res = await fetch(`${apiBase}/api/manage/questions/export${query}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${apiBase}/api/manage/questions/export${query}`, { credentials: 'include' });
       if (!res.ok) throw new Error('export_failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -271,7 +271,7 @@ export default function Management({ isAdmin, token, onSubjectsChanged }: { isAd
     try {
       const formData = new FormData();
       formData.append('file', importFile);
-      const res = await fetch(`${apiBase}/api/manage/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const res = await fetch(`${apiBase}/api/manage/questions/import?format=${importFormat}&unitId=${questionUnitId}`, { method: 'POST', credentials: 'include', body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'import_failed');
       const created = data.created || 0;

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, Users, Cog } from 'flowbite-react-icons/outline';
-import { apiBase, apiAuthJson } from '../api';
+import { apiBase, apiJson } from '../api';
 
 export type AdminUser = {
   id: string;
@@ -77,7 +77,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   );
 }
 
-export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: string }) {
+export default function Settings({ isAdmin }: { isAdmin: boolean }) {
   const [tab, setTab] = useState<Tab>('general');
 
   // ── User settings ──
@@ -88,7 +88,7 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
 
   async function loadUserSettings() {
     try {
-      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token);
+      const data = await apiJson<UserSettings>(`${apiBase}/api/settings`);
       setSettingsForm(data);
     } catch { /* keep defaults */ }
   }
@@ -96,7 +96,7 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
   async function saveUserSettings() {
     setSettingsLoading(true); setSettingsSaved(false); setSettingsError('');
     try {
-      const data = await apiAuthJson<UserSettings>(`${apiBase}/api/settings`, token, {
+      const data = await apiJson<UserSettings>(`${apiBase}/api/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settingsForm),
@@ -122,7 +122,7 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
   function resetForm() { setForm({ id: '', email: '', role: 'STUDENT', firstName: '', lastName: '', occupation: '' }); }
 
   async function loadUsers(page = userPage) {
-    const data = await apiAuthJson<{ items: AdminUser[]; page: number; totalPages: number }>(`${apiBase}/api/admin/users?page=${page - 1}&size=10`, token);
+    const data = await apiJson<{ items: AdminUser[]; page: number; totalPages: number }>(`${apiBase}/api/admin/users?page=${page - 1}&size=10`);
     setUsers(data.items); setUserPage(data.page + 1); setUserTotalPages(data.totalPages || 1);
   }
 
@@ -137,12 +137,12 @@ export default function Settings({ isAdmin, token }: { isAdmin: boolean; token: 
     try {
       const body = JSON.stringify({ email: form.email, firstName: form.firstName || null, lastName: form.lastName || null, occupation: form.occupation || null, role: form.role });
       const opts = { method: isEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
-      await apiAuthJson(isEditing ? `${apiBase}/api/admin/users/${form.id}` : `${apiBase}/api/admin/users`, token, opts);
+      await apiJson(isEditing ? `${apiBase}/api/admin/users/${form.id}` : `${apiBase}/api/admin/users`, opts);
       resetForm(); await loadUsers(1);
     } finally { setLoading(false); }
   }
 
-  async function removeUser(id: string) { await apiAuthJson(`${apiBase}/api/admin/users/${id}`, token, { method: 'DELETE' }); await loadUsers(userPage); }
+  async function removeUser(id: string) { await apiJson(`${apiBase}/api/admin/users/${id}`, { method: 'DELETE' }); await loadUsers(userPage); }
 
   const generalNavItems = [
     { id: 'general' as Tab, label: 'General', icon: <Cog className="w-4 h-4" /> },

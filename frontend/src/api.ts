@@ -13,8 +13,8 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
   let signal = controller.signal;
-  if (existing && typeof (AbortSignal as any).any === 'function') {
-    signal = (AbortSignal as any).any([existing, controller.signal]);
+  if (existing && typeof (AbortSignal as { any?: unknown }).any === 'function') {
+    signal = (AbortSignal as unknown as { any: (signals: AbortSignal[]) => AbortSignal }).any([existing, controller.signal]);
   }
   return { signal, clear: () => window.clearTimeout(timeoutId) };
 }
@@ -23,21 +23,22 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
   const { timeoutMs, ...fetchOptions } = options;
   const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
   try {
-    const res = await fetch(url, { ...fetchOptions, signal });
+    const res = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
     if (!res.ok) {
-      const err: any = new Error('api_error');
-      err.status = res.status;
-      err.body = await res.json().catch(() => ({}));
+      const err: { message: string; status: number; body: unknown; name?: string } = {
+        message: 'api_error',
+        status: res.status,
+        body: await res.json().catch(() => ({})),
+      };
       throw err;
     }
     if (res.status === 204) return undefined as T;
     const text = await res.text();
     if (!text) return undefined as T;
     return JSON.parse(text) as T;
-  } catch (err: any) {
-    if (err?.name === 'AbortError') {
-      const timeoutErr: any = new Error('timeout');
-      timeoutErr.code = 'timeout';
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'name' in err && (err as { name: string }).name === 'AbortError') {
+      const timeoutErr = Object.assign(new Error('timeout'), { code: 'timeout' });
       throw timeoutErr;
     }
     throw err;
@@ -46,21 +47,28 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
   }
 }
 
-// User profile API functions
+// User auth API functions
 import type {
   SourceDocument, GeneratedDraft, GenerateQuizCommand, GenerateQuizResponse,
   IndexPreview, ConfirmIndexCommand, ApprovedUnit, UserProfile
 } from './types';
 
-export async function getMyProfile(token: string): Promise<UserProfile> {
-  return apiAuthJson<UserProfile>(`${apiBase}/api/v1/users/me`, token);
+export async function getMe(): Promise<{ email: string; role: string }> {
+  return apiJson<{ email: string; role: string }>(`${apiBase}/api/auth/me`);
+}
+
+export async function logout(): Promise<void> {
+  return apiJson<void>(`${apiBase}/api/auth/logout`, { method: 'POST' });
+}
+
+export async function getMyProfile(): Promise<UserProfile> {
+  return apiJson<UserProfile>(`${apiBase}/api/v1/users/me`);
 }
 
 export async function updateMyProfile(
-  token: string,
   data: { firstName: string | null; lastName: string | null }
 ): Promise<UserProfile> {
-  return apiAuthJson<UserProfile>(`${apiBase}/api/v1/users/me`, token, {
+  return apiJson<UserProfile>(`${apiBase}/api/v1/users/me`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
@@ -69,46 +77,46 @@ export async function updateMyProfile(
 
 // RAG module API functions
 
-export async function uploadSource(token: string, file: File, subjectId: string): Promise<IndexPreview> {
+export async function uploadSource(file: File, subjectId: string): Promise<IndexPreview> {
   const form = new FormData();
   form.append('file', file);
   form.append('subjectId', subjectId);
   const res = await fetch(`${apiBase}/api/sources`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: form
+    body: form,
+    credentials: 'include'
   });
   if (!res.ok) {
-    const err: any = new Error('api_error');
-    err.status = res.status;
-    err.body = await res.json().catch(() => ({}));
+    const err = Object.assign(new Error('api_error'), {
+      status: res.status,
+      body: await res.json().catch(() => ({})),
+    });
     throw err;
   }
-  return res.json();
+  return res.json() as Promise<IndexPreview>;
 }
 
 export async function confirmIndex(
-  token: string,
   documentId: string,
   approvedUnits: ApprovedUnit[]
 ): Promise<{ document: SourceDocument; savedUnits: { id: string; name: string }[] }> {
   const cmd: ConfirmIndexCommand = { approvedUnits };
-  return apiAuthJson(`${apiBase}/api/sources/${documentId}/confirm`, token, {
+  return apiJson(`${apiBase}/api/sources/${documentId}/confirm`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cmd)
   });
 }
 
-export async function getSources(token: string, subjectId?: string): Promise<SourceDocument[]> {
+export async function getSources(subjectId?: string): Promise<SourceDocument[]> {
   const url = subjectId
     ? `${apiBase}/api/sources?subjectId=${subjectId}`
     : `${apiBase}/api/sources`;
-  return apiAuthJson<SourceDocument[]>(url, token);
+  return apiJson<SourceDocument[]>(url);
 }
 
-export async function generateQuiz(token: string, cmd: GenerateQuizCommand): Promise<GenerateQuizResponse> {
-  return apiAuthJson<GenerateQuizResponse>(`${apiBase}/api/ai/quizzes/generate`, token, {
+export async function generateQuiz(cmd: GenerateQuizCommand): Promise<GenerateQuizResponse> {
+  return apiJson<GenerateQuizResponse>(`${apiBase}/api/ai/quizzes/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cmd),
@@ -116,77 +124,48 @@ export async function generateQuiz(token: string, cmd: GenerateQuizCommand): Pro
   });
 }
 
-export async function getDrafts(token: string, sourceId: string, status?: string): Promise<GeneratedDraft[]> {
+export async function getDrafts(sourceId: string, status?: string): Promise<GeneratedDraft[]> {
   const url = status
     ? `${apiBase}/api/ai/quizzes/drafts?sourceId=${sourceId}&status=${status}`
     : `${apiBase}/api/ai/quizzes/drafts?sourceId=${sourceId}`;
-  return apiAuthJson<GeneratedDraft[]>(url, token);
+  return apiJson<GeneratedDraft[]>(url);
 }
 
-export async function approveDraft(token: string, draftId: string): Promise<GeneratedDraft> {
-  return apiAuthJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/approve`, token, {
+export async function approveDraft(draftId: string): Promise<GeneratedDraft> {
+  return apiJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/approve`, {
     method: 'POST'
   });
 }
 
-export async function rejectDraft(token: string, draftId: string): Promise<GeneratedDraft> {
-  return apiAuthJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/reject`, token, {
+export async function rejectDraft(draftId: string): Promise<GeneratedDraft> {
+  return apiJson<GeneratedDraft>(`${apiBase}/api/ai/drafts/${draftId}/reject`, {
     method: 'POST'
   });
 }
 
-export async function getUnitsForSubject(token: string, subjectId: string): Promise<{ id: string; name: string }[]> {
-  return apiAuthJson<{ id: string; name: string }[]>(`${apiBase}/api/units?subjectId=${subjectId}`, token);
+export async function getUnitsForSubject(subjectId: string): Promise<{ id: string; name: string }[]> {
+  return apiJson<{ id: string; name: string }[]>(`${apiBase}/api/units?subjectId=${subjectId}`);
 }
 
-export async function deleteSource(token: string, id: string): Promise<void> {
-  return apiAuthJson<void>(`${apiBase}/api/sources/${id}`, token, { method: 'DELETE' });
+export async function deleteSource(id: string): Promise<void> {
+  return apiJson<void>(`${apiBase}/api/sources/${id}`, { method: 'DELETE' });
 }
 
 export async function exportFlashcardsBySubject(
-  token: string,
   subjectId: string,
   format: 'csv' | 'json'
 ): Promise<string> {
   const res = await fetch(
     `${apiBase}/api/flashcards/export?subjectId=${subjectId}&format=${format}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { credentials: 'include' }
   );
   if (!res.ok) {
-    const err: any = new Error('api_error');
-    err.status = res.status;
+    const err = Object.assign(new Error('api_error'), { status: res.status });
     throw err;
   }
   return res.text();
 }
 
-export async function apiAuthJson<T>(url: string, token: string, options: RequestOptions = {}): Promise<T> {
-  const { timeoutMs, ...fetchOptions } = options;
-  const { signal, clear } = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
-  try {
-    const res = await fetch(url, {
-      ...fetchOptions,
-      signal,
-      headers: { ...(fetchOptions.headers || {}), Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) {
-      const err: any = new Error('api_error');
-      err.status = res.status;
-      err.body = await res.json().catch(() => ({}));
-      throw err;
-    }
-    if (res.status === 204) return undefined as T;
-    const text = await res.text();
-    if (!text) return undefined as T;
-    return JSON.parse(text) as T;
-  } catch (err: any) {
-    if (err?.name === 'AbortError') {
-      const timeoutErr: any = new Error('timeout');
-      timeoutErr.code = 'timeout';
-      throw timeoutErr;
-    }
-    throw err;
-  } finally {
-    clear();
-  }
+export async function apiAuthJson<T>(url: string, options: RequestOptions = {}): Promise<T> {
+  return apiJson<T>(url, options);
 }
