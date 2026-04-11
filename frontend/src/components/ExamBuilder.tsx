@@ -201,7 +201,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                         value={disabled ? 0 : current}
                         onChange={e => setCount(u.id, Number(e.target.value))}
                         disabled={disabled}
-                        className="w-10 text-center bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-lg py-1 font-bold text-base focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-40"
+                        className="w-[3.75rem] text-center bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-lg py-1 font-bold text-base focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-40"
                       />
                       <button
                         onClick={() => setCount(u.id, current + 1)}
@@ -269,13 +269,13 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
             </div>
             <div className="h-12 w-px bg-secondary/20 hidden md:block" />
             <div className="hidden md:flex items-center gap-4">
-              <div className="flex -space-x-3">
-                <div className="w-10 h-10 rounded-full border-2 border-bg bg-primary flex items-center justify-center z-10">
-                  <svg className="w-4 h-4 text-bg" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex -space-x-4">
+                <div className="w-12 h-12 rounded-full border-2 border-bg bg-primary flex items-center justify-center z-0">
+                  <svg className="w-5 h-5 text-bg" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="w-10 h-10 rounded-full border-2 border-bg bg-secondary/40 dark:bg-[#1F2E40] flex items-center justify-center text-xs font-bold">
+                <div className="w-12 h-12 rounded-full border-2 border-bg bg-secondary/40 dark:bg-[#1F2E40] flex items-center justify-center text-sm font-bold z-10">
                   {total()}m
                 </div>
               </div>
