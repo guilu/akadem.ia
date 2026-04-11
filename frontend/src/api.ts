@@ -14,7 +14,7 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
   let signal = controller.signal;
   if (existing && typeof (AbortSignal as { any?: unknown }).any === 'function') {
-    signal = (AbortSignal as { any: (...s: AbortSignal[]) => AbortSignal }).any([existing, controller.signal]);
+    signal = (AbortSignal as unknown as { any: (signals: AbortSignal[]) => AbortSignal }).any([existing, controller.signal]);
   }
   return { signal, clear: () => window.clearTimeout(timeoutId) };
 }

@@ -243,7 +243,14 @@ describe('RAG API functions', () => {
     const origClearTimeout = window.clearTimeout;
     vi.stubGlobal('clearTimeout', vi.fn());
 
-    const result = await generateQuiz({ sourceId: 'src-1', count: 5 } as Parameters<typeof generateQuiz>[0]);
+    const result = await generateQuiz({
+      sourceId: 'src-1',
+      unitId: 'unit-1',
+      difficulty: 'MEDIUM',
+      questionCount: 5,
+      includeHints: false,
+      storeAsDraft: false,
+    });
 
     vi.stubGlobal('clearTimeout', origClearTimeout);
 
