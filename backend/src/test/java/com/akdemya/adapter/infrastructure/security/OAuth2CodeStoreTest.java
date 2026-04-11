@@ -16,9 +16,10 @@ class OAuth2CodeStoreTest {
     @Test
     void storeAndExchangeReturnsCorrectJwtAndRole() {
         String jwt = "test.jwt.token";
+        String refreshToken = "test-refresh-token";
         String role = "STUDENT";
 
-        String code = store.store(jwt, role);
+        String code = store.store(jwt, refreshToken, role);
 
         assertNotNull(code);
         assertFalse(code.isBlank());
@@ -27,12 +28,13 @@ class OAuth2CodeStoreTest {
 
         assertTrue(result.isPresent());
         assertEquals(jwt, result.get().accessToken());
+        assertEquals(refreshToken, result.get().refreshToken());
         assertEquals(role, result.get().role());
     }
 
     @Test
     void secondExchangeOfSameCodeReturnsEmpty() {
-        String code = store.store("jwt", "ADMIN");
+        String code = store.store("jwt", "refresh", "ADMIN");
 
         store.exchange(code); // first use
         Optional<OAuth2CodeStore.ExchangeResult> second = store.exchange(code);
@@ -42,7 +44,7 @@ class OAuth2CodeStoreTest {
 
     @Test
     void expiredCodeReturnsEmpty() throws Exception {
-        String code = store.store("expired.jwt", "STUDENT");
+        String code = store.store("expired.jwt", "refresh", "STUDENT");
 
         // Use reflection to manipulate the stored entry's expiresAt to be in the past
         Field codesField = OAuth2CodeStore.class.getDeclaredField("codes");

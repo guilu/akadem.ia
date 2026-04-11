@@ -22,6 +22,7 @@ class JwtServiceTest {
     @BeforeEach
     void setUp() {
         jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "ttlMinutes", 15);
     }
 
     @Test

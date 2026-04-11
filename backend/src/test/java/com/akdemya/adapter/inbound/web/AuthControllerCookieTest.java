@@ -3,10 +3,10 @@ package com.akdemya.adapter.inbound.web;
 import com.akdemya.adapter.infrastructure.security.JwtService;
 import com.akdemya.adapter.infrastructure.security.OAuth2CodeStore;
 import com.akdemya.domain.port.in.AuthUseCase;
+import com.akdemya.domain.port.in.RefreshTokenUseCase;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -24,13 +24,14 @@ class AuthControllerCookieTest {
     private final AuthUseCase authUseCase = mock(AuthUseCase.class);
     private final OAuth2CodeStore codeStore = mock(OAuth2CodeStore.class);
     private final JwtService jwtService = mock(JwtService.class);
+    private final RefreshTokenUseCase refreshTokenUseCase = mock(RefreshTokenUseCase.class);
 
     private AuthController controller;
 
     @BeforeEach
     void setUp() {
         // secure=false to test cookie attributes without HTTPS in unit tests
-        controller = new AuthController(authUseCase, codeStore, jwtService, false);
+        controller = new AuthController(authUseCase, codeStore, jwtService, refreshTokenUseCase, false);
     }
 
     // ── login ──
@@ -39,7 +40,7 @@ class AuthControllerCookieTest {
     void login_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.LoginCommand("a@b.com", "pass");
         when(authUseCase.login(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("jwt.token.here", "STUDENT"));
+            .thenReturn(AuthUseCase.AuthResponse.success("jwt.token.here", "refresh-token", "STUDENT"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.login(cmd, res);
@@ -56,16 +57,25 @@ class AuthControllerCookieTest {
         assertEquals("jwt.token.here", cookie.getValue());
         assertTrue(cookie.isHttpOnly(), "cookie must be httpOnly");
         assertEquals("/api", cookie.getPath());
-        assertEquals(86400, cookie.getMaxAge());
+        assertEquals(900, cookie.getMaxAge());
+
+        // ak_refresh cookie is set as ResponseCookie header (may be a separate Set-Cookie entry)
+        String refreshCookieHeader = res.getHeaders("Set-Cookie").stream()
+            .filter(h -> h.contains("ak_refresh="))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(refreshCookieHeader, "ak_refresh cookie header must be set");
+        assertTrue(refreshCookieHeader.contains("ak_refresh=refresh-token"));
+        assertTrue(refreshCookieHeader.contains("Path=/api/auth"));
     }
 
     @Test
     void login_secureFlagRespectedFromConfig() {
         // With secure=true
-        AuthController secureController = new AuthController(authUseCase, codeStore, jwtService, true);
+        AuthController secureController = new AuthController(authUseCase, codeStore, jwtService, refreshTokenUseCase, true);
         var cmd = new AuthUseCase.LoginCommand("a@b.com", "pass");
         when(authUseCase.login(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("tok", "STUDENT"));
+            .thenReturn(AuthUseCase.AuthResponse.success("tok", "refresh-token", "STUDENT"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         secureController.login(cmd, res);
@@ -79,7 +89,7 @@ class AuthControllerCookieTest {
     void login_insecureFlagRespectedFromConfig() {
         var cmd = new AuthUseCase.LoginCommand("a@b.com", "pass");
         when(authUseCase.login(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("tok", "STUDENT"));
+            .thenReturn(AuthUseCase.AuthResponse.success("tok", "refresh-token", "STUDENT"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         controller.login(cmd, res);
@@ -95,7 +105,7 @@ class AuthControllerCookieTest {
     void register_setsCookieAndReturnsRole() {
         var cmd = new AuthUseCase.RegisterCommand("a@b.com", "pass", "pass", "A", "B", "dev");
         when(authUseCase.register(cmd))
-            .thenReturn(AuthUseCase.AuthResponse.success("jwt.reg.token", "STUDENT"));
+            .thenReturn(AuthUseCase.AuthResponse.success("jwt.reg.token", "refresh-token", "STUDENT"));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.register(cmd, res);
@@ -112,7 +122,14 @@ class AuthControllerCookieTest {
         assertEquals("jwt.reg.token", cookie.getValue());
         assertTrue(cookie.isHttpOnly());
         assertEquals("/api", cookie.getPath());
-        assertEquals(86400, cookie.getMaxAge());
+        assertEquals(900, cookie.getMaxAge());
+
+        String refreshCookieHeader = res.getHeaders("Set-Cookie").stream()
+            .filter(h -> h.contains("ak_refresh="))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(refreshCookieHeader, "ak_refresh cookie header must be set");
+        assertTrue(refreshCookieHeader.contains("ak_refresh=refresh-token"));
     }
 
     // ── logout ──
@@ -120,7 +137,7 @@ class AuthControllerCookieTest {
     @Test
     void logout_clearsCookieWithMaxAgeZero() {
         MockHttpServletResponse res = new MockHttpServletResponse();
-        ResponseEntity<?> response = controller.logout(res);
+        ResponseEntity<?> response = controller.logout(null, res);
 
         assertEquals(204, response.getStatusCodeValue());
 
@@ -129,6 +146,14 @@ class AuthControllerCookieTest {
         assertEquals("", cookie.getValue());
         assertEquals(0, cookie.getMaxAge());
         assertEquals("/api", cookie.getPath());
+    }
+
+    @Test
+    void logout_revokesRefreshToken_whenPresent() {
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        controller.logout("some-refresh-token", res);
+
+        verify(refreshTokenUseCase).revoke("some-refresh-token");
     }
 
     // ── /me ──
@@ -186,7 +211,7 @@ class AuthControllerCookieTest {
     void exchangeValidCode_setsCookieAndReturnsRole() {
         String code = "valid-uuid-code";
         when(codeStore.exchange(code))
-            .thenReturn(Optional.of(new OAuth2CodeStore.ExchangeResult("jwt.token.here", "STUDENT")));
+            .thenReturn(Optional.of(new OAuth2CodeStore.ExchangeResult("jwt.token.here", "refresh-token", "STUDENT")));
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         var request = new AuthController.ExchangeCodeRequest(code);
