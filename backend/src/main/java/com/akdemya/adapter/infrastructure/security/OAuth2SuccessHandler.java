@@ -36,7 +36,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String email = oAuth2User.getAttribute("email");
         String name  = oAuth2User.getAttribute("name");
         AuthUseCase.AuthResponse authResponse = authUseCase.loginWithOAuth2(email, name);
-        String code = codeStore.store(authResponse.accessToken(), authResponse.role());
+        String code = codeStore.store(authResponse.accessToken(), authResponse.refreshToken(), authResponse.role());
         response.sendRedirect(frontendUrl + "/oauth2/callback?code=" + code);
     }
 }
