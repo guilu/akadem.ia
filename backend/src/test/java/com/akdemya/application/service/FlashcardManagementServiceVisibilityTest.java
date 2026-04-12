@@ -1,9 +1,11 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.Flashcard;
+import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
+import com.akdemya.domain.port.out.UnitRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -24,7 +26,8 @@ import static org.mockito.Mockito.*;
 class FlashcardManagementServiceVisibilityTest {
 
   private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
-  private final FlashcardManagementService service = new FlashcardManagementService(flashcardRepo);
+  private final UnitRepository unitRepo = mock(UnitRepository.class);
+  private final FlashcardManagementService service = new FlashcardManagementService(flashcardRepo, unitRepo);
 
   // === Update preserves visibility ===
 
@@ -93,6 +96,10 @@ class FlashcardManagementServiceVisibilityTest {
   void createFlashcardWithPrivateVisibilityCreatesPrivateFlashcard() {
     UUID unitId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
+    Unit globalUnit = Unit.createGlobal(UUID.randomUUID(), "Unit", "desc", 1);
+    // Use a global unit so PRIVATE flashcard is allowed
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.GLOBAL, null)));
     when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
     Flashcard created = service.createFlashcardWithVisibility(
@@ -107,6 +114,8 @@ class FlashcardManagementServiceVisibilityTest {
   @Test
   void createFlashcardWithGlobalVisibilityCreatesGlobalFlashcard() {
     UUID unitId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.GLOBAL, null)));
     when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
     Flashcard created = service.createFlashcardWithVisibility(
@@ -115,6 +124,49 @@ class FlashcardManagementServiceVisibilityTest {
 
     assertEquals(Visibility.GLOBAL, created.getVisibility());
     assertNull(created.getOwnerId());
+  }
+
+  @Test
+  void createGlobalFlashcardUnderPrivateUnitThrows() {
+    UUID unitId = UUID.randomUUID();
+    UUID unitOwnerId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, unitOwnerId)));
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.createFlashcardWithVisibility(
+            new FlashcardManagementUseCase.CreateCommandWithVisibility(
+                unitId, "front", "back", Visibility.GLOBAL, null)));
+  }
+
+  @Test
+  void createPrivateFlashcardInPrivateUnitWithDifferentOwnerThrows() {
+    UUID unitId = UUID.randomUUID();
+    UUID unitOwnerId = UUID.randomUUID();
+    UUID otherUserId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, unitOwnerId)));
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.createFlashcardWithVisibility(
+            new FlashcardManagementUseCase.CreateCommandWithVisibility(
+                unitId, "front", "back", Visibility.PRIVATE, otherUserId)));
+  }
+
+  @Test
+  void createPrivateFlashcardInPrivateUnitWithSameOwnerSucceeds() {
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, ownerId)));
+    when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    Flashcard created = service.createFlashcardWithVisibility(
+        new FlashcardManagementUseCase.CreateCommandWithVisibility(
+            unitId, "front", "back", Visibility.PRIVATE, ownerId));
+
+    assertEquals(Visibility.PRIVATE, created.getVisibility());
+    assertEquals(ownerId, created.getOwnerId());
   }
 
   // === listVisibleByUnit ===
