@@ -227,9 +227,10 @@ public class FlashcardController {
       @RequestParam(defaultValue = "csv") String format,
       @RequestBody String content,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
     FlashcardImportExportUseCase.ImportResult result =
-        importExportUseCase.importFlashcards(unitId, format, content);
+        importExportUseCase.importFlashcards(unitId, format, content, userId, admin);
     return ResponseEntity.ok(
         new FlashcardDto.ImportResult(result.imported(), result.skipped(), result.errors()));
   }
@@ -244,8 +245,9 @@ public class FlashcardController {
     if (unitId == null && subjectId == null) {
       return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
     }
+    boolean admin = isAdmin(principal);
     String content = unitId != null
-        ? importExportUseCase.exportFlashcards(unitId, format)
+        ? importExportUseCase.exportFlashcards(unitId, format, userId, admin)
         : importExportUseCase.exportFlashcardsBySubject(subjectId, userId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";

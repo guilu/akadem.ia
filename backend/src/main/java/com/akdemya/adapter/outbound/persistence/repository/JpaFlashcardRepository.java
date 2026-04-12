@@ -18,6 +18,7 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
   @Query("""
       select f from FlashcardEntity f
       where f.unitId = :unitId
+        and (f.visibility = 'GLOBAL' or f.ownerId = :userId)
         and not exists (
           select 1 from FlashcardReviewEntity r
           where r.userId = :userId and r.flashcardId = f.id
@@ -31,6 +32,7 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
   @Query("""
       select count(f) from FlashcardEntity f
       where f.unitId = :unitId
+        and (f.visibility = 'GLOBAL' or f.ownerId = :userId)
         and not exists (
           select 1 from FlashcardReviewEntity r
           where r.userId = :userId and r.flashcardId = f.id
@@ -41,10 +43,11 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
 
   @Query("""
       select count(f) from FlashcardEntity f
-      where not exists (
-        select 1 from FlashcardReviewEntity r
-        where r.userId = :userId and r.flashcardId = f.id
-      )
+      where (f.visibility = 'GLOBAL' or f.ownerId = :userId)
+        and not exists (
+          select 1 from FlashcardReviewEntity r
+          where r.userId = :userId and r.flashcardId = f.id
+        )
       """)
   long countNewByUserId(@Param("userId") UUID userId);
 
@@ -56,10 +59,11 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
 
   @Query("""
       select f.unitId, count(f) from FlashcardEntity f
-      where not exists (
-        select 1 from FlashcardReviewEntity r
-        where r.userId = :userId and r.flashcardId = f.id
-      )
+      where (f.visibility = 'GLOBAL' or f.ownerId = :userId)
+        and not exists (
+          select 1 from FlashcardReviewEntity r
+          where r.userId = :userId and r.flashcardId = f.id
+        )
       group by f.unitId
       """)
   List<Object[]> countNewByUserIdGroupByUnit(@Param("userId") UUID userId);

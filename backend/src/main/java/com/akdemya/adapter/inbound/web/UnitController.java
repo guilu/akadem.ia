@@ -46,8 +46,14 @@ public class UnitController {
     }
 
     @GetMapping("/availability")
-    public List<ContentManagement.UnitAvailability> getAvailability(@RequestParam UUID subjectId,
-            @RequestParam(required = false) String difficulty) {
+    public ResponseEntity<List<ContentManagement.UnitAvailability>> getAvailability(
+            @RequestParam UUID subjectId,
+            @RequestParam(required = false) String difficulty,
+            @AuthenticationPrincipal User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        UUID userId = resolveUserId(principal);
         com.akdemya.domain.model.Question.Difficulty diff = null;
         if (difficulty != null && !difficulty.isBlank()) {
             try {
@@ -57,7 +63,7 @@ public class UnitController {
         }
         org.slf4j.LoggerFactory.getLogger(UnitController.class)
             .info("Availability for subject {} difficulty {}", subjectId, difficulty);
-        return contentService.getUnitAvailability(subjectId, diff);
+        return ResponseEntity.ok(contentService.getVisibleUnitAvailability(subjectId, userId, diff));
     }
 
     @PostMapping
