@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 class FlashcardImportExportServiceTest {
@@ -116,10 +117,11 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcards_csvFormatReturnsHeaderAndRows() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Flashcard card = flashcard(unitId, "Question", "Answer");
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of(card));
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of(card));
 
-    String result = service.exportFlashcards(unitId, "csv");
+    String result = service.exportFlashcards(unitId, "csv", userId, false);
 
     assertTrue(result.startsWith("front,back\n"));
     assertTrue(result.contains("Question,Answer"));
@@ -128,10 +130,11 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcards_jsonFormatReturnsJsonArray() throws Exception {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Flashcard card = flashcard(unitId, "Front", "Back");
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of(card));
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of(card));
 
-    String result = service.exportFlashcards(unitId, "json");
+    String result = service.exportFlashcards(unitId, "json", userId, false);
 
     var parsed = objectMapper.readValue(result, List.class);
     assertEquals(1, parsed.size());
@@ -140,10 +143,11 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcards_csvEscapesCommasInFields() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Flashcard card = flashcard(unitId, "A, B", "C, D");
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of(card));
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of(card));
 
-    String result = service.exportFlashcards(unitId, "csv");
+    String result = service.exportFlashcards(unitId, "csv", userId, false);
 
     assertTrue(result.contains("\"A, B\""));
     assertTrue(result.contains("\"C, D\""));
@@ -152,10 +156,11 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcards_csvEscapesQuotesInFields() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     Flashcard card = flashcard(unitId, "Say \"hello\"", "reply");
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of(card));
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of(card));
 
-    String result = service.exportFlashcards(unitId, "csv");
+    String result = service.exportFlashcards(unitId, "csv", userId, false);
 
     assertTrue(result.contains("\"Say \"\"hello\"\"\""));
   }
@@ -163,40 +168,77 @@ class FlashcardImportExportServiceTest {
   @Test
   void exportFlashcards_emptyUnitReturnsCsvHeader() {
     UUID unitId = UUID.randomUUID();
-    when(managementUseCase.listByUnit(unitId)).thenReturn(List.of());
+    UUID userId = UUID.randomUUID();
+    when(managementUseCase.listVisibleByUnit(unitId, userId)).thenReturn(List.of());
 
-    String result = service.exportFlashcards(unitId, "csv");
+    String result = service.exportFlashcards(unitId, "csv", userId, false);
 
     assertEquals("front,back\n", result);
   }
 
   // --- importFlashcards: CSV ---
 
+  // --- importFlashcards: CSV ---
+
   @Test
   void importFlashcards_csvImportsValidRows() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\nHello,Hola\nGoodbye,Adiós\n";
 
     Flashcard created = flashcard(unitId, "Hello", "Hola");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(2, result.imported());
     assertEquals(0, result.skipped());
     assertTrue(result.errors().isEmpty());
-    verify(managementUseCase, times(2)).createFlashcard(any());
+    verify(managementUseCase, times(2)).createFlashcardWithVisibility(any());
+  }
+
+  @Test
+  void importFlashcards_nonAdminImportsAsPrivate() {
+    UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    String csv = "front,back\nHello,Hola\n";
+
+    Flashcard created = flashcard(unitId, "Hello", "Hola");
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
+
+    service.importFlashcards(unitId, "csv", csv, userId, false);
+
+    verify(managementUseCase).createFlashcardWithVisibility(
+        argThat(cmd -> cmd.visibility() == com.akdemya.domain.model.Visibility.PRIVATE
+            && userId.equals(cmd.ownerId())));
+  }
+
+  @Test
+  void importFlashcards_adminImportsAsGlobal() {
+    UUID unitId = UUID.randomUUID();
+    UUID adminId = UUID.randomUUID();
+    String csv = "front,back\nHello,Hola\n";
+
+    Flashcard created = flashcard(unitId, "Hello", "Hola");
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
+
+    service.importFlashcards(unitId, "csv", csv, adminId, true);
+
+    verify(managementUseCase).createFlashcardWithVisibility(
+        argThat(cmd -> cmd.visibility() == com.akdemya.domain.model.Visibility.GLOBAL
+            && cmd.ownerId() == null));
   }
 
   @Test
   void importFlashcards_csvSkipsBlankRows() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\nHello,Hola\n\nGoodbye,Adiós\n";
 
     Flashcard created = flashcard(unitId, "Hello", "Hola");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(2, result.imported());
     assertEquals(0, result.skipped());
@@ -205,9 +247,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvErrorsWhenFrontIsEmpty() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\n,Hola\n";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -218,9 +261,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvErrorsWhenBackIsEmpty() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\nHello,\n";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -231,9 +275,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvSkipsBothEmptyFrontAndBack() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\n,\n";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -243,12 +288,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvHandlesCreateException() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\nHello,Hola\n";
 
-    when(managementUseCase.createFlashcard(any()))
+    when(managementUseCase.createFlashcardWithVisibility(any()))
         .thenThrow(new IllegalArgumentException("duplicate"));
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -259,12 +305,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvWithoutHeaderLineStillImports() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "Hello,Hola\nGoodbye,Adiós\n";
 
     Flashcard created = flashcard(unitId, "Hello", "Hola");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(2, result.imported());
   }
@@ -272,12 +319,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvWithQuotedFields() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\n\"Hello, world\",\"Hola, mundo\"\n";
 
     Flashcard created = flashcard(unitId, "Hello, world", "Hola, mundo");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(1, result.imported());
     assertEquals(0, result.skipped());
@@ -286,12 +334,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvWithEscapedQuotesInFields() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String csv = "front,back\n\"Say \"\"hi\"\"\",reply\n";
 
     Flashcard created = flashcard(unitId, "Say \"hi\"", "reply");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", csv, userId, false);
 
     assertEquals(1, result.imported());
   }
@@ -301,12 +350,13 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_jsonImportsValidRows() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String json = "[{\"front\":\"Hello\",\"back\":\"Hola\"},{\"front\":\"Bye\",\"back\":\"Adiós\"}]";
 
     Flashcard created = flashcard(unitId, "Hello", "Hola");
-    when(managementUseCase.createFlashcard(any())).thenReturn(created);
+    when(managementUseCase.createFlashcardWithVisibility(any())).thenReturn(created);
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json, userId, false);
 
     assertEquals(2, result.imported());
     assertEquals(0, result.skipped());
@@ -316,9 +366,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_jsonHandlesMissingFrontKey() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String json = "[{\"back\":\"Hola\"}]";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -329,9 +380,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_jsonHandlesMissingBackKey() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String json = "[{\"front\":\"Hello\"}]";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", json, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.skipped());
@@ -342,9 +394,10 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_jsonReturnsParseErrorOnInvalidJson() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
     String badJson = "not valid json";
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", badJson);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "json", badJson, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.errors().size());
@@ -354,8 +407,9 @@ class FlashcardImportExportServiceTest {
   @Test
   void importFlashcards_csvReturnsParseErrorOnNullContent() {
     UUID unitId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
 
-    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", null);
+    FlashcardImportExportUseCase.ImportResult result = service.importFlashcards(unitId, "csv", null, userId, false);
 
     assertEquals(0, result.imported());
     assertEquals(1, result.errors().size());

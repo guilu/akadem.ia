@@ -24,6 +24,12 @@ public interface UnitRepository {
   List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId);
 
   /**
+   * Returns all units visible to the caller (GLOBAL + own PRIVATE) that have at least one flashcard.
+   * Used by getUnitSummaries to avoid leaking other users' PRIVATE units.
+   */
+  List<Unit> findVisibleWithFlashcardsByUserId(UUID userId);
+
+  /**
    * Scope-aware query for a given subject:
    * - GLOBAL → visibility=GLOBAL
    * - PRIVATE → visibility=PRIVATE AND ownerId=userId

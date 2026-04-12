@@ -67,7 +67,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.list(unitId, null, 1, 10, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
@@ -86,7 +86,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).createQuestion(any());
   }
 
@@ -99,7 +99,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "GLOBAL");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(403, response.getStatusCode().value());
     verify(contentService, never()).createQuestion(any());
   }
 
@@ -111,7 +111,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).deleteQuestionIfAuthorized(eq(questionId), any(), eq(false));
   }
 
@@ -124,7 +124,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(403, response.getStatusCode().value());
   }
 
   @Test
@@ -135,14 +135,14 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).deleteQuestionIfAuthorized(eq(questionId), any(), eq(true));
   }
 
   @Test
   void nullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.list(UUID.randomUUID(), null, 1, 10, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
@@ -153,7 +153,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -165,7 +165,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -177,7 +177,7 @@ class ManageQuestionControllerTest {
         null, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -189,7 +189,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, null, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -205,7 +205,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, answers, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -223,7 +223,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, answers, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -241,7 +241,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, answers, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -257,7 +257,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.MEDIUM, validAnswers(), "GLOBAL");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).createQuestion(any());
   }
 
@@ -267,7 +267,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, null);
 
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
@@ -279,13 +279,13 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
   void deleteWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
@@ -297,7 +297,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(404, response.getStatusCode().value());
   }
 
   @Test
@@ -310,7 +310,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.list(unitId, "GLOBAL", 1, 10, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.GLOBAL), anyInt(), anyInt());
   }
 
@@ -324,7 +324,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.list(unitId, "PRIVATE", 1, 10, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt());
   }
 
@@ -341,7 +341,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.list(unitId, null, 1, 10, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(answerRepo).findByQuestionId(q.getId());
   }
 
@@ -351,7 +351,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
 
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
@@ -361,7 +361,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -372,7 +372,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -387,7 +387,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, answers, "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -401,7 +401,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(404, response.getStatusCode().value());
   }
 
   @Test
@@ -418,7 +418,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(403, response.getStatusCode().value());
   }
 
   @Test
@@ -438,7 +438,7 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "GLOBAL");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
@@ -458,18 +458,33 @@ class ManageQuestionControllerTest {
         Question.Difficulty.EASY, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
   void exportWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.export(null, "json", null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
-  void exportJsonReturnsAllQuestionsWhenNoUnitId() {
+  void exportJsonReturnsVisibleQuestionsWhenNoUnitId_nonAdmin() {
     User principal = userPrincipal("user@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
+    when(contentService.getVisibleQuestions(userId)).thenReturn(List.of(q));
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
+
+    ResponseEntity<?> response = controller.export(null, "json", principal);
+
+    assertEquals(200, response.getStatusCode().value());
+    verify(contentService).getVisibleQuestions(userId);
+    verify(contentService, never()).getAllQuestions();
+  }
+
+  @Test
+  void exportJsonReturnsAllQuestionsWhenNoUnitId_admin() {
+    User principal = adminPrincipal("admin@example.com");
     UUID unitId = UUID.randomUUID();
     Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
     when(contentService.getAllQuestions()).thenReturn(List.of(q));
@@ -477,22 +492,22 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.export(null, "json", principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     verify(contentService).getAllQuestions();
   }
 
   @Test
-  void exportJsonByUnitIdFiltersQuestions() {
+  void exportJsonByUnitIdFiltersVisibleQuestions() {
     User principal = userPrincipal("user@example.com");
     UUID unitId = UUID.randomUUID();
     Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
-    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(q));
+    when(contentService.getVisibleQuestionsByUnit(unitId, userId)).thenReturn(List.of(q));
     when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
 
     ResponseEntity<?> response = controller.export(unitId, "json", principal);
 
-    assertEquals(200, response.getStatusCodeValue());
-    verify(contentService).getQuestionsByUnit(unitId);
+    assertEquals(200, response.getStatusCode().value());
+    verify(contentService).getVisibleQuestionsByUnit(unitId, userId);
   }
 
   @Test
@@ -500,7 +515,7 @@ class ManageQuestionControllerTest {
     User principal = userPrincipal("user@example.com");
     UUID unitId = UUID.randomUUID();
     Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
-    when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(q));
+    when(contentService.getVisibleQuestionsByUnit(unitId, userId)).thenReturn(List.of(q));
     Answer a1 = Answer.create(q.getId(), "Ans1", true);
     Answer a2 = Answer.create(q.getId(), "Ans2", false);
     Answer a3 = Answer.create(q.getId(), "Ans3", false);
@@ -509,7 +524,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.export(unitId, "csv", principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     assertEquals("text/csv", response.getHeaders().getFirst("Content-Type"));
   }
 
@@ -517,7 +532,7 @@ class ManageQuestionControllerTest {
   void importWithNullPrincipalReturnsUnauthorized() throws Exception {
     var file = mock(org.springframework.web.multipart.MultipartFile.class);
     ResponseEntity<?> response = controller.importQuestions(file, "json", null, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
   }
 
   @Test
@@ -528,7 +543,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -540,7 +555,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -553,7 +568,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -577,7 +592,7 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.importQuestions(file, "json", null, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
@@ -599,6 +614,6 @@ class ManageQuestionControllerTest {
 
     ResponseEntity<?> response = controller.importQuestions(file, "csv", null, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
   }
 }

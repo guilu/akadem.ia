@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -111,14 +112,18 @@ public class FlashcardController {
   public ResponseEntity<FlashcardDto.FlashcardResponse> update(@PathVariable UUID id,
                                                                @RequestBody FlashcardDto.UpdateRequest req,
                                                                @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
     if (req == null) {
       return ResponseEntity.badRequest().build();
     }
     try {
-      Flashcard saved = managementUseCase.updateFlashcard(
-          new FlashcardManagementUseCase.UpdateCommand(id, req.unitId(), req.front(), req.back()));
+      Flashcard saved = managementUseCase.updateFlashcardIfAuthorized(
+          new FlashcardManagementUseCase.UpdateCommand(id, req.unitId(), req.front(), req.back()),
+          userId, admin);
       return ResponseEntity.ok(toFlashcardResponse(saved));
+    } catch (AccessDeniedException ex) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     } catch (NoSuchElementException ex) {
       return ResponseEntity.notFound().build();
     } catch (IllegalArgumentException ex) {
@@ -128,9 +133,16 @@ public class FlashcardController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
-    managementUseCase.deleteFlashcard(id);
-    return ResponseEntity.noContent().build();
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
+    try {
+      managementUseCase.deleteFlashcardIfAuthorized(id, userId, admin);
+      return ResponseEntity.noContent().build();
+    } catch (AccessDeniedException ex) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    } catch (NoSuchElementException ex) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping("/study/queue")
@@ -215,9 +227,10 @@ public class FlashcardController {
       @RequestParam(defaultValue = "csv") String format,
       @RequestBody String content,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
     FlashcardImportExportUseCase.ImportResult result =
-        importExportUseCase.importFlashcards(unitId, format, content);
+        importExportUseCase.importFlashcards(unitId, format, content, userId, admin);
     return ResponseEntity.ok(
         new FlashcardDto.ImportResult(result.imported(), result.skipped(), result.errors()));
   }
@@ -232,8 +245,9 @@ public class FlashcardController {
     if (unitId == null && subjectId == null) {
       return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
     }
+    boolean admin = isAdmin(principal);
     String content = unitId != null
-        ? importExportUseCase.exportFlashcards(unitId, format)
+        ? importExportUseCase.exportFlashcards(unitId, format, userId, admin)
         : importExportUseCase.exportFlashcardsBySubject(subjectId, userId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";

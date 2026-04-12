@@ -181,9 +181,11 @@ public class ManageQuestionController {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+    AppUser caller = resolveUser(principal);
+    boolean isAdmin = isAdmin(principal);
     List<Question> data = unitId == null
-        ? contentService.getAllQuestions()
-        : contentService.getQuestionsByUnit(unitId);
+        ? (isAdmin ? contentService.getAllQuestions() : contentService.getVisibleQuestions(caller.getId()))
+        : contentService.getVisibleQuestionsByUnit(unitId, caller.getId());
     if (format.equalsIgnoreCase("csv")) {
       String csv = toCsv(data);
       return ResponseEntity.ok()

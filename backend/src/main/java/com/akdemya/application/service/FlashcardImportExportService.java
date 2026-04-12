@@ -1,6 +1,7 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.Flashcard;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.out.UnitRepository;
@@ -29,7 +30,8 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
   }
 
   @Override
-  public ImportResult importFlashcards(UUID unitId, String format, String content) {
+  public ImportResult importFlashcards(UUID unitId, String format, String content,
+                                       UUID callerId, boolean isAdmin) {
     List<String[]> rows;
     List<String> errors = new ArrayList<>();
 
@@ -41,6 +43,10 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
 
     int imported = 0;
     int skipped = 0;
+
+    // Non-admin users always import as PRIVATE; admins import as GLOBAL
+    Visibility importVisibility = isAdmin ? Visibility.GLOBAL : Visibility.PRIVATE;
+    UUID importOwnerId = isAdmin ? null : callerId;
 
     for (int i = 0; i < rows.size(); i++) {
       String[] row = rows.get(i);
@@ -63,8 +69,9 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
       }
 
       try {
-        managementUseCase.createFlashcard(
-            new FlashcardManagementUseCase.CreateCommand(unitId, front, back));
+        managementUseCase.createFlashcardWithVisibility(
+            new FlashcardManagementUseCase.CreateCommandWithVisibility(
+                unitId, front, back, importVisibility, importOwnerId));
         imported++;
       } catch (Exception e) {
         errors.add("Fila " + (i + 1) + ": " + e.getMessage());
@@ -76,8 +83,8 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
   }
 
   @Override
-  public String exportFlashcards(UUID unitId, String format) {
-    List<Flashcard> flashcards = managementUseCase.listByUnit(unitId);
+  public String exportFlashcards(UUID unitId, String format, UUID callerId, boolean isAdmin) {
+    List<Flashcard> flashcards = managementUseCase.listVisibleByUnit(unitId, callerId);
 
     if ("json".equalsIgnoreCase(format)) {
       List<Map<String, String>> list = flashcards.stream()

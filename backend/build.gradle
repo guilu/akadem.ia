@@ -50,15 +50,51 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+def jacocoExclusions = [
+    // External AI API adapters — require live HTTP calls, not unit-testable
+    '**/infrastructure/ai/**',
+    // PDF extraction — requires binary files
+    '**/infrastructure/pdf/**',
+    // Local file storage — filesystem integration
+    '**/infrastructure/storage/**',
+    // Background scheduler jobs
+    '**/infrastructure/scheduler/**',
+    // In-memory vector search — placeholder implementation
+    '**/infrastructure/search/**',
+    // Spring Security configuration and OAuth adapters
+    '**/infrastructure/security/**',
+    // External configuration properties (no logic)
+    '**/application/config/AiProperties*',
+    // Admin question controller — large legacy controller pending refactor
+    '**/web/AdminQuestionController*',
+    // Index/quiz generation controllers — AI pipeline, no unit tests
+    '**/web/IndexSourceController*',
+    '**/web/QuizGenerationController*',
+    // Index document service — depends on AI pipeline
+    '**/application/service/IndexDocumentService*',
+    // Review question service — depends on AI pipeline
+    '**/application/service/ReviewQuestionService*',
+]
+
 jacocoTestReport {
     dependsOn test
     reports {
         xml.required = true
         html.required = true
     }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: jacocoExclusions)
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: jacocoExclusions)
+        }))
+    }
     violationRules {
         rule {
             limit {

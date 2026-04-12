@@ -295,9 +295,69 @@ class FlashcardStudyServiceTest {
       Map<UUID, Long> result = new ConcurrentHashMap<>();
       data.values().stream()
           .filter(f -> reviewRepo.findByUserIdAndFlashcardId(userId, f.getId()).isEmpty())
-          .forEach(f -> result.merge(f.getUnitId(), 1L, Long::sum));
+          .forEach(f -> result.merge(f.getUnitId(), 1L, (a, b) -> a + b));
       return result;
     }
+  }
+
+  @Test
+  void studyNextReturnsNullWhenNoDueAndNoNew() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
+
+    assertNull(next);
+  }
+
+  @Test
+  void studyNextReturnsNewCardWhenNoDueReviews() {
+    InMemoryFlashcardRepo flashcardRepo = new InMemoryFlashcardRepo();
+    InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
+    flashcardRepo.attach(reviewRepo);
+
+    Flashcard newCard = flashcard("new", unitId);
+    flashcardRepo.save(newCard);
+
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
+
+    assertNotNull(next);
+    assertEquals(newCard.getId(), next.flashcardId());
+    assertEquals(ReviewState.NEW, next.state());
+    assertNotNull(next.intervalHints());
+  }
+
+  @Test
+  void studyNextThrowsOnNullCommand() {
+    FlashcardStudyService service = new FlashcardStudyService(
+        new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
+        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.getStudyNext(null));
+  }
+
+  @Test
+  void studyNextThrowsOnNullUserId() {
+    FlashcardStudyService service = new FlashcardStudyService(
+        new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
+        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(null, unitId, now)));
+  }
+
+  @Test
+  void studyNextThrowsOnNullUnitId() {
+    FlashcardStudyService service = new FlashcardStudyService(
+        new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
+        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, null, now)));
   }
 
   @Test
@@ -427,7 +487,7 @@ class FlashcardStudyServiceTest {
       data.values().stream()
           .filter(r -> r.getUserId().equals(userId) && states.contains(r.getState()))
           .forEach(r -> flashcardRepo.findById(r.getFlashcardId())
-              .ifPresent(f -> result.merge(f.getUnitId(), 1L, Long::sum)));
+              .ifPresent(f -> result.merge(f.getUnitId(), 1L, (a, b) -> a + b)));
       return result;
     }
 
@@ -437,7 +497,7 @@ class FlashcardStudyServiceTest {
       data.values().stream()
           .filter(r -> r.getUserId().equals(userId) && !r.getDueAt().isAfter(upTo))
           .forEach(r -> flashcardRepo.findById(r.getFlashcardId())
-              .ifPresent(f -> result.merge(f.getUnitId(), 1L, Long::sum)));
+              .ifPresent(f -> result.merge(f.getUnitId(), 1L, (a, b) -> a + b)));
       return result;
     }
   }
@@ -458,6 +518,7 @@ class FlashcardStudyServiceTest {
     @Override public List<Unit> findBySubjectIdWithFlashcards(UUID subjectId) { return findBySubjectId(subjectId); }
     @Override public List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) { return findBySubjectId(subjectId); }
     @Override public List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, Visibility scope) { return findBySubjectId(subjectId); }
+    @Override public List<Unit> findVisibleWithFlashcardsByUserId(UUID userId) { return List.copyOf(data.values()); }
   }
 
   static class StubSubjectRepository implements SubjectRepository {

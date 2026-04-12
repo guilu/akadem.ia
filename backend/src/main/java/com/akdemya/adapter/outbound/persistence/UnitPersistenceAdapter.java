@@ -86,6 +86,13 @@ public class UnitPersistenceAdapter implements UnitRepository {
   }
 
   @Override
+  public List<Unit> findVisibleWithFlashcardsByUserId(UUID userId) {
+    return repository.findVisibleWithFlashcardsByUserId(userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, Visibility scope) {
     if (scope == null) {
       // null = ALL: GLOBAL + user's PRIVATE

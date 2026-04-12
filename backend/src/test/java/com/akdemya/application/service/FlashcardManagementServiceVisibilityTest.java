@@ -1,13 +1,17 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.Flashcard;
+import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
+import com.akdemya.domain.port.out.UnitRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +26,8 @@ import static org.mockito.Mockito.*;
 class FlashcardManagementServiceVisibilityTest {
 
   private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
-  private final FlashcardManagementService service = new FlashcardManagementService(flashcardRepo);
+  private final UnitRepository unitRepo = mock(UnitRepository.class);
+  private final FlashcardManagementService service = new FlashcardManagementService(flashcardRepo, unitRepo);
 
   // === Update preserves visibility ===
 
@@ -91,6 +96,10 @@ class FlashcardManagementServiceVisibilityTest {
   void createFlashcardWithPrivateVisibilityCreatesPrivateFlashcard() {
     UUID unitId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
+    Unit globalUnit = Unit.createGlobal(UUID.randomUUID(), "Unit", "desc", 1);
+    // Use a global unit so PRIVATE flashcard is allowed
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.GLOBAL, null)));
     when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
     Flashcard created = service.createFlashcardWithVisibility(
@@ -105,6 +114,8 @@ class FlashcardManagementServiceVisibilityTest {
   @Test
   void createFlashcardWithGlobalVisibilityCreatesGlobalFlashcard() {
     UUID unitId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.GLOBAL, null)));
     when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
     Flashcard created = service.createFlashcardWithVisibility(
@@ -113,6 +124,49 @@ class FlashcardManagementServiceVisibilityTest {
 
     assertEquals(Visibility.GLOBAL, created.getVisibility());
     assertNull(created.getOwnerId());
+  }
+
+  @Test
+  void createGlobalFlashcardUnderPrivateUnitThrows() {
+    UUID unitId = UUID.randomUUID();
+    UUID unitOwnerId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, unitOwnerId)));
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.createFlashcardWithVisibility(
+            new FlashcardManagementUseCase.CreateCommandWithVisibility(
+                unitId, "front", "back", Visibility.GLOBAL, null)));
+  }
+
+  @Test
+  void createPrivateFlashcardInPrivateUnitWithDifferentOwnerThrows() {
+    UUID unitId = UUID.randomUUID();
+    UUID unitOwnerId = UUID.randomUUID();
+    UUID otherUserId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, unitOwnerId)));
+
+    assertThrows(IllegalArgumentException.class, () ->
+        service.createFlashcardWithVisibility(
+            new FlashcardManagementUseCase.CreateCommandWithVisibility(
+                unitId, "front", "back", Visibility.PRIVATE, otherUserId)));
+  }
+
+  @Test
+  void createPrivateFlashcardInPrivateUnitWithSameOwnerSucceeds() {
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    when(unitRepo.findById(unitId)).thenReturn(Optional.of(
+        new Unit(unitId, UUID.randomUUID(), "Unit", "desc", 1, Visibility.PRIVATE, ownerId)));
+    when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    Flashcard created = service.createFlashcardWithVisibility(
+        new FlashcardManagementUseCase.CreateCommandWithVisibility(
+            unitId, "front", "back", Visibility.PRIVATE, ownerId));
+
+    assertEquals(Visibility.PRIVATE, created.getVisibility());
+    assertEquals(ownerId, created.getOwnerId());
   }
 
   // === listVisibleByUnit ===
@@ -129,5 +183,184 @@ class FlashcardManagementServiceVisibilityTest {
 
     assertEquals(1, result.size());
     verify(flashcardRepo).findVisibleByUnitIdAndUserId(unitId, userId);
+  }
+
+  // === createFlashcard ===
+
+  @Test
+  void createFlashcardDelegatesToRepo() {
+    UUID unitId = UUID.randomUUID();
+    when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    Flashcard result = service.createFlashcard(
+        new FlashcardManagementUseCase.CreateCommand(unitId, "front", "back"));
+
+    assertEquals(unitId, result.getUnitId());
+    assertEquals("front", result.getFront());
+    assertEquals("back", result.getBack());
+    verify(flashcardRepo).save(any());
+  }
+
+  // === deleteFlashcard ===
+
+  @Test
+  void deleteFlashcardDelegatesToRepo() {
+    UUID id = UUID.randomUUID();
+    service.deleteFlashcard(id);
+    verify(flashcardRepo).deleteById(id);
+  }
+
+  // === listByUnit ===
+
+  @Test
+  void listByUnitDelegatesToRepo() {
+    UUID unitId = UUID.randomUUID();
+    when(flashcardRepo.findByUnitId(unitId)).thenReturn(List.of());
+
+    service.listByUnit(unitId);
+
+    verify(flashcardRepo).findByUnitId(unitId);
+  }
+
+  // === updateFlashcardIfAuthorized ===
+
+  @Test
+  void updateFlashcardIfAuthorized_adminCanUpdateGlobalFlashcard() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "old", "old",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.GLOBAL, null);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+    when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    UUID adminId = UUID.randomUUID();
+    Flashcard updated = service.updateFlashcardIfAuthorized(
+        new FlashcardManagementUseCase.UpdateCommand(id, null, "new front", "new back"),
+        adminId, true);
+
+    assertEquals("new front", updated.getFront());
+    assertEquals(Visibility.GLOBAL, updated.getVisibility());
+  }
+
+  @Test
+  void updateFlashcardIfAuthorized_nonAdminCannotUpdateGlobal() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "old", "old",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.GLOBAL, null);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    UUID nonAdmin = UUID.randomUUID();
+    assertThrows(AccessDeniedException.class, () ->
+        service.updateFlashcardIfAuthorized(
+            new FlashcardManagementUseCase.UpdateCommand(id, null, "new", "new"),
+            nonAdmin, false));
+  }
+
+  @Test
+  void updateFlashcardIfAuthorized_ownerCanUpdateOwnPrivateFlashcard() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "old", "old",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.PRIVATE, ownerId);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+    when(flashcardRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    Flashcard updated = service.updateFlashcardIfAuthorized(
+        new FlashcardManagementUseCase.UpdateCommand(id, null, "new front", "new back"),
+        ownerId, false);
+
+    assertEquals("new front", updated.getFront());
+  }
+
+  @Test
+  void updateFlashcardIfAuthorized_nonOwnerCannotUpdatePrivate() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "old", "old",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.PRIVATE, ownerId);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    UUID otherId = UUID.randomUUID();
+    assertThrows(AccessDeniedException.class, () ->
+        service.updateFlashcardIfAuthorized(
+            new FlashcardManagementUseCase.UpdateCommand(id, null, "new", "new"),
+            otherId, false));
+  }
+
+  @Test
+  void updateFlashcardIfAuthorized_throwsWhenNotFound() {
+    UUID id = UUID.randomUUID();
+    when(flashcardRepo.findById(id)).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class, () ->
+        service.updateFlashcardIfAuthorized(
+            new FlashcardManagementUseCase.UpdateCommand(id, null, "new", "new"),
+            UUID.randomUUID(), false));
+  }
+
+  // === deleteFlashcardIfAuthorized ===
+
+  @Test
+  void deleteFlashcardIfAuthorized_adminCanDeleteGlobal() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "front", "back",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.GLOBAL, null);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    service.deleteFlashcardIfAuthorized(id, UUID.randomUUID(), true);
+
+    verify(flashcardRepo).deleteById(id);
+  }
+
+  @Test
+  void deleteFlashcardIfAuthorized_nonAdminCannotDeleteGlobal() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "front", "back",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.GLOBAL, null);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    assertThrows(AccessDeniedException.class, () ->
+        service.deleteFlashcardIfAuthorized(id, UUID.randomUUID(), false));
+  }
+
+  @Test
+  void deleteFlashcardIfAuthorized_ownerCanDeleteOwnPrivate() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "front", "back",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.PRIVATE, ownerId);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    service.deleteFlashcardIfAuthorized(id, ownerId, false);
+
+    verify(flashcardRepo).deleteById(id);
+  }
+
+  @Test
+  void deleteFlashcardIfAuthorized_nonOwnerCannotDeletePrivate() {
+    UUID id = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Flashcard existing = new Flashcard(id, unitId, "front", "back",
+        LocalDateTime.now(), LocalDateTime.now(), Visibility.PRIVATE, ownerId);
+    when(flashcardRepo.findById(id)).thenReturn(Optional.of(existing));
+
+    assertThrows(AccessDeniedException.class, () ->
+        service.deleteFlashcardIfAuthorized(id, UUID.randomUUID(), false));
+  }
+
+  @Test
+  void deleteFlashcardIfAuthorized_throwsWhenNotFound() {
+    UUID id = UUID.randomUUID();
+    when(flashcardRepo.findById(id)).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class, () ->
+        service.deleteFlashcardIfAuthorized(id, UUID.randomUUID(), false));
   }
 }

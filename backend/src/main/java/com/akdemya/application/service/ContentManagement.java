@@ -93,6 +93,24 @@ public class ContentManagement {
         .toList();
   }
 
+  /**
+   * Returns visible unit availability for the caller: only GLOBAL units plus the caller's own
+   * PRIVATE units are included, and question counts are scoped to visible questions per unit.
+   */
+  public List<UnitAvailability> getVisibleUnitAvailability(UUID subjectId, UUID callerId,
+                                                           Question.Difficulty difficulty) {
+    return unitRepo.findVisibleBySubjectIdAndUserId(subjectId, callerId).stream()
+        .map(u -> {
+          long count = difficulty == null
+              ? questionRepo.findVisibleByUnitIdAndUserId(u.getId(), callerId).size()
+              : questionRepo.findVisibleByUnitIdAndUserId(u.getId(), callerId).stream()
+                  .filter(q -> q.getDifficulty().name().equalsIgnoreCase(difficulty.name()))
+                  .count();
+          return new UnitAvailability(u.getId(), u.getName(), count);
+        })
+        .toList();
+  }
+
   public record UnitAvailability(UUID id, String name, long available) {}
 
   /**
@@ -140,6 +158,10 @@ public class ContentManagement {
 
   public List<Question> getVisibleQuestionsByUnit(UUID unitId, UUID userId) {
     return questionRepo.findVisibleByUnitIdAndUserId(unitId, userId);
+  }
+
+  public List<Question> getVisibleQuestions(UUID userId) {
+    return questionRepo.findVisibleByUserId(userId);
   }
 
   /** Returns paginated questions for a unit filtered by scope. */

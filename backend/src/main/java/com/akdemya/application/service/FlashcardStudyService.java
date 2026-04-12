@@ -151,10 +151,10 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
         command.userId(), List.of(ReviewState.LEARNING, ReviewState.REVIEW));
     Map<UUID, Long> dueCounts = reviewRepo.countDueByUserIdUpToGroupByUnit(command.userId(), now);
 
-    Map<UUID, String> subjectNames = subjectRepo.findAll().stream()
+    Map<UUID, String> subjectNames = subjectRepo.findVisibleByUserId(command.userId()).stream()
         .collect(Collectors.toMap(Subject::getId, Subject::getName));
 
-    return unitRepo.findAllWithFlashcards().stream()
+    return unitRepo.findVisibleWithFlashcardsByUserId(command.userId()).stream()
         .map(unit -> new UnitSummaryResult(
             unit.getId(),
             unit.getName(),
