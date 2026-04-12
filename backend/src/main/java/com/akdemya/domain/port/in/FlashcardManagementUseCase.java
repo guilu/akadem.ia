@@ -13,7 +13,11 @@ public interface FlashcardManagementUseCase {
 
   Flashcard updateFlashcard(UpdateCommand command);
 
+  Flashcard updateFlashcardIfAuthorized(UpdateCommand command, UUID callerId, boolean isAdmin);
+
   void deleteFlashcard(UUID id);
+
+  void deleteFlashcardIfAuthorized(UUID id, UUID callerId, boolean isAdmin);
 
   List<Flashcard> listByUnit(UUID unitId);
 
