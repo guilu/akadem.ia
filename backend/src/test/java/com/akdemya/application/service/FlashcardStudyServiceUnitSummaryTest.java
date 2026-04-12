@@ -4,6 +4,7 @@ import com.akdemya.application.config.FlashcardSchedulerProperties;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.model.Unit;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
@@ -49,8 +50,8 @@ class FlashcardStudyServiceUnitSummaryTest {
     Unit unit = Unit.create(subjectId, "Unit A", "desc", 1);
     Subject subject = Subject.createGlobal("Math", "desc");
 
-    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit));
-    when(subjectRepo.findAll()).thenReturn(List.of(subject));
+    when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit));
+    when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());
@@ -60,8 +61,10 @@ class FlashcardStudyServiceUnitSummaryTest {
     verify(flashcardRepo, times(1)).countNewByUserIdGroupByUnit(userId);
     verify(reviewRepo, times(1)).countByUserIdAndStateInGroupByUnit(eq(userId), any());
     verify(reviewRepo, times(1)).countDueByUserIdUpToGroupByUnit(eq(userId), any());
-    verify(unitRepo, times(1)).findAllWithFlashcards();
-    verify(subjectRepo, times(1)).findAll();
+    verify(unitRepo, times(1)).findVisibleWithFlashcardsByUserId(userId);
+    verify(subjectRepo, times(1)).findVisibleByUserId(userId);
+    verify(unitRepo, never()).findAllWithFlashcards();
+    verify(subjectRepo, never()).findAll();
   }
 
   @Test
@@ -71,8 +74,8 @@ class FlashcardStudyServiceUnitSummaryTest {
     Unit unit2 = Unit.create(subjectId, "Unit 2", "desc", 2);
     Subject subject = new Subject(subjectId, "Math", "desc");
 
-    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit1, unit2));
-    when(subjectRepo.findAll()).thenReturn(List.of(subject));
+    when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit1, unit2));
+    when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId))
         .thenReturn(Map.of(unit1.getId(), 5L));
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any()))
@@ -105,8 +108,8 @@ class FlashcardStudyServiceUnitSummaryTest {
     Unit unit = Unit.create(subjectId, "Empty Unit", "desc", 1);
     Subject subject = new Subject(subjectId, "Science", "desc");
 
-    when(unitRepo.findAllWithFlashcards()).thenReturn(List.of(unit));
-    when(subjectRepo.findAll()).thenReturn(List.of(subject));
+    when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit));
+    when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());
@@ -122,6 +125,55 @@ class FlashcardStudyServiceUnitSummaryTest {
     assertEquals("Science", r.subjectName());
     assertEquals(unit.getId(), r.unitId());
     assertEquals("Empty Unit", r.unitName());
+  }
+
+  @Test
+  void getUnitSummaries_excludesOtherUsersPrivateSubjectsAndUnits() {
+    UUID callerId = userId;
+    UUID ownSubjectId = UUID.randomUUID();
+    UUID globalSubjectId = UUID.randomUUID();
+    UUID otherSubjectId = UUID.randomUUID();
+
+    // Caller's own PRIVATE unit and a GLOBAL unit — both visible
+    Unit ownUnit = Unit.create(ownSubjectId, "My Private Unit", "desc", 1);
+    Unit globalUnit = Unit.create(globalSubjectId, "Global Unit", "desc", 1);
+
+    // Only visible subjects/units are returned by the scoped repository methods
+    Subject ownSubject = new Subject(ownSubjectId, "My Subject", "desc");
+    Subject globalSubject = new Subject(globalSubjectId, "Global Subject", "desc");
+
+    when(unitRepo.findVisibleWithFlashcardsByUserId(callerId))
+        .thenReturn(List.of(ownUnit, globalUnit));  // other user's private unit NOT included
+    when(subjectRepo.findVisibleByUserId(callerId))
+        .thenReturn(List.of(ownSubject, globalSubject));  // other user's private subject NOT included
+    when(flashcardRepo.countNewByUserIdGroupByUnit(callerId)).thenReturn(Map.of());
+    when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(callerId), any())).thenReturn(Map.of());
+    when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(callerId), any())).thenReturn(Map.of());
+
+    List<FlashcardStudyUseCase.UnitSummaryResult> results =
+        service.getUnitSummaries(new FlashcardStudyUseCase.UnitSummaryCommand(callerId, now));
+
+    assertEquals(2, results.size());
+    assertTrue(results.stream().noneMatch(r -> r.subjectId().equals(otherSubjectId)),
+        "Other user's private subject must not appear in results");
+    assertTrue(results.stream().anyMatch(r -> r.subjectId().equals(ownSubjectId)));
+    assertTrue(results.stream().anyMatch(r -> r.subjectId().equals(globalSubjectId)));
+  }
+
+  @Test
+  void getUnitSummaries_onlyCallsVisibilityScopedRepositoryMethods() {
+    when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of());
+    when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of());
+    when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
+    when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
+    when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());
+
+    service.getUnitSummaries(new FlashcardStudyUseCase.UnitSummaryCommand(userId, now));
+
+    // Must NEVER call the unscoped findAll / findAllWithFlashcards
+    verify(unitRepo, never()).findAllWithFlashcards();
+    verify(unitRepo, never()).findAll();
+    verify(subjectRepo, never()).findAll();
   }
 
   @Test

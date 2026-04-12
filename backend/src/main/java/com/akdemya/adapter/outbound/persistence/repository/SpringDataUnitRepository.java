@@ -36,4 +36,12 @@ public interface SpringDataUnitRepository extends JpaRepository<UnitEntity, UUID
         order by u.orderIndex asc, u.name asc
         """)
     List<UnitEntity> findAllWithFlashcards();
+
+    @Query("""
+        select u from UnitEntity u
+        where (u.visibility = 'GLOBAL' OR u.ownerId = :userId)
+          and exists (select 1 from FlashcardEntity f where f.unitId = u.id)
+        order by u.orderIndex asc, u.name asc
+        """)
+    List<UnitEntity> findVisibleWithFlashcardsByUserId(@Param("userId") UUID userId);
 }

@@ -1,7 +1,6 @@
 package com.akdemya.application.service;
 
 import com.akdemya.domain.model.*;
-import com.akdemya.domain.port.in.UserSettingsUseCase;
 import com.akdemya.domain.port.out.*;
 import org.junit.jupiter.api.Test;
 
@@ -513,6 +512,11 @@ class ExamManagerResumeTest {
             };
           })
           .toList();
+    }
+
+    @Override
+    public java.util.List<Unit> findVisibleWithFlashcardsByUserId(UUID userId) {
+      return java.util.List.copyOf(data.values());
     }
   }
 

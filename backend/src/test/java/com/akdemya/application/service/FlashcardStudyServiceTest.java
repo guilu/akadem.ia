@@ -518,6 +518,7 @@ class FlashcardStudyServiceTest {
     @Override public List<Unit> findBySubjectIdWithFlashcards(UUID subjectId) { return findBySubjectId(subjectId); }
     @Override public List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId) { return findBySubjectId(subjectId); }
     @Override public List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, Visibility scope) { return findBySubjectId(subjectId); }
+    @Override public List<Unit> findVisibleWithFlashcardsByUserId(UUID userId) { return List.copyOf(data.values()); }
   }
 
   static class StubSubjectRepository implements SubjectRepository {

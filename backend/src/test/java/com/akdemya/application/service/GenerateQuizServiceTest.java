@@ -227,6 +227,7 @@ class GenerateQuizServiceTest {
                 })
                 .toList();
         }
+        @Override public List<Unit> findVisibleWithFlashcardsByUserId(UUID userId) { return List.copyOf(store.values()); }
     }
 
     static class StubGeneratedQuestionDraftRepository implements GeneratedQuestionDraftRepository {
