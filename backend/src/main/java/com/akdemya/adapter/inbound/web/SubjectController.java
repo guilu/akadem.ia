@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -72,11 +73,17 @@ public class SubjectController {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(principal)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        UUID userId = resolveUserId(principal);
+        boolean admin = isAdmin(principal);
+        try {
+            contentService.deleteSubjectIfAuthorized(id, userId, admin);
+            return ResponseEntity.ok().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
-        contentService.deleteSubject(id);
-        return ResponseEntity.ok().build();
     }
 
     private UUID resolveUserId(User principal) {
