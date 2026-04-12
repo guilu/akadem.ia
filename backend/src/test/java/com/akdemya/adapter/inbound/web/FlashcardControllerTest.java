@@ -295,7 +295,7 @@ class FlashcardControllerTest {
 
     Flashcard updated = new Flashcard(flashcardId, unitId, "front2", "back2",
         LocalDateTime.now(), LocalDateTime.now());
-    when(managementUseCase.updateFlashcard(any())).thenReturn(updated);
+    when(managementUseCase.updateFlashcardIfAuthorized(any(), any(), anyBoolean())).thenReturn(updated);
 
     var req = new FlashcardDto.UpdateRequest(unitId, "front2", "back2");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(flashcardId, req, principal);
@@ -323,7 +323,8 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    when(managementUseCase.updateFlashcard(any())).thenThrow(new java.util.NoSuchElementException());
+    when(managementUseCase.updateFlashcardIfAuthorized(any(), any(), anyBoolean()))
+        .thenThrow(new java.util.NoSuchElementException());
 
     var req = new FlashcardDto.UpdateRequest(UUID.randomUUID(), "front", "back");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), req, principal);
@@ -337,7 +338,8 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    when(managementUseCase.updateFlashcard(any())).thenThrow(new IllegalArgumentException("invalid"));
+    when(managementUseCase.updateFlashcardIfAuthorized(any(), any(), anyBoolean()))
+        .thenThrow(new IllegalArgumentException("invalid"));
 
     var req = new FlashcardDto.UpdateRequest(UUID.randomUUID(), "front", "back");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), req, principal);
@@ -354,12 +356,12 @@ class FlashcardControllerTest {
     var principal = new User("user@example.com", "", List.of());
     when(userRepo.findByEmail("user@example.com"))
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
-    doNothing().when(managementUseCase).deleteFlashcard(flashcardId);
+    doNothing().when(managementUseCase).deleteFlashcardIfAuthorized(eq(flashcardId), any(), anyBoolean());
 
     ResponseEntity<Void> response = controller.delete(flashcardId, principal);
 
     assertEquals(204, response.getStatusCodeValue());
-    verify(managementUseCase).deleteFlashcard(flashcardId);
+    verify(managementUseCase).deleteFlashcardIfAuthorized(eq(flashcardId), any(), anyBoolean());
   }
 
   // --- listByUnit ---

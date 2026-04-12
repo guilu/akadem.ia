@@ -14,8 +14,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class SubjectControllerTest {
@@ -46,7 +48,7 @@ class SubjectControllerTest {
     SubjectController.CreateSubjectRequest req =
         new SubjectController.CreateSubjectRequest("Math", "desc", null);
     ResponseEntity<Subject> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(401, response.getStatusCode().value());
     verify(contentService, never()).createSubject(any());
   }
 
@@ -61,7 +63,7 @@ class SubjectControllerTest {
         new SubjectController.CreateSubjectRequest("Math", "desc", null);
     ResponseEntity<Subject> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode().value());
     // null visibility should default to PRIVATE, so createPrivate path is taken
     verify(contentService).createSubject(any());
   }
@@ -71,19 +73,21 @@ class SubjectControllerTest {
   @Test
   void deleteUnauthenticatedReturns401() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
-    verify(contentService, never()).deleteSubject(any());
+    assertEquals(401, response.getStatusCode().value());
+    verify(contentService, never()).deleteSubjectIfAuthorized(any(), any(), anyBoolean());
   }
 
   @Test
-  void deleteByNonAdminReturns403() {
+  void deleteGlobalSubjectByNonAdminReturns403() {
     String email = "user@example.com";
     User principal = userPrincipal(email);
+    UUID subjectId = UUID.randomUUID();
+    doThrow(new AccessDeniedException("Only admins can delete GLOBAL subjects"))
+        .when(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(false));
 
-    ResponseEntity<?> response = controller.delete(UUID.randomUUID(), principal);
+    ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
-    verify(contentService, never()).deleteSubject(any());
+    assertEquals(403, response.getStatusCode().value());
   }
 
   @Test
@@ -91,10 +95,11 @@ class SubjectControllerTest {
     String email = "admin@example.com";
     User principal = adminPrincipal(email);
     UUID subjectId = UUID.randomUUID();
+    doNothing().when(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(true));
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
-    verify(contentService).deleteSubject(subjectId);
+    assertEquals(200, response.getStatusCode().value());
+    verify(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(true));
   }
 }
