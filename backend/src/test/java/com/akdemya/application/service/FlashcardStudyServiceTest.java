@@ -532,5 +532,7 @@ class FlashcardStudyServiceTest {
     @Override public void deleteById(UUID id) { data.remove(id); }
     @Override public List<Subject> findVisibleByUserId(UUID userId) { return findAll(); }
     @Override public List<Subject> findByScope(UUID userId, Visibility scope) { return findAll(); }
+    @Override public List<Subject> findBySyllabusId(UUID syllabusId) { return findAll(); }
+    @Override public List<Subject> findVisibleBySyllabusId(UUID syllabusId, UUID userId) { return findAll(); }
   }
 }
