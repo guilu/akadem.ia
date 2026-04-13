@@ -121,11 +121,12 @@ describe('Navbar — theme toggle', () => {
         onSettings={onSettings}
       />
     );
-    const themeBtn = screen.getByRole('button', { name: /cambiar tema/i });
+    const darkBtn = screen.getByRole('button', { name: /tema oscuro/i });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    fireEvent.click(themeBtn);
+    fireEvent.click(darkBtn);
     expect(document.documentElement.classList.contains('dark')).toBe(true);
-    fireEvent.click(themeBtn);
+    const lightBtn = screen.getByRole('button', { name: /tema claro/i });
+    fireEvent.click(lightBtn);
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 });
