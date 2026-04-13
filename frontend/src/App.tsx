@@ -10,6 +10,8 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import SubjectsPage from './pages/SubjectsPage';
+import SyllabusesPage from './pages/SyllabusesPage';
+import SyllabusSubjectsPage from './pages/SyllabusSubjectsPage';
 import ExamBuilderPage from './pages/ExamBuilderPage';
 import ExamRunnerPage from './pages/ExamRunnerPage';
 import ExamAttemptPage from './pages/ExamAttemptPage';
@@ -113,7 +115,7 @@ export default function App() {
 
   function onAuthSuccess(userData: { email: string; role: string }) {
     setAuthUser(userData);
-    navigate(ROUTES.subjects);
+    navigate(ROUTES.syllabuses);
   }
 
   function onLogout() {
@@ -253,6 +255,16 @@ export default function App() {
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
+          <Route path={ROUTES.syllabuses} element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/syllabuses/:syllabusId/subjects" element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusSubjectsPage />
+            </ProtectedRoute>
+          } />
           <Route path={ROUTES.subjects} element={
             <ProtectedRoute allow={isAuthed}>
               <SubjectsPage
