@@ -65,4 +65,18 @@ public class SubjectPersistenceAdapter implements SubjectRepository {
     };
     return entities.stream().map(mapper::toDomain).collect(Collectors.toList());
   }
+
+  @Override
+  public List<Subject> findBySyllabusId(UUID syllabusId) {
+    return repository.findBySyllabusId(syllabusId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Subject> findVisibleBySyllabusId(UUID syllabusId, UUID userId) {
+    return repository.findVisibleBySyllabusId(syllabusId, userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }
