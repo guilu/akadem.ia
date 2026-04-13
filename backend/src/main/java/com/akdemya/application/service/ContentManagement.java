@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -16,14 +17,66 @@ public class ContentManagement {
   private final UnitRepository unitRepo;
   private final QuestionRepository questionRepo;
   private final AnswerRepository answerRepo;
+  private final SyllabusRepository syllabusRepo;
 
   public ContentManagement(SubjectRepository subjectRepo, UnitRepository unitRepo, QuestionRepository questionRepo,
-      AnswerRepository answerRepo) {
+      AnswerRepository answerRepo, SyllabusRepository syllabusRepo) {
     this.subjectRepo = subjectRepo;
     this.unitRepo = unitRepo;
     this.questionRepo = questionRepo;
     this.answerRepo = answerRepo;
+    this.syllabusRepo = syllabusRepo;
   }
+
+  // ── Syllabus operations ──
+
+  public List<Syllabus> getAllSyllabuses() {
+    return syllabusRepo.findAll();
+  }
+
+  public List<Syllabus> getVisibleSyllabuses(UUID userId) {
+    if (userId == null) {
+      return syllabusRepo.findAll().stream()
+          .filter(s -> s.getVisibility() == Visibility.GLOBAL)
+          .toList();
+    }
+    return syllabusRepo.findVisibleByUserId(userId);
+  }
+
+  public Optional<Syllabus> getSyllabusById(UUID id) {
+    return syllabusRepo.findById(id);
+  }
+
+  public Syllabus createSyllabus(Syllabus syllabus) {
+    return syllabusRepo.save(syllabus);
+  }
+
+  public void deleteSyllabus(UUID syllabusId, UUID callerId, boolean isAdmin) {
+    Syllabus syllabus = syllabusRepo.findById(syllabusId)
+        .orElseThrow(() -> new IllegalArgumentException("Syllabus not found: " + syllabusId));
+    if (syllabus.getVisibility() == Visibility.GLOBAL && !isAdmin) {
+      throw new AccessDeniedException("Only admins can delete GLOBAL syllabuses");
+    }
+    if (syllabus.getVisibility() == Visibility.PRIVATE && !syllabus.getOwnerId().equals(callerId)) {
+      throw new AccessDeniedException("Cannot delete another user's PRIVATE syllabus");
+    }
+    List<Subject> linked = subjectRepo.findBySyllabusId(syllabusId);
+    if (!linked.isEmpty()) {
+      throw new IllegalStateException("Cannot delete syllabus with linked subjects");
+    }
+    syllabusRepo.deleteById(syllabusId);
+  }
+
+  public List<Subject> getSubjectsBySyllabus(UUID syllabusId, UUID callerId) {
+    if (callerId == null) {
+      return subjectRepo.findBySyllabusId(syllabusId).stream()
+          .filter(s -> s.getVisibility() == Visibility.GLOBAL)
+          .toList();
+    }
+    return subjectRepo.findVisibleBySyllabusId(syllabusId, callerId);
+  }
+
+  // ── Subject operations ──
 
   public List<Subject> getAllSubjects() {
     return subjectRepo.findAll();
