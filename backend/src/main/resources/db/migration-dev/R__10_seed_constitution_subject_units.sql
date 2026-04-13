@@ -1,4 +1,17 @@
-INSERT INTO subjects(id, name, description) VALUES ('11111111-1111-1111-1111-111111111111','Constitución Española','Preguntas básicas sobre la Constitución Española') ON CONFLICT DO NOTHING;
+INSERT INTO syllabuses (id, name, description, visibility)
+VALUES ('11111111-1111-1111-1111-111111111000', 'Constitución Española', 'Temario de la Constitución Española', 'GLOBAL')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
+VALUES (
+  '11111111-1111-1111-1111-111111111111',
+  'Constitución Española',
+  'Preguntas básicas sobre la Constitución Española',
+  'GLOBAL',
+  NULL,
+  '11111111-1111-1111-1111-111111111000'
+)
+ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111201','11111111-1111-1111-1111-111111111111','Preámbulo',2) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111202','11111111-1111-1111-1111-111111111111','Título Preliminar',3) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111203','11111111-1111-1111-1111-111111111111','Título I · Capítulo I · De los españoles y los extranjeros (Arts. 10–13)',4) ON CONFLICT DO NOTHING;
