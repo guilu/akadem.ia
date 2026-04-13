@@ -21,8 +21,9 @@ class ContentManagementParentChildInvariantTest {
   private final QuestionRepository questionRepo = mock(QuestionRepository.class);
   private final AnswerRepository answerRepo = mock(AnswerRepository.class);
 
+  private final com.akdemya.domain.port.out.SyllabusRepository syllabusRepo = mock(com.akdemya.domain.port.out.SyllabusRepository.class);
   private final ContentManagement service =
-      new ContentManagement(subjectRepo, unitRepo, questionRepo, answerRepo);
+      new ContentManagement(subjectRepo, unitRepo, questionRepo, answerRepo, syllabusRepo);
 
   // === Unit under Subject invariants ===
 
