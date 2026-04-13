@@ -45,3 +45,4 @@ tsconfig.tsbuildinfo
 
 # Claude Code
 .claude/
+.gemini/
