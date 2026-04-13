@@ -2,6 +2,8 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  syllabuses: '/syllabuses',
+  syllabusSubjects: (id: string) => `/syllabuses/${id}/subjects`,
   subjects: '/subjects',
   subjectBuilder: (subjectId: string) => `/subjects/${subjectId}/builder`,
   examRunner: '/exam',
