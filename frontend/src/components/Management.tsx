@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
 import { apiBase, apiJson } from '../api';
+import { getSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
+import type { Syllabus } from '../types';
 import ScopeFilter, { type ContentScope } from './ScopeFilter';
 
 export type AdminSubject = {
@@ -35,7 +37,7 @@ export type AdminQuestion = {
   isEditable?: boolean;
 };
 
-type Tab = 'subjects' | 'units' | 'questions';
+type Tab = 'syllabuses' | 'subjects' | 'units' | 'questions';
 type Scope = ContentScope;
 
 const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
@@ -110,7 +112,25 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 }
 
 export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: boolean; onSubjectsChanged?: () => void }) {
-  const [tab, setTab] = useState<Tab>('subjects');
+  const [tab, setTab] = useState<Tab>('syllabuses');
+
+  // ── Temarios state ──
+  const [syllabuses, setSyllabuses] = useState<Syllabus[]>([]);
+  const [syllabusForm, setSyllabusForm] = useState<{ id: string; name: string; description: string }>({ id: '', name: '', description: '' });
+  const [syllabusLoading, setSyllabusLoading] = useState(false);
+  const [confirmSyllabusDelete, setConfirmSyllabusDelete] = useState<Syllabus | null>(null);
+  const [syllabusDeleteLoading, setSyllabusDeleteLoading] = useState(false);
+  const [syllabusDeleteError, setSyllabusDeleteError] = useState('');
+  const isSyllabusEditing = useMemo(() => Boolean(syllabusForm.id), [syllabusForm.id]);
+
+  async function loadSyllabuses() {
+    try {
+      const data = await getSyllabuses();
+      setSyllabuses(data);
+    } catch { setSyllabuses([]); }
+  }
+
+  useEffect(() => { if (tab === 'syllabuses') loadSyllabuses(); }, [tab]);
 
   const [subjects, setSubjects] = useState<AdminSubject[]>([]);
   const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '' });
@@ -285,6 +305,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   }
 
   const navItems = [
+    { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-4 h-4" /> },
     { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
     { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
@@ -311,6 +332,80 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
       {/* ── Content ── */}
       <section className="grid gap-5">
+
+        {/* ── Temarios ── */}
+        {tab === 'syllabuses' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temarios</span></h2>
+            </div>
+            <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">{isSyllabusEditing ? 'Editar temario' : 'Nuevo temario'}</div>
+              <div className="grid gap-3">
+                <input className={inp} placeholder="Nombre del temario" value={syllabusForm.name}
+                  onChange={e => setSyllabusForm(f => ({ ...f, name: e.target.value }))} />
+                <input className={inp} placeholder="Descripción (opcional)" value={syllabusForm.description}
+                  onChange={e => setSyllabusForm(f => ({ ...f, description: e.target.value }))} />
+                <div className="flex gap-2">
+                  <button className={btnPrimary} disabled={syllabusLoading || !syllabusForm.name.trim()}
+                    onClick={async () => {
+                      if (!syllabusForm.name.trim()) return;
+                      setSyllabusLoading(true);
+                      try {
+                        if (isSyllabusEditing) {
+                          await updateSyllabus(syllabusForm.id, { name: syllabusForm.name.trim(), description: syllabusForm.description });
+                        } else {
+                          await createSyllabus({ name: syllabusForm.name.trim(), description: syllabusForm.description });
+                        }
+                        setSyllabusForm({ id: '', name: '', description: '' });
+                        await loadSyllabuses();
+                      } catch { /* ignore */ }
+                      finally { setSyllabusLoading(false); }
+                    }}>
+                    <Check className="w-4 h-4" />
+                    {isSyllabusEditing ? (syllabusLoading ? 'Guardando...' : 'Guardar') : (syllabusLoading ? 'Creando...' : 'Crear')}
+                  </button>
+                  {isSyllabusEditing && (
+                    <button className={btnOutline} onClick={() => setSyllabusForm({ id: '', name: '', description: '' })}>
+                      <CircleMinus className="w-4 h-4" /> Cancelar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={card}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr>
+                    <Th>Nombre</Th><Th>Descripción</Th><Th>Visibilidad</Th><Th></Th>
+                  </tr></thead>
+                  <tbody>
+                    {syllabuses.length === 0 && (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/45">No hay temarios</td></tr>
+                    )}
+                    {syllabuses.map(s => (
+                      <tr key={s.id} className="border-t border-secondary/10 hover:bg-secondary/5 transition-colors">
+                        <Td className="font-medium">{s.name}</Td>
+                        <Td className="text-text/55">{s.description || '—'}</Td>
+                        <Td><span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${s.visibility === 'GLOBAL' ? 'border-lime-400/30 bg-lime-400/10 text-lime-600 dark:text-lime-400' : 'border-accent/30 bg-accent/10 text-accent'}`}>{s.visibility === 'GLOBAL' ? 'Global' : 'Privado'}</span></Td>
+                        <Td>
+                          <div className="flex gap-1.5 justify-end">
+                            <button className={btnOutline} onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })}>
+                              <Pen className="w-3.5 h-3.5" /> Editar
+                            </button>
+                            <button className={btnDanger} onClick={() => setConfirmSyllabusDelete(s)}>
+                              <TrashBin className="w-3.5 h-3.5" /> Eliminar
+                            </button>
+                          </div>
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Materias ── */}
         {tab === 'subjects' && (
@@ -681,6 +776,21 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
             try { await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId); setConfirmQuestionDelete(null); }
             catch { setQuestionDeleteError('No se pudo eliminar'); }
             finally { setQuestionDeleteLoading(false); }
+          }}
+        />
+      )}
+      {confirmSyllabusDelete && (
+        <DeleteModal
+          title="Eliminar temario"
+          body={<p className="text-sm text-text/70">¿Seguro que quieres eliminar <strong>{confirmSyllabusDelete.name}</strong>? Esta acción no se puede deshacer.</p>}
+          error={syllabusDeleteError}
+          loading={syllabusDeleteLoading}
+          onClose={() => { setConfirmSyllabusDelete(null); setSyllabusDeleteError(''); }}
+          onConfirm={async () => {
+            setSyllabusDeleteError(''); setSyllabusDeleteLoading(true);
+            try { await deleteSyllabus(confirmSyllabusDelete.id); setConfirmSyllabusDelete(null); await loadSyllabuses(); }
+            catch { setSyllabusDeleteError('No se pudo eliminar'); }
+            finally { setSyllabusDeleteLoading(false); }
           }}
         />
       )}
