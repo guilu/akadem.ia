@@ -1,5 +1,5 @@
 INSERT INTO syllabuses (id, name, description, visibility)
-VALUES ('11111111-1111-1111-1111-111111111000', 'Constitución Española', 'Temario de la Constitución Española', 'GLOBAL')
+VALUES ('11111111-1111-1111-1111-111111111000', 'Subalterno GVA 2026', 'Temario de la oposición a subalterno de la Comunidad Valenciana', 'GLOBAL')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
