@@ -48,7 +48,7 @@ export default function SyllabusCard({ syllabus, onClick }: Props) {
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-text/55">
           <span className="flex items-center gap-1">
             <FolderOpen className="w-3.5 h-3.5" />
-            {syllabus.subjectCount} {syllabus.subjectCount === 1 ? 'materia' : 'materias'}
+            {syllabus.subjectCount} {syllabus.subjectCount === 1 ? 'tema' : 'temas'}
           </span>
           {syllabus.newCount > 0 && (
             <span className="flex items-center gap-1 text-lime-500">

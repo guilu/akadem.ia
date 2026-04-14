@@ -55,7 +55,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
               temario
             </span>
           </h1>
-          <p className="text-text/55 text-sm mt-1">Selecciona un temario para explorar sus materias.</p>
+          <p className="text-text/55 text-sm mt-1">Selecciona un temario para explorar sus temas.</p>
         </div>
         {activeAttemptId && (
           <Link
@@ -112,7 +112,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                 to={ROUTES.syllabusSubjects(s.id)}
               >
                 <Plus className="w-4 h-4" />
-                Ver materias
+                Ver temas
               </Link>
             </article>
           ))}

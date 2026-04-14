@@ -33,14 +33,14 @@ export default function SyllabusSubjectsPage() {
         <h1 className="text-3xl font-extrabold tracking-tight">
           Elige tu{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            materia
+            tema
           </span>
         </h1>
-        <p className="text-text/55 text-sm mt-1">Selecciona una materia para configurar tu examen.</p>
+        <p className="text-text/55 text-sm mt-1">Selecciona un tema para configurar tu examen.</p>
       </div>
 
       {loading && (
-        <div className="text-sm text-text/55">Cargando materias...</div>
+        <div className="text-sm text-text/55">Cargando temas...</div>
       )}
 
       {!loading && error && (
@@ -53,8 +53,8 @@ export default function SyllabusSubjectsPage() {
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <p className="font-bold text-base mb-1">No hay materias en este temario</p>
-            <p className="text-sm text-text/55">Aún no hay materias. Añade materias desde el panel de gestión.</p>
+            <p className="font-bold text-base mb-1">No hay temas en este temario</p>
+            <p className="text-sm text-text/55">Aún no hay temas. Añade temas desde el panel de gestión.</p>
           </div>
           <Link
             to={ROUTES.manage}
@@ -67,7 +67,7 @@ export default function SyllabusSubjectsPage() {
       )}
 
       {!loading && !error && subjects.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {subjects.map((s) => (
             <article
               key={s.id}
