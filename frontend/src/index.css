@@ -28,6 +28,13 @@
     line-height: 2.25rem;
     align-items: center;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 input[type="radio"] {

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
+import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck, ChevronLeft, ChevronRight } from 'flowbite-react-icons/outline';
 import { getSyllabuses } from '../api/syllabusApi';
 import { apiJson, apiBase } from '../api';
 import type { Syllabus, ExamAttemptSummary } from '../types';
@@ -22,6 +22,25 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
   const [historyError, setHistoryError] = useState('');
   const [showAll, setShowAll] = useState(false);
   const INITIAL_SHOW = 5;
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeDot, setActiveDot] = useState(0);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const { scrollLeft, clientWidth } = carouselRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      carouselRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, clientWidth } = carouselRef.current;
+      const index = Math.round(scrollLeft / clientWidth);
+      setActiveDot(index);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -89,33 +108,78 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
       )}
 
       {!loading && !error && syllabuses.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {syllabuses.map((s) => (
-            <article
-              key={s.id}
-              className="group border border-secondary/25 rounded-2xl bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 transition-colors group-hover:bg-primary/15">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div className="text-lg font-bold mb-1">{s.name}</div>
-              {s.description && (
-                <div className="text-sm text-text/55 mb-5 leading-relaxed">{s.description}</div>
-              )}
-              {s.visibility && (
-                <div className="text-xs text-text/40 mb-4">
-                  {s.visibility === 'GLOBAL' ? 'Público' : 'Privado'}
-                </div>
-              )}
-              <Link
-                className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
-                to={ROUTES.syllabusSubjects(s.id)}
+        <div className="relative group mx-auto w-full">
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => scroll('left')}
+            aria-label="Anterior"
+            className="absolute -left-4 top-[40%] -translate-y-1/2 z-10 w-10 h-10 hidden md:flex items-center justify-center bg-card/80 backdrop-blur-sm border border-secondary/20 rounded-full text-text hover:border-primary transition-all opacity-0 group-hover:opacity-100"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            aria-label="Siguiente"
+            className="absolute -right-4 top-[40%] -translate-y-1/2 z-10 w-10 h-10 hidden md:flex items-center justify-center bg-card/80 backdrop-blur-sm border border-secondary/20 rounded-full text-text hover:border-primary transition-all opacity-0 group-hover:opacity-100"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Carousel Container */}
+          <div
+            ref={carouselRef}
+            onScroll={handleScroll}
+            className="flex gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scroll-smooth no-scrollbar"
+          >
+            {syllabuses.map((s) => (
+              <article
+                key={s.id}
+                className="min-w-[320px] md:min-w-[400px] snap-start group/card border border-secondary/25 rounded-3xl bg-card p-10 transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
               >
-                <Plus className="w-4 h-4" />
-                Ver temas
-              </Link>
-            </article>
-          ))}
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-colors group-hover/card:bg-primary/15">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+
+                <div className="space-y-3 mb-10">
+                  <h3 className="text-2xl font-black tracking-tight">{s.name}</h3>
+                  {s.description && (
+                    <p className="text-sm text-text/55 leading-relaxed line-clamp-2">
+                      {s.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between mt-auto">
+                  <Link
+                    className="btn btn-primary rounded-full px-8 py-3 text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform"
+                    to={ROUTES.syllabusSubjects(s.id)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ver temas
+                  </Link>
+                  {s.visibility && (
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text/30 px-3 py-1 border border-secondary/15 rounded-full">
+                      {s.visibility === 'GLOBAL' ? 'Público' : 'Privado'}
+                    </span>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Pagination Indicators */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            {syllabuses.map((_, i) => (
+              <div
+                key={i}
+                className={`transition-all duration-300 rounded-full ${
+                  activeDot === i
+                    ? 'h-1.5 w-8 bg-primary'
+                    : 'h-1.5 w-1.5 bg-primary/20'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
