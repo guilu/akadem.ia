@@ -10,7 +10,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111112',
@@ -19,7 +19,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111113',
@@ -28,7 +28,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111114',
@@ -37,7 +37,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111115',
@@ -46,7 +46,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111116',
@@ -55,7 +55,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111117',
@@ -64,7 +64,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111118',
@@ -73,7 +73,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111119',
@@ -82,7 +82,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111120',
@@ -91,7 +91,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111121',
@@ -100,7 +100,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111122',
@@ -109,7 +109,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111123',
@@ -118,7 +118,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111124',
@@ -127,7 +127,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO subjects(id, name, description, visibility, owner_id, syllabus_id)
 VALUES (
   '11111111-1111-1111-1111-111111111125',
@@ -136,10 +136,7 @@ VALUES (
   'GLOBAL',
   NULL,
   '11111111-1111-1111-1111-111111111000'
-);
-
-
-ON CONFLICT DO NOTHING;
+) ON CONFLICT (id) DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111201','11111111-1111-1111-1111-111111111111','Princípios fundamentales y valores superiores',2) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111202','11111111-1111-1111-1111-111111111111','Derechos y libertades fundamentales',3) ON CONFLICT DO NOTHING;
 INSERT INTO units(id, subject_id, name, order_index) VALUES ('11111111-1111-1111-1111-111111111203','11111111-1111-1111-1111-111111111111','Garantías y suspensión de derechos',4) ON CONFLICT DO NOTHING;
