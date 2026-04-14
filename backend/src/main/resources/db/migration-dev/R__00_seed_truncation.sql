@@ -8,4 +8,5 @@ truncate table answers cascade;
 truncate table questions cascade;
 truncate table units cascade;
 truncate table subjects cascade;
+truncate table syllabuses cascade;
 truncate table users cascade;
