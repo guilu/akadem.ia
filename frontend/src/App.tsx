@@ -257,7 +257,12 @@ export default function App() {
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.syllabuses} element={
             <ProtectedRoute allow={isAuthed}>
-              <SyllabusesPage />
+              <SyllabusesPage
+                activeAttemptId={activeAttemptId}
+                onUnauthorized={onLogout}
+                onViewResult={viewResult}
+                onResumeAttempt={resumeAttempt}
+              />
             </ProtectedRoute>
           } />
           <Route path="/syllabuses/:syllabusId/subjects" element={

@@ -1,14 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus } from 'flowbite-react-icons/outline';
+import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
 import { getSyllabuses } from '../api/syllabusApi';
-import type { Syllabus } from '../types';
+import { apiJson, apiBase } from '../api';
+import type { Syllabus, ExamAttemptSummary } from '../types';
 import { ROUTES } from '../constants/routes';
+import { formatDuration } from '../utils/format';
 
-export default function SyllabusesPage() {
+export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onViewResult, onResumeAttempt }: {
+  activeAttemptId?: string;
+  onUnauthorized: () => void;
+  onViewResult: (attemptId: string) => void;
+  onResumeAttempt: (attemptId: string) => void;
+}) {
   const [syllabuses, setSyllabuses] = useState<Syllabus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [history, setHistory] = useState<ExamAttemptSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState('');
+  const [showAll, setShowAll] = useState(false);
+  const INITIAL_SHOW = 5;
 
   useEffect(() => {
     setLoading(true);
@@ -19,16 +32,40 @@ export default function SyllabusesPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    apiJson<ExamAttemptSummary[]>(`${apiBase}/api/exams/attempts`)
+      .then(setHistory)
+      .catch((err: unknown) => {
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
+        setHistoryError('No se pudo cargar el historial.');
+        setHistory([]);
+      })
+      .finally(() => setHistoryLoading(false));
+  }, [apiBase, onUnauthorized]);
+
   return (
     <section className="mb-8">
-      <div className="py-[1.5rem] mb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight">
-          Elige tu{' '}
-          <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            temario
-          </span>
-        </h1>
-        <p className="text-text/55 text-sm mt-1">Selecciona un temario para explorar sus materias.</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="py-[1.5rem]">
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Elige tu{' '}
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              temario
+            </span>
+          </h1>
+          <p className="text-text/55 text-sm mt-1">Selecciona un temario para explorar sus materias.</p>
+        </div>
+        {activeAttemptId && (
+          <Link
+            className="btn btn-outline rounded-full px-5 py-2.5 text-sm flex items-center gap-2"
+            to={ROUTES.examAttempt(activeAttemptId)}
+          >
+            <ArrowsRepeat className="w-4 h-4" />
+            Reanudar examen
+          </Link>
+        )}
       </div>
 
       {loading && (
@@ -81,6 +118,91 @@ export default function SyllabusesPage() {
           ))}
         </div>
       )}
+
+      {/* ── History ── */}
+      <div className="mt-12">
+        <h2 className="text-xl font-extrabold tracking-tight mb-4">Historial de exámenes</h2>
+
+        {historyLoading && (
+          <div className="text-sm text-text/55">Cargando historial...</div>
+        )}
+
+        {!historyLoading && historyError && (
+          <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">{historyError}</div>
+        )}
+
+        {!historyLoading && !historyError && history.length === 0 && (
+          <div className="border border-secondary/25 rounded-2xl p-6 bg-card">
+            <div className="text-base font-bold mb-1">Aún no tienes exámenes realizados</div>
+            <div className="text-sm text-text/55">Empieza tu primer simulacro para ver tu progreso aquí.</div>
+          </div>
+        )}
+
+        {!historyLoading && !historyError && history.length > 0 && (
+          <div className="grid gap-3">
+            {(showAll ? history : history.slice(0, INITIAL_SHOW)).map(h => {
+              const finished = Boolean(h.finishedAt);
+              const timeSpent = finished && h.startedAt && h.finishedAt
+                ? Math.max(0, Math.floor((new Date(h.finishedAt).getTime() - new Date(h.startedAt).getTime()) / 1000))
+                : 0;
+              const pct = h.percent ?? 0;
+              const scoreColorClass = pct < 50 ? 'text-red-400' : pct < 70 ? 'text-orange-400' : pct < 90 ? 'text-yellow-500' : 'text-lime-500';
+
+              return (
+                <div
+                  key={h.attemptId}
+                  className="border border-secondary/25 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-sm">{h.subjectName || 'Materia'}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                        finished
+                          ? 'border-lime-400/30 bg-lime-400/10 text-lime-500'
+                          : 'border-accent/30 bg-accent/10 text-accent'
+                      }`}>
+                        {finished ? 'Finalizado' : 'En curso'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-text/45 mb-2">{new Date(h.startedAt).toLocaleString()}</div>
+                    <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-text/60">
+                      <span>Resultado: <strong className={`${scoreColorClass}`}>{(h.score ?? 0)} ({pct.toFixed(1)}%)</strong></span>
+                      <span>Tiempo: <strong>{finished ? formatDuration(timeSpent) : formatDuration(h.totalTimeSeconds)}</strong></span>
+                    </div>
+                  </div>
+                  <div>
+                    {finished ? (
+                      <button
+                        className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
+                        onClick={() => onViewResult(h.attemptId)}
+                      >
+                        <ClipboardCheck className="w-4 h-4" />
+                        Ver resultados
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2"
+                        onClick={() => onResumeAttempt(h.attemptId)}
+                      >
+                        <ArrowsRepeat className="w-4 h-4" />
+                        Reanudar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {history.length > INITIAL_SHOW && (
+              <button
+                className="btn btn-outline w-full"
+                onClick={() => setShowAll(v => !v)}
+              >
+                {showAll ? 'Ver menos' : `Ver ${history.length - INITIAL_SHOW} más`}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
