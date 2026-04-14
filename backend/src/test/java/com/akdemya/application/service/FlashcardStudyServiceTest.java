@@ -12,6 +12,7 @@ import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
 import com.akdemya.domain.port.out.SubjectRepository;
+import com.akdemya.domain.port.out.SyllabusRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserSettingsRepository;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class FlashcardStudyServiceTest {
   private final InMemoryUserSettingsRepo settingsRepo = new InMemoryUserSettingsRepo();
   private final StubUnitRepository stubUnitRepo = new StubUnitRepository();
   private final StubSubjectRepository stubSubjectRepo = new StubSubjectRepository();
+  private final StubSyllabusRepository stubSyllabusRepo = new StubSyllabusRepository();
 
   @Test
   void studyQueueCountsDueLearningAndNew() {
@@ -53,7 +55,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(learningCard.getId(), now.minusMinutes(5), ReviewState.LEARNING));
     reviewRepo.save(review(reviewCard.getId(), now.minusMinutes(10), ReviewState.REVIEW));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
 
     assertEquals(1, response.learningCount());
@@ -74,7 +76,7 @@ class FlashcardStudyServiceTest {
 
     reviewRepo.save(review(dueCard.getId(), now.minusMinutes(5)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
 
     assertNotNull(next);
@@ -87,7 +89,7 @@ class FlashcardStudyServiceTest {
     InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
     flashcardRepo.attach(reviewRepo);
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -104,7 +106,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(flashcard("card1", unitId));
     flashcardRepo.save(flashcard("card2", unitId));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(2, response.newCount());
@@ -122,7 +124,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(card);
     reviewRepo.save(review(card.getId(), now.minusMinutes(5), ReviewState.LEARNING));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -140,7 +142,7 @@ class FlashcardStudyServiceTest {
     flashcardRepo.save(flashcard("card-unit1", unitId));
     flashcardRepo.save(flashcard("card-unit2", unitId2));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(2, response.newCount());
@@ -161,7 +163,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(learningCard.getId(), now.plusMinutes(30), ReviewState.LEARNING));
     reviewRepo.save(review(reviewCard.getId(), now.plusDays(1), ReviewState.REVIEW));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, null, 5, now));
 
     assertEquals(0, response.newCount());
@@ -191,7 +193,7 @@ class FlashcardStudyServiceTest {
     reviewRepo.save(review(in5.getId(), now.plusDays(5)));
     reviewRepo.save(review(in10.getId(), now.plusDays(10)));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var dashboard = service.getDashboard(new FlashcardStudyUseCase.DashboardCommand(userId, unitId, now));
 
     assertEquals(1, dashboard.dueToday());
@@ -306,7 +308,7 @@ class FlashcardStudyServiceTest {
     InMemoryReviewRepo reviewRepo = new InMemoryReviewRepo(flashcardRepo);
     flashcardRepo.attach(reviewRepo);
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
 
     assertNull(next);
@@ -321,7 +323,7 @@ class FlashcardStudyServiceTest {
     Flashcard newCard = flashcard("new", unitId);
     flashcardRepo.save(newCard);
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var next = service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, unitId, now));
 
     assertNotNull(next);
@@ -334,7 +336,7 @@ class FlashcardStudyServiceTest {
   void studyNextThrowsOnNullCommand() {
     FlashcardStudyService service = new FlashcardStudyService(
         new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
-        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+        settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
 
     assertThrows(IllegalArgumentException.class, () ->
         service.getStudyNext(null));
@@ -344,7 +346,7 @@ class FlashcardStudyServiceTest {
   void studyNextThrowsOnNullUserId() {
     FlashcardStudyService service = new FlashcardStudyService(
         new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
-        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+        settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
 
     assertThrows(IllegalArgumentException.class, () ->
         service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(null, unitId, now)));
@@ -354,7 +356,7 @@ class FlashcardStudyServiceTest {
   void studyNextThrowsOnNullUnitId() {
     FlashcardStudyService service = new FlashcardStudyService(
         new InMemoryFlashcardRepo(), new InMemoryReviewRepo(new InMemoryFlashcardRepo()),
-        settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+        settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
 
     assertThrows(IllegalArgumentException.class, () ->
         service.getStudyNext(new FlashcardStudyUseCase.StudyNextCommand(userId, null, now)));
@@ -372,7 +374,7 @@ class FlashcardStudyServiceTest {
 
     settingsRepo.save(new UserSettings(userId, 3, 100, 3));
 
-    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, schedulerProperties);
+    FlashcardStudyService service = new FlashcardStudyService(flashcardRepo, reviewRepo, settingsRepo, stubUnitRepo, stubSubjectRepo, stubSyllabusRepo, schedulerProperties);
     var response = service.getStudyQueue(new FlashcardStudyUseCase.StudyQueueCommand(userId, unitId, 5, now));
 
     assertEquals(3, response.newCount(), "newCount should be capped by user's newCardsLimit");
@@ -534,5 +536,15 @@ class FlashcardStudyServiceTest {
     @Override public List<Subject> findByScope(UUID userId, Visibility scope) { return findAll(); }
     @Override public List<Subject> findBySyllabusId(UUID syllabusId) { return findAll(); }
     @Override public List<Subject> findVisibleBySyllabusId(UUID syllabusId, UUID userId) { return findAll(); }
+  }
+
+  static class StubSyllabusRepository implements SyllabusRepository {
+    private final Map<UUID, com.akdemya.domain.model.Syllabus> data = new ConcurrentHashMap<>();
+
+    @Override public List<com.akdemya.domain.model.Syllabus> findAll() { return List.copyOf(data.values()); }
+    @Override public Optional<com.akdemya.domain.model.Syllabus> findById(UUID id) { return Optional.ofNullable(data.get(id)); }
+    @Override public com.akdemya.domain.model.Syllabus save(com.akdemya.domain.model.Syllabus syllabus) { data.put(syllabus.getId(), syllabus); return syllabus; }
+    @Override public void deleteById(UUID id) { data.remove(id); }
+    @Override public List<com.akdemya.domain.model.Syllabus> findVisibleByUserId(UUID userId) { return findAll(); }
   }
 }
