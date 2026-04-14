@@ -93,7 +93,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
           {syllabuses.map((s) => (
             <article
               key={s.id}
-              className="group border border-secondary/25 rounded-2xl p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+              className="group border border-secondary/25 rounded-2xl bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
             >
               <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 transition-colors group-hover:bg-primary/15">
                 <BookOpen className="w-5 h-5" />
@@ -132,7 +132,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
         )}
 
         {!historyLoading && !historyError && history.length === 0 && (
-          <div className="border border-secondary/25 rounded-2xl p-6 bg-card">
+          <div className="border border-secondary/25 rounded-2xl p-6">
             <div className="text-base font-bold mb-1">Aún no tienes exámenes realizados</div>
             <div className="text-sm text-text/55">Empieza tu primer simulacro para ver tu progreso aquí.</div>
           </div>
@@ -151,7 +151,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
               return (
                 <div
                   key={h.attemptId}
-                  className="border border-secondary/25 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card"
+                  className="border border-secondary/25 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

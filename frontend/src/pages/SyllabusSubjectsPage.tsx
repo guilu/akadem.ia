@@ -71,7 +71,7 @@ export default function SyllabusSubjectsPage() {
           {subjects.map((s) => (
             <article
               key={s.id}
-              className="group border border-secondary/25 rounded-2xl p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+              className="group border border-secondary/25 rounded-2xl bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
             >
               <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 transition-colors group-hover:bg-primary/15">
                 <Plus className="w-5 h-5" />

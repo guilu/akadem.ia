@@ -25,7 +25,7 @@ export default function SyllabusCard({ syllabus, onClick }: Props) {
       <button
         type="button"
         onClick={onClick}
-        className="w-full text-left border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+        className="w-full text-left border border-secondary/25 rounded-2xl bg-card p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
       >
         <div className="flex items-center gap-4">
           <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors ${isNoSyllabus ? 'text-text/50 group-hover:bg-accent/5' : 'text-accent group-hover:bg-accent/15'}`}>
