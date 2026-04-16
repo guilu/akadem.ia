@@ -1,5 +1,5 @@
 {
-  "version": "2.9",
+  "version": "2.10",
   "children": [
     {
       "type": "frame",
@@ -3295,6 +3295,48 @@
       },
       "width": 2026,
       "height": 1228
+    },
+    {
+      "type": "rectangle",
+      "id": "jKpdV",
+      "x": -915,
+      "y": 20381,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./temario.png",
+        "mode": "fill"
+      },
+      "width": 1715,
+      "height": 1190
+    },
+    {
+      "type": "rectangle",
+      "id": "eI5n9",
+      "x": 996,
+      "y": 20381,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "../temas.png",
+        "mode": "fill"
+      },
+      "width": 1722,
+      "height": 1224
+    },
+    {
+      "type": "rectangle",
+      "id": "5WRAz",
+      "x": 2885,
+      "y": 20381,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "../examen.png",
+        "mode": "fill"
+      },
+      "width": 1715,
+      "height": 1222
     }
   ]
 }
