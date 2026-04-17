@@ -180,7 +180,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
             {features.map(({ icon, title, desc }) => (
               <article
                 key={title}
-                className="group border border-secondary/25 rounded-2xl p-7 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+                className="group border border-secondary/25 rounded-2xl p-7 bg-card transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5 transition-colors group-hover:bg-primary/15">
                   {icon}
