@@ -388,7 +388,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead><tr>
-                    <Th>Nombre</Th><Th>Descripción</Th><Th>Visibilidad</Th><Th></Th>
+                    <Th>Nombre</Th><Th className="hidden sm:table-cell">Descripción</Th><Th>Visibilidad</Th><Th></Th>
                   </tr></thead>
                   <tbody>
                     {filteredSyllabuses.length === 0 && (
@@ -397,7 +397,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     {filteredSyllabuses.map(s => (
                       <tr key={s.id} className="border-t border-secondary/10 hover:bg-secondary/5 transition-colors">
                         <Td className="font-medium">{s.name}</Td>
-                        <Td className="text-text/55">{s.description || '—'}</Td>
+                        <Td className="hidden sm:table-cell text-text/55">{s.description || '—'}</Td>
                         <Td><span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${s.visibility === 'GLOBAL' ? 'border-lime-400/30 bg-lime-400/10 text-lime-600 dark:text-lime-400' : 'border-accent/30 bg-accent/10 text-accent'}`}>{s.visibility === 'GLOBAL' ? 'Global' : 'Privado'}</span></Td>
                         <Td>
                           {(isAdmin || s.visibility === 'PRIVATE') && (
