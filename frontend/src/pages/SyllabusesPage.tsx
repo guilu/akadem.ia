@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck, ChevronLeft, ChevronRight } from 'flowbite-react-icons/outline';
+import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck, ChevronLeft, ChevronRight, Play } from 'flowbite-react-icons/outline';
 import { getSyllabuses } from '../api/syllabusApi';
 import { apiJson, apiBase } from '../api';
 import type { Syllabus, ExamAttemptSummary } from '../types';
@@ -149,16 +149,25 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                   )}
                 </div>
 
-                <div className="flex items-center justify-between mt-auto">
-                  <Link
-                    className="btn btn-primary rounded-full px-8 py-3 text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform"
-                    to={ROUTES.syllabusSubjects(s.id)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ver temas
-                  </Link>
+                <div className="flex flex-col gap-3 mt-auto">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      className="btn btn-primary rounded-full px-6 py-2.5 text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform"
+                      to={ROUTES.syllabusSubjects(s.id)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Ver temas
+                    </Link>
+                    <Link
+                      className="btn btn-outline rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+                      to={ROUTES.syllabusExamBuilder(s.id)}
+                    >
+                      <Play className="w-4 h-4" />
+                      Crear examen
+                    </Link>
+                  </div>
                   {s.visibility && (
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-text/30 px-3 py-1 border border-secondary/15 rounded-full">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text/30 px-3 py-1 border border-secondary/15 rounded-full self-start">
                       {s.visibility === 'GLOBAL' ? 'Público' : 'Privado'}
                     </span>
                   )}

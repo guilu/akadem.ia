@@ -12,6 +12,7 @@ import RegisterPage from './pages/RegisterPage';
 import SubjectsPage from './pages/SubjectsPage';
 import SyllabusesPage from './pages/SyllabusesPage';
 import SyllabusSubjectsPage from './pages/SyllabusSubjectsPage';
+import SyllabusExamBuilderPage from './pages/SyllabusExamBuilderPage';
 import ExamBuilderPage from './pages/ExamBuilderPage';
 import ExamRunnerPage from './pages/ExamRunnerPage';
 import ExamAttemptPage from './pages/ExamAttemptPage';
@@ -268,6 +269,11 @@ export default function App() {
           <Route path="/syllabuses/:syllabusId/subjects" element={
             <ProtectedRoute allow={isAuthed}>
               <SyllabusSubjectsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/syllabuses/:syllabusId/exam-builder" element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusExamBuilderPage onUnauthorized={onLogout} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.subjects} element={

@@ -4,6 +4,7 @@ export const ROUTES = {
   register: '/register',
   syllabuses: '/syllabuses',
   syllabusSubjects: (id: string) => `/syllabuses/${id}/subjects`,
+  syllabusExamBuilder: (id: string) => `/syllabuses/${id}/exam-builder`,
   subjects: '/subjects',
   subjectBuilder: (subjectId: string) => `/subjects/${subjectId}/builder`,
   examRunner: '/exam',
