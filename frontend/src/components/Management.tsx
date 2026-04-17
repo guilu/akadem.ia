@@ -191,10 +191,13 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
-  const subjectOptions = useMemo(() => subjects.map(s => ({ value: s.id, label: s.name })), [subjects]);
+  const unitSubjectOptions = useMemo(() => subjects.filter(s => unitScope === 'ALL' || s.visibility === unitScope).map(s => ({ value: s.id, label: s.name })), [subjects, unitScope]);
+  const questionSubjectOptions = useMemo(() => subjects.filter(s => questionScope === 'ALL' || s.visibility === questionScope).map(s => ({ value: s.id, label: s.name })), [subjects, questionScope]);
   const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
+  const syllabusesForSubjectsForm = useMemo(() => syllabuses.filter(s => subjectScope === 'ALL' || s.visibility === subjectScope), [syllabuses, subjectScope]);
+  const filteredSubjectsList = useMemo(() => subjectForm.syllabusId ? subjects.filter(s => s.syllabusId === subjectForm.syllabusId) : [], [subjects, subjectForm.syllabusId]);
 
-  function resetSubjectForm() { setSubjectForm({ id: '', name: '', description: '' }); }
+  function resetSubjectForm(keepSyllabusId?: string | null) { setSubjectForm({ id: '', name: '', description: '', syllabusId: keepSyllabusId ?? null }); }
   function resetUnitForm() { setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 }); }
   function resetQuestionForm() {
     setQuestionForm({ id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY', answers: [{ text: '', correct: true }, { text: '', correct: false }, { text: '', correct: false }, { text: '', correct: false }] });
@@ -238,7 +241,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
       const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility, syllabusId: subjectForm.syllabusId || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
-      resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
+      resetSubjectForm(subjectForm.syllabusId); await loadSubjects(subjectScope); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
@@ -428,8 +431,8 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   value={subjectForm.syllabusId ?? ''}
                   onChange={e => setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null }))}
                 >
-                  <option value="">Sin temario</option>
-                  {syllabuses.map(s => (
+                  <option value="">Selecciona un temario</option>
+                  {syllabusesForSubjectsForm.map(s => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
@@ -461,9 +464,11 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {subjects.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias disponibles.</td></tr>
-                    ) : subjects.map(s => (
+                    {!subjectForm.syllabusId ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />Selecciona un temario para ver las materias.</td></tr>
+                    ) : filteredSubjectsList.length === 0 ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias en este temario.</td></tr>
+                    ) : filteredSubjectsList.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
                         <Td className="hidden sm:table-cell text-text/55 text-xs">
@@ -503,7 +508,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))}>
                   <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  {unitSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <input className={inp} placeholder="Nombre" value={unitForm.name} onChange={e => setUnitForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={unitForm.description || ''} onChange={e => setUnitForm(f => ({ ...f, description: e.target.value }))} />
@@ -577,7 +582,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="grid gap-3 sm:grid-cols-2">
                 <select className={inp} value={questionSubjectId} onChange={e => setQuestionSubjectId(e.target.value)}>
                   <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  {questionSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)}>
                   <option value="">Selecciona unidad</option>
