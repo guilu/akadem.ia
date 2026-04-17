@@ -3,7 +3,6 @@ import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCs
 import { apiBase, apiJson } from '../api';
 import { getSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
 import type { Syllabus } from '../types';
-import ScopeFilter, { type ContentScope } from './ScopeFilter';
 
 export type AdminSubject = {
   id: string;
@@ -39,7 +38,6 @@ export type AdminQuestion = {
 };
 
 type Tab = 'syllabuses' | 'subjects' | 'units' | 'questions';
-type Scope = ContentScope;
 
 const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 const card = 'border border-secondary/25 rounded-2xl p-6';
@@ -117,7 +115,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   // ── Temarios state ──
   const [syllabuses, setSyllabuses] = useState<Syllabus[]>([]);
-  const [syllabusScope, setSyllabusScope] = useState<Scope>('ALL');
   const [syllabusForm, setSyllabusForm] = useState<{ id: string; name: string; description: string }>({ id: '', name: '', description: '' });
   const [syllabusLoading, setSyllabusLoading] = useState(false);
   const [confirmSyllabusDelete, setConfirmSyllabusDelete] = useState<Syllabus | null>(null);
@@ -131,11 +128,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
       setSyllabuses(data);
     } catch { setSyllabuses([]); }
   }
-
-  const filteredSyllabuses = useMemo(() =>
-    syllabusScope === 'ALL' ? syllabuses : syllabuses.filter(s => s.visibility === syllabusScope),
-    [syllabuses, syllabusScope]
-  );
 
   useEffect(() => { if (tab === 'syllabuses' || tab === 'subjects' || tab === 'units' || tab === 'questions') loadSyllabuses(); }, [tab]);
 
@@ -185,10 +177,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   const [importDone, setImportDone] = useState(false);
   const [importStats, setImportStats] = useState<{ created: number; errors: number } | null>(null);
 
-  const [subjectScope, setSubjectScope] = useState<Scope>('ALL');
-  const [unitScope, setUnitScope] = useState<Scope>('ALL');
-  const [questionScope, setQuestionScope] = useState<Scope>('ALL');
-
   const [filterSyllabusId, setFilterSyllabusId] = useState('');
   const [filterUnitSyllabusId, setFilterUnitSyllabusId] = useState('');
   const [questionSyllabusId, setQuestionSyllabusId] = useState('');
@@ -196,23 +184,17 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
 
-  const syllabusesForSubjectsFilter = useMemo(() => syllabuses.filter(s => subjectScope === 'ALL' || s.visibility === subjectScope), [syllabuses, subjectScope]);
-  const syllabusesForUnitsFilter = useMemo(() => syllabuses.filter(s => unitScope === 'ALL' || s.visibility === unitScope), [syllabuses, unitScope]);
-  const syllabusesForQuestionsFilter = useMemo(() => syllabuses.filter(s => questionScope === 'ALL' || s.visibility === questionScope), [syllabuses, questionScope]);
-
   const unitSubjectOptions = useMemo(() =>
     subjects
-      .filter(s => unitScope === 'ALL' || s.visibility === unitScope)
       .filter(s => !filterUnitSyllabusId || s.syllabusId === filterUnitSyllabusId)
       .map(s => ({ value: s.id, label: s.name })),
-    [subjects, unitScope, filterUnitSyllabusId]);
+    [subjects, filterUnitSyllabusId]);
 
   const questionSubjectOptions = useMemo(() =>
     subjects
-      .filter(s => questionScope === 'ALL' || s.visibility === questionScope)
       .filter(s => !questionSyllabusId || s.syllabusId === questionSyllabusId)
       .map(s => ({ value: s.id, label: s.name })),
-    [subjects, questionScope, questionSyllabusId]);
+    [subjects, questionSyllabusId]);
 
   const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
   const filteredSubjectsList = useMemo(() => filterSyllabusId ? subjects.filter(s => s.syllabusId === filterSyllabusId) : [], [subjects, filterSyllabusId]);
@@ -223,63 +205,58 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     setQuestionForm({ id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY', answers: [{ text: '', correct: true }, { text: '', correct: false }, { text: '', correct: false }, { text: '', correct: false }] });
   }
 
-  async function loadSubjects(scope: Scope = subjectScope) {
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1${scopeParam}`);
+  async function loadSubjects() {
+    const data = await apiJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1`);
     setSubjects(data);
   }
-  async function loadUnits(subjectId: string, scope: Scope = unitScope) {
+  async function loadUnits(subjectId: string) {
     if (!subjectId) { setUnits([]); return; }
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}${scopeParam}`);
+    const data = await apiJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}`);
     setUnits(data);
   }
-  async function loadQuestions(unitId: string, page = questionPage, scope: Scope = questionScope) {
+  async function loadQuestions(unitId: string, page = questionPage) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10${scopeParam}`);
+    const data = await apiJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10`);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
   useEffect(() => {
-    loadSubjects('ALL').catch(() => setSubjects([]));
+    loadSubjects().catch(() => setSubjects([]));
   }, []);
-  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId, unitScope).catch(() => setUnits([])); }, [tab, unitForm.subjectId, unitScope]);
+  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId).catch(() => setUnits([])); }, [tab, unitForm.subjectId]);
   useEffect(() => {
     if (tab === 'questions') {
-      loadUnits(questionSubjectId, 'ALL').catch(() => setUnits([]));
-      loadQuestions(questionUnitId, 1, questionScope).catch(() => setQuestions([]));
+      loadUnits(questionSubjectId).catch(() => setUnits([]));
+      loadQuestions(questionUnitId, 1).catch(() => setQuestions([]));
     }
-  }, [tab, questionSubjectId, questionUnitId, questionScope]);
-  useEffect(() => { if (tab === 'subjects') loadSubjects(subjectScope).catch(() => setSubjects([])); }, [tab, subjectScope]);
+  }, [tab, questionSubjectId, questionUnitId]);
+  useEffect(() => { if (tab === 'subjects') loadSubjects().catch(() => setSubjects([])); }, [tab]);
 
   async function saveSubject() {
     if (!subjectForm.name.trim()) return;
     setSubjectLoading(true);
     try {
-      const visibility = isAdmin && subjectScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility, syllabusId: subjectForm.syllabusId || null });
+      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, syllabusId: subjectForm.syllabusId || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
-      resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
+      resetSubjectForm(); await loadSubjects(); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
-  async function removeSubject(id: string) { await apiJson(`${apiBase}/api/manage/subjects/${id}`, { method: 'DELETE' }); await loadSubjects(subjectScope); onSubjectsChanged?.(); }
+  async function removeSubject(id: string) { await apiJson(`${apiBase}/api/manage/subjects/${id}`, { method: 'DELETE' }); await loadSubjects(); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
     setUnitLoading(true);
     try {
-      const visibility = isAdmin && unitScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0, visibility };
+      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0 };
       const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
       await apiJson(isUnitEditing ? `${apiBase}/api/manage/units/${unitForm.id}` : `${apiBase}/api/manage/units`, opts);
-      resetUnitForm(); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope);
+      resetUnitForm(); await loadUnits(unitForm.subjectId); await loadSubjects();
     } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) { await apiJson(`${apiBase}/api/manage/units/${id}`, { method: 'DELETE' }); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope); }
+  async function removeUnit(id: string) { await apiJson(`${apiBase}/api/manage/units/${id}`, { method: 'DELETE' }); await loadUnits(unitForm.subjectId); await loadSubjects(); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
@@ -288,15 +265,14 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     if (questionForm.answers.filter(a => a.correct).length !== 1) return;
     setQuestionLoading(true);
     try {
-      const visibility = isAdmin && questionScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })), visibility };
+      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })) };
       const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
       await apiJson(isQuestionEditing ? `${apiBase}/api/manage/questions/${questionForm.id}` : `${apiBase}/api/manage/questions`, opts);
-      resetQuestionForm(); await loadQuestions(unitId, 1, questionScope); await loadUnits(questionSubjectId, 'ALL');
+      resetQuestionForm(); await loadQuestions(unitId, 1); await loadUnits(questionSubjectId);
     } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) { await apiJson(`${apiBase}/api/manage/questions/${id}`, { method: 'DELETE' }); await loadQuestions(unitId, questionPage, questionScope); await loadUnits(questionSubjectId, 'ALL'); }
+  async function removeQuestion(id: string, unitId: string) { await apiJson(`${apiBase}/api/manage/questions/${id}`, { method: 'DELETE' }); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
@@ -368,7 +344,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temarios</span></h2>
-              <ScopeFilter scope={syllabusScope} onChange={setSyllabusScope} isAdmin={isAdmin} />
             </div>
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">{isSyllabusEditing ? 'Editar temario' : 'Nuevo temario'}</div>
@@ -411,10 +386,10 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     <Th>Nombre</Th><Th className="hidden sm:table-cell">Descripción</Th><Th>Visibilidad</Th><Th></Th>
                   </tr></thead>
                   <tbody>
-                    {filteredSyllabuses.length === 0 && (
+                    {syllabuses.length === 0 && (
                       <tr><td colSpan={4} className="py-8 text-center text-sm text-text/45">No hay temarios</td></tr>
                     )}
-                    {filteredSyllabuses.map(s => (
+                    {syllabuses.map(s => (
                       <tr key={s.id} className="border-t border-secondary/10 hover:bg-secondary/5 transition-colors">
                         <Td className="font-medium">{s.name}</Td>
                         <Td className="hidden sm:table-cell text-text/55">{s.description || '—'}</Td>
@@ -441,7 +416,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
-              <ScopeFilter scope={subjectScope} onChange={setSubjectScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
@@ -452,7 +426,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                 onChange={e => { setFilterSyllabusId(e.target.value); setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null })); }}
               >
                 <option value="">Selecciona un temario</option>
-                {syllabusesForSubjectsFilter.map(s => (
+                {syllabuses.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
@@ -526,7 +500,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
-              <ScopeFilter scope={unitScope} onChange={setUnitScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
@@ -534,7 +507,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="grid gap-3 sm:grid-cols-2">
                 <select className={inp} value={filterUnitSyllabusId} onChange={e => { setFilterUnitSyllabusId(e.target.value); setUnitForm(f => ({ ...f, subjectId: '' })); }}>
                   <option value="">Selecciona un temario</option>
-                  {syllabusesForUnitsFilter.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))} disabled={!filterUnitSyllabusId}>
                   <option value="">Selecciona materia</option>
@@ -612,7 +585,6 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
-              <ScopeFilter scope={questionScope} onChange={setQuestionScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
@@ -620,7 +592,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="grid gap-3 sm:grid-cols-3">
                 <select className={inp} value={questionSyllabusId} onChange={e => { setQuestionSyllabusId(e.target.value); setQuestionSubjectId(''); setQuestionUnitId(''); }}>
                   <option value="">Selecciona temario</option>
-                  {syllabusesForQuestionsFilter.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <select className={inp} value={questionSubjectId} onChange={e => { setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }} disabled={!questionSyllabusId}>
                   <option value="">Selecciona materia</option>

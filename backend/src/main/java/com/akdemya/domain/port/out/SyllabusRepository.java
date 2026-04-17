@@ -17,4 +17,7 @@ public interface SyllabusRepository {
 
   /** Returns all GLOBAL syllabuses plus the caller's own PRIVATE syllabuses. */
   List<Syllabus> findVisibleByUserId(UUID userId);
+
+  /** Returns only the caller's own PRIVATE syllabuses. */
+  List<Syllabus> findPrivateByOwnerId(UUID ownerId);
 }

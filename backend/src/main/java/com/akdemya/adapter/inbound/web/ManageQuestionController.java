@@ -38,7 +38,6 @@ public class ManageQuestionController {
   @GetMapping
   public ResponseEntity<?> list(
       @RequestParam UUID unitId,
-      @RequestParam(required = false) String scope,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
       @AuthenticationPrincipal User principal) {
@@ -46,19 +45,15 @@ public class ManageQuestionController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
-    Visibility visibilityScope = parseScope(scope);
 
     Page<Question> questions = contentService.getQuestionsByScope(
-        unitId, caller.getId(), isAdmin, visibilityScope, page - 1, size);
+        unitId, caller.getId(), false, Visibility.PRIVATE, page - 1, size);
     var result = PageResponse.from(questions, q -> {
       List<Answer> answers = answerRepo.findByQuestionId(q.getId());
-      boolean isEditable = isAdmin || (q.getVisibility() == Visibility.PRIVATE
-          && caller.getId().equals(q.getOwnerId()));
       return new ManageQuestionResponse(q.getId(), q.getUnitId(), q.getText(),
           q.getExplanation(), q.getDifficulty().name(),
           answers.stream().map(AnswerDto::from).toList(),
-          q.getVisibility(), isEditable);
+          q.getVisibility(), true);
     });
     return ResponseEntity.ok(result);
   }
@@ -397,12 +392,6 @@ public class ManageQuestionController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-  }
-
-  private Visibility parseScope(String scope) {
-    if ("GLOBAL".equalsIgnoreCase(scope)) return Visibility.GLOBAL;
-    if ("PRIVATE".equalsIgnoreCase(scope)) return Visibility.PRIVATE;
-    return null; // null = ALL
   }
 
   public record AnswerRequest(String text, boolean correct) {}

@@ -43,6 +43,10 @@ public class ContentManagement {
     return syllabusRepo.findVisibleByUserId(userId);
   }
 
+  public List<Syllabus> getPrivateSyllabuses(UUID userId) {
+    return syllabusRepo.findPrivateByOwnerId(userId);
+  }
+
   public Optional<Syllabus> getSyllabusById(UUID id) {
     return syllabusRepo.findById(id);
   }

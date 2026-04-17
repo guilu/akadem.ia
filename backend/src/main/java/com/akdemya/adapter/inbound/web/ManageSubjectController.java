@@ -28,24 +28,18 @@ public class ManageSubjectController {
   }
 
   @GetMapping
-  public ResponseEntity<?> list(
-      @RequestParam(required = false) String scope,
-      @AuthenticationPrincipal User principal) {
+  public ResponseEntity<?> list(@AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
-    Visibility visibilityScope = parseScope(scope);
 
-    List<Subject> subjects = contentService.getSubjectsByScope(caller.getId(), isAdmin, visibilityScope);
+    List<Subject> subjects = contentService.getSubjectsByScope(caller.getId(), false, Visibility.PRIVATE);
     List<ManageSubjectResponse> result = subjects.stream()
         .map(s -> {
           long unitCount = contentService.getUnitsBySubject(s.getId()).size();
-          boolean isEditable = isAdmin || (s.getVisibility() == Visibility.PRIVATE
-              && caller.getId().equals(s.getOwnerId()));
           return new ManageSubjectResponse(s.getId(), s.getName(), s.getDescription(),
-              unitCount, s.getVisibility(), isEditable, s.getSyllabusId());
+              unitCount, s.getVisibility(), true, s.getSyllabusId());
         })
         .toList();
     return ResponseEntity.ok(result);
@@ -150,13 +144,6 @@ public class ManageSubjectController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-  }
-
-  /** Returns null to mean ALL (GLOBAL + user's PRIVATE), else the explicit scope. */
-  private Visibility parseScope(String scope) {
-    if ("GLOBAL".equalsIgnoreCase(scope)) return Visibility.GLOBAL;
-    if ("PRIVATE".equalsIgnoreCase(scope)) return Visibility.PRIVATE;
-    return null; // null = ALL
   }
 
   public record SubjectRequest(String name, String description, String visibility, UUID syllabusId) {}

@@ -33,14 +33,9 @@ public class ManageSyllabusController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean admin = isAdmin(principal);
-    List<ManageSyllabusResponse> result = contentService.getVisibleSyllabuses(caller.getId()).stream()
-        .map(s -> {
-          boolean isEditable = admin || (s.getVisibility() == Visibility.PRIVATE
-              && caller.getId().equals(s.getOwnerId()));
-          return new ManageSyllabusResponse(s.getId(), s.getName(), s.getDescription(),
-              s.getVisibility() != null ? s.getVisibility().name() : null, isEditable);
-        })
+    List<ManageSyllabusResponse> result = contentService.getPrivateSyllabuses(caller.getId()).stream()
+        .map(s -> new ManageSyllabusResponse(s.getId(), s.getName(), s.getDescription(),
+            s.getVisibility() != null ? s.getVisibility().name() : null, true))
         .toList();
     return ResponseEntity.ok(result);
   }

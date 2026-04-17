@@ -14,4 +14,6 @@ public interface SpringDataSyllabusRepository extends JpaRepository<SyllabusEnti
 
   @Query("SELECT s FROM SyllabusEntity s WHERE s.visibility = 'GLOBAL' OR s.ownerId = :ownerId")
   List<SyllabusEntity> findByVisibilityOrOwnerId(@Param("ownerId") UUID ownerId);
+
+  List<SyllabusEntity> findByVisibilityAndOwnerId(String visibility, UUID ownerId);
 }

@@ -49,4 +49,11 @@ public class SyllabusPersistenceAdapter implements SyllabusRepository {
         .map(mapper::toDomain)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public List<Syllabus> findPrivateByOwnerId(UUID ownerId) {
+    return repository.findByVisibilityAndOwnerId("PRIVATE", ownerId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
 }
