@@ -116,6 +116,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   // ── Temarios state ──
   const [syllabuses, setSyllabuses] = useState<Syllabus[]>([]);
+  const [syllabusScope, setSyllabusScope] = useState<Scope>('ALL');
   const [syllabusForm, setSyllabusForm] = useState<{ id: string; name: string; description: string }>({ id: '', name: '', description: '' });
   const [syllabusLoading, setSyllabusLoading] = useState(false);
   const [confirmSyllabusDelete, setConfirmSyllabusDelete] = useState<Syllabus | null>(null);
@@ -129,6 +130,11 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
       setSyllabuses(data);
     } catch { setSyllabuses([]); }
   }
+
+  const filteredSyllabuses = useMemo(() =>
+    syllabusScope === 'ALL' ? syllabuses : syllabuses.filter(s => s.visibility === syllabusScope),
+    [syllabuses, syllabusScope]
+  );
 
   useEffect(() => { if (tab === 'syllabuses') loadSyllabuses(); }, [tab]);
 
@@ -338,10 +344,11 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temarios</span></h2>
+              <ScopeFilter scope={syllabusScope} onChange={setSyllabusScope} isAdmin={isAdmin} />
             </div>
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">{isSyllabusEditing ? 'Editar temario' : 'Nuevo temario'}</div>
-              <div className="grid gap-3">
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre del temario" value={syllabusForm.name}
                   onChange={e => setSyllabusForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={syllabusForm.description}
@@ -380,10 +387,10 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     <Th>Nombre</Th><Th>Descripción</Th><Th>Visibilidad</Th><Th></Th>
                   </tr></thead>
                   <tbody>
-                    {syllabuses.length === 0 && (
+                    {filteredSyllabuses.length === 0 && (
                       <tr><td colSpan={4} className="py-8 text-center text-sm text-text/45">No hay temarios</td></tr>
                     )}
-                    {syllabuses.map(s => (
+                    {filteredSyllabuses.map(s => (
                       <tr key={s.id} className="border-t border-secondary/10 hover:bg-secondary/5 transition-colors">
                         <Td className="font-medium">{s.name}</Td>
                         <Td className="text-text/55">{s.description || '—'}</Td>
