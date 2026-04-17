@@ -98,10 +98,6 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 <BookOpen className="w-4 h-4" />
                 Exámenes
               </button>
-              <button onClick={() => go(ROUTES.manage)} className={linkCls(ROUTES.manage)}>
-                <FolderOpen className="w-4 h-4" />
-                Gestionar
-              </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={linkCls(ROUTES.rag)}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -145,6 +141,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 user={user}
                 isAdmin={isAdmin}
                 onProfile={onProfile}
+                onManage={() => go(ROUTES.manage)}
                 onSettings={onSettings}
                 onLogout={onLogout}
               />
@@ -202,10 +199,6 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 <BookOpen className="w-4 h-4" />
                 Exámenes
               </button>
-              <button onClick={() => go(ROUTES.manage)} className={mobileLinkCls(ROUTES.manage)}>
-                <FolderOpen className="w-4 h-4" />
-                Gestionar
-              </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={mobileLinkCls(ROUTES.rag)}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -230,6 +223,13 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
               >
                 <User className="w-4 h-4" />
                 Mi perfil
+              </button>
+              <button
+                onClick={() => { go(ROUTES.manage); setMenuOpen(false); }}
+                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
+              >
+                <FolderOpen className="w-4 h-4" />
+                Gestionar
               </button>
               <button
                 onClick={() => { onSettings(); setMenuOpen(false); }}

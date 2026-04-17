@@ -5,11 +5,12 @@ interface Props {
   user: NavUser;
   isAdmin: boolean;
   onProfile: () => void;
+  onManage: () => void;
   onSettings: () => void;
   onLogout: () => void;
 }
 
-export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogout }: Props) {
+export function UserMenuDropdown({ user, isAdmin, onProfile, onManage, onSettings, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -55,6 +56,12 @@ export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogou
             className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"
           >
             Mi perfil
+          </button>
+          <button
+            onClick={() => { onManage(); setOpen(false); }}
+            className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"
+          >
+            Gestionar
           </button>
           <button
             onClick={() => { onSettings(); setOpen(false); }}
