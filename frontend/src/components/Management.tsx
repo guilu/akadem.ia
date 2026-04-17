@@ -137,7 +137,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     [syllabuses, syllabusScope]
   );
 
-  useEffect(() => { if (tab === 'syllabuses' || tab === 'subjects') loadSyllabuses(); }, [tab]);
+  useEffect(() => { if (tab === 'syllabuses' || tab === 'subjects' || tab === 'units' || tab === 'questions') loadSyllabuses(); }, [tab]);
 
   const [subjects, setSubjects] = useState<AdminSubject[]>([]);
   const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '', syllabusId: null });
@@ -189,15 +189,35 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   const [unitScope, setUnitScope] = useState<Scope>('ALL');
   const [questionScope, setQuestionScope] = useState<Scope>('ALL');
 
+  const [filterSyllabusId, setFilterSyllabusId] = useState('');
+  const [filterUnitSyllabusId, setFilterUnitSyllabusId] = useState('');
+  const [questionSyllabusId, setQuestionSyllabusId] = useState('');
+
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
-  const unitSubjectOptions = useMemo(() => subjects.filter(s => unitScope === 'ALL' || s.visibility === unitScope).map(s => ({ value: s.id, label: s.name })), [subjects, unitScope]);
-  const questionSubjectOptions = useMemo(() => subjects.filter(s => questionScope === 'ALL' || s.visibility === questionScope).map(s => ({ value: s.id, label: s.name })), [subjects, questionScope]);
-  const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
-  const syllabusesForSubjectsForm = useMemo(() => syllabuses.filter(s => subjectScope === 'ALL' || s.visibility === subjectScope), [syllabuses, subjectScope]);
-  const filteredSubjectsList = useMemo(() => subjectForm.syllabusId ? subjects.filter(s => s.syllabusId === subjectForm.syllabusId) : [], [subjects, subjectForm.syllabusId]);
 
-  function resetSubjectForm(keepSyllabusId?: string | null) { setSubjectForm({ id: '', name: '', description: '', syllabusId: keepSyllabusId ?? null }); }
+  const syllabusesForSubjectsFilter = useMemo(() => syllabuses.filter(s => subjectScope === 'ALL' || s.visibility === subjectScope), [syllabuses, subjectScope]);
+  const syllabusesForUnitsFilter = useMemo(() => syllabuses.filter(s => unitScope === 'ALL' || s.visibility === unitScope), [syllabuses, unitScope]);
+  const syllabusesForQuestionsFilter = useMemo(() => syllabuses.filter(s => questionScope === 'ALL' || s.visibility === questionScope), [syllabuses, questionScope]);
+
+  const unitSubjectOptions = useMemo(() =>
+    subjects
+      .filter(s => unitScope === 'ALL' || s.visibility === unitScope)
+      .filter(s => !filterUnitSyllabusId || s.syllabusId === filterUnitSyllabusId)
+      .map(s => ({ value: s.id, label: s.name })),
+    [subjects, unitScope, filterUnitSyllabusId]);
+
+  const questionSubjectOptions = useMemo(() =>
+    subjects
+      .filter(s => questionScope === 'ALL' || s.visibility === questionScope)
+      .filter(s => !questionSyllabusId || s.syllabusId === questionSyllabusId)
+      .map(s => ({ value: s.id, label: s.name })),
+    [subjects, questionScope, questionSyllabusId]);
+
+  const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
+  const filteredSubjectsList = useMemo(() => filterSyllabusId ? subjects.filter(s => s.syllabusId === filterSyllabusId) : [], [subjects, filterSyllabusId]);
+
+  function resetSubjectForm() { setSubjectForm({ id: '', name: '', description: '', syllabusId: filterSyllabusId || null }); }
   function resetUnitForm() { setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 }); }
   function resetQuestionForm() {
     setQuestionForm({ id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY', answers: [{ text: '', correct: true }, { text: '', correct: false }, { text: '', correct: false }, { text: '', correct: false }] });
@@ -241,7 +261,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
       const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility, syllabusId: subjectForm.syllabusId || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
-      resetSubjectForm(subjectForm.syllabusId); await loadSubjects(subjectScope); onSubjectsChanged?.();
+      resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
@@ -425,29 +445,34 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
             </div>
 
             <div className={card}>
-              <div className="mb-3">
-                <select
-                  className={inp}
-                  value={subjectForm.syllabusId ?? ''}
-                  onChange={e => setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null }))}
-                >
-                  <option value="">Selecciona un temario</option>
-                  {syllabusesForSubjectsForm.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
+              <select
+                className={inp}
+                value={filterSyllabusId}
+                onChange={e => { setFilterSyllabusId(e.target.value); setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null })); }}
+              >
+                <option value="">Selecciona un temario</option>
+                {syllabusesForSubjectsFilter.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={card}>
+              {!filterSyllabusId && (
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario para crear la materia.</p>
+              )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={subjectForm.name} onChange={e => setSubjectForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={subjectForm.description || ''} onChange={e => setSubjectForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="flex gap-2">
-                <button onClick={saveSubject} disabled={subjectLoading} className={btnPrimary}>
+                <button onClick={saveSubject} disabled={subjectLoading || !filterSyllabusId} className={btnPrimary}>
                   {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
                 </button>
                 {isSubjectEditing && (
-                  <button onClick={() => resetSubjectForm(subjectForm.syllabusId)} className={btnOutline}>
+                  <button onClick={resetSubjectForm} className={btnOutline}>
                     <CircleMinus className="w-4 h-4" />Cancelar
                   </button>
                 )}
@@ -464,7 +489,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {!subjectForm.syllabusId ? (
+                    {!filterSyllabusId ? (
                       <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />Selecciona un temario para ver las materias.</td></tr>
                     ) : filteredSubjectsList.length === 0 ? (
                       <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias en este temario.</td></tr>
@@ -505,17 +530,30 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
             </div>
 
             <div className={card}>
-              <div className="grid gap-3 sm:grid-cols-2 mb-4">
-                <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <select className={inp} value={filterUnitSyllabusId} onChange={e => { setFilterUnitSyllabusId(e.target.value); setUnitForm(f => ({ ...f, subjectId: '' })); }}>
+                  <option value="">Selecciona un temario</option>
+                  {syllabusesForUnitsFilter.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))} disabled={!filterUnitSyllabusId}>
                   <option value="">Selecciona materia</option>
                   {unitSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
+              </div>
+            </div>
+
+            <div className={card}>
+              {!unitForm.subjectId && (
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario y la materia para añadir una unidad.</p>
+              )}
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={unitForm.name} onChange={e => setUnitForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={unitForm.description || ''} onChange={e => setUnitForm(f => ({ ...f, description: e.target.value }))} />
                 <input className={inp} type="number" placeholder="Orden" value={unitForm.orderIndex} onChange={e => setUnitForm(f => ({ ...f, orderIndex: Number(e.target.value) }))} />
               </div>
               <div className="flex gap-2">
-                <button onClick={saveUnit} disabled={unitLoading} className={btnPrimary}>
+                <button onClick={saveUnit} disabled={unitLoading || !unitForm.subjectId} className={btnPrimary}>
                   {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
                 </button>
@@ -540,7 +578,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {units.length === 0 ? (
-                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay unidades disponibles.</td></tr>
+                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{unitForm.subjectId ? 'No hay unidades disponibles.' : 'Selecciona un temario y materia para ver las unidades.'}</td></tr>
                     ) : units.map(u => (
                       <tr key={u.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
@@ -579,12 +617,16 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <select className={inp} value={questionSubjectId} onChange={e => setQuestionSubjectId(e.target.value)}>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <select className={inp} value={questionSyllabusId} onChange={e => { setQuestionSyllabusId(e.target.value); setQuestionSubjectId(''); setQuestionUnitId(''); }}>
+                  <option value="">Selecciona temario</option>
+                  {syllabusesForQuestionsFilter.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <select className={inp} value={questionSubjectId} onChange={e => { setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }} disabled={!questionSyllabusId}>
                   <option value="">Selecciona materia</option>
                   {questionSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
-                <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)}>
+                <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)} disabled={!questionSubjectId}>
                   <option value="">Selecciona unidad</option>
                   {unitOptions.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
                 </select>
@@ -593,7 +635,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               {!questionUnitId && (
-                <p className="text-sm text-text/50 mb-4">Selecciona materia y unidad para crear preguntas.</p>
+                <p className="text-sm text-text/50 mb-4">Selecciona temario, materia y unidad para crear preguntas.</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Enunciado" value={questionForm.text} onChange={e => setQuestionForm(f => ({ ...f, text: e.target.value }))} />
@@ -660,7 +702,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {questions.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona una materia y unidad para ver las preguntas.'}</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona temario, materia y unidad para ver las preguntas.'}</td></tr>
                     ) : questions.map(q => (
                       <tr key={q.id} className="border-b border-secondary/10 last:border-0">
                         <Td><span className="line-clamp-2">{q.text}</span></Td>
