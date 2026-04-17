@@ -447,7 +447,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
                 </button>
                 {isSubjectEditing && (
-                  <button onClick={resetSubjectForm} className={btnOutline}>
+                  <button onClick={() => resetSubjectForm(subjectForm.syllabusId)} className={btnOutline}>
                     <CircleMinus className="w-4 h-4" />Cancelar
                   </button>
                 )}
