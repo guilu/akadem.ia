@@ -16,6 +16,7 @@ const userWithAvatar: NavUser = {
 
 describe('UserMenuDropdown', () => {
   const onProfile = vi.fn();
+  const onManage = vi.fn();
   const onSettings = vi.fn();
   const onLogout = vi.fn();
 
@@ -29,6 +30,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -44,6 +46,7 @@ describe('UserMenuDropdown', () => {
         user={userWithAvatar}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -59,6 +62,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -74,6 +78,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -111,6 +116,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -128,6 +134,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -145,6 +152,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
@@ -162,6 +170,7 @@ describe('UserMenuDropdown', () => {
         user={baseUser}
         isAdmin={false}
         onProfile={onProfile}
+        onManage={onManage}
         onSettings={onSettings}
         onLogout={onLogout}
       />
