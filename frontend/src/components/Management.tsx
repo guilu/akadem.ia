@@ -389,14 +389,12 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                         <Td className="text-text/55">{s.description || '—'}</Td>
                         <Td><span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${s.visibility === 'GLOBAL' ? 'border-lime-400/30 bg-lime-400/10 text-lime-600 dark:text-lime-400' : 'border-accent/30 bg-accent/10 text-accent'}`}>{s.visibility === 'GLOBAL' ? 'Global' : 'Privado'}</span></Td>
                         <Td>
-                          <div className="flex gap-1.5 justify-end">
-                            <button className={btnOutline} onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })}>
-                              <Pen className="w-3.5 h-3.5" /> Editar
-                            </button>
-                            <button className={btnDanger} onClick={() => setConfirmSyllabusDelete(s)}>
-                              <TrashBin className="w-3.5 h-3.5" /> Eliminar
-                            </button>
-                          </div>
+                          {(isAdmin || s.visibility === 'PRIVATE') && (
+                            <div className="flex gap-2">
+                              <button onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                              <button onClick={() => setConfirmSyllabusDelete(s)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))}
