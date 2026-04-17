@@ -311,16 +311,16 @@ export default function FlashcardsPage() {
           </div>
         ) : globalQueue ? (
           <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
-            <span className="flex items-center gap-1.5 text-lime-500">
-              <CirclePlus className="w-4 h-4" />
+            <span className="flex items-center gap-1.5 text-lime-500 whitespace-nowrap">
+              <CirclePlus className="w-4 h-4 shrink-0" />
               {globalQueue.new} nuevas
             </span>
-            <span className="flex items-center gap-1.5 text-accent">
-              <Refresh className="w-4 h-4" />
+            <span className="flex items-center gap-1.5 text-accent whitespace-nowrap">
+              <Refresh className="w-4 h-4 shrink-0" />
               {globalQueue.learning} aprendiendo
             </span>
-            <span className="flex items-center gap-1.5 text-primary">
-              <Clock className="w-4 h-4" />
+            <span className="flex items-center gap-1.5 text-primary whitespace-nowrap">
+              <Clock className="w-4 h-4 shrink-0" />
               {globalQueue.due} pendientes
             </span>
           </div>
