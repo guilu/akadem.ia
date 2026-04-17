@@ -85,6 +85,14 @@ public class SyllabusController {
     }
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getById(@PathVariable UUID id,
+                                    @AuthenticationPrincipal User principal) {
+    return contentService.getSyllabusById(id)
+        .map(s -> ResponseEntity.ok(SyllabusResponse.from(s)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
   @GetMapping("/{id}/subjects")
   public ResponseEntity<?> getSubjects(@PathVariable UUID id,
                                         @AuthenticationPrincipal User principal) {
