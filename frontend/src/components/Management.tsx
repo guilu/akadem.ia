@@ -12,6 +12,7 @@ export type AdminSubject = {
   unitCount?: number;
   visibility?: 'GLOBAL' | 'PRIVATE';
   isEditable?: boolean;
+  syllabusId?: string | null;
 };
 
 export type AdminUnit = {
@@ -136,10 +137,10 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     [syllabuses, syllabusScope]
   );
 
-  useEffect(() => { if (tab === 'syllabuses') loadSyllabuses(); }, [tab]);
+  useEffect(() => { if (tab === 'syllabuses' || tab === 'subjects') loadSyllabuses(); }, [tab]);
 
   const [subjects, setSubjects] = useState<AdminSubject[]>([]);
-  const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '' });
+  const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '', syllabusId: null });
   const [subjectLoading, setSubjectLoading] = useState(false);
   const [confirmSubjectDelete, setConfirmSubjectDelete] = useState<AdminSubject | null>(null);
   const [subjectDeleteLoading, setSubjectDeleteLoading] = useState(false);
@@ -234,7 +235,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     setSubjectLoading(true);
     try {
       const visibility = isAdmin && subjectScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility });
+      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility, syllabusId: subjectForm.syllabusId || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
       resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
@@ -421,6 +422,18 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
             </div>
 
             <div className={card}>
+              <div className="mb-3">
+                <select
+                  className={inp}
+                  value={subjectForm.syllabusId ?? ''}
+                  onChange={e => setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null }))}
+                >
+                  <option value="">Sin temario</option>
+                  {syllabuses.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={subjectForm.name} onChange={e => setSubjectForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={subjectForm.description || ''} onChange={e => setSubjectForm(f => ({ ...f, description: e.target.value }))} />
@@ -443,7 +456,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                 <table className="w-full">
                   <thead><tr className="border-b border-secondary/20">
                     <Th>Materia</Th>
-                    <Th className="hidden sm:table-cell">Descripción</Th>
+                    <Th className="hidden sm:table-cell">Temario</Th>
                     <Th className="hidden sm:table-cell">Visibilidad</Th>
                     <Th />
                   </tr></thead>
@@ -453,7 +466,9 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                     ) : subjects.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
-                        <Td className="hidden sm:table-cell">{s.description || '-'}</Td>
+                        <Td className="hidden sm:table-cell text-text/55 text-xs">
+                          {s.syllabusId ? (syllabuses.find(sy => sy.id === s.syllabusId)?.name ?? '—') : '—'}
+                        </Td>
                         <Td className="hidden sm:table-cell">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.visibility === 'GLOBAL' ? 'bg-blue-500/15 text-blue-600' : 'bg-secondary/20 text-text/60'}`}>
                             {s.visibility === 'GLOBAL' ? 'Global' : 'Personal'}

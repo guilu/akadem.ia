@@ -45,7 +45,7 @@ public class ManageSubjectController {
           boolean isEditable = isAdmin || (s.getVisibility() == Visibility.PRIVATE
               && caller.getId().equals(s.getOwnerId()));
           return new ManageSubjectResponse(s.getId(), s.getName(), s.getDescription(),
-              unitCount, s.getVisibility(), isEditable);
+              unitCount, s.getVisibility(), isEditable, s.getSyllabusId());
         })
         .toList();
     return ResponseEntity.ok(result);
@@ -71,16 +71,16 @@ public class ManageSubjectController {
 
     Subject subject;
     if ("GLOBAL".equals(visibilityStr)) {
-      subject = Subject.createGlobal(req.name().trim(), req.description());
+      subject = Subject.createGlobal(req.name().trim(), req.description(), req.syllabusId());
     } else {
-      subject = Subject.createPrivate(req.name().trim(), req.description(), caller.getId());
+      subject = Subject.createPrivate(req.name().trim(), req.description(), caller.getId(), req.syllabusId());
     }
 
     Subject saved = contentService.createSubject(subject);
     long unitCount = 0;
     boolean isEditable = isAdmin || saved.getVisibility() == Visibility.PRIVATE;
     return ResponseEntity.ok(new ManageSubjectResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), unitCount, saved.getVisibility(), isEditable));
+        saved.getDescription(), unitCount, saved.getVisibility(), isEditable, saved.getSyllabusId()));
   }
 
   @PutMapping("/{id}")
@@ -112,13 +112,14 @@ public class ManageSubjectController {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
 
-    Subject updated = new Subject(id, name, req.description(), current.getVisibility(), current.getOwnerId());
+    UUID syllabusId = req.syllabusId() != null ? req.syllabusId() : current.getSyllabusId();
+    Subject updated = new Subject(id, name, req.description(), current.getVisibility(), current.getOwnerId(), syllabusId);
     Subject saved = contentService.createSubject(updated);
     long unitCount = contentService.getUnitsBySubject(id).size();
     boolean isEditable = isAdmin || (saved.getVisibility() == Visibility.PRIVATE
         && caller.getId().equals(saved.getOwnerId()));
     return ResponseEntity.ok(new ManageSubjectResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), unitCount, saved.getVisibility(), isEditable));
+        saved.getDescription(), unitCount, saved.getVisibility(), isEditable, saved.getSyllabusId()));
   }
 
   @DeleteMapping("/{id}")
@@ -158,8 +159,8 @@ public class ManageSubjectController {
     return null; // null = ALL
   }
 
-  public record SubjectRequest(String name, String description, String visibility) {}
+  public record SubjectRequest(String name, String description, String visibility, UUID syllabusId) {}
 
   public record ManageSubjectResponse(UUID id, String name, String description,
-                                       long unitCount, Visibility visibility, boolean isEditable) {}
+                                       long unitCount, Visibility visibility, boolean isEditable, UUID syllabusId) {}
 }
