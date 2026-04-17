@@ -167,9 +167,11 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                     </Link>
                   </div>
                   {s.visibility && (
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-text/30 px-3 py-1 border border-secondary/15 rounded-full self-start">
-                      {s.visibility === 'GLOBAL' ? 'Público' : 'Privado'}
-                    </span>
+                    <div className="flex justify-end">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.visibility === 'GLOBAL' ? 'bg-blue-500/15 text-blue-600' : 'bg-secondary/20 text-text/60'}`}>
+                        {s.visibility === 'GLOBAL' ? 'Público' : 'Privado'}
+                      </span>
+                    </div>
                   )}
                 </div>
               </article>
