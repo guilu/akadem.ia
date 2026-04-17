@@ -13,6 +13,8 @@ const units: UnitSummary[] = [
     unitName: 'Álgebra',
     subjectId: 'subj-1',
     subjectName: 'Matemáticas',
+    syllabusId: null,
+    syllabusName: null,
     newCount: 5,
     reviewCount: 2,
     dueCount: 1,

@@ -157,6 +157,93 @@ public class ExamManager implements ExamUseCase {
   }
 
   @Override
+  public StartResponse startExamFromSyllabus(StartFromSyllabusCommand command) {
+    int totalSec = Math.max(60, command.minutes() * 60);
+    ExamAttempt attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(),
+        java.time.OffsetDateTime.now(), null, totalSec, null);
+    attemptRepo.save(attempt);
+
+    Question.Difficulty difficulty = null;
+    if (command.difficulty() != null && !command.difficulty().isBlank()) {
+      try {
+        difficulty = Question.Difficulty.valueOf(command.difficulty());
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+    final Question.Difficulty selectedDifficulty = difficulty;
+
+    // Load subjects for the syllabus, filtering by subjectIds if provided
+    List<com.akdemya.domain.model.Subject> subjects =
+        subjectRepo.findVisibleBySyllabusId(command.syllabusId(), command.userId());
+    if (command.subjectIds() != null && !command.subjectIds().isEmpty()) {
+      java.util.Set<UUID> filter = new java.util.HashSet<>(command.subjectIds());
+      subjects = subjects.stream().filter(s -> filter.contains(s.getId())).collect(Collectors.toList());
+    }
+
+    if (subjects.isEmpty()) {
+      throw new java.util.NoSuchElementException("No subjects found for the given syllabus");
+    }
+
+    // Gather all visible questions per subject
+    Map<UUID, List<Question>> questionsBySubject = new LinkedHashMap<>();
+    for (com.akdemya.domain.model.Subject subject : subjects) {
+      List<Unit> units = unitRepo.findVisibleBySubjectIdAndUserId(subject.getId(), command.userId());
+      List<Question> subjectQuestions = new ArrayList<>();
+      for (Unit unit : units) {
+        List<Question> qs = questionRepo.findVisibleByUnitIdAndUserId(unit.getId(), command.userId());
+        if (selectedDifficulty != null) {
+          qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
+        }
+        subjectQuestions.addAll(qs);
+      }
+      if (!subjectQuestions.isEmpty()) {
+        questionsBySubject.put(subject.getId(), subjectQuestions);
+      }
+    }
+
+    int totalAvailable = questionsBySubject.values().stream().mapToInt(List::size).sum();
+    if (totalAvailable == 0) {
+      throw new java.util.NoSuchElementException("No questions available for the given syllabus and filters");
+    }
+
+    // Distribute count proportionally across subjects, then pick randomly within each
+    int totalCount = command.count() > 0 ? Math.min(command.count(), totalAvailable) : totalAvailable;
+    List<Question> pool = new ArrayList<>();
+
+    int remaining = totalCount;
+    List<Map.Entry<UUID, List<Question>>> entries = new ArrayList<>(questionsBySubject.entrySet());
+    for (int i = 0; i < entries.size(); i++) {
+      List<Question> subjectQs = new ArrayList<>(entries.get(i).getValue());
+      int quota = (i == entries.size() - 1)
+          ? remaining
+          : (int) Math.round((double) subjectQs.size() / totalAvailable * totalCount);
+      quota = Math.min(quota, subjectQs.size());
+      quota = Math.min(quota, remaining);
+      Collections.shuffle(subjectQs, rnd);
+      pool.addAll(subjectQs.subList(0, quota));
+      remaining -= quota;
+      if (remaining <= 0) break;
+    }
+    Collections.shuffle(pool, rnd);
+
+    List<ExamAttemptAnswer> placeholders = new ArrayList<>();
+    for (Question q : pool) {
+      placeholders.add(ExamAttemptAnswer.create(attempt.getId(), q.getId(), null));
+    }
+    attemptAnsRepo.saveAll(placeholders);
+
+    List<QuestionData> questionDataList = pool.stream().map(q -> {
+      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+          .map(a -> new AnswerData(a.getId(), a.getText()))
+          .collect(Collectors.toList());
+      Collections.shuffle(answers, rnd);
+      return new QuestionData(q.getId(), q.getText(), answers);
+    }).toList();
+
+    return new StartResponse(attempt.getId(), totalSec, questionDataList);
+  }
+
+  @Override
   public SubmitResult submitExam(SubmitCommand command, String userEmail) {
     ExamAttempt attempt = attemptRepo.findById(command.attemptId())
         .orElseThrow(() -> new NoSuchElementException("Attempt not found"));

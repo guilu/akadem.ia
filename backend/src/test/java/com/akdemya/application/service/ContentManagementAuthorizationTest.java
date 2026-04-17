@@ -23,8 +23,9 @@ class ContentManagementAuthorizationTest {
   private final QuestionRepository questionRepo = mock(QuestionRepository.class);
   private final AnswerRepository answerRepo = mock(AnswerRepository.class);
 
+  private final SyllabusRepository syllabusRepo = mock(SyllabusRepository.class);
   private final ContentManagement service =
-      new ContentManagement(subjectRepo, unitRepo, questionRepo, answerRepo);
+      new ContentManagement(subjectRepo, unitRepo, questionRepo, answerRepo, syllabusRepo);
 
   // ===================== Subject =====================
 

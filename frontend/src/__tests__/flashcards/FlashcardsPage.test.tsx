@@ -50,6 +50,8 @@ const mockUnits = [
     unitName: 'Álgebra',
     subjectId: 'subj-1',
     subjectName: 'Matemáticas',
+    syllabusId: 'syll-1',
+    syllabusName: 'Ciencias',
     newCount: 3,
     reviewCount: 2,
     dueCount: 1,
@@ -59,6 +61,8 @@ const mockUnits = [
     unitName: 'Trigonometría',
     subjectId: 'subj-1',
     subjectName: 'Matemáticas',
+    syllabusId: 'syll-1',
+    syllabusName: 'Ciencias',
     newCount: 1,
     reviewCount: 0,
     dueCount: 0,
@@ -72,13 +76,13 @@ describe('FlashcardsPage', () => {
     globalThis.URL.revokeObjectURL = vi.fn();
   });
 
-  it('shows empty state with import CTA when no subjects available', async () => {
+  it('shows empty state with import CTA when no syllabuses available', async () => {
     vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     expect(
@@ -92,7 +96,7 @@ describe('FlashcardsPage', () => {
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /importar flashcards/i }));
@@ -106,7 +110,7 @@ describe('FlashcardsPage', () => {
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     const importButtons = screen.getAllByRole('button', { name: /importar/i });
@@ -120,7 +124,7 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument());
 
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     expect(screen.getByTestId('import-modal')).toBeInTheDocument();
@@ -134,7 +138,7 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument());
 
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     fireEvent.click(screen.getByText('Importado'));
@@ -143,25 +147,29 @@ describe('FlashcardsPage', () => {
     expect(vi.mocked(api.apiJson).mock.calls.length).toBeGreaterThan(2);
   });
 
-  it('shows subjects when data loads', async () => {
+  it('shows syllabuses when data loads', async () => {
     vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Matemáticas')).toBeInTheDocument();
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
     });
   });
 
-  it('shows unit list when subject is selected', async () => {
+  it('shows unit list when syllabus and subject is selected', async () => {
     vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
 
-    // We need SubjectCard to be real here — don't mock it
+    // We need components to be real here — don't mock it
     render(<FlashcardsPage />);
+
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Ciencias'));
 
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
-    // Click on the subject button (the main button inside SubjectCard)
+    // Click on the subject button
     fireEvent.click(screen.getByText('Matemáticas'));
 
     // UnitList should now show the units for the selected subject
@@ -175,16 +183,16 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
+
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Matemáticas'));
 
-    await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
-
-    const backButton = screen.getByRole('button', { name: /volver a materias/i });
+    const backButton = screen.getByRole('button', { name: /volver/i });
     fireEvent.click(backButton);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    expect(screen.queryByText('Álgebra')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
   });
 
   it('navigates to study page when unit clicked in study mode', async () => {
@@ -196,7 +204,7 @@ describe('FlashcardsPage', () => {
     vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
   });
 
   it('navigates to study page tab when Estudio tab clicked', async () => {
@@ -238,9 +246,10 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
 
-    // Select subject to show units
+    fireEvent.click(screen.getByText('Ciencias'));
+    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Matemáticas'));
 
     await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
@@ -262,6 +271,8 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Matemáticas'));
     await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
@@ -292,6 +303,8 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
     // Click CSV export on the SubjectCard
@@ -312,6 +325,8 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
     const csvButtons = screen.getAllByTitle('Exportar CSV');
@@ -324,7 +339,7 @@ describe('FlashcardsPage', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/no se pudo exportar la materia/i);
   });
 
-  it('filters subjects by search term', async () => {
+  it('filters syllabuses by search term', async () => {
     vi.mocked(api.apiJson).mockResolvedValue([
       ...mockUnits,
       {
@@ -332,6 +347,8 @@ describe('FlashcardsPage', () => {
         unitName: 'Historia Medieval',
         subjectId: 'subj-2',
         subjectName: 'Historia',
+        syllabusId: 'syll-2',
+        syllabusName: 'Humanidades',
         newCount: 0,
         reviewCount: 0,
         dueCount: 0,
@@ -341,32 +358,45 @@ describe('FlashcardsPage', () => {
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Matemáticas')).toBeInTheDocument();
-      expect(screen.getByText('Historia')).toBeInTheDocument();
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
+      expect(screen.getByText('Humanidades')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'histo' } });
+    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'humani' } });
 
     await waitFor(() => {
-      expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
-      expect(screen.getByText('Historia')).toBeInTheDocument();
+      expect(screen.queryByText('Ciencias')).not.toBeInTheDocument();
+      expect(screen.getByText('Humanidades')).toBeInTheDocument();
     });
   });
 
-  it('filters units by search term when subject is selected', async () => {
-    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
+  it('filters subjects by search term when syllabus is selected', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue([
+      ...mockUnits,
+      {
+        unitId: 'unit-3',
+        unitName: 'Física',
+        subjectId: 'subj-3',
+        subjectName: 'Física Clásica',
+        syllabusId: 'syll-1',
+        syllabusName: 'Ciencias',
+        newCount: 0,
+        reviewCount: 0,
+        dueCount: 0,
+      },
+    ]);
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Matemáticas'));
-    await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
 
-    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'álge' } });
+    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'físi' } });
 
     await waitFor(() => {
-      expect(screen.getByText('Álgebra')).toBeInTheDocument();
-      expect(screen.queryByText('Trigonometría')).not.toBeInTheDocument();
+      expect(screen.getByText('Física Clásica')).toBeInTheDocument();
+      expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
     });
   });
 });

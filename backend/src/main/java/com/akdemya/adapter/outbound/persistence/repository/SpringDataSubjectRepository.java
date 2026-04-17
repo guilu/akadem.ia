@@ -21,4 +21,10 @@ public interface SpringDataSubjectRepository extends JpaRepository<SubjectEntity
 
   @Query("SELECT s FROM SubjectEntity s WHERE s.visibility = 'GLOBAL' OR (s.visibility = 'PRIVATE' AND s.ownerId = :userId)")
   List<SubjectEntity> findAllByScope(@Param("userId") UUID userId);
+
+  @Query("SELECT s FROM SubjectEntity s WHERE s.syllabus.id = :syllabusId")
+  List<SubjectEntity> findBySyllabusId(@Param("syllabusId") UUID syllabusId);
+
+  @Query("SELECT s FROM SubjectEntity s WHERE s.syllabus.id = :syllabusId AND (s.visibility = 'GLOBAL' OR s.ownerId = :userId)")
+  List<SubjectEntity> findVisibleBySyllabusId(@Param("syllabusId") UUID syllabusId, @Param("userId") UUID userId);
 }

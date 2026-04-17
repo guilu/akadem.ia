@@ -217,6 +217,7 @@ public class FlashcardController {
         .stream()
         .map(r -> new FlashcardDto.UnitSummary(
             r.unitId(), r.unitName(), r.subjectId(), r.subjectName(),
+            r.syllabusId(), r.syllabusName(),
             r.newCount(), r.reviewCount(), r.dueCount()))
         .toList();
   }

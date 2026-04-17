@@ -65,7 +65,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
         {/* ── Left column: config + tip ── */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="border border-secondary/25 rounded-3xl p-8 flex flex-col gap-6">
+          <div className="border border-secondary/25 rounded-3xl bg-card p-8 flex flex-col gap-6">
             <div className="flex items-center gap-3">
               <AdjustmentsHorizontal className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Configuración General</h2>
@@ -154,7 +154,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
 
         {/* ── Right column: units ── */}
         <div className="lg:col-span-8">
-          <div className="border border-secondary/25 rounded-3xl p-8 mb-20">
+          <div className="border border-secondary/25 rounded-3xl bg-card p-8 mb-20">
             <div className="flex items-center gap-3 mb-8">
               <ClipboardList className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Preguntas por unidad</h2>

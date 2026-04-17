@@ -1,4 +1,4 @@
-export type Subject = { id: string; name: string; description?: string };
+export type Subject = { id: string; name: string; description?: string; syllabusId?: string };
 export type UnitAvailability = { id: string; name: string; available: number };
 export type ExamStartResponse = { attemptId: string; totalTimeSeconds: number; questions: any[] };
 export type ExamResult = {
@@ -86,6 +86,14 @@ export type GenerateQuizResponse = {
 export type AdminUnit = { id: string; name: string };
 
 export type ContentVisibility = 'GLOBAL' | 'PRIVATE';
+
+export type Syllabus = {
+  id: string;
+  name: string;
+  description?: string;
+  visibility?: ContentVisibility;
+  ownerId?: string;
+};
 
 export interface NavUser {
   email: string;

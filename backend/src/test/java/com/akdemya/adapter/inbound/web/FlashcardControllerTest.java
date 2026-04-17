@@ -107,7 +107,7 @@ class FlashcardControllerTest {
         .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
 
     var summaryResult = new FlashcardStudyUseCase.UnitSummaryResult(
-        unitId, "Unidad 1", subjectId, "Math", 5L, 0L, 0L);
+        unitId, "Unidad 1", subjectId, "Math", null, "Syllabus 1", 5L, 0L, 0L);
     when(studyUseCase.getUnitSummaries(any())).thenReturn(List.of(summaryResult));
 
     List<FlashcardDto.UnitSummary> response = controller.getUnitSummary(principal);

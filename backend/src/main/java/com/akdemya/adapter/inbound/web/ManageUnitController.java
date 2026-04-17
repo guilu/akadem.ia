@@ -30,23 +30,18 @@ public class ManageUnitController {
   @GetMapping
   public ResponseEntity<?> list(
       @RequestParam UUID subjectId,
-      @RequestParam(required = false) String scope,
       @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
-    Visibility visibilityScope = parseScope(scope);
 
-    List<Unit> units = contentService.getUnitsByScope(subjectId, caller.getId(), isAdmin, visibilityScope);
+    List<Unit> units = contentService.getUnitsByScope(subjectId, caller.getId(), false, Visibility.PRIVATE);
     List<ManageUnitResponse> result = units.stream()
         .map(u -> {
           long questionCount = contentService.getQuestionsByUnit(u.getId()).size();
-          boolean isEditable = isAdmin || (u.getVisibility() == Visibility.PRIVATE
-              && caller.getId().equals(u.getOwnerId()));
           return new ManageUnitResponse(u.getId(), u.getSubjectId(), u.getName(),
-              u.getDescription(), u.getOrderIndex(), questionCount, u.getVisibility(), isEditable);
+              u.getDescription(), u.getOrderIndex(), questionCount, u.getVisibility(), true);
         })
         .toList();
     return ResponseEntity.ok(result);
@@ -169,12 +164,6 @@ public class ManageUnitController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-  }
-
-  private Visibility parseScope(String scope) {
-    if ("GLOBAL".equalsIgnoreCase(scope)) return Visibility.GLOBAL;
-    if ("PRIVATE".equalsIgnoreCase(scope)) return Visibility.PRIVATE;
-    return null; // null = ALL
   }
 
   public record UnitRequest(UUID subjectId, String name, String description,

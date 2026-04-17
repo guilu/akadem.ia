@@ -33,6 +33,9 @@ public class ExamController {
     public record StartRandomRequest(UUID subjectId, int count, int minutes, String difficulty) {
     }
 
+    public record StartFromSyllabusRequest(UUID syllabusId, java.util.List<UUID> subjectIds, int count, int minutes, String difficulty) {
+    }
+
     @PostMapping("/attempts/start-random")
     public ResponseEntity<?> startRandom(@RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {
@@ -43,6 +46,27 @@ public class ExamController {
                 principal.getUsername(), userId, req.subjectId(), req.count(), req.minutes(), req.difficulty());
         var response = examUseCase.startRandomExam(command);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/attempts/start-from-syllabus")
+    public ResponseEntity<?> startFromSyllabus(@RequestBody StartFromSyllabusRequest req,
+            @AuthenticationPrincipal User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UUID userId = resolveUserId(principal);
+        var command = new ExamUseCase.StartFromSyllabusCommand(
+                principal.getUsername(), userId,
+                req.syllabusId(),
+                req.subjectIds() != null ? req.subjectIds() : java.util.List.of(),
+                req.count(), req.minutes(), req.difficulty());
+        try {
+            var response = examUseCase.startExamFromSyllabus(command);
+            return ResponseEntity.ok(response);
+        } catch (java.util.NoSuchElementException e) {
+            log.warn("start-from-syllabus: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/attempts/start")

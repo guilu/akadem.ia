@@ -26,4 +26,10 @@ public interface SubjectRepository {
    * - ALL → visibility=GLOBAL OR (visibility=PRIVATE AND ownerId=userId)
    */
   List<Subject> findByScope(UUID userId, Visibility scope);
+
+  /** Returns all subjects belonging to a given syllabus. */
+  List<Subject> findBySyllabusId(UUID syllabusId);
+
+  /** Returns visible subjects (GLOBAL + caller's PRIVATE) for a given syllabus. */
+  List<Subject> findVisibleBySyllabusId(UUID syllabusId, UUID userId);
 }

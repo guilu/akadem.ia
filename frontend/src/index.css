@@ -28,6 +28,13 @@
     line-height: 2.25rem;
     align-items: center;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 input[type="radio"] {
@@ -38,6 +45,7 @@ input[type="radio"] {
 html, body {
   background: rgb(var(--bg));
   color: rgb(var(--text));
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 .theme-toggle {

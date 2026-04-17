@@ -583,5 +583,15 @@ class ExamManagerResumeTest {
           })
           .toList();
     }
+
+    @Override
+    public List<Subject> findBySyllabusId(UUID syllabusId) {
+      return data.values().stream().filter(s -> syllabusId.equals(s.getSyllabusId())).toList();
+    }
+
+    @Override
+    public List<Subject> findVisibleBySyllabusId(UUID syllabusId, UUID userId) {
+      return findBySyllabusId(syllabusId);
+    }
   }
 }

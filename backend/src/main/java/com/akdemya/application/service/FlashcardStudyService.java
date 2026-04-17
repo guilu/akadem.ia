@@ -6,11 +6,13 @@ import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.StudySettingsDefaults;
 import com.akdemya.domain.model.Subject;
+import com.akdemya.domain.model.Syllabus;
 import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
 import com.akdemya.domain.port.out.SubjectRepository;
+import com.akdemya.domain.port.out.SyllabusRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserSettingsRepository;
 import com.akdemya.domain.service.Sm2Scheduler;
@@ -32,6 +34,7 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
   private final UserSettingsRepository settingsRepo;
   private final UnitRepository unitRepo;
   private final SubjectRepository subjectRepo;
+  private final SyllabusRepository syllabusRepo;
   private final Sm2Scheduler scheduler;
 
   public FlashcardStudyService(FlashcardRepository flashcardRepo,
@@ -39,12 +42,14 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
                                UserSettingsRepository settingsRepo,
                                UnitRepository unitRepo,
                                SubjectRepository subjectRepo,
+                               SyllabusRepository syllabusRepo,
                                FlashcardSchedulerProperties schedulerProperties) {
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
     this.settingsRepo = settingsRepo;
     this.unitRepo = unitRepo;
     this.subjectRepo = subjectRepo;
+    this.syllabusRepo = syllabusRepo;
     this.scheduler = new Sm2Scheduler(
         schedulerProperties.getLearningStepsMinutes(),
         schedulerProperties.getEasyIntervalDays(),
@@ -151,19 +156,38 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
         command.userId(), List.of(ReviewState.LEARNING, ReviewState.REVIEW));
     Map<UUID, Long> dueCounts = reviewRepo.countDueByUserIdUpToGroupByUnit(command.userId(), now);
 
-    Map<UUID, String> subjectNames = subjectRepo.findVisibleByUserId(command.userId()).stream()
+    List<Subject> subjects = subjectRepo.findVisibleByUserId(command.userId());
+    Map<UUID, String> subjectNames = subjects.stream()
         .collect(Collectors.toMap(Subject::getId, Subject::getName));
+    Map<UUID, UUID> subjectToSyllabus = subjects.stream()
+        .filter(s -> s.getSyllabusId() != null)
+        .collect(Collectors.toMap(Subject::getId, Subject::getSyllabusId));
+
+    Map<UUID, String> syllabusNames = syllabusRepo.findVisibleByUserId(command.userId()).stream()
+        .collect(Collectors.toMap(Syllabus::getId, Syllabus::getName));
 
     return unitRepo.findVisibleWithFlashcardsByUserId(command.userId()).stream()
-        .map(unit -> new UnitSummaryResult(
-            unit.getId(),
-            unit.getName(),
-            unit.getSubjectId(),
-            subjectNames.getOrDefault(unit.getSubjectId(), ""),
-            newCounts.getOrDefault(unit.getId(), 0L),
-            reviewCounts.getOrDefault(unit.getId(), 0L),
-            dueCounts.getOrDefault(unit.getId(), 0L)
-        ))
+        .map(unit -> {
+          UUID syllabusId = null;
+          String syllabusName = null;
+          if (unit.getSubjectId() != null) {
+            syllabusId = subjectToSyllabus.get(unit.getSubjectId());
+            if (syllabusId != null) {
+              syllabusName = syllabusNames.get(syllabusId);
+            }
+          }
+          return new UnitSummaryResult(
+              unit.getId(),
+              unit.getName(),
+              unit.getSubjectId(),
+              subjectNames.getOrDefault(unit.getSubjectId(), ""),
+              syllabusId,
+              syllabusName != null ? syllabusName : "",
+              newCounts.getOrDefault(unit.getId(), 0L),
+              reviewCounts.getOrDefault(unit.getId(), 0L),
+              dueCounts.getOrDefault(unit.getId(), 0L)
+          );
+        })
         .toList();
   }
 }

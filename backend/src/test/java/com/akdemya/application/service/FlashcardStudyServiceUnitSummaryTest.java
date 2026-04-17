@@ -9,6 +9,7 @@ import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
 import com.akdemya.domain.port.out.SubjectRepository;
+import com.akdemya.domain.port.out.SyllabusRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ class FlashcardStudyServiceUnitSummaryTest {
   private final UserSettingsRepository settingsRepo = mock(UserSettingsRepository.class);
   private final UnitRepository unitRepo = mock(UnitRepository.class);
   private final SubjectRepository subjectRepo = mock(SubjectRepository.class);
+  private final SyllabusRepository syllabusRepo = mock(SyllabusRepository.class);
   private final FlashcardSchedulerProperties schedulerProperties = new FlashcardSchedulerProperties();
 
   private FlashcardStudyService service;
@@ -41,7 +43,7 @@ class FlashcardStudyServiceUnitSummaryTest {
   @BeforeEach
   void setUp() {
     service = new FlashcardStudyService(
-        flashcardRepo, reviewRepo, settingsRepo, unitRepo, subjectRepo, schedulerProperties);
+        flashcardRepo, reviewRepo, settingsRepo, unitRepo, subjectRepo, syllabusRepo, schedulerProperties);
   }
 
   @Test
@@ -52,6 +54,7 @@ class FlashcardStudyServiceUnitSummaryTest {
 
     when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit));
     when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
+    when(syllabusRepo.findVisibleByUserId(userId)).thenReturn(List.of());
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());
@@ -76,6 +79,7 @@ class FlashcardStudyServiceUnitSummaryTest {
 
     when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit1, unit2));
     when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
+    when(syllabusRepo.findVisibleByUserId(userId)).thenReturn(List.of());
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId))
         .thenReturn(Map.of(unit1.getId(), 5L));
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any()))
@@ -110,6 +114,7 @@ class FlashcardStudyServiceUnitSummaryTest {
 
     when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of(unit));
     when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of(subject));
+    when(syllabusRepo.findVisibleByUserId(userId)).thenReturn(List.of());
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());
@@ -146,6 +151,7 @@ class FlashcardStudyServiceUnitSummaryTest {
         .thenReturn(List.of(ownUnit, globalUnit));  // other user's private unit NOT included
     when(subjectRepo.findVisibleByUserId(callerId))
         .thenReturn(List.of(ownSubject, globalSubject));  // other user's private subject NOT included
+    when(syllabusRepo.findVisibleByUserId(callerId)).thenReturn(List.of());
     when(flashcardRepo.countNewByUserIdGroupByUnit(callerId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(callerId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(callerId), any())).thenReturn(Map.of());
@@ -164,6 +170,7 @@ class FlashcardStudyServiceUnitSummaryTest {
   void getUnitSummaries_onlyCallsVisibilityScopedRepositoryMethods() {
     when(unitRepo.findVisibleWithFlashcardsByUserId(userId)).thenReturn(List.of());
     when(subjectRepo.findVisibleByUserId(userId)).thenReturn(List.of());
+    when(syllabusRepo.findVisibleByUserId(userId)).thenReturn(List.of());
     when(flashcardRepo.countNewByUserIdGroupByUnit(userId)).thenReturn(Map.of());
     when(reviewRepo.countByUserIdAndStateInGroupByUnit(eq(userId), any())).thenReturn(Map.of());
     when(reviewRepo.countDueByUserIdUpToGroupByUnit(eq(userId), any())).thenReturn(Map.of());

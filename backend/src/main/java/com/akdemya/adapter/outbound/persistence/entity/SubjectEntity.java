@@ -18,6 +18,10 @@ public class SubjectEntity {
     @Column(name = "owner_id")
     private UUID ownerId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "syllabus_id", nullable = false)
+    private SyllabusEntity syllabus;
+
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<UnitEntity> units = new java.util.ArrayList<>();
 
@@ -67,6 +71,14 @@ public class SubjectEntity {
 
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public SyllabusEntity getSyllabus() {
+        return syllabus;
+    }
+
+    public void setSyllabus(SyllabusEntity syllabus) {
+        this.syllabus = syllabus;
     }
 
     public java.util.List<UnitEntity> getUnits() {

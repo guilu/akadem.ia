@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
 import { apiBase, apiJson } from '../api';
-import ScopeFilter, { type ContentScope } from './ScopeFilter';
+import { getSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
+import type { Syllabus } from '../types';
 
 export type AdminSubject = {
   id: string;
@@ -10,6 +11,7 @@ export type AdminSubject = {
   unitCount?: number;
   visibility?: 'GLOBAL' | 'PRIVATE';
   isEditable?: boolean;
+  syllabusId?: string | null;
 };
 
 export type AdminUnit = {
@@ -35,8 +37,7 @@ export type AdminQuestion = {
   isEditable?: boolean;
 };
 
-type Tab = 'subjects' | 'units' | 'questions';
-type Scope = ContentScope;
+type Tab = 'syllabuses' | 'subjects' | 'units' | 'questions';
 
 const inp = 'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-2.5 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
 const card = 'border border-secondary/25 rounded-2xl p-6';
@@ -110,10 +111,28 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 }
 
 export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: boolean; onSubjectsChanged?: () => void }) {
-  const [tab, setTab] = useState<Tab>('subjects');
+  const [tab, setTab] = useState<Tab>('syllabuses');
+
+  // ── Temarios state ──
+  const [syllabuses, setSyllabuses] = useState<Syllabus[]>([]);
+  const [syllabusForm, setSyllabusForm] = useState<{ id: string; name: string; description: string }>({ id: '', name: '', description: '' });
+  const [syllabusLoading, setSyllabusLoading] = useState(false);
+  const [confirmSyllabusDelete, setConfirmSyllabusDelete] = useState<Syllabus | null>(null);
+  const [syllabusDeleteLoading, setSyllabusDeleteLoading] = useState(false);
+  const [syllabusDeleteError, setSyllabusDeleteError] = useState('');
+  const isSyllabusEditing = useMemo(() => Boolean(syllabusForm.id), [syllabusForm.id]);
+
+  async function loadSyllabuses() {
+    try {
+      const data = await getSyllabuses();
+      setSyllabuses(data);
+    } catch { setSyllabuses([]); }
+  }
+
+  useEffect(() => { if (tab === 'syllabuses' || tab === 'subjects' || tab === 'units' || tab === 'questions') loadSyllabuses(); }, [tab]);
 
   const [subjects, setSubjects] = useState<AdminSubject[]>([]);
-  const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '' });
+  const [subjectForm, setSubjectForm] = useState<AdminSubject>({ id: '', name: '', description: '', syllabusId: null });
   const [subjectLoading, setSubjectLoading] = useState(false);
   const [confirmSubjectDelete, setConfirmSubjectDelete] = useState<AdminSubject | null>(null);
   const [subjectDeleteLoading, setSubjectDeleteLoading] = useState(false);
@@ -158,78 +177,86 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   const [importDone, setImportDone] = useState(false);
   const [importStats, setImportStats] = useState<{ created: number; errors: number } | null>(null);
 
-  const [subjectScope, setSubjectScope] = useState<Scope>('ALL');
-  const [unitScope, setUnitScope] = useState<Scope>('ALL');
-  const [questionScope, setQuestionScope] = useState<Scope>('ALL');
+  const [filterSyllabusId, setFilterSyllabusId] = useState('');
+  const [filterUnitSyllabusId, setFilterUnitSyllabusId] = useState('');
+  const [questionSyllabusId, setQuestionSyllabusId] = useState('');
 
   const subjectById = useMemo(() => subjects.reduce((acc, s) => { acc[s.id] = s; return acc; }, {} as Record<string, AdminSubject>), [subjects]);
   const unitById = useMemo(() => units.reduce((acc, u) => { acc[u.id] = u; return acc; }, {} as Record<string, AdminUnit>), [units]);
-  const subjectOptions = useMemo(() => subjects.map(s => ({ value: s.id, label: s.name })), [subjects]);
-  const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
 
-  function resetSubjectForm() { setSubjectForm({ id: '', name: '', description: '' }); }
+  const unitSubjectOptions = useMemo(() =>
+    subjects
+      .filter(s => !filterUnitSyllabusId || s.syllabusId === filterUnitSyllabusId)
+      .map(s => ({ value: s.id, label: s.name })),
+    [subjects, filterUnitSyllabusId]);
+
+  const questionSubjectOptions = useMemo(() =>
+    subjects
+      .filter(s => !questionSyllabusId || s.syllabusId === questionSyllabusId)
+      .map(s => ({ value: s.id, label: s.name })),
+    [subjects, questionSyllabusId]);
+
+  const unitOptions = useMemo(() => units.map(u => ({ value: u.id, label: u.name })), [units]);
+  const filteredSubjectsList = useMemo(() => filterSyllabusId ? subjects.filter(s => s.syllabusId === filterSyllabusId) : [], [subjects, filterSyllabusId]);
+
+  function resetSubjectForm() { setSubjectForm({ id: '', name: '', description: '', syllabusId: filterSyllabusId || null }); }
   function resetUnitForm() { setUnitForm({ id: '', subjectId: '', name: '', description: '', orderIndex: 1 }); }
   function resetQuestionForm() {
     setQuestionForm({ id: '', unitId: '', text: '', explanation: '', difficulty: 'EASY', answers: [{ text: '', correct: true }, { text: '', correct: false }, { text: '', correct: false }, { text: '', correct: false }] });
   }
 
-  async function loadSubjects(scope: Scope = subjectScope) {
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1${scopeParam}`);
+  async function loadSubjects() {
+    const data = await apiJson<AdminSubject[]>(`${apiBase}/api/manage/subjects?_=1`);
     setSubjects(data);
   }
-  async function loadUnits(subjectId: string, scope: Scope = unitScope) {
+  async function loadUnits(subjectId: string) {
     if (!subjectId) { setUnits([]); return; }
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}${scopeParam}`);
+    const data = await apiJson<AdminUnit[]>(`${apiBase}/api/manage/units?subjectId=${subjectId}`);
     setUnits(data);
   }
-  async function loadQuestions(unitId: string, page = questionPage, scope: Scope = questionScope) {
+  async function loadQuestions(unitId: string, page = questionPage) {
     if (!unitId) { setQuestions([]); setQuestionTotalPages(1); return; }
-    const scopeParam = scope === 'ALL' ? '' : `&scope=${scope}`;
-    const data = await apiJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10${scopeParam}`);
+    const data = await apiJson<{ items: AdminQuestion[]; page: number; totalPages: number }>(`${apiBase}/api/manage/questions?unitId=${unitId}&page=${page}&size=10`);
     setQuestions(data.items); setQuestionPage(data.page + 1); setQuestionTotalPages(data.totalPages || 1);
   }
 
   useEffect(() => {
-    loadSubjects('ALL').catch(() => setSubjects([]));
+    loadSubjects().catch(() => setSubjects([]));
   }, []);
-  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId, unitScope).catch(() => setUnits([])); }, [tab, unitForm.subjectId, unitScope]);
+  useEffect(() => { if (tab === 'units') loadUnits(unitForm.subjectId).catch(() => setUnits([])); }, [tab, unitForm.subjectId]);
   useEffect(() => {
     if (tab === 'questions') {
-      loadUnits(questionSubjectId, 'ALL').catch(() => setUnits([]));
-      loadQuestions(questionUnitId, 1, questionScope).catch(() => setQuestions([]));
+      loadUnits(questionSubjectId).catch(() => setUnits([]));
+      loadQuestions(questionUnitId, 1).catch(() => setQuestions([]));
     }
-  }, [tab, questionSubjectId, questionUnitId, questionScope]);
-  useEffect(() => { if (tab === 'subjects') loadSubjects(subjectScope).catch(() => setSubjects([])); }, [tab, subjectScope]);
+  }, [tab, questionSubjectId, questionUnitId]);
+  useEffect(() => { if (tab === 'subjects') loadSubjects().catch(() => setSubjects([])); }, [tab]);
 
   async function saveSubject() {
     if (!subjectForm.name.trim()) return;
     setSubjectLoading(true);
     try {
-      const visibility = isAdmin && subjectScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, visibility });
+      const body = JSON.stringify({ name: subjectForm.name, description: subjectForm.description || null, syllabusId: subjectForm.syllabusId || null });
       const opts = { method: isSubjectEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body };
       await apiJson(isSubjectEditing ? `${apiBase}/api/manage/subjects/${subjectForm.id}` : `${apiBase}/api/manage/subjects`, opts);
-      resetSubjectForm(); await loadSubjects(subjectScope); onSubjectsChanged?.();
+      resetSubjectForm(); await loadSubjects(); onSubjectsChanged?.();
     } finally { setSubjectLoading(false); }
   }
 
-  async function removeSubject(id: string) { await apiJson(`${apiBase}/api/manage/subjects/${id}`, { method: 'DELETE' }); await loadSubjects(subjectScope); onSubjectsChanged?.(); }
+  async function removeSubject(id: string) { await apiJson(`${apiBase}/api/manage/subjects/${id}`, { method: 'DELETE' }); await loadSubjects(); onSubjectsChanged?.(); }
 
   async function saveUnit() {
     if (!unitForm.subjectId || !unitForm.name.trim()) return;
     setUnitLoading(true);
     try {
-      const visibility = isAdmin && unitScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0, visibility };
+      const payload = { subjectId: unitForm.subjectId, name: unitForm.name, description: unitForm.description || null, orderIndex: unitForm.orderIndex || 0 };
       const opts = { method: isUnitEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
       await apiJson(isUnitEditing ? `${apiBase}/api/manage/units/${unitForm.id}` : `${apiBase}/api/manage/units`, opts);
-      resetUnitForm(); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope);
+      resetUnitForm(); await loadUnits(unitForm.subjectId); await loadSubjects();
     } finally { setUnitLoading(false); }
   }
 
-  async function removeUnit(id: string) { await apiJson(`${apiBase}/api/manage/units/${id}`, { method: 'DELETE' }); await loadUnits(unitForm.subjectId, unitScope); await loadSubjects(subjectScope); }
+  async function removeUnit(id: string) { await apiJson(`${apiBase}/api/manage/units/${id}`, { method: 'DELETE' }); await loadUnits(unitForm.subjectId); await loadSubjects(); }
 
   async function saveQuestion() {
     const unitId = questionUnitId || questionForm.unitId;
@@ -238,15 +265,14 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     if (questionForm.answers.filter(a => a.correct).length !== 1) return;
     setQuestionLoading(true);
     try {
-      const visibility = isAdmin && questionScope === 'GLOBAL' ? 'GLOBAL' : 'PRIVATE';
-      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })), visibility };
+      const payload = { unitId, text: questionForm.text, explanation: questionForm.explanation || null, difficulty: questionForm.difficulty, answers: questionForm.answers.map(a => ({ text: a.text, correct: a.correct })) };
       const opts = { method: isQuestionEditing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
       await apiJson(isQuestionEditing ? `${apiBase}/api/manage/questions/${questionForm.id}` : `${apiBase}/api/manage/questions`, opts);
-      resetQuestionForm(); await loadQuestions(unitId, 1, questionScope); await loadUnits(questionSubjectId, 'ALL');
+      resetQuestionForm(); await loadQuestions(unitId, 1); await loadUnits(questionSubjectId);
     } finally { setQuestionLoading(false); }
   }
 
-  async function removeQuestion(id: string, unitId: string) { await apiJson(`${apiBase}/api/manage/questions/${id}`, { method: 'DELETE' }); await loadQuestions(unitId, questionPage, questionScope); await loadUnits(questionSubjectId, 'ALL'); }
+  async function removeQuestion(id: string, unitId: string) { await apiJson(`${apiBase}/api/manage/questions/${id}`, { method: 'DELETE' }); await loadQuestions(unitId, questionPage); await loadUnits(questionSubjectId); }
 
   async function handleExport(format: 'csv' | 'json') {
     setExportLoading(true);
@@ -285,6 +311,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   }
 
   const navItems = [
+    { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-4 h-4" /> },
     { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
     { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
@@ -312,21 +339,109 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
       {/* ── Content ── */}
       <section className="grid gap-5">
 
+        {/* ── Temarios ── */}
+        {tab === 'syllabuses' && (
+          <div className="grid gap-5 py-[1.5rem]">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temarios</span></h2>
+            </div>
+            <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">{isSyllabusEditing ? 'Editar temario' : 'Nuevo temario'}</div>
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                <input className={inp} placeholder="Nombre del temario" value={syllabusForm.name}
+                  onChange={e => setSyllabusForm(f => ({ ...f, name: e.target.value }))} />
+                <input className={inp} placeholder="Descripción (opcional)" value={syllabusForm.description}
+                  onChange={e => setSyllabusForm(f => ({ ...f, description: e.target.value }))} />
+                <div className="flex gap-2">
+                  <button className={btnPrimary} disabled={syllabusLoading || !syllabusForm.name.trim()}
+                    onClick={async () => {
+                      if (!syllabusForm.name.trim()) return;
+                      setSyllabusLoading(true);
+                      try {
+                        if (isSyllabusEditing) {
+                          await updateSyllabus(syllabusForm.id, { name: syllabusForm.name.trim(), description: syllabusForm.description });
+                        } else {
+                          await createSyllabus({ name: syllabusForm.name.trim(), description: syllabusForm.description });
+                        }
+                        setSyllabusForm({ id: '', name: '', description: '' });
+                        await loadSyllabuses();
+                      } catch { /* ignore */ }
+                      finally { setSyllabusLoading(false); }
+                    }}>
+                    <Check className="w-4 h-4" />
+                    {isSyllabusEditing ? (syllabusLoading ? 'Guardando...' : 'Guardar') : (syllabusLoading ? 'Creando...' : 'Crear')}
+                  </button>
+                  {isSyllabusEditing && (
+                    <button className={btnOutline} onClick={() => setSyllabusForm({ id: '', name: '', description: '' })}>
+                      <CircleMinus className="w-4 h-4" /> Cancelar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={card}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr>
+                    <Th>Nombre</Th><Th className="hidden sm:table-cell">Descripción</Th><Th>Visibilidad</Th><Th></Th>
+                  </tr></thead>
+                  <tbody>
+                    {syllabuses.length === 0 && (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/45">No hay temarios</td></tr>
+                    )}
+                    {syllabuses.map(s => (
+                      <tr key={s.id} className="border-t border-secondary/10 hover:bg-secondary/5 transition-colors">
+                        <Td className="font-medium">{s.name}</Td>
+                        <Td className="hidden sm:table-cell text-text/55">{s.description || '—'}</Td>
+                        <Td><span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${s.visibility === 'GLOBAL' ? 'border-lime-400/30 bg-lime-400/10 text-lime-600 dark:text-lime-400' : 'border-accent/30 bg-accent/10 text-accent'}`}>{s.visibility === 'GLOBAL' ? 'Global' : 'Privado'}</span></Td>
+                        <Td>
+                          {(isAdmin || s.visibility === 'PRIVATE') && (
+                            <div className="flex gap-2">
+                              <button onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
+                              <button onClick={() => setConfirmSyllabusDelete(s)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            </div>
+                          )}
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Materias ── */}
         {tab === 'subjects' && (
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
-              <ScopeFilter scope={subjectScope} onChange={setSubjectScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
+              <select
+                className={inp}
+                value={filterSyllabusId}
+                onChange={e => { setFilterSyllabusId(e.target.value); setSubjectForm(f => ({ ...f, syllabusId: e.target.value || null })); }}
+              >
+                <option value="">Selecciona un temario</option>
+                {syllabuses.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={card}>
+              {!filterSyllabusId && (
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario para crear la materia.</p>
+              )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={subjectForm.name} onChange={e => setSubjectForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={subjectForm.description || ''} onChange={e => setSubjectForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="flex gap-2">
-                <button onClick={saveSubject} disabled={subjectLoading} className={btnPrimary}>
+                <button onClick={saveSubject} disabled={subjectLoading || !filterSyllabusId} className={btnPrimary}>
                   {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
                 </button>
@@ -343,17 +458,21 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                 <table className="w-full">
                   <thead><tr className="border-b border-secondary/20">
                     <Th>Materia</Th>
-                    <Th className="hidden sm:table-cell">Descripción</Th>
+                    <Th className="hidden sm:table-cell">Temario</Th>
                     <Th className="hidden sm:table-cell">Visibilidad</Th>
                     <Th />
                   </tr></thead>
                   <tbody>
-                    {subjects.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias disponibles.</td></tr>
-                    ) : subjects.map(s => (
+                    {!filterSyllabusId ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />Selecciona un temario para ver las materias.</td></tr>
+                    ) : filteredSubjectsList.length === 0 ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias en este temario.</td></tr>
+                    ) : filteredSubjectsList.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
-                        <Td className="hidden sm:table-cell">{s.description || '-'}</Td>
+                        <Td className="hidden sm:table-cell text-text/55 text-xs">
+                          {s.syllabusId ? (syllabuses.find(sy => sy.id === s.syllabusId)?.name ?? '—') : '—'}
+                        </Td>
                         <Td className="hidden sm:table-cell">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.visibility === 'GLOBAL' ? 'bg-blue-500/15 text-blue-600' : 'bg-secondary/20 text-text/60'}`}>
                             {s.visibility === 'GLOBAL' ? 'Global' : 'Personal'}
@@ -381,21 +500,33 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
-              <ScopeFilter scope={unitScope} onChange={setUnitScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
-              <div className="grid gap-3 sm:grid-cols-2 mb-4">
-                <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))}>
-                  <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <select className={inp} value={filterUnitSyllabusId} onChange={e => { setFilterUnitSyllabusId(e.target.value); setUnitForm(f => ({ ...f, subjectId: '' })); }}>
+                  <option value="">Selecciona un temario</option>
+                  {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
+                <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))} disabled={!filterUnitSyllabusId}>
+                  <option value="">Selecciona materia</option>
+                  {unitSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className={card}>
+              {!unitForm.subjectId && (
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario y la materia para añadir una unidad.</p>
+              )}
+              <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={unitForm.name} onChange={e => setUnitForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inp} placeholder="Descripción (opcional)" value={unitForm.description || ''} onChange={e => setUnitForm(f => ({ ...f, description: e.target.value }))} />
                 <input className={inp} type="number" placeholder="Orden" value={unitForm.orderIndex} onChange={e => setUnitForm(f => ({ ...f, orderIndex: Number(e.target.value) }))} />
               </div>
               <div className="flex gap-2">
-                <button onClick={saveUnit} disabled={unitLoading} className={btnPrimary}>
+                <button onClick={saveUnit} disabled={unitLoading || !unitForm.subjectId} className={btnPrimary}>
                   {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                   {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
                 </button>
@@ -420,7 +551,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {units.length === 0 ? (
-                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay unidades disponibles.</td></tr>
+                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{unitForm.subjectId ? 'No hay unidades disponibles.' : 'Selecciona un temario y materia para ver las unidades.'}</td></tr>
                     ) : units.map(u => (
                       <tr key={u.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
@@ -454,17 +585,20 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Preguntas</span></h2>
-              <ScopeFilter scope={questionScope} onChange={setQuestionScope} isAdmin={isAdmin} />
             </div>
 
             <div className={card}>
               <div className="text-xs text-text/50 uppercase tracking-wide font-semibold mb-3">Filtros</div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <select className={inp} value={questionSubjectId} onChange={e => setQuestionSubjectId(e.target.value)}>
-                  <option value="">Selecciona materia</option>
-                  {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              <div className="grid gap-3 sm:grid-cols-3">
+                <select className={inp} value={questionSyllabusId} onChange={e => { setQuestionSyllabusId(e.target.value); setQuestionSubjectId(''); setQuestionUnitId(''); }}>
+                  <option value="">Selecciona temario</option>
+                  {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
-                <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)}>
+                <select className={inp} value={questionSubjectId} onChange={e => { setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }} disabled={!questionSyllabusId}>
+                  <option value="">Selecciona materia</option>
+                  {questionSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+                <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)} disabled={!questionSubjectId}>
                   <option value="">Selecciona unidad</option>
                   {unitOptions.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
                 </select>
@@ -473,7 +607,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               {!questionUnitId && (
-                <p className="text-sm text-text/50 mb-4">Selecciona materia y unidad para crear preguntas.</p>
+                <p className="text-sm text-text/50 mb-4">Selecciona temario, materia y unidad para crear preguntas.</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Enunciado" value={questionForm.text} onChange={e => setQuestionForm(f => ({ ...f, text: e.target.value }))} />
@@ -540,7 +674,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {questions.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona una materia y unidad para ver las preguntas.'}</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona temario, materia y unidad para ver las preguntas.'}</td></tr>
                     ) : questions.map(q => (
                       <tr key={q.id} className="border-b border-secondary/10 last:border-0">
                         <Td><span className="line-clamp-2">{q.text}</span></Td>
@@ -681,6 +815,21 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
             try { await removeQuestion(confirmQuestionDelete.id, confirmQuestionDelete.unitId); setConfirmQuestionDelete(null); }
             catch { setQuestionDeleteError('No se pudo eliminar'); }
             finally { setQuestionDeleteLoading(false); }
+          }}
+        />
+      )}
+      {confirmSyllabusDelete && (
+        <DeleteModal
+          title="Eliminar temario"
+          body={<p className="text-sm text-text/70">¿Seguro que quieres eliminar <strong>{confirmSyllabusDelete.name}</strong>? Esta acción no se puede deshacer.</p>}
+          error={syllabusDeleteError}
+          loading={syllabusDeleteLoading}
+          onClose={() => { setConfirmSyllabusDelete(null); setSyllabusDeleteError(''); }}
+          onConfirm={async () => {
+            setSyllabusDeleteError(''); setSyllabusDeleteLoading(true);
+            try { await deleteSyllabus(confirmSyllabusDelete.id); setConfirmSyllabusDelete(null); await loadSyllabuses(); }
+            catch { setSyllabusDeleteError('No se pudo eliminar'); }
+            finally { setSyllabusDeleteLoading(false); }
           }}
         />
       )}

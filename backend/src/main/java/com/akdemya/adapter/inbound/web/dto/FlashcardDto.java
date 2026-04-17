@@ -60,6 +60,7 @@ public class FlashcardDto {
   }
 
   public record UnitSummary(UUID unitId, String unitName, UUID subjectId, String subjectName,
+                            UUID syllabusId, String syllabusName,
                             long newCount, long reviewCount, long dueCount) {
   }
 

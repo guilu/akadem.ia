@@ -19,7 +19,8 @@ import static org.mockito.Mockito.*;
 class SubjectPersistenceAdapterTest {
 
   private final SpringDataSubjectRepository repository = mock(SpringDataSubjectRepository.class);
-  private final SubjectMapper mapper = new SubjectMapper();
+  private final com.akdemya.adapter.outbound.persistence.repository.SpringDataSyllabusRepository syllabusRepository = mock(com.akdemya.adapter.outbound.persistence.repository.SpringDataSyllabusRepository.class);
+  private final SubjectMapper mapper = new SubjectMapper(syllabusRepository);
   private final SubjectPersistenceAdapter adapter = new SubjectPersistenceAdapter(repository, mapper);
 
   @Test
