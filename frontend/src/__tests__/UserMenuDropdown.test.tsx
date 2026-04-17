@@ -98,6 +98,7 @@ describe('UserMenuDropdown', () => {
           user={baseUser}
           isAdmin={false}
           onProfile={onProfile}
+          onManage={onManage}
           onSettings={onSettings}
           onLogout={onLogout}
         />
