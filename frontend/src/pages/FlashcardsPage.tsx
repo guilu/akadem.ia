@@ -317,11 +317,11 @@ export default function FlashcardsPage() {
             </span>
             <span className="flex items-center gap-1.5 text-accent whitespace-nowrap">
               <Refresh className="w-4 h-4 shrink-0" />
-              {globalQueue.learning} aprendiendo
+              {globalQueue.learning}<span className="sm:hidden"> aprend.</span><span className="hidden sm:inline"> aprendiendo</span>
             </span>
             <span className="flex items-center gap-1.5 text-primary whitespace-nowrap">
               <Clock className="w-4 h-4 shrink-0" />
-              {globalQueue.due} pendientes
+              {globalQueue.due}<span className="sm:hidden"> pend.</span><span className="hidden sm:inline"> pendientes</span>
             </span>
           </div>
         ) : null
