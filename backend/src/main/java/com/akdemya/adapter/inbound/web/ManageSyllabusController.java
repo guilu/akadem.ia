@@ -29,7 +29,7 @@ public class ManageSyllabusController {
   }
 
   @GetMapping
-  public ResponseEntity<?> list(@AuthenticationPrincipal User principal) {
+  public ResponseEntity<List<ManageSyllabusResponse>> list(@AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -42,7 +42,7 @@ public class ManageSyllabusController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody SyllabusRequest req,
+  public ResponseEntity<Object> create(@Valid @RequestBody SyllabusRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -73,7 +73,7 @@ public class ManageSyllabusController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id,
+  public ResponseEntity<Object> update(@PathVariable UUID id,
                                    @Valid @RequestBody SyllabusRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
@@ -108,7 +108,7 @@ public class ManageSyllabusController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id,
+  public ResponseEntity<Object> delete(@PathVariable UUID id,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

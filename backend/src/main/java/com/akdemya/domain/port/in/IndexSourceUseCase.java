@@ -8,7 +8,34 @@ import java.util.UUID;
 
 public interface IndexSourceUseCase {
 
-    record UploadCommand(UUID subjectId, String filename, String contentType, byte[] bytes) {}
+    record UploadCommand(UUID subjectId, String filename, String contentType, byte[] bytes) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UploadCommand that = (UploadCommand) o;
+            return java.util.Objects.equals(subjectId, that.subjectId) &&
+                   java.util.Objects.equals(filename, that.filename) &&
+                   java.util.Objects.equals(contentType, that.contentType) &&
+                   java.util.Arrays.equals(bytes, that.bytes);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = java.util.Objects.hash(subjectId, filename, contentType);
+            result = 31 * result + java.util.Arrays.hashCode(bytes);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "UploadCommand[" +
+                   "subjectId=" + subjectId + ", " +
+                   "filename=" + filename + ", " +
+                   "contentType=" + contentType + ", " +
+                   "bytes=" + java.util.Arrays.toString(bytes) + "]";
+        }
+    }
 
     record DetectedUnit(String name, String headingKey, int chunkCount) {}
 

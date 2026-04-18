@@ -28,7 +28,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/quizzes/generate")
-    public ResponseEntity<?> generate(@Valid @RequestBody GenerateRequest req) {
+    public ResponseEntity<Object> generate(@Valid @RequestBody GenerateRequest req) {
         try {
             req.validate();
         } catch (IllegalArgumentException e) {
@@ -72,7 +72,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/drafts/{id}/approve")
-    public ResponseEntity<?> approve(@PathVariable UUID id) {
+    public ResponseEntity<Object> approve(@PathVariable UUID id) {
         try {
             GeneratedQuestionDraft updated = reviewUseCase.approve(id);
             return ResponseEntity.ok(toResponse(updated));
@@ -84,7 +84,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/drafts/{id}/reject")
-    public ResponseEntity<?> reject(@PathVariable UUID id) {
+    public ResponseEntity<Object> reject(@PathVariable UUID id) {
         try {
             GeneratedQuestionDraft updated = reviewUseCase.reject(id);
             return ResponseEntity.ok(toResponse(updated));

@@ -29,7 +29,7 @@ public class ManageSubjectController {
   }
 
   @GetMapping
-  public ResponseEntity<?> list(@AuthenticationPrincipal User principal) {
+  public ResponseEntity<List<ManageSubjectResponse>> list(@AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -47,7 +47,7 @@ public class ManageSubjectController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody SubjectRequest req,
+  public ResponseEntity<Object> create(@Valid @RequestBody SubjectRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -79,7 +79,7 @@ public class ManageSubjectController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id,
+  public ResponseEntity<Object> update(@PathVariable UUID id,
                                    @Valid @RequestBody SubjectRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
@@ -118,7 +118,7 @@ public class ManageSubjectController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id,
+  public ResponseEntity<Object> delete(@PathVariable UUID id,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

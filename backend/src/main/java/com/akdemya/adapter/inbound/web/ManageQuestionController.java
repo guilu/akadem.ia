@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -37,7 +38,7 @@ public class ManageQuestionController {
   }
 
   @GetMapping
-  public ResponseEntity<?> list(
+  public ResponseEntity<PageResponse<ManageQuestionResponse>> list(
       @RequestParam UUID unitId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int size,
@@ -60,8 +61,8 @@ public class ManageQuestionController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody QuestionRequest req,
-                                   @AuthenticationPrincipal User principal) {
+  public ResponseEntity<Object> create(@Valid @RequestBody QuestionRequest req,
+                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -118,7 +119,7 @@ public class ManageQuestionController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id,
+  public ResponseEntity<Object> update(@PathVariable UUID id,
                                    @Valid @RequestBody QuestionRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
@@ -171,7 +172,7 @@ public class ManageQuestionController {
   }
 
   @GetMapping("/export")
-  public ResponseEntity<?> export(@RequestParam(required = false) UUID unitId,
+  public ResponseEntity<Object> export(@RequestParam(required = false) UUID unitId,
                                    @RequestParam(defaultValue = "json") String format,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
@@ -179,9 +180,12 @@ public class ManageQuestionController {
     }
     AppUser caller = resolveUser(principal);
     boolean isAdmin = isAdmin(principal);
-    List<Question> data = unitId == null
-        ? (isAdmin ? contentService.getAllQuestions() : contentService.getVisibleQuestions(caller.getId()))
-        : contentService.getVisibleQuestionsByUnit(unitId, caller.getId());
+    List<Question> data;
+    if (unitId == null) {
+      data = isAdmin ? contentService.getAllQuestions() : contentService.getVisibleQuestions(caller.getId());
+    } else {
+      data = contentService.getVisibleQuestionsByUnit(unitId, caller.getId());
+    }
     if (format.equalsIgnoreCase("csv")) {
       String csv = toCsv(data);
       return ResponseEntity.ok()
@@ -207,7 +211,7 @@ public class ManageQuestionController {
   );
 
   @PostMapping(value = "/import", consumes = "multipart/form-data")
-  public ResponseEntity<?> importQuestions(
+  public ResponseEntity<Object> importQuestions(
       @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
       @RequestParam(defaultValue = "json") String format,
       @RequestParam(required = false) UUID unitId,
@@ -366,7 +370,7 @@ public class ManageQuestionController {
                    Question.Difficulty difficulty, List<AnswerRequest> answers) {}
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id,
+  public ResponseEntity<Object> delete(@PathVariable UUID id,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

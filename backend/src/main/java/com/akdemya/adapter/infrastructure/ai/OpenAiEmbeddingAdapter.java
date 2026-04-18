@@ -78,5 +78,27 @@ public class OpenAiEmbeddingAdapter implements EmbeddingPort {
     record EmbeddingResponse(List<EmbeddingData> data) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record EmbeddingData(int index, float[] embedding) {}
+    record EmbeddingData(int index, float[] embedding) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EmbeddingData that = (EmbeddingData) o;
+            return index == that.index && java.util.Arrays.equals(embedding, that.embedding);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = java.util.Objects.hash(index);
+            result = 31 * result + java.util.Arrays.hashCode(embedding);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "EmbeddingData[" +
+                   "index=" + index + ", " +
+                   "embedding=" + java.util.Arrays.toString(embedding) + "]";
+        }
+    }
 }
