@@ -39,6 +39,12 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
+    @Value("${app.rate-limit.login.requests-per-minute:5}")
+    private int loginRateLimit;
+
+    @Value("${app.rate-limit.register.requests-per-minute:3}")
+    private int registerRateLimit;
+
     public SecurityConfig(JwtService jwt,
                           GoogleOAuth2UserService googleOAuth2UserService,
                           OAuth2SuccessHandler oAuth2SuccessHandler) {
@@ -74,6 +80,9 @@ public class SecurityConfig {
                     .baseUri("/api/login/oauth2/code/*"))
                 .userInfoEndpoint(ui -> ui.userService(googleOAuth2UserService))
                 .successHandler(oAuth2SuccessHandler));
+
+        http.addFilterBefore(new RateLimitFilter(loginRateLimit, registerRateLimit),
+            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         http.addFilterBefore(new JwtAuthFilter(jwt),
             org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
