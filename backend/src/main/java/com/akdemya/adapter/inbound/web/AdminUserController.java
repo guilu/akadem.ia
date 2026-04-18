@@ -60,6 +60,9 @@ public class AdminUserController {
   public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody UserRequest req) {
     AppUser user = users.findById(id).orElse(null);
     if (user == null) return ResponseEntity.notFound().build();
+    if (!req.email().equals(user.getEmail()) && users.existsByEmail(req.email())) {
+      return ResponseEntity.status(409).body(Map.of("error", "email_in_use"));
+    }
     AppUser updated = new AppUser(id, req.email(), user.getPasswordHash(), req.role(), req.firstName(), req.lastName(), req.occupation());
     return ResponseEntity.ok(UserResponse.from(users.save(updated)));
   }
