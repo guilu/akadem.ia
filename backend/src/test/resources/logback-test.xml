@@ -1,0 +1,8 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="org.springframework.orm.jpa" level="ERROR"/>
+    <logger name="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" level="ERROR"/>
+    <logger name="org.hibernate.tool.schema" level="ERROR"/>
+    <logger name="org.hibernate.SQL" level="ERROR"/>
+</configuration>

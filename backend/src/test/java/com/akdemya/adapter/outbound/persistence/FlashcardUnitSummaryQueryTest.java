@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(properties = {
     "spring.flyway.enabled=false",
     "spring.sql.init.mode=never",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.show-sql=false",
+    "spring.jpa.properties.hibernate.show_sql=false"
 })
 class FlashcardUnitSummaryQueryTest {
 
