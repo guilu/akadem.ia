@@ -11,9 +11,6 @@ import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
-import com.akdemya.domain.port.out.FlashcardRepository;
-import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
-import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
@@ -21,13 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -39,26 +31,21 @@ class FlashcardControllerTest {
   private final FlashcardStudyUseCase studyUseCase = mock(FlashcardStudyUseCase.class);
   private final FlashcardReviewUseCase reviewUseCase = mock(FlashcardReviewUseCase.class);
   private final FlashcardManagementUseCase managementUseCase = mock(FlashcardManagementUseCase.class);
-  private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
-  private final FlashcardReviewLogRepository reviewLogRepo = mock(FlashcardReviewLogRepository.class);
-  private final UserRepository userRepo = mock(UserRepository.class);
+  private final PrincipalResolver principalResolver = mock(PrincipalResolver.class);
 
   private final FlashcardController controller = new FlashcardController(
       studyUseCase,
        reviewUseCase,
        managementUseCase,
        importExportUseCase,
-       flashcardRepo,
-       reviewLogRepo,
-       userRepo);
+       principalResolver);
 
   @Test
   void studyQueueReturnsCounts() {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     when(studyUseCase.getStudyQueue(any()))
         .thenReturn(new FlashcardStudyUseCase.StudyQueueResponse(3, 2, 1));
@@ -78,8 +65,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     FlashcardReview review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
         ReviewState.LEARNING, 2.5, 3, 0, 2, 0, LocalDateTime.now(),
@@ -103,8 +89,7 @@ class FlashcardControllerTest {
     UUID unitId = UUID.randomUUID();
     UUID subjectId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     var summaryResult = new FlashcardStudyUseCase.UnitSummaryResult(
         unitId, "Unidad 1", subjectId, "Math", null, "Syllabus 1", 5L, 0L, 0L);
@@ -123,23 +108,19 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
-    FlashcardReviewLog log = FlashcardReviewLog.create(userId, flashcardId, ReviewGrade.HARD,
+    var historyItem = new FlashcardReviewUseCase.HistoryItemResult(
+        UUID.randomUUID(), flashcardId, "front", "back", ReviewGrade.HARD,
         LocalDateTime.now(), 1, 2, 2.5, 2.4);
-    when(reviewLogRepo.findRecentByUserId(eq(userId), eq(20))).thenReturn(List.of(log));
-    when(flashcardRepo.findByIds(any())).thenReturn(List.of(
-        new Flashcard(flashcardId, UUID.randomUUID(), "front", "back",
-            LocalDateTime.now(), LocalDateTime.now())
-    ));
+    when(reviewUseCase.getReviewHistory(eq(userId), eq(20))).thenReturn(List.of(historyItem));
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(null, principal);
 
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().size());
-    verify(reviewLogRepo).findRecentByUserId(userId, 20);
+    verify(reviewUseCase).getReviewHistory(userId, 20);
   }
 
   // --- export endpoint ---
@@ -149,8 +130,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID subjectId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(importExportUseCase.exportFlashcardsBySubject(subjectId, userId, "csv"))
         .thenReturn("front,back\nHello,Hola\n");
 
@@ -167,8 +147,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID subjectId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(importExportUseCase.exportFlashcardsBySubject(subjectId, userId, "json"))
         .thenReturn("[{\"front\":\"Hello\",\"back\":\"Hola\"}]");
 
@@ -184,8 +163,7 @@ class FlashcardControllerTest {
   void exportWithNeitherParamReturns400() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     ResponseEntity<String> response = controller.exportFlashcards(null, null, "csv", principal);
 
@@ -197,8 +175,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(importExportUseCase.exportFlashcards(eq(unitId), eq("csv"), eq(userId), eq(false)))
         .thenReturn("front,back\nQ,A\n");
 
@@ -210,18 +187,21 @@ class FlashcardControllerTest {
 
   @Test
   void createWithoutAuthReturns401() {
-    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
+    when(principalResolver.requireUserId(isNull())).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", com.akdemya.domain.model.Visibility.PRIVATE);
     assertThrows(ResponseStatusException.class, () -> controller.create(req, null));
   }
 
   @Test
   void updateWithoutAuthReturns401() {
+    when(principalResolver.requireUserId(isNull())).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));
     var req = new FlashcardDto.UpdateRequest(null, "front", "back");
     assertThrows(ResponseStatusException.class, () -> controller.update(UUID.randomUUID(), req, null));
   }
 
   @Test
   void deleteWithoutAuthReturns401() {
+    when(principalResolver.requireUserId(isNull())).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));
     assertThrows(ResponseStatusException.class, () -> controller.delete(UUID.randomUUID(), null));
   }
 
@@ -233,8 +213,7 @@ class FlashcardControllerTest {
     UUID unitId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     Flashcard saved = new Flashcard(flashcardId, unitId, "front", "back",
         LocalDateTime.now(), LocalDateTime.now());
@@ -252,8 +231,7 @@ class FlashcardControllerTest {
   void createWithNullUnitIdReturns400() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     var req = new FlashcardDto.CreateRequest(null, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
@@ -265,8 +243,7 @@ class FlashcardControllerTest {
   void createWithIllegalArgumentReturns400() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(managementUseCase.createFlashcardWithVisibility(any())).thenThrow(new IllegalArgumentException("invalid"));
 
     var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
@@ -283,8 +260,7 @@ class FlashcardControllerTest {
     UUID unitId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     Flashcard updated = new Flashcard(flashcardId, unitId, "front2", "back2",
         LocalDateTime.now(), LocalDateTime.now());
@@ -302,8 +278,7 @@ class FlashcardControllerTest {
   void updateWithNullRequestReturns400() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), null, principal);
 
@@ -314,8 +289,7 @@ class FlashcardControllerTest {
   void updateNotFoundReturns404() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(managementUseCase.updateFlashcardIfAuthorized(any(), any(), anyBoolean()))
         .thenThrow(new java.util.NoSuchElementException());
 
@@ -329,8 +303,7 @@ class FlashcardControllerTest {
   void updateWithIllegalArgumentReturns400() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(managementUseCase.updateFlashcardIfAuthorized(any(), any(), anyBoolean()))
         .thenThrow(new IllegalArgumentException("invalid"));
 
@@ -347,8 +320,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     doNothing().when(managementUseCase).deleteFlashcardIfAuthorized(eq(flashcardId), any(), anyBoolean());
 
     ResponseEntity<Void> response = controller.delete(flashcardId, principal);
@@ -364,8 +336,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     Flashcard card = new Flashcard(UUID.randomUUID(), unitId, "front", "back",
         LocalDateTime.now(), LocalDateTime.now());
@@ -385,8 +356,7 @@ class FlashcardControllerTest {
     UUID unitId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     when(studyUseCase.getStudyNext(any()))
         .thenReturn(new FlashcardStudyUseCase.StudyNextResponse(
@@ -406,8 +376,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     when(studyUseCase.getStudyNext(any())).thenReturn(null);
 
     ResponseEntity<FlashcardDto.StudyNextResponse> response = controller.getStudyNext(unitId, principal);
@@ -421,8 +390,7 @@ class FlashcardControllerTest {
     UUID unitId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     when(studyUseCase.getStudyNext(any()))
         .thenReturn(new FlashcardStudyUseCase.StudyNextResponse(
@@ -442,8 +410,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     when(studyUseCase.getDashboard(any()))
         .thenReturn(new FlashcardStudyUseCase.DashboardResponse(3, 2, 1, 0, 5, 6));
@@ -463,8 +430,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     when(importExportUseCase.importFlashcards(eq(unitId), eq("csv"), eq("front,back\nHello,Hola\n"), eq(userId), eq(false)))
         .thenReturn(new com.akdemya.domain.port.in.FlashcardImportExportUseCase.ImportResult(1, 0, List.of()));
@@ -485,8 +451,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, -1, principal);
@@ -499,8 +464,7 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, 101, principal);
@@ -514,8 +478,7 @@ class FlashcardControllerTest {
   void historyReturns400WhenLimitIsNegative() {
     UUID userId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(-1, principal);
 
@@ -527,13 +490,12 @@ class FlashcardControllerTest {
     UUID userId = UUID.randomUUID();
     UUID flashcardId = UUID.randomUUID();
     var principal = new User("user@example.com", "", List.of());
-    when(userRepo.findByEmail("user@example.com"))
-        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
 
-    FlashcardReviewLog log = FlashcardReviewLog.create(userId, flashcardId, ReviewGrade.GOOD,
+    var historyItem = new FlashcardReviewUseCase.HistoryItemResult(
+        UUID.randomUUID(), flashcardId, null, null, ReviewGrade.GOOD,
         LocalDateTime.now(), 1, 3, 2.5, 2.6);
-    when(reviewLogRepo.findRecentByUserId(eq(userId), eq(20))).thenReturn(List.of(log));
-    when(flashcardRepo.findByIds(any())).thenReturn(List.of()); // no matching flashcard
+    when(reviewUseCase.getReviewHistory(eq(userId), eq(20))).thenReturn(List.of(historyItem));
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(null, principal);
 

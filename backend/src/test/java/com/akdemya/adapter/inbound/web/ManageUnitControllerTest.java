@@ -52,7 +52,7 @@ class ManageUnitControllerTest {
         .thenReturn(List.of(u));
     when(contentService.getQuestionsByUnit(any())).thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list(subjectId, null, principal);
+    ResponseEntity<?> response = controller.list(subjectId, principal);
 
     assertEquals(200, response.getStatusCodeValue());
   }
@@ -165,7 +165,7 @@ class ManageUnitControllerTest {
 
   @Test
   void nullPrincipalReturnsUnauthorized() {
-    ResponseEntity<?> response = controller.list(UUID.randomUUID(), null, null);
+    ResponseEntity<?> response = controller.list(UUID.randomUUID(), null);
     assertEquals(401, response.getStatusCodeValue());
   }
 
@@ -290,13 +290,13 @@ class ManageUnitControllerTest {
   void listWithGlobalScopeFiltersCorrectly() {
     User principal = userPrincipal("user@example.com");
     UUID subjectId = UUID.randomUUID();
-    when(contentService.getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.GLOBAL)))
+    when(contentService.getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE)))
         .thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list(subjectId, "GLOBAL", principal);
+    ResponseEntity<?> response = controller.list(subjectId, principal);
 
     assertEquals(200, response.getStatusCodeValue());
-    verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.GLOBAL));
+    verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
   @Test
@@ -306,7 +306,7 @@ class ManageUnitControllerTest {
     when(contentService.getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE)))
         .thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list(subjectId, "PRIVATE", principal);
+    ResponseEntity<?> response = controller.list(subjectId, principal);
 
     assertEquals(200, response.getStatusCodeValue());
     verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));

@@ -20,15 +20,14 @@ import static org.mockito.Mockito.*;
 class ExamControllerTest {
 
   private final ExamUseCase examUseCase = mock(ExamUseCase.class);
-  private final UserRepository userRepo = mock(UserRepository.class);
+  private final PrincipalResolver principalResolver = mock(PrincipalResolver.class);
 
-  private final ExamController controller = new ExamController(examUseCase, userRepo);
+  private final ExamController controller = new ExamController(examUseCase, principalResolver);
 
   private final UUID userId = UUID.randomUUID();
 
   private User userPrincipal(String email) {
-    when(userRepo.findByEmail(email))
-        .thenReturn(Optional.of(new AppUser(userId, email, "", "STUDENT", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     return new User(email, "", List.of());
   }
 

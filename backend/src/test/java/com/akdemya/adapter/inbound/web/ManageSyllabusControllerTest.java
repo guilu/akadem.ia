@@ -53,12 +53,12 @@ class ManageSyllabusControllerTest {
   void authenticatedUserCanListSyllabuses() {
     User principal = userPrincipal("user@example.com");
     Syllabus s = Syllabus.createPrivate("My Syllabus", "desc", userId);
-    when(contentService.getVisibleSyllabuses(any())).thenReturn(List.of(s));
+    when(contentService.getPrivateSyllabuses(any())).thenReturn(List.of(s));
 
     ResponseEntity<?> response = controller.list(principal);
 
     assertEquals(200, response.getStatusCode().value());
-    verify(contentService).getVisibleSyllabuses(any());
+    verify(contentService).getPrivateSyllabuses(any());
   }
 
   // --- POST /api/manage/syllabuses ---

@@ -41,28 +41,20 @@ class FlashcardControllerVisibilityTest {
   private final FlashcardReviewUseCase reviewUseCase = mock(FlashcardReviewUseCase.class);
   private final FlashcardManagementUseCase managementUseCase = mock(FlashcardManagementUseCase.class);
   private final FlashcardImportExportUseCase importExportUseCase = mock(FlashcardImportExportUseCase.class);
-  private final FlashcardRepository flashcardRepo = mock(FlashcardRepository.class);
-  private final FlashcardReviewRepository reviewRepo = mock(FlashcardReviewRepository.class);
-  private final FlashcardReviewLogRepository reviewLogRepo = mock(FlashcardReviewLogRepository.class);
-  private final UserRepository userRepo = mock(UserRepository.class);
-  private final UnitRepository unitRepo = mock(UnitRepository.class);
-  private final SubjectRepository subjectRepo = mock(SubjectRepository.class);
+  private final PrincipalResolver principalResolver = mock(PrincipalResolver.class);
 
   private final FlashcardController controller = new FlashcardController(
-      studyUseCase, reviewUseCase, managementUseCase, importExportUseCase,
-      flashcardRepo, reviewLogRepo, userRepo);
+      studyUseCase, reviewUseCase, managementUseCase, importExportUseCase, principalResolver);
 
   private UUID setupUser(String email) {
     UUID userId = UUID.randomUUID();
-    when(userRepo.findByEmail(email))
-        .thenReturn(Optional.of(new AppUser(userId, email, "", "USER", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(userId);
     return userId;
   }
 
   private UUID setupAdmin(String email) {
     UUID adminId = UUID.randomUUID();
-    when(userRepo.findByEmail(email))
-        .thenReturn(Optional.of(new AppUser(adminId, email, "", "ADMIN", null, null, null)));
+    when(principalResolver.requireUserId(any())).thenReturn(adminId);
     return adminId;
   }
 
@@ -175,7 +167,8 @@ class FlashcardControllerVisibilityTest {
 
   @Test
   void createWithoutAuthThrows401() {
-    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
+    when(principalResolver.requireUserId(isNull())).thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", Visibility.PRIVATE);
     assertThrows(ResponseStatusException.class, () -> controller.create(req, null));
   }
 }

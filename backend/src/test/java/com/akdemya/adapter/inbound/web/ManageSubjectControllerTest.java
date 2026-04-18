@@ -50,10 +50,10 @@ class ManageSubjectControllerTest {
     when(contentService.getSubjectsByScope(any(), anyBoolean(), isNull())).thenReturn(List.of(s));
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list(null, principal);
+    ResponseEntity<?> response = controller.list(principal);
 
     assertEquals(200, response.getStatusCodeValue());
-    verify(contentService).getSubjectsByScope(any(), anyBoolean(), isNull());
+    verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
   // Test 2: Non-admin GET with scope=PRIVATE → only their PRIVATE subjects
@@ -65,7 +65,7 @@ class ManageSubjectControllerTest {
         .thenReturn(List.of(privateSubject));
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list("PRIVATE", principal);
+    ResponseEntity<?> response = controller.list(principal);
 
     assertEquals(200, response.getStatusCodeValue());
     verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
@@ -80,10 +80,10 @@ class ManageSubjectControllerTest {
         .thenReturn(List.of(globalSubject));
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list("GLOBAL", principal);
+    ResponseEntity<?> response = controller.list(principal);
 
     assertEquals(200, response.getStatusCodeValue());
-    verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.GLOBAL));
+    verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
   // Test 4: Non-admin POST with visibility=PRIVATE → 200, subject created
@@ -94,7 +94,7 @@ class ManageSubjectControllerTest {
     when(contentService.createSubject(any())).thenReturn(created);
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
     assertEquals(200, response.getStatusCodeValue());
@@ -106,7 +106,7 @@ class ManageSubjectControllerTest {
   void nonAdminCannotCreateGlobalSubject() {
     User principal = userPrincipal("user@example.com");
 
-    var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL");
+    var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
     assertEquals(403, response.getStatusCodeValue());
@@ -156,14 +156,14 @@ class ManageSubjectControllerTest {
   // This test verifies the controller still handles null principal defensively
   @Test
   void nullPrincipalReturnsUnauthorized() {
-    ResponseEntity<?> response = controller.list(null, null);
+    ResponseEntity<?> response = controller.list(null);
     assertEquals(401, response.getStatusCodeValue());
   }
 
   // Test 10: POST with null principal → 401
   @Test
   void createWithNullPrincipalReturnsUnauthorized() {
-    var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, null);
     assertEquals(401, response.getStatusCodeValue());
   }
@@ -172,7 +172,7 @@ class ManageSubjectControllerTest {
   @Test
   void createWithNullNameReturnsBadRequest() {
     User principal = userPrincipal("user@example.com");
-    var req = new ManageSubjectController.SubjectRequest(null, "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest(null, "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
     assertEquals(400, response.getStatusCodeValue());
   }
@@ -181,7 +181,7 @@ class ManageSubjectControllerTest {
   @Test
   void createWithBlankNameReturnsBadRequest() {
     User principal = userPrincipal("user@example.com");
-    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
     assertEquals(400, response.getStatusCodeValue());
   }
@@ -193,7 +193,7 @@ class ManageSubjectControllerTest {
     Subject created = Subject.createGlobal("Global Subject", "desc");
     when(contentService.createSubject(any())).thenReturn(created);
 
-    var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL");
+    var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
     assertEquals(200, response.getStatusCodeValue());
@@ -203,7 +203,7 @@ class ManageSubjectControllerTest {
   // Test 14: PUT with null principal → 401
   @Test
   void updateWithNullPrincipalReturnsUnauthorized() {
-    var req = new ManageSubjectController.SubjectRequest("Name", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
     assertEquals(401, response.getStatusCodeValue());
   }
@@ -215,7 +215,7 @@ class ManageSubjectControllerTest {
     UUID subjectId = UUID.randomUUID();
     when(contentService.getAllSubjects()).thenReturn(List.of());
 
-    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
     assertEquals(404, response.getStatusCodeValue());
@@ -226,10 +226,10 @@ class ManageSubjectControllerTest {
   void nonAdminCannotUpdateGlobalSubject() {
     User principal = userPrincipal("user@example.com");
     UUID subjectId = UUID.randomUUID();
-    Subject globalSubject = new Subject(subjectId, "Global", "desc", Visibility.GLOBAL, null);
+    Subject globalSubject = new Subject(subjectId, "Global", "desc", Visibility.GLOBAL, null, null);
     when(contentService.getAllSubjects()).thenReturn(List.of(globalSubject));
 
-    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
     assertEquals(403, response.getStatusCodeValue());
@@ -240,13 +240,13 @@ class ManageSubjectControllerTest {
   void nonAdminCanUpdateOwnPrivateSubject() {
     User principal = userPrincipal("user@example.com");
     UUID subjectId = UUID.randomUUID();
-    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId);
-    Subject updated = new Subject(subjectId, "New Name", "desc", Visibility.PRIVATE, userId);
+    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId, null);
+    Subject updated = new Subject(subjectId, "New Name", "desc", Visibility.PRIVATE, userId, null);
     when(contentService.getAllSubjects()).thenReturn(List.of(privateSubject));
     when(contentService.createSubject(any())).thenReturn(updated);
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
     assertEquals(200, response.getStatusCodeValue());
@@ -257,10 +257,10 @@ class ManageSubjectControllerTest {
   void updateWithBlankNameReturnsBadRequest() {
     User principal = userPrincipal("user@example.com");
     UUID subjectId = UUID.randomUUID();
-    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId);
+    Subject privateSubject = new Subject(subjectId, "Old Name", "desc", Visibility.PRIVATE, userId, null);
     when(contentService.getAllSubjects()).thenReturn(List.of(privateSubject));
 
-    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE");
+    var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
     assertEquals(400, response.getStatusCodeValue());
@@ -294,7 +294,7 @@ class ManageSubjectControllerTest {
     when(contentService.getSubjectsByScope(any(), eq(true), isNull())).thenReturn(List.of(globalSubject));
     when(contentService.getUnitsBySubject(any())).thenReturn(List.of());
 
-    ResponseEntity<?> response = controller.list(null, principal);
+    ResponseEntity<?> response = controller.list(principal);
 
     assertEquals(200, response.getStatusCodeValue());
   }

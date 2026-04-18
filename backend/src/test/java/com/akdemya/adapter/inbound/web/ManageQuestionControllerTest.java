@@ -62,10 +62,10 @@ class ManageQuestionControllerTest {
     User principal = userPrincipal("user@example.com");
     UUID unitId = UUID.randomUUID();
     var emptyPage = new PageImpl<Question>(List.of(), PageRequest.of(0, 10), 0);
-    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), isNull(), anyInt(), anyInt()))
+    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), any(), anyInt(), anyInt()))
         .thenReturn(emptyPage);
 
-    ResponseEntity<?> response = controller.list(unitId, null, 1, 10, principal);
+    ResponseEntity<?> response = controller.list(unitId, 1, 10, principal);
 
     assertEquals(200, response.getStatusCode().value());
   }
@@ -141,7 +141,7 @@ class ManageQuestionControllerTest {
 
   @Test
   void nullPrincipalReturnsUnauthorized() {
-    ResponseEntity<?> response = controller.list(UUID.randomUUID(), null, 1, 10, null);
+    ResponseEntity<?> response = controller.list(UUID.randomUUID(), 1, 10, null);
     assertEquals(401, response.getStatusCode().value());
   }
 
@@ -305,13 +305,13 @@ class ManageQuestionControllerTest {
     User principal = userPrincipal("user@example.com");
     UUID unitId = UUID.randomUUID();
     var emptyPage = new PageImpl<Question>(List.of(), PageRequest.of(0, 10), 0);
-    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.GLOBAL), anyInt(), anyInt()))
+    when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt()))
         .thenReturn(emptyPage);
 
-    ResponseEntity<?> response = controller.list(unitId, "GLOBAL", 1, 10, principal);
+    ResponseEntity<?> response = controller.list(unitId, 1, 10, principal);
 
     assertEquals(200, response.getStatusCode().value());
-    verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.GLOBAL), anyInt(), anyInt());
+    verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt());
   }
 
   @Test
@@ -322,7 +322,7 @@ class ManageQuestionControllerTest {
     when(contentService.getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt()))
         .thenReturn(emptyPage);
 
-    ResponseEntity<?> response = controller.list(unitId, "PRIVATE", 1, 10, principal);
+    ResponseEntity<?> response = controller.list(unitId, 1, 10, principal);
 
     assertEquals(200, response.getStatusCode().value());
     verify(contentService).getQuestionsByScope(eq(unitId), any(), anyBoolean(), eq(Visibility.PRIVATE), anyInt(), anyInt());
@@ -334,12 +334,12 @@ class ManageQuestionControllerTest {
     UUID unitId = UUID.randomUUID();
     Question q = Question.createPrivate(unitId, "Test question", null, Question.Difficulty.EASY, userId);
     var page = new PageImpl<Question>(List.of(q), PageRequest.of(0, 10), 1);
-    when(contentService.getQuestionsByScope(any(), any(), anyBoolean(), isNull(), anyInt(), anyInt()))
+    when(contentService.getQuestionsByScope(any(), any(), anyBoolean(), any(), anyInt(), anyInt()))
         .thenReturn(page);
     Answer answer = Answer.create(q.getId(), "Answer A", true);
     when(answerRepo.findByQuestionId(q.getId())).thenReturn(List.of(answer));
 
-    ResponseEntity<?> response = controller.list(unitId, null, 1, 10, principal);
+    ResponseEntity<?> response = controller.list(unitId, 1, 10, principal);
 
     assertEquals(200, response.getStatusCode().value());
     verify(answerRepo).findByQuestionId(q.getId());

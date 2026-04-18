@@ -546,5 +546,10 @@ class FlashcardStudyServiceTest {
     @Override public com.akdemya.domain.model.Syllabus save(com.akdemya.domain.model.Syllabus syllabus) { data.put(syllabus.getId(), syllabus); return syllabus; }
     @Override public void deleteById(UUID id) { data.remove(id); }
     @Override public List<com.akdemya.domain.model.Syllabus> findVisibleByUserId(UUID userId) { return findAll(); }
+    @Override public List<com.akdemya.domain.model.Syllabus> findPrivateByOwnerId(UUID ownerId) {
+      return data.values().stream()
+          .filter(s -> ownerId.equals(s.getOwnerId()))
+          .toList();
+    }
   }
 }
