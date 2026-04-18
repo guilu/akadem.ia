@@ -108,7 +108,7 @@ class FlashcardControllerVisibilityTest {
     var req = new FlashcardDto.CreateRequest(unitId, "front", "back", Visibility.PRIVATE);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(201, response.getStatusCodeValue());
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(managementUseCase).createFlashcardWithVisibility(
         argThat(cmd -> cmd.visibility() == Visibility.PRIVATE && userId.equals(cmd.ownerId())));
   }
@@ -122,7 +122,7 @@ class FlashcardControllerVisibilityTest {
     var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", Visibility.GLOBAL);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(managementUseCase, never()).createFlashcardWithVisibility(any());
   }
 
@@ -140,7 +140,7 @@ class FlashcardControllerVisibilityTest {
     var req = new FlashcardDto.CreateRequest(unitId, "front", "back", Visibility.GLOBAL);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(201, response.getStatusCodeValue());
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(managementUseCase).createFlashcardWithVisibility(
         argThat(cmd -> cmd.visibility() == Visibility.GLOBAL));
   }
@@ -160,7 +160,7 @@ class FlashcardControllerVisibilityTest {
     var req = new FlashcardDto.CreateRequest(unitId, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(201, response.getStatusCodeValue());
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(managementUseCase).createFlashcardWithVisibility(
         argThat(cmd -> cmd.visibility() == Visibility.PRIVATE));
   }

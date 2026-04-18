@@ -4,6 +4,7 @@ import com.akdemya.application.service.ContentManagement;
 import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -54,7 +55,7 @@ class QuestionControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(questionId, principal);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(contentService).deleteQuestionIfAuthorized(eq(questionId), eq(ownerId), eq(false));
         verify(contentService).deleteAnswersByQuestion(eq(questionId));
     }
@@ -72,7 +73,7 @@ class QuestionControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(questionId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(contentService, never()).deleteAnswersByQuestion(any());
     }
 
@@ -89,7 +90,7 @@ class QuestionControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(questionId, principal);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(contentService).deleteQuestionIfAuthorized(eq(questionId), eq(adminId), eq(true));
         verify(contentService).deleteAnswersByQuestion(eq(questionId));
     }
@@ -107,7 +108,7 @@ class QuestionControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(questionId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(contentService, never()).deleteAnswersByQuestion(any());
     }
 
@@ -115,7 +116,7 @@ class QuestionControllerAuthzTest {
     @Test
     void unauthenticatedDeleteReturns401() {
         ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-        assertEquals(401, response.getStatusCode().value());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     // Test 6: Delete non-existent question → 404
@@ -131,6 +132,6 @@ class QuestionControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(questionId, principal);
 
-        assertEquals(404, response.getStatusCode().value());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }

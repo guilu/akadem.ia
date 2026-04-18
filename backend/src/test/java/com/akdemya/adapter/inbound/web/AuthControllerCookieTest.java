@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -45,7 +46,7 @@ class AuthControllerCookieTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.login(cmd, res);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -110,7 +111,7 @@ class AuthControllerCookieTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.register(cmd, res);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -139,7 +140,7 @@ class AuthControllerCookieTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.logout(null, res);
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
         Cookie cookie = res.getCookie("ak_token");
         assertNotNull(cookie, "ak_token cookie must be set on logout");
@@ -174,7 +175,7 @@ class AuthControllerCookieTest {
 
         ResponseEntity<?> response = controller.me(req);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -189,7 +190,7 @@ class AuthControllerCookieTest {
 
         ResponseEntity<?> response = controller.me(req);
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
@@ -202,7 +203,7 @@ class AuthControllerCookieTest {
 
         ResponseEntity<?> response = controller.me(req);
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     // ── oauth2 exchange (now sets cookie too) ──
@@ -217,7 +218,7 @@ class AuthControllerCookieTest {
         var request = new AuthController.ExchangeCodeRequest(code);
         ResponseEntity<?> response = controller.exchangeOAuth2Code(request, res);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);

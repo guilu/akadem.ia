@@ -7,6 +7,7 @@ import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -54,7 +55,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.list(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -72,7 +73,7 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(parentSubject.getId(), "My Unit", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createUnit(any());
   }
 
@@ -84,7 +85,7 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(subjectId, "Global Unit", "desc", 1, "GLOBAL");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createUnit(any());
   }
 
@@ -96,7 +97,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.delete(unitId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).deleteUnitIfAuthorized(eq(unitId), any(), eq(false));
   }
 
@@ -109,7 +110,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.delete(unitId, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   @Test
@@ -120,7 +121,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.delete(unitId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).deleteUnitIfAuthorized(eq(unitId), any(), eq(true));
   }
 
@@ -159,21 +160,21 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(unitId, req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createUnit(any());
   }
 
   @Test
   void nullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.list(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
   void createWithNullPrincipalReturnsUnauthorized() {
     var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "My Unit", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -181,7 +182,7 @@ class ManageUnitControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageUnitController.UnitRequest(null, "My Unit", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -189,7 +190,7 @@ class ManageUnitControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), null, "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -197,7 +198,7 @@ class ManageUnitControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "  ", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -210,7 +211,7 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(subjectId, "Global Unit", "desc", 1, "GLOBAL");
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createUnit(any());
   }
 
@@ -218,7 +219,7 @@ class ManageUnitControllerTest {
   void updateWithNullPrincipalReturnsUnauthorized() {
     var req = new ManageUnitController.UnitRequest(UUID.randomUUID(), "Name", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -226,7 +227,7 @@ class ManageUnitControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageUnitController.UnitRequest(null, "Name", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -235,7 +236,7 @@ class ManageUnitControllerTest {
     UUID subjectId = UUID.randomUUID();
     var req = new ManageUnitController.UnitRequest(subjectId, "  ", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -248,7 +249,7 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(subjectId, "Name", "desc", 1, "PRIVATE");
     ResponseEntity<?> response = controller.update(unitId, req, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -265,13 +266,13 @@ class ManageUnitControllerTest {
     var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "GLOBAL");
     ResponseEntity<?> response = controller.update(unitId, req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
   void deleteWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -283,7 +284,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.delete(unitId, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -295,7 +296,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.list(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
@@ -308,7 +309,7 @@ class ManageUnitControllerTest {
 
     ResponseEntity<?> response = controller.list(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 }

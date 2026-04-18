@@ -12,6 +12,7 @@ import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,7 +54,7 @@ class FlashcardControllerTest {
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, 5, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(3, response.getBody().newCount());
     assertEquals(2, response.getBody().dueCount());
@@ -78,7 +79,7 @@ class FlashcardControllerTest {
     var request = new FlashcardDto.ReviewRequest(flashcardId, ReviewGrade.GOOD, LocalDateTime.now());
     ResponseEntity<FlashcardDto.ReviewResponse> response = controller.registerReview(request, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().review().flashcardId());
   }
@@ -117,7 +118,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(null, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().size());
     verify(reviewUseCase).getReviewHistory(userId, 20);
@@ -136,7 +137,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "csv", principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello,Hola"));
     verify(importExportUseCase).exportFlashcardsBySubject(subjectId, userId, "csv");
@@ -153,7 +154,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "json", principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello"));
     verify(importExportUseCase).exportFlashcardsBySubject(subjectId, userId, "json");
@@ -167,7 +168,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<String> response = controller.exportFlashcards(null, null, "csv", principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -181,7 +182,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<String> response = controller.exportFlashcards(unitId, null, "csv", principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(importExportUseCase).exportFlashcards(eq(unitId), eq("csv"), eq(userId), eq(false));
   }
 
@@ -222,7 +223,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.CreateRequest(unitId, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(201, response.getStatusCode().value());
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().id());
   }
@@ -236,7 +237,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.CreateRequest(null, "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -249,7 +250,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.CreateRequest(UUID.randomUUID(), "front", "back", null);
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.create(req, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // --- update ---
@@ -269,7 +270,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.UpdateRequest(unitId, "front2", "back2");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(flashcardId, req, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().id());
   }
@@ -282,7 +283,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), null, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -296,7 +297,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.UpdateRequest(UUID.randomUUID(), "front", "back");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), req, principal);
 
-    assertEquals(404, response.getStatusCode().value());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -310,7 +311,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.UpdateRequest(UUID.randomUUID(), "front", "back");
     ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(UUID.randomUUID(), req, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // --- delete ---
@@ -325,7 +326,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<Void> response = controller.delete(flashcardId, principal);
 
-    assertEquals(204, response.getStatusCode().value());
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(managementUseCase).deleteFlashcardIfAuthorized(eq(flashcardId), any(), anyBoolean());
   }
 
@@ -365,7 +366,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.StudyNextResponse> response = controller.getStudyNext(unitId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(flashcardId, response.getBody().flashcardId());
     assertNotNull(response.getBody().intervalHints());
@@ -381,7 +382,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.StudyNextResponse> response = controller.getStudyNext(unitId, principal);
 
-    assertEquals(204, response.getStatusCode().value());
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 
   @Test
@@ -398,7 +399,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.StudyNextResponse> response = controller.getStudyNext(unitId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertNull(response.getBody().intervalHints());
   }
@@ -417,7 +418,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.DashboardResponse> response = controller.getDashboard(unitId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(3, response.getBody().dueToday());
     assertEquals(5, response.getBody().newCards());
@@ -438,7 +439,7 @@ class FlashcardControllerTest {
     ResponseEntity<FlashcardDto.ImportResult> response =
         controller.importFlashcards(unitId, "csv", "front,back\nHello,Hola\n", principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().imported());
     assertEquals(0, response.getBody().skipped());
@@ -456,7 +457,7 @@ class FlashcardControllerTest {
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, -1, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -469,7 +470,7 @@ class FlashcardControllerTest {
     ResponseEntity<FlashcardDto.StudyQueueResponse> response =
         controller.getStudyQueue(unitId, 101, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // --- history edge cases ---
@@ -482,7 +483,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(-1, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -499,7 +500,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<List<FlashcardDto.HistoryItem>> response = controller.getHistory(null, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().size());
     assertNull(response.getBody().get(0).front());
@@ -514,7 +515,7 @@ class FlashcardControllerTest {
 
     ResponseEntity<FlashcardDto.ReviewResponse> response = controller.registerReview(null, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -524,7 +525,7 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.ReviewRequest(null, ReviewGrade.GOOD, LocalDateTime.now());
     ResponseEntity<FlashcardDto.ReviewResponse> response = controller.registerReview(req, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -534,6 +535,6 @@ class FlashcardControllerTest {
     var req = new FlashcardDto.ReviewRequest(UUID.randomUUID(), null, LocalDateTime.now());
     ResponseEntity<FlashcardDto.ReviewResponse> response = controller.registerReview(req, principal);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 }

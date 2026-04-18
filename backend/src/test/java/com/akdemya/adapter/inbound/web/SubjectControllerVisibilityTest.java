@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import com.akdemya.domain.model.AppUser;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 
@@ -81,7 +82,7 @@ class SubjectControllerVisibilityTest {
         new SubjectController.CreateSubjectRequest("My Math", "desc", Visibility.PRIVATE);
     ResponseEntity<Subject> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(Visibility.PRIVATE, response.getBody().getVisibility());
   }
@@ -96,7 +97,7 @@ class SubjectControllerVisibilityTest {
         new SubjectController.CreateSubjectRequest("Global Math", "desc", Visibility.GLOBAL);
     ResponseEntity<Subject> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createSubject(any());
   }
 
@@ -113,7 +114,7 @@ class SubjectControllerVisibilityTest {
         new SubjectController.CreateSubjectRequest("Global Math", "desc", Visibility.GLOBAL);
     ResponseEntity<Subject> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSubject(any());
   }
 }

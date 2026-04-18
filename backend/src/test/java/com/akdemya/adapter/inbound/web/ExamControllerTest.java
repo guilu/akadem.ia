@@ -4,6 +4,7 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.in.ExamUseCase;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 
@@ -37,7 +38,7 @@ class ExamControllerTest {
   void startRandomWithNullPrincipalReturnsUnauthorized() {
     var req = new ExamController.StartRandomRequest(UUID.randomUUID(), 10, 30, "EASY");
     ResponseEntity<?> response = controller.startRandom(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -51,7 +52,7 @@ class ExamControllerTest {
     var req = new ExamController.StartRandomRequest(subjectId, 10, 30, "EASY");
     ResponseEntity<?> response = controller.startRandom(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(examUseCase).startRandomExam(any(ExamUseCase.StartRandomCommand.class));
   }
 
@@ -61,7 +62,7 @@ class ExamControllerTest {
   void startWithNullPrincipalReturnsUnauthorized() {
     var req = new ExamController.StartRequest(Map.of(), 30, "EASY");
     ResponseEntity<?> response = controller.start(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -75,7 +76,7 @@ class ExamControllerTest {
     var req = new ExamController.StartRequest(Map.of(unitId, 5), 30, "MEDIUM");
     ResponseEntity<?> response = controller.start(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(examUseCase).startExam(any(ExamUseCase.StartCommand.class));
   }
 
@@ -86,7 +87,7 @@ class ExamControllerTest {
     UUID attemptId = UUID.randomUUID();
     var cmd = new ExamUseCase.SubmitCommand(attemptId, Map.of());
     ResponseEntity<?> response = controller.submit(attemptId, cmd, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -99,7 +100,7 @@ class ExamControllerTest {
     var cmd = new ExamUseCase.SubmitCommand(attemptId, Map.of());
     ResponseEntity<?> response = controller.submit(attemptId, cmd, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -112,7 +113,7 @@ class ExamControllerTest {
     var cmd = new ExamUseCase.SubmitCommand(attemptId, Map.of());
     ResponseEntity<?> response = controller.submit(attemptId, cmd, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -125,7 +126,7 @@ class ExamControllerTest {
     var cmd = new ExamUseCase.SubmitCommand(attemptId, Map.of());
     ResponseEntity<?> response = controller.submit(attemptId, cmd, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   // --- updateAnswer ---
@@ -136,7 +137,7 @@ class ExamControllerTest {
     UUID questionId = UUID.randomUUID();
     var req = new ExamController.UpdateAnswerRequest(UUID.randomUUID());
     ResponseEntity<?> response = controller.updateAnswer(attemptId, questionId, req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -146,7 +147,7 @@ class ExamControllerTest {
     UUID questionId = UUID.randomUUID();
     var req = new ExamController.UpdateAnswerRequest(null);
     ResponseEntity<?> response = controller.updateAnswer(attemptId, questionId, req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
@@ -160,7 +161,7 @@ class ExamControllerTest {
     var req = new ExamController.UpdateAnswerRequest(answerId);
     ResponseEntity<?> response = controller.updateAnswer(attemptId, questionId, req, principal);
 
-    assertEquals(204, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 
   @Test
@@ -175,7 +176,7 @@ class ExamControllerTest {
     var req = new ExamController.UpdateAnswerRequest(answerId);
     ResponseEntity<?> response = controller.updateAnswer(attemptId, questionId, req, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -190,7 +191,7 @@ class ExamControllerTest {
     var req = new ExamController.UpdateAnswerRequest(answerId);
     ResponseEntity<?> response = controller.updateAnswer(attemptId, questionId, req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   // --- getAttempt ---
@@ -198,7 +199,7 @@ class ExamControllerTest {
   @Test
   void getAttemptWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.getAttempt(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -210,7 +211,7 @@ class ExamControllerTest {
 
     ResponseEntity<?> response = controller.getAttempt(attemptId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -222,7 +223,7 @@ class ExamControllerTest {
 
     ResponseEntity<?> response = controller.getAttempt(attemptId, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -234,7 +235,7 @@ class ExamControllerTest {
 
     ResponseEntity<?> response = controller.getAttempt(attemptId, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   // --- listAttempts ---
@@ -242,7 +243,7 @@ class ExamControllerTest {
   @Test
   void listAttemptsWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.listAttempts(null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
@@ -252,7 +253,7 @@ class ExamControllerTest {
 
     ResponseEntity<?> response = controller.listAttempts(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(examUseCase).listAttempts("user@example.com");
   }
 }

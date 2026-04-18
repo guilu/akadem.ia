@@ -5,6 +5,7 @@ import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.SubjectRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -45,7 +46,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest("Physics", "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(subjectRepo).save(any());
   }
 
@@ -54,7 +55,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest(null, "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(subjectRepo, never()).save(any());
   }
 
@@ -63,7 +64,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest("   ", "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(subjectRepo, never()).save(any());
   }
 
@@ -79,7 +80,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest("New Name", "new desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(subjectRepo).save(any());
   }
 
@@ -91,7 +92,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest("Name", "desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     verify(subjectRepo, never()).save(any());
   }
 
@@ -104,7 +105,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest("", "desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(subjectRepo, never()).save(any());
   }
 
@@ -117,7 +118,7 @@ class AdminSubjectControllerTest {
     var req = new AdminSubjectController.SubjectRequest(null, "desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(subjectRepo, never()).save(any());
   }
 
@@ -126,7 +127,7 @@ class AdminSubjectControllerTest {
     UUID id = UUID.randomUUID();
     ResponseEntity<?> response = controller.delete(id);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(subjectRepo).deleteById(id);
   }
 }

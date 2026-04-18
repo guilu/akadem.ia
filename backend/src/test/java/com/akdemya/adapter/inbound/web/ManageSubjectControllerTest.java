@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,7 +53,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.list(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
@@ -67,7 +68,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.list(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
@@ -82,7 +83,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.list(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsByScope(any(), anyBoolean(), eq(Visibility.PRIVATE));
   }
 
@@ -97,7 +98,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSubject(any());
   }
 
@@ -109,7 +110,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createSubject(any());
   }
 
@@ -122,7 +123,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(false));
   }
 
@@ -136,7 +137,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   // Test 8: Admin DELETE GLOBAL subject → 200
@@ -148,7 +149,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(true));
   }
 
@@ -157,7 +158,7 @@ class ManageSubjectControllerTest {
   @Test
   void nullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.list(null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   // Test 10: POST with null principal → 401
@@ -165,7 +166,7 @@ class ManageSubjectControllerTest {
   void createWithNullPrincipalReturnsUnauthorized() {
     var req = new ManageSubjectController.SubjectRequest("My Subject", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   // Test 11: POST with null name → 400
@@ -174,7 +175,7 @@ class ManageSubjectControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageSubjectController.SubjectRequest(null, "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // Test 12: POST with blank name → 400
@@ -183,7 +184,7 @@ class ManageSubjectControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // Test 13: Admin POST with visibility=GLOBAL → 200
@@ -196,7 +197,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("Global Subject", "desc", "GLOBAL", null);
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSubject(any());
   }
 
@@ -205,7 +206,7 @@ class ManageSubjectControllerTest {
   void updateWithNullPrincipalReturnsUnauthorized() {
     var req = new ManageSubjectController.SubjectRequest("Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(UUID.randomUUID(), req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   // Test 15: PUT for non-existent subject → 404
@@ -218,7 +219,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   // Test 16: Non-admin PUT on GLOBAL subject → 403
@@ -232,7 +233,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   // Test 17: Non-admin PUT on own PRIVATE subject → 200
@@ -249,7 +250,7 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("New Name", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   // Test 18: PUT with blank name → 400
@@ -263,14 +264,14 @@ class ManageSubjectControllerTest {
     var req = new ManageSubjectController.SubjectRequest("  ", "desc", "PRIVATE", null);
     ResponseEntity<?> response = controller.update(subjectId, req, principal);
 
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   // Test 19: DELETE with null principal → 401
   @Test
   void deleteWithNullPrincipalReturnsUnauthorized() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   // Test 20: DELETE non-existent → 404
@@ -283,7 +284,7 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(404, response.getStatusCodeValue());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   // Test 21: list returns isEditable=true for admin on global subject
@@ -296,6 +297,6 @@ class ManageSubjectControllerTest {
 
     ResponseEntity<?> response = controller.list(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 }
