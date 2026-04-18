@@ -1,8 +1,6 @@
 package com.akdemya.adapter.inbound.web;
 
-import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.in.ExamUseCase;
-import com.akdemya.domain.port.out.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.validation.Valid;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -22,11 +19,11 @@ public class ExamController {
 
     private static final Logger log = LoggerFactory.getLogger(ExamController.class);
     private final ExamUseCase examUseCase;
-    private final UserRepository userRepo;
+    private final PrincipalResolver principalResolver;
 
-    public ExamController(ExamUseCase examUseCase, UserRepository userRepo) {
+    public ExamController(ExamUseCase examUseCase, PrincipalResolver principalResolver) {
         this.examUseCase = examUseCase;
-        this.userRepo = userRepo;
+        this.principalResolver = principalResolver;
     }
 
     public record StartRequest(java.util.Map<UUID, Integer> unitCounts, @Min(1) int minutes, String difficulty) {
@@ -157,8 +154,6 @@ public class ExamController {
     }
 
     private UUID resolveUserId(User principal) {
-        return userRepo.findByEmail(principal.getUsername())
-                .map(AppUser::getId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        return principalResolver.requireUserId(principal);
     }
 }

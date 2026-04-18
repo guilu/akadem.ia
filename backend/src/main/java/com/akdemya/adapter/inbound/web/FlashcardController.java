@@ -1,7 +1,6 @@
 package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.adapter.inbound.web.dto.FlashcardDto;
-import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
@@ -10,9 +9,6 @@ import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
-import com.akdemya.domain.port.out.FlashcardRepository;
-import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
-import com.akdemya.domain.port.out.UserRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,13 +26,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/flashcards")
@@ -49,24 +41,18 @@ public class FlashcardController {
   private final FlashcardReviewUseCase reviewUseCase;
   private final FlashcardManagementUseCase managementUseCase;
   private final FlashcardImportExportUseCase importExportUseCase;
-  private final FlashcardRepository flashcardRepo;
-  private final FlashcardReviewLogRepository reviewLogRepo;
-  private final UserRepository userRepo;
+  private final PrincipalResolver principalResolver;
 
   public FlashcardController(FlashcardStudyUseCase studyUseCase,
                              FlashcardReviewUseCase reviewUseCase,
                              FlashcardManagementUseCase managementUseCase,
                              FlashcardImportExportUseCase importExportUseCase,
-                             FlashcardRepository flashcardRepo,
-                             FlashcardReviewLogRepository reviewLogRepo,
-                             UserRepository userRepo) {
+                             PrincipalResolver principalResolver) {
     this.studyUseCase = studyUseCase;
     this.reviewUseCase = reviewUseCase;
     this.managementUseCase = managementUseCase;
     this.importExportUseCase = importExportUseCase;
-    this.flashcardRepo = flashcardRepo;
-    this.reviewLogRepo = reviewLogRepo;
-    this.userRepo = userRepo;
+    this.principalResolver = principalResolver;
   }
 
   @GetMapping
@@ -269,26 +255,11 @@ public class FlashcardController {
     if (resolvedLimit < 0) {
       return ResponseEntity.badRequest().build();
     }
-    List<FlashcardReviewLog> logs = reviewLogRepo.findRecentByUserId(userId, resolvedLimit);
-    Map<UUID, Flashcard> flashcards = flashcardRepo.findByIds(
-            logs.stream().map(FlashcardReviewLog::getFlashcardId).toList())
-        .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
-    List<FlashcardDto.HistoryItem> items = logs.stream()
-        .map(log -> {
-          Flashcard card = flashcards.get(log.getFlashcardId());
-          return new FlashcardDto.HistoryItem(
-              log.getId(),
-              log.getFlashcardId(),
-              card != null ? card.getFront() : null,
-              card != null ? card.getBack() : null,
-              log.getGrade(),
-              log.getReviewedAt(),
-              log.getIntervalBefore(),
-              log.getIntervalAfter(),
-              log.getEaseBefore(),
-              log.getEaseAfter()
-          );
-        })
+    List<FlashcardDto.HistoryItem> items = reviewUseCase.getReviewHistory(userId, resolvedLimit)
+        .stream()
+        .map(r -> new FlashcardDto.HistoryItem(r.id(), r.flashcardId(), r.front(), r.back(),
+            r.grade(), r.reviewedAt(), r.intervalBefore(), r.intervalAfter(),
+            r.easeBefore(), r.easeAfter()))
         .toList();
     return ResponseEntity.ok(items);
   }
@@ -319,12 +290,7 @@ public class FlashcardController {
   }
 
   private UUID requireUserId(User principal) {
-    if (principal == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-    }
-    return userRepo.findByEmail(principal.getUsername())
-        .map(AppUser::getId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    return principalResolver.requireUserId(principal);
   }
 
   private boolean isAdmin(User principal) {

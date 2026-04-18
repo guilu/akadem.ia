@@ -1,6 +1,7 @@
 package com.akdemya.application.service;
 
 import com.akdemya.application.config.FlashcardSchedulerProperties;
+import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
@@ -12,7 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FlashcardReviewService implements FlashcardReviewUseCase {
@@ -89,5 +94,30 @@ public class FlashcardReviewService implements FlashcardReviewUseCase {
     FlashcardReviewLog savedLog = logRepo.save(log);
 
     return new RegisterResponse(saved, savedLog);
+  }
+
+  @Override
+  public List<HistoryItemResult> getReviewHistory(UUID userId, int limit) {
+    List<FlashcardReviewLog> logs = logRepo.findRecentByUserId(userId, limit);
+    Map<UUID, Flashcard> flashcards = flashcardRepo.findByIds(
+            logs.stream().map(FlashcardReviewLog::getFlashcardId).toList())
+        .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
+    return logs.stream()
+        .map(log -> {
+          Flashcard card = flashcards.get(log.getFlashcardId());
+          return new HistoryItemResult(
+              log.getId(),
+              log.getFlashcardId(),
+              card != null ? card.getFront() : null,
+              card != null ? card.getBack() : null,
+              log.getGrade(),
+              log.getReviewedAt(),
+              log.getIntervalBefore(),
+              log.getIntervalAfter(),
+              log.getEaseBefore(),
+              log.getEaseAfter()
+          );
+        })
+        .toList();
   }
 }
