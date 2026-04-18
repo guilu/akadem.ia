@@ -410,4 +410,30 @@ public class ExamManager implements ExamUseCase {
         existing.getQuestionId(), command.selectedAnswerId());
     attemptAnsRepo.save(updated);
   }
+
+  @Override
+  public SubmitResult getResult(UUID attemptId, String userEmail) {
+    ExamAttempt attempt = attemptRepo.findById(attemptId)
+        .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+    if (!attempt.getUserEmail().equals(userEmail)) {
+      throw new SecurityException("Forbidden");
+    }
+    if (attempt.getFinishedAt() == null) {
+      throw new IllegalStateException("Exam not yet submitted");
+    }
+    List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attemptId);
+    int total = entries.size();
+    int correct = 0;
+    int wrong = 0;
+    for (ExamAttemptAnswer e : entries) {
+      if (e.getAnswerId() == null) continue;
+      Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
+      if (ans != null && ans.isCorrect()) correct++;
+      else if (ans != null) wrong++;
+    }
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
+    return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),
+        scoring.percentage());
+  }
 }

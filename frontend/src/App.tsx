@@ -203,10 +203,7 @@ export default function App() {
 
   async function viewResult(attempt: string) {
     try {
-      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selections: {} }),
+      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/result`, {
         timeoutMs: 15000
       });
       if (activeAttemptId === attempt) {

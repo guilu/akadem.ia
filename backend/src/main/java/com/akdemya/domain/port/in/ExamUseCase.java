@@ -19,6 +19,8 @@ public interface ExamUseCase {
 
   void updateAnswer(UpdateAnswerCommand command, String userEmail);
 
+  SubmitResult getResult(UUID attemptId, String userEmail);
+
   record StartCommand(String userEmail, UUID userId, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
   }
 

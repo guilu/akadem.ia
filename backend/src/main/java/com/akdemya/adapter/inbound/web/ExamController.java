@@ -153,6 +153,23 @@ public class ExamController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/attempts/{attemptId}/result")
+    public ResponseEntity<?> getResult(@PathVariable UUID attemptId, @AuthenticationPrincipal User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            var result = examUseCase.getResult(attemptId, principal.getUsername());
+            return ResponseEntity.ok(result);
+        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(java.util.Map.of("error", "exam_not_submitted"));
+        }
+    }
+
     private UUID resolveUserId(User principal) {
         return principalResolver.requireUserId(principal);
     }
