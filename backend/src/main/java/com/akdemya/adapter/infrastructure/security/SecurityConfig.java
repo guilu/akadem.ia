@@ -56,6 +56,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // CSRF disabled: all API endpoints authenticate via JWT (stateless).
+            // The OAuth2 flow uses IF_REQUIRED session only internally (state param);
+            // no business endpoint accepts session-based auth, so CSRF risk is negligible.
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // IF_REQUIRED: stateless for JWT requests, creates a session only
