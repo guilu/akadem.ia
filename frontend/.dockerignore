@@ -1,0 +1,9 @@
+.git
+node_modules
+dist
+.env
+.env.*
+*.md
+.idea
+.vscode
+src/__tests__
