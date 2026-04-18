@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class ManageSyllabusController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody SyllabusRequest req,
+  public ResponseEntity<?> create(@Valid @RequestBody SyllabusRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -73,7 +74,7 @@ public class ManageSyllabusController {
 
   @PutMapping("/{id}")
   public ResponseEntity<?> update(@PathVariable UUID id,
-                                   @RequestBody SyllabusRequest req,
+                                   @Valid @RequestBody SyllabusRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

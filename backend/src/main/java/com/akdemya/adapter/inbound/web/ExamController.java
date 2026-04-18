@@ -5,6 +5,8 @@ import com.akdemya.domain.port.in.ExamUseCase;
 import com.akdemya.domain.port.out.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,17 +29,17 @@ public class ExamController {
         this.userRepo = userRepo;
     }
 
-    public record StartRequest(java.util.Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
+    public record StartRequest(java.util.Map<UUID, Integer> unitCounts, @Min(1) int minutes, String difficulty) {
     }
 
-    public record StartRandomRequest(UUID subjectId, int count, int minutes, String difficulty) {
+    public record StartRandomRequest(UUID subjectId, @Min(1) int count, @Min(1) int minutes, String difficulty) {
     }
 
-    public record StartFromSyllabusRequest(UUID syllabusId, java.util.List<UUID> subjectIds, int count, int minutes, String difficulty) {
+    public record StartFromSyllabusRequest(UUID syllabusId, java.util.List<UUID> subjectIds, @Min(1) int count, @Min(1) int minutes, String difficulty) {
     }
 
     @PostMapping("/attempts/start-random")
-    public ResponseEntity<?> startRandom(@RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<?> startRandom(@Valid @RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }

@@ -5,6 +5,7 @@ import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.IndexSourceUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,7 +76,7 @@ public class IndexSourceController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> confirm(
             @PathVariable UUID id,
-            @RequestBody ConfirmRequest req) {
+            @Valid @RequestBody ConfirmRequest req) {
 
         if (req.approvedUnits() == null || req.approvedUnits().isEmpty()) {
             return ResponseEntity.badRequest().body(error("approved_units_required"));

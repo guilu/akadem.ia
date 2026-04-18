@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -30,7 +31,7 @@ public class AdminSubjectController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody SubjectRequest req) {
+  public ResponseEntity<?> create(@Valid @RequestBody SubjectRequest req) {
     if (req.name() == null || req.name().trim().isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
@@ -39,7 +40,7 @@ public class AdminSubjectController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody SubjectRequest req) {
+  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody SubjectRequest req) {
     Subject current = subjects.findById(id).orElse(null);
     if (current == null) return ResponseEntity.notFound().build();
     String name = (req.name() == null ? "" : req.name().trim());

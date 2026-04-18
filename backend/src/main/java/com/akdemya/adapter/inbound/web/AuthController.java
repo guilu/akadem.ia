@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthUseCase.RegisterCommand req, HttpServletResponse res) {
+    public ResponseEntity<?> register(@Valid @RequestBody AuthUseCase.RegisterCommand req, HttpServletResponse res) {
         var response = authUseCase.register(req);
         if (response.error() != null) {
             return ResponseEntity.badRequest().body(Map.of("error", response.error()));
@@ -49,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthUseCase.LoginCommand req, HttpServletResponse res) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthUseCase.LoginCommand req, HttpServletResponse res) {
         var response = authUseCase.login(req);
         if (response.error() != null) {
             return ResponseEntity.status(401).body(Map.of("error", response.error()));
@@ -111,7 +112,7 @@ public class AuthController {
     }
 
     @PostMapping("/oauth2/exchange")
-    public ResponseEntity<?> exchangeOAuth2Code(@RequestBody ExchangeCodeRequest req, HttpServletResponse res) {
+    public ResponseEntity<?> exchangeOAuth2Code(@Valid @RequestBody ExchangeCodeRequest req, HttpServletResponse res) {
         return codeStore.exchange(req.code())
             .map(result -> {
                 addAuthCookie(res, result.accessToken(), 900);

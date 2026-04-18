@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,7 +33,7 @@ public class UserSettingsController {
     }
 
     @PutMapping
-    public ResponseEntity<SettingsResponse> updateSettings(@RequestBody SettingsRequest req,
+    public ResponseEntity<SettingsResponse> updateSettings(@Valid @RequestBody SettingsRequest req,
                                                            @AuthenticationPrincipal User principal) {
         if (req == null) {
             return ResponseEntity.badRequest().build();

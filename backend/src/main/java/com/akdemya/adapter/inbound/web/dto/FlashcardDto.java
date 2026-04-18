@@ -4,6 +4,8 @@ import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +17,7 @@ public class FlashcardDto {
                                   LocalDateTime createdAt, LocalDateTime updatedAt) {
   }
 
-  public record CreateRequest(UUID unitId, String front, String back, Visibility visibility) {
+  public record CreateRequest(@NotNull UUID unitId, @NotBlank String front, @NotBlank String back, Visibility visibility) {
   }
 
   public record UpdateRequest(UUID unitId, String front, String back) {

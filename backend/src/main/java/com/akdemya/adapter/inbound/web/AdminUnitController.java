@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -32,7 +33,7 @@ public class AdminUnitController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody UnitRequest req) {
+  public ResponseEntity<?> create(@Valid @RequestBody UnitRequest req) {
     if (req.subjectId() == null) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "subject_required"));
     }
@@ -47,7 +48,7 @@ public class AdminUnitController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody UnitRequest req) {
+  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody UnitRequest req) {
     Unit current = units.findById(id).orElse(null);
     if (current == null) return ResponseEntity.notFound().build();
     if (req.subjectId() == null) {

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class ManageQuestionController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody QuestionRequest req,
+  public ResponseEntity<?> create(@Valid @RequestBody QuestionRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -118,7 +119,7 @@ public class ManageQuestionController {
 
   @PutMapping("/{id}")
   public ResponseEntity<?> update(@PathVariable UUID id,
-                                   @RequestBody QuestionRequest req,
+                                   @Valid @RequestBody QuestionRequest req,
                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

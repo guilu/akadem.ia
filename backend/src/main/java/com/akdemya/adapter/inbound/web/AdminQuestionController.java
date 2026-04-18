@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -106,7 +107,7 @@ public class AdminQuestionController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody QuestionRequest req) {
+  public ResponseEntity<?> create(@Valid @RequestBody QuestionRequest req) {
     var validation = validateRequest(req);
     if (validation != null) return validation;
 
@@ -115,7 +116,7 @@ public class AdminQuestionController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody QuestionRequest req) {
+  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody QuestionRequest req) {
     var validation = validateRequest(req);
     if (validation != null) return validation;
 

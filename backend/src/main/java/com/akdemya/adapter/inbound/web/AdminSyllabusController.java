@@ -5,6 +5,7 @@ import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.SyllabusRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class AdminSyllabusController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody SyllabusRequest req) {
+  public ResponseEntity<?> create(@Valid @RequestBody SyllabusRequest req) {
     if (req.name() == null || req.name().trim().isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
@@ -38,7 +39,7 @@ public class AdminSyllabusController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody SyllabusRequest req) {
+  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody SyllabusRequest req) {
     Syllabus current = syllabusRepo.findById(id).orElse(null);
     if (current == null) return ResponseEntity.notFound().build();
     String name = (req.name() == null ? "" : req.name().trim());

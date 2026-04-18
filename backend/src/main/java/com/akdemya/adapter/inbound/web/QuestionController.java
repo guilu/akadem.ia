@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,7 +58,7 @@ public class QuestionController {
     }
 
     @PostMapping
-    public ResponseEntity<Question> create(@RequestBody CreateQuestionRequest req,
+    public ResponseEntity<Question> create(@Valid @RequestBody CreateQuestionRequest req,
                                            @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -101,7 +102,7 @@ public class QuestionController {
 
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{qid}/answers")
-    public Answer addAnswer(@PathVariable UUID qid, @RequestBody Answer a) {
+    public Answer addAnswer(@PathVariable UUID qid, @Valid @RequestBody Answer a) {
         Answer toSave = new Answer(a.getId(), qid, a.getText(), a.isCorrect());
         return contentService.createAnswer(toSave);
     }

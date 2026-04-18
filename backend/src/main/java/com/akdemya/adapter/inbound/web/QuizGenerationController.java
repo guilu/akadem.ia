@@ -6,6 +6,7 @@ import com.akdemya.domain.port.in.GenerateQuizUseCase;
 import com.akdemya.domain.port.in.ReviewGeneratedQuestionsUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/quizzes/generate")
-    public ResponseEntity<?> generate(@RequestBody GenerateRequest req) {
+    public ResponseEntity<?> generate(@Valid @RequestBody GenerateRequest req) {
         try {
             req.validate();
         } catch (IllegalArgumentException e) {
