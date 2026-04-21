@@ -36,13 +36,15 @@ public class ManageUnitController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
+    boolean isAdmin = isAdmin(principal);
 
-    List<Unit> units = contentService.getUnitsByScope(subjectId, caller.getId(), false, Visibility.PRIVATE);
+    List<Unit> units = contentService.getUnitsByScope(
+        subjectId, caller.getId(), isAdmin, isAdmin ? Visibility.GLOBAL : Visibility.PRIVATE);
     List<ManageUnitResponse> result = units.stream()
         .map(u -> {
           long questionCount = contentService.getQuestionsByUnit(u.getId()).size();
           return new ManageUnitResponse(u.getId(), u.getSubjectId(), u.getName(),
-              u.getDescription(), u.getOrderIndex(), questionCount, u.getVisibility(), true);
+              u.getDescription(), u.getOrderIndex(), questionCount, u.getVisibility(), isManageEditable(u, caller));
         })
         .toList();
     return ResponseEntity.ok(result);
@@ -63,7 +65,7 @@ public class ManageUnitController {
 
     AppUser caller = resolveUser(principal);
     boolean isAdmin = isAdmin(principal);
-    String visibilityStr = req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE";
+    String visibilityStr = isAdmin ? "GLOBAL" : (req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE");
 
     if ("GLOBAL".equals(visibilityStr) && !isAdmin) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -80,10 +82,9 @@ public class ManageUnitController {
     try {
       Unit saved = contentService.createUnit(unit);
       long questionCount = 0;
-      boolean isEditable = isAdmin || saved.getVisibility() == Visibility.PRIVATE;
       return ResponseEntity.ok(new ManageUnitResponse(saved.getId(), saved.getSubjectId(),
           saved.getName(), saved.getDescription(), saved.getOrderIndex(), questionCount,
-          saved.getVisibility(), isEditable));
+          saved.getVisibility(), isManageEditable(saved, caller)));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
     }
@@ -97,8 +98,6 @@ public class ManageUnitController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
-
     if (req.subjectId() == null) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "subject_required"));
     }
@@ -115,8 +114,7 @@ public class ManageUnitController {
       return ResponseEntity.notFound().build();
     }
 
-    boolean canEdit = isAdmin || (current.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(current.getOwnerId()));
+    boolean canEdit = isManageEditable(current, caller);
     if (!canEdit) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
@@ -127,11 +125,9 @@ public class ManageUnitController {
     try {
       Unit saved = contentService.createUnit(updated);
       long questionCount = contentService.getQuestionsByUnit(id).size();
-      boolean isEditable = isAdmin || (saved.getVisibility() == Visibility.PRIVATE
-          && caller.getId().equals(saved.getOwnerId()));
       return ResponseEntity.ok(new ManageUnitResponse(saved.getId(), saved.getSubjectId(),
           saved.getName(), saved.getDescription(), saved.getOrderIndex(), questionCount,
-          saved.getVisibility(), isEditable));
+          saved.getVisibility(), isManageEditable(saved, caller)));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
     }
@@ -144,9 +140,16 @@ public class ManageUnitController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
+    Unit current = contentService.getUnitById(id).orElse(null);
+    if (current == null) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!isManageEditable(current, caller)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(java.util.Map.of("error", "not_authorized"));
+    }
     try {
-      contentService.deleteUnitIfAuthorized(id, caller.getId(), isAdmin);
+      contentService.deleteUnitIfAuthorized(id, caller.getId(), false);
       return ResponseEntity.ok().build();
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -165,6 +168,11 @@ public class ManageUnitController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+  }
+
+  private boolean isManageEditable(Unit unit, AppUser caller) {
+    return unit.getVisibility() == Visibility.PRIVATE
+        && caller.getId().equals(unit.getOwnerId());
   }
 
   public record UnitRequest(UUID subjectId, String name, String description,

@@ -34,9 +34,12 @@ public class ManageSyllabusController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    List<ManageSyllabusResponse> result = contentService.getPrivateSyllabuses(caller.getId()).stream()
+    List<Syllabus> syllabuses = isAdmin(principal)
+        ? contentService.getVisibleSyllabuses(null)
+        : contentService.getPrivateSyllabuses(caller.getId());
+    List<ManageSyllabusResponse> result = syllabuses.stream()
         .map(s -> new ManageSyllabusResponse(s.getId(), s.getName(), s.getDescription(),
-            s.getVisibility() != null ? s.getVisibility().name() : null, true))
+            s.getVisibility() != null ? s.getVisibility().name() : null, isManageEditable(s, caller)))
         .toList();
     return ResponseEntity.ok(result);
   }
@@ -52,8 +55,7 @@ public class ManageSyllabusController {
     }
     AppUser caller = resolveUser(principal);
     boolean admin = isAdmin(principal);
-
-    String visibilityStr = req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE";
+    String visibilityStr = admin ? "GLOBAL" : (req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE");
     if ("GLOBAL".equals(visibilityStr) && !admin) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "only_admins_can_create_global_syllabuses"));
@@ -67,9 +69,9 @@ public class ManageSyllabusController {
     }
 
     Syllabus saved = contentService.createSyllabus(syllabus);
-    boolean isEditable = admin || saved.getVisibility() == Visibility.PRIVATE;
     return ResponseEntity.ok(new ManageSyllabusResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null, isEditable));
+        saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null,
+        isManageEditable(saved, caller)));
   }
 
   @PutMapping("/{id}")
@@ -87,8 +89,7 @@ public class ManageSyllabusController {
       return ResponseEntity.notFound().build();
     }
 
-    boolean canEdit = admin || (current.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(current.getOwnerId()));
+    boolean canEdit = isManageEditable(current, caller);
     if (!canEdit) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
@@ -101,10 +102,9 @@ public class ManageSyllabusController {
 
     Syllabus updated = new Syllabus(id, name, req.description(), current.getVisibility(), current.getOwnerId());
     Syllabus saved = contentService.createSyllabus(updated);
-    boolean isEditable = admin || (saved.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(saved.getOwnerId()));
     return ResponseEntity.ok(new ManageSyllabusResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null, isEditable));
+        saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null,
+        isManageEditable(saved, caller)));
   }
 
   @DeleteMapping("/{id}")
@@ -114,9 +114,16 @@ public class ManageSyllabusController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean admin = isAdmin(principal);
+    Syllabus current = contentService.getSyllabusById(id).orElse(null);
+    if (current == null) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!isManageEditable(current, caller)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(java.util.Map.of("error", "not_authorized"));
+    }
     try {
-      contentService.deleteSyllabus(id, caller.getId(), admin);
+      contentService.deleteSyllabus(id, caller.getId(), false);
       return ResponseEntity.ok().build();
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -138,6 +145,11 @@ public class ManageSyllabusController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+  }
+
+  private boolean isManageEditable(Syllabus syllabus, AppUser caller) {
+    return syllabus.getVisibility() == Visibility.PRIVATE
+        && caller.getId().equals(syllabus.getOwnerId());
   }
 
   public record SyllabusRequest(String name, String description, String visibility) {}

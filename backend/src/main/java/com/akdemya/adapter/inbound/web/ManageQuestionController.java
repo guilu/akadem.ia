@@ -47,15 +47,16 @@ public class ManageQuestionController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
+    boolean isAdmin = isAdmin(principal);
 
     Page<Question> questions = contentService.getQuestionsByScope(
-        unitId, caller.getId(), false, Visibility.PRIVATE, page - 1, size);
+        unitId, caller.getId(), isAdmin, isAdmin ? Visibility.GLOBAL : Visibility.PRIVATE, page - 1, size);
     var result = PageResponse.from(questions, q -> {
       List<Answer> answers = answerRepo.findByQuestionId(q.getId());
       return new ManageQuestionResponse(q.getId(), q.getUnitId(), q.getText(),
           q.getExplanation(), q.getDifficulty().name(),
           answers.stream().map(AnswerDto::from).toList(),
-          q.getVisibility(), true);
+          q.getVisibility(), isManageEditable(q, caller));
     });
     return ResponseEntity.ok(result);
   }
@@ -88,7 +89,7 @@ public class ManageQuestionController {
 
     AppUser caller = resolveUser(principal);
     boolean isAdmin = isAdmin(principal);
-    String visibilityStr = req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE";
+    String visibilityStr = isAdmin ? "GLOBAL" : (req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE");
 
     if ("GLOBAL".equals(visibilityStr) && !isAdmin) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -109,10 +110,9 @@ public class ManageQuestionController {
         answerRepo.save(Answer.create(saved.getId(), a.text().trim(), a.correct()));
       }
       List<Answer> answers = answerRepo.findByQuestionId(saved.getId());
-      boolean isEditable = isAdmin || saved.getVisibility() == Visibility.PRIVATE;
       return ResponseEntity.ok(new ManageQuestionResponse(saved.getId(), saved.getUnitId(),
           saved.getText(), saved.getExplanation(), saved.getDifficulty().name(),
-          answers.stream().map(AnswerDto::from).toList(), saved.getVisibility(), isEditable));
+          answers.stream().map(AnswerDto::from).toList(), saved.getVisibility(), isManageEditable(saved, caller)));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
     }
@@ -136,8 +136,6 @@ public class ManageQuestionController {
     }
 
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
-
     Question current = contentService.getQuestionsByUnit(req.unitId()).stream()
         .filter(q -> q.getId().equals(id))
         .findFirst().orElse(null);
@@ -145,8 +143,7 @@ public class ManageQuestionController {
       return ResponseEntity.notFound().build();
     }
 
-    boolean canEdit = isAdmin || (current.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(current.getOwnerId()));
+    boolean canEdit = isManageEditable(current, caller);
     if (!canEdit) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
@@ -161,11 +158,9 @@ public class ManageQuestionController {
         answerRepo.save(Answer.create(saved.getId(), a.text().trim(), a.correct()));
       }
       List<Answer> answers = answerRepo.findByQuestionId(saved.getId());
-      boolean isEditable = isAdmin || (saved.getVisibility() == Visibility.PRIVATE
-          && caller.getId().equals(saved.getOwnerId()));
       return ResponseEntity.ok(new ManageQuestionResponse(saved.getId(), saved.getUnitId(),
           saved.getText(), saved.getExplanation(), saved.getDifficulty().name(),
-          answers.stream().map(AnswerDto::from).toList(), saved.getVisibility(), isEditable));
+          answers.stream().map(AnswerDto::from).toList(), saved.getVisibility(), isManageEditable(saved, caller)));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
     }
@@ -182,9 +177,9 @@ public class ManageQuestionController {
     boolean isAdmin = isAdmin(principal);
     List<Question> data;
     if (unitId == null) {
-      data = isAdmin ? contentService.getAllQuestions() : contentService.getVisibleQuestions(caller.getId());
+      data = isAdmin ? contentService.getVisibleQuestions(null) : contentService.getVisibleQuestions(caller.getId());
     } else {
-      data = contentService.getVisibleQuestionsByUnit(unitId, caller.getId());
+      data = contentService.getVisibleQuestionsByUnit(unitId, isAdmin ? null : caller.getId());
     }
     if (format.equalsIgnoreCase("csv")) {
       String csv = toCsv(data);
@@ -199,7 +194,7 @@ public class ManageQuestionController {
           return new ManageQuestionResponse(q.getId(), q.getUnitId(), q.getText(),
               q.getExplanation(), q.getDifficulty().name(),
               answers.stream().map(AnswerDto::from).toList(),
-              q.getVisibility(), true);
+              q.getVisibility(), isManageEditable(q, caller));
         })
         .toList();
     return ResponseEntity.ok(payload);
@@ -376,9 +371,16 @@ public class ManageQuestionController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
+    Question current = contentService.getQuestionById(id).orElse(null);
+    if (current == null) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!isManageEditable(current, caller)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(Map.of("error", "not_authorized"));
+    }
     try {
-      contentService.deleteQuestionIfAuthorized(id, caller.getId(), isAdmin);
+      contentService.deleteQuestionIfAuthorized(id, caller.getId(), false);
       return ResponseEntity.ok().build();
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -397,6 +399,11 @@ public class ManageQuestionController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+  }
+
+  private boolean isManageEditable(Question question, AppUser caller) {
+    return question.getVisibility() == Visibility.PRIVATE
+        && caller.getId().equals(question.getOwnerId());
   }
 
   public record AnswerRequest(String text, boolean correct) {}

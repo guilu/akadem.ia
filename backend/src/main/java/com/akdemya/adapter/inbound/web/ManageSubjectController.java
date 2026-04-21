@@ -34,13 +34,15 @@ public class ManageSubjectController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
+    boolean isAdmin = isAdmin(principal);
 
-    List<Subject> subjects = contentService.getSubjectsByScope(caller.getId(), false, Visibility.PRIVATE);
+    List<Subject> subjects = contentService.getSubjectsByScope(
+        caller.getId(), isAdmin, isAdmin ? Visibility.GLOBAL : Visibility.PRIVATE);
     List<ManageSubjectResponse> result = subjects.stream()
         .map(s -> {
           long unitCount = contentService.getUnitsBySubject(s.getId()).size();
           return new ManageSubjectResponse(s.getId(), s.getName(), s.getDescription(),
-              unitCount, s.getVisibility(), true, s.getSyllabusId());
+              unitCount, s.getVisibility(), isManageEditable(s, caller), s.getSyllabusId());
         })
         .toList();
     return ResponseEntity.ok(result);
@@ -58,7 +60,7 @@ public class ManageSubjectController {
     AppUser caller = resolveUser(principal);
     boolean isAdmin = isAdmin(principal);
 
-    String visibilityStr = req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE";
+    String visibilityStr = isAdmin ? "GLOBAL" : (req.visibility() != null ? req.visibility().toUpperCase() : "PRIVATE");
     if ("GLOBAL".equals(visibilityStr) && !isAdmin) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "only_admins_can_create_global_subjects"));
@@ -73,9 +75,8 @@ public class ManageSubjectController {
 
     Subject saved = contentService.createSubject(subject);
     long unitCount = 0;
-    boolean isEditable = isAdmin || saved.getVisibility() == Visibility.PRIVATE;
     return ResponseEntity.ok(new ManageSubjectResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), unitCount, saved.getVisibility(), isEditable, saved.getSyllabusId()));
+        saved.getDescription(), unitCount, saved.getVisibility(), isManageEditable(saved, caller), saved.getSyllabusId()));
   }
 
   @PutMapping("/{id}")
@@ -88,15 +89,12 @@ public class ManageSubjectController {
     AppUser caller = resolveUser(principal);
     boolean isAdmin = isAdmin(principal);
 
-    Subject current = contentService.getAllSubjects().stream()
-        .filter(s -> s.getId().equals(id))
-        .findFirst().orElse(null);
+    Subject current = contentService.getSubjectById(id).orElse(null);
     if (current == null) {
       return ResponseEntity.notFound().build();
     }
 
-    boolean canEdit = isAdmin || (current.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(current.getOwnerId()));
+    boolean canEdit = isManageEditable(current, caller);
     if (!canEdit) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
@@ -111,10 +109,8 @@ public class ManageSubjectController {
     Subject updated = new Subject(id, name, req.description(), current.getVisibility(), current.getOwnerId(), syllabusId);
     Subject saved = contentService.createSubject(updated);
     long unitCount = contentService.getUnitsBySubject(id).size();
-    boolean isEditable = isAdmin || (saved.getVisibility() == Visibility.PRIVATE
-        && caller.getId().equals(saved.getOwnerId()));
     return ResponseEntity.ok(new ManageSubjectResponse(saved.getId(), saved.getName(),
-        saved.getDescription(), unitCount, saved.getVisibility(), isEditable, saved.getSyllabusId()));
+        saved.getDescription(), unitCount, saved.getVisibility(), isManageEditable(saved, caller), saved.getSyllabusId()));
   }
 
   @DeleteMapping("/{id}")
@@ -124,9 +120,16 @@ public class ManageSubjectController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    boolean isAdmin = isAdmin(principal);
+    Subject current = contentService.getSubjectById(id).orElse(null);
+    if (current == null) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!isManageEditable(current, caller)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(java.util.Map.of("error", "not_authorized"));
+    }
     try {
-      contentService.deleteSubjectIfAuthorized(id, caller.getId(), isAdmin);
+      contentService.deleteSubjectIfAuthorized(id, caller.getId(), false);
       return ResponseEntity.ok().build();
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -145,6 +148,11 @@ public class ManageSubjectController {
   private boolean isAdmin(User principal) {
     return principal.getAuthorities().stream()
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+  }
+
+  private boolean isManageEditable(Subject subject, AppUser caller) {
+    return subject.getVisibility() == Visibility.PRIVATE
+        && caller.getId().equals(subject.getOwnerId());
   }
 
   public record SubjectRequest(String name, String description, String visibility, UUID syllabusId) {}

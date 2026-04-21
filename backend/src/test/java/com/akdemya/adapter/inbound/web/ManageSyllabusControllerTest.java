@@ -56,10 +56,26 @@ class ManageSyllabusControllerTest {
     Syllabus s = Syllabus.createPrivate("My Syllabus", "desc", userId);
     when(contentService.getPrivateSyllabuses(any())).thenReturn(List.of(s));
 
-    ResponseEntity<?> response = controller.list(principal);
+    ResponseEntity<List<ManageSyllabusController.ManageSyllabusResponse>> response = controller.list(principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getPrivateSyllabuses(any());
+    assertTrue(response.getBody().get(0).isEditable());
+  }
+
+  @Test
+  void adminListsOnlyGlobalSyllabusesAsReadOnly() {
+    User principal = adminPrincipal("admin@example.com");
+    Syllabus global = Syllabus.createGlobal("Global", "desc");
+    when(contentService.getVisibleSyllabuses(null)).thenReturn(List.of(global));
+
+    ResponseEntity<List<ManageSyllabusController.ManageSyllabusResponse>> response = controller.list(principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).getVisibleSyllabuses(null);
+    verify(contentService, never()).getPrivateSyllabuses(any());
+    assertEquals(Visibility.GLOBAL.name(), response.getBody().get(0).visibility());
+    assertFalse(response.getBody().get(0).isEditable());
   }
 
   // --- POST /api/manage/syllabuses ---
@@ -118,11 +134,13 @@ class ManageSyllabusControllerTest {
     Syllabus saved = Syllabus.createGlobal("Global Syllabus", "desc");
     when(contentService.createSyllabus(any())).thenReturn(saved);
 
-    var req = new ManageSyllabusController.SyllabusRequest("Global Syllabus", "desc", "GLOBAL");
+    var req = new ManageSyllabusController.SyllabusRequest("Global Syllabus", "desc", "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(contentService).createSyllabus(any());
+    verify(contentService).createSyllabus(argThat(s -> s.getVisibility() == Visibility.GLOBAL && s.getOwnerId() == null));
+    var body = assertInstanceOf(ManageSyllabusController.ManageSyllabusResponse.class, response.getBody());
+    assertFalse(body.isEditable());
   }
 
   // --- PUT /api/manage/syllabuses/{id} ---
@@ -175,6 +193,20 @@ class ManageSyllabusControllerTest {
   }
 
   @Test
+  void adminCannotUpdateGlobalSyllabusFromManage() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID syllabusId = UUID.randomUUID();
+    Syllabus existing = new Syllabus(syllabusId, "Global", "desc", Visibility.GLOBAL, null);
+    when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(existing));
+
+    var req = new ManageSyllabusController.SyllabusRequest("New Name", "desc", null);
+    ResponseEntity<?> response = controller.update(syllabusId, req, principal);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    verify(contentService, never()).createSyllabus(any());
+  }
+
+  @Test
   void updateWithBlankNameReturnsBadRequest() {
     User principal = userPrincipal("user@example.com");
     UUID syllabusId = UUID.randomUUID();
@@ -196,22 +228,23 @@ class ManageSyllabusControllerTest {
   }
 
   @Test
-  void deleteByAdminReturns200() {
+  void deleteByAdminReturnsForbiddenForGlobalSyllabus() {
     User principal = adminPrincipal("admin@example.com");
     UUID syllabusId = UUID.randomUUID();
-    doNothing().when(contentService).deleteSyllabus(eq(syllabusId), any(), eq(true));
+    Syllabus existing = new Syllabus(syllabusId, "Global", "desc", Visibility.GLOBAL, null);
+    when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(existing));
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    verify(contentService, never()).deleteSyllabus(any(), any(), anyBoolean());
   }
 
   @Test
   void deleteNonExistentSyllabusReturnsNotFound() {
     User principal = userPrincipal("user@example.com");
     UUID syllabusId = UUID.randomUUID();
-    doThrow(new IllegalArgumentException("Not found"))
-        .when(contentService).deleteSyllabus(any(), any(), anyBoolean());
+    when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.empty());
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
@@ -220,10 +253,12 @@ class ManageSyllabusControllerTest {
 
   @Test
   void deleteSyllabusWithSubjectsReturns409() {
-    User principal = adminPrincipal("admin@example.com");
+    User principal = userPrincipal("user@example.com");
     UUID syllabusId = UUID.randomUUID();
+    Syllabus existing = new Syllabus(syllabusId, "Mine", "desc", Visibility.PRIVATE, userId);
+    when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(existing));
     doThrow(new IllegalStateException("Cannot delete syllabus with linked subjects"))
-        .when(contentService).deleteSyllabus(eq(syllabusId), any(), eq(true));
+        .when(contentService).deleteSyllabus(eq(syllabusId), any(), eq(false));
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 

@@ -69,6 +69,25 @@ class ManageQuestionControllerTest {
     ResponseEntity<?> response = controller.list(unitId, 1, 10, principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).getQuestionsByScope(eq(unitId), any(), eq(false), eq(Visibility.PRIVATE), anyInt(), anyInt());
+  }
+
+  @Test
+  void adminListsOnlyGlobalQuestionsAsReadOnly() {
+    User principal = adminPrincipal("admin@example.com");
+    UUID unitId = UUID.randomUUID();
+    Question q = Question.createGlobal(unitId, "Global?", null, Question.Difficulty.EASY);
+    var page = new PageImpl<Question>(List.of(q), PageRequest.of(0, 10), 1);
+    when(contentService.getQuestionsByScope(eq(unitId), any(), eq(true), eq(Visibility.GLOBAL), anyInt(), anyInt()))
+        .thenReturn(page);
+    when(answerRepo.findByQuestionId(q.getId())).thenReturn(List.of());
+
+    ResponseEntity<ManageQuestionController.PageResponse<ManageQuestionController.ManageQuestionResponse>> response =
+        controller.list(unitId, 1, 10, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).getQuestionsByScope(eq(unitId), any(), eq(true), eq(Visibility.GLOBAL), anyInt(), anyInt());
+    assertFalse(response.getBody().items().get(0).isEditable());
   }
 
   @Test
@@ -108,6 +127,9 @@ class ManageQuestionControllerTest {
   void nonAdminCanDeleteOwnPrivateQuestion() {
     User principal = userPrincipal("user@example.com");
     UUID questionId = UUID.randomUUID();
+    when(contentService.getQuestionById(questionId))
+        .thenReturn(Optional.of(new Question(questionId, UUID.randomUUID(), "Mine?", null,
+            Question.Difficulty.EASY, Visibility.PRIVATE, userId)));
     doNothing().when(contentService).deleteQuestionIfAuthorized(any(), any(), eq(false));
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
@@ -120,8 +142,9 @@ class ManageQuestionControllerTest {
   void nonAdminCannotDeleteGlobalQuestion() {
     User principal = userPrincipal("user@example.com");
     UUID questionId = UUID.randomUUID();
-    doThrow(new AccessDeniedException("Only admins can delete GLOBAL questions"))
-        .when(contentService).deleteQuestionIfAuthorized(any(), any(), eq(false));
+    when(contentService.getQuestionById(questionId))
+        .thenReturn(Optional.of(new Question(questionId, UUID.randomUUID(), "Global?", null,
+            Question.Difficulty.EASY, Visibility.GLOBAL, null)));
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
@@ -132,12 +155,14 @@ class ManageQuestionControllerTest {
   void adminCanDeleteGlobalQuestion() {
     User principal = adminPrincipal("admin@example.com");
     UUID questionId = UUID.randomUUID();
-    doNothing().when(contentService).deleteQuestionIfAuthorized(any(), any(), eq(true));
+    when(contentService.getQuestionById(questionId))
+        .thenReturn(Optional.of(new Question(questionId, UUID.randomUUID(), "Global?", null,
+            Question.Difficulty.EASY, Visibility.GLOBAL, null)));
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(contentService).deleteQuestionIfAuthorized(eq(questionId), any(), eq(true));
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    verify(contentService, never()).deleteQuestionIfAuthorized(any(), any(), anyBoolean());
   }
 
   @Test
@@ -255,11 +280,14 @@ class ManageQuestionControllerTest {
     when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
 
     var req = new ManageQuestionController.QuestionRequest(unitId, "Global Question?", null,
-        Question.Difficulty.MEDIUM, validAnswers(), "GLOBAL");
+        Question.Difficulty.MEDIUM, validAnswers(), "PRIVATE");
     ResponseEntity<?> response = controller.create(req, principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(contentService).createQuestion(any());
+    verify(contentService).createQuestion(argThat(question -> question.getVisibility() == Visibility.GLOBAL
+        && question.getOwnerId() == null));
+    var body = assertInstanceOf(ManageQuestionController.ManageQuestionResponse.class, response.getBody());
+    assertFalse(body.isEditable());
   }
 
   @Test
@@ -293,8 +321,7 @@ class ManageQuestionControllerTest {
   void deleteNonExistentQuestionReturnsNotFound() {
     User principal = userPrincipal("user@example.com");
     UUID questionId = UUID.randomUUID();
-    doThrow(new IllegalArgumentException("Not found"))
-        .when(contentService).deleteQuestionIfAuthorized(any(), any(), anyBoolean());
+    when(contentService.getQuestionById(questionId)).thenReturn(Optional.empty());
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
@@ -423,23 +450,20 @@ class ManageQuestionControllerTest {
   }
 
   @Test
-  void adminCanUpdateGlobalQuestion() {
+  void adminCannotUpdateGlobalQuestionFromManage() {
     User principal = adminPrincipal("admin@example.com");
     UUID questionId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     Question existing = new Question(questionId, unitId, "Old?", null,
         Question.Difficulty.EASY, Visibility.GLOBAL, null);
     when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(existing));
-    Question updated = new Question(questionId, unitId, "New?", null,
-        Question.Difficulty.EASY, Visibility.GLOBAL, null);
-    when(contentService.createQuestion(any())).thenReturn(updated);
-    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
 
     var req = new ManageQuestionController.QuestionRequest(unitId, "New?", null,
         Question.Difficulty.EASY, validAnswers(), "GLOBAL");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    verify(contentService, never()).createQuestion(any());
   }
 
   @Test
@@ -484,17 +508,18 @@ class ManageQuestionControllerTest {
   }
 
   @Test
-  void exportJsonReturnsAllQuestionsWhenNoUnitId_admin() {
+  void exportJsonReturnsOnlyGlobalQuestionsWhenNoUnitId_admin() {
     User principal = adminPrincipal("admin@example.com");
     UUID unitId = UUID.randomUUID();
     Question q = Question.createGlobal(unitId, "Q?", null, Question.Difficulty.EASY);
-    when(contentService.getAllQuestions()).thenReturn(List.of(q));
+    when(contentService.getVisibleQuestions(null)).thenReturn(List.of(q));
     when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
 
     ResponseEntity<?> response = controller.export(null, "json", principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(contentService).getAllQuestions();
+    verify(contentService).getVisibleQuestions(null);
+    verify(contentService, never()).getAllQuestions();
   }
 
   @Test
