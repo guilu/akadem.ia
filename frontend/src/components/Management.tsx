@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
 import { apiBase, apiJson } from '../api';
-import { getSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
+import { getManageSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
 import type { Syllabus } from '../types';
 
 export type AdminSubject = {
@@ -124,7 +124,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   async function loadSyllabuses() {
     try {
-      const data = await getSyllabuses();
+      const data = await getManageSyllabuses();
       setSyllabuses(data);
     } catch { setSyllabuses([]); }
   }

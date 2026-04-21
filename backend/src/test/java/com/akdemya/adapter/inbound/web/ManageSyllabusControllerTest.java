@@ -54,12 +54,15 @@ class ManageSyllabusControllerTest {
   void authenticatedUserCanListSyllabuses() {
     User principal = userPrincipal("user@example.com");
     Syllabus s = Syllabus.createPrivate("My Syllabus", "desc", userId);
-    when(contentService.getPrivateSyllabuses(any())).thenReturn(List.of(s));
+    when(contentService.getPrivateSyllabuses(userId)).thenReturn(List.of(s));
 
     ResponseEntity<List<ManageSyllabusController.ManageSyllabusResponse>> response = controller.list(principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(contentService).getPrivateSyllabuses(any());
+    assertEquals(1, response.getBody().size());
+    assertEquals(Visibility.PRIVATE.name(), response.getBody().get(0).visibility());
+    verify(contentService).getPrivateSyllabuses(userId);
+    verify(contentService, never()).getVisibleSyllabuses(any());
     assertTrue(response.getBody().get(0).isEditable());
   }
 
@@ -74,6 +77,7 @@ class ManageSyllabusControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getVisibleSyllabuses(null);
     verify(contentService, never()).getPrivateSyllabuses(any());
+    assertEquals(1, response.getBody().size());
     assertEquals(Visibility.GLOBAL.name(), response.getBody().get(0).visibility());
     assertFalse(response.getBody().get(0).isEditable());
   }

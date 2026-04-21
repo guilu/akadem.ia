@@ -5,6 +5,10 @@ export async function getSyllabuses(): Promise<Syllabus[]> {
   return apiJson<Syllabus[]>(`${apiBase}/api/syllabuses`);
 }
 
+export async function getManageSyllabuses(): Promise<Syllabus[]> {
+  return apiJson<Syllabus[]>(`${apiBase}/api/manage/syllabuses`);
+}
+
 export async function getSyllabus(id: string): Promise<Syllabus> {
   return apiJson<Syllabus>(`${apiBase}/api/syllabuses/${id}`);
 }
