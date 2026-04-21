@@ -34,12 +34,13 @@ public class ManageSyllabusController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
-    List<Syllabus> syllabuses = isAdmin(principal)
+    boolean admin = isAdmin(principal);
+    List<Syllabus> syllabuses = admin
         ? contentService.getVisibleSyllabuses(null)
         : contentService.getPrivateSyllabuses(caller.getId());
     List<ManageSyllabusResponse> result = syllabuses.stream()
         .map(s -> new ManageSyllabusResponse(s.getId(), s.getName(), s.getDescription(),
-            s.getVisibility() != null ? s.getVisibility().name() : null, isManageEditable(s, caller)))
+            s.getVisibility() != null ? s.getVisibility().name() : null, isManageEditable(s, caller, admin)))
         .toList();
     return ResponseEntity.ok(result);
   }
@@ -71,7 +72,7 @@ public class ManageSyllabusController {
     Syllabus saved = contentService.createSyllabus(syllabus);
     return ResponseEntity.ok(new ManageSyllabusResponse(saved.getId(), saved.getName(),
         saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null,
-        isManageEditable(saved, caller)));
+        isManageEditable(saved, caller, admin)));
   }
 
   @PutMapping("/{id}")
@@ -89,7 +90,7 @@ public class ManageSyllabusController {
       return ResponseEntity.notFound().build();
     }
 
-    boolean canEdit = isManageEditable(current, caller);
+    boolean canEdit = isManageEditable(current, caller, admin);
     if (!canEdit) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
@@ -104,7 +105,7 @@ public class ManageSyllabusController {
     Syllabus saved = contentService.createSyllabus(updated);
     return ResponseEntity.ok(new ManageSyllabusResponse(saved.getId(), saved.getName(),
         saved.getDescription(), saved.getVisibility() != null ? saved.getVisibility().name() : null,
-        isManageEditable(saved, caller)));
+        isManageEditable(saved, caller, admin)));
   }
 
   @DeleteMapping("/{id}")
@@ -114,16 +115,17 @@ public class ManageSyllabusController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     AppUser caller = resolveUser(principal);
+    boolean admin = isAdmin(principal);
     Syllabus current = contentService.getSyllabusById(id).orElse(null);
     if (current == null) {
       return ResponseEntity.notFound().build();
     }
-    if (!isManageEditable(current, caller)) {
+    if (!isManageEditable(current, caller, admin)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(java.util.Map.of("error", "not_authorized"));
     }
     try {
-      contentService.deleteSyllabus(id, caller.getId(), false);
+      contentService.deleteSyllabus(id, caller.getId(), admin);
       return ResponseEntity.ok().build();
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -147,7 +149,8 @@ public class ManageSyllabusController {
         .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
   }
 
-  private boolean isManageEditable(Syllabus syllabus, AppUser caller) {
+  private boolean isManageEditable(Syllabus syllabus, AppUser caller, boolean isAdmin) {
+    if (isAdmin && syllabus.getVisibility() == Visibility.GLOBAL) return true;
     return syllabus.getVisibility() == Visibility.PRIVATE
         && caller.getId().equals(syllabus.getOwnerId());
   }

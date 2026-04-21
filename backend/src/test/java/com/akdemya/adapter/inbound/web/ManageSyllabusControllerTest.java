@@ -67,7 +67,7 @@ class ManageSyllabusControllerTest {
   }
 
   @Test
-  void adminListsOnlyGlobalSyllabusesAsReadOnly() {
+  void adminListsGlobalSyllabusesAsEditable() {
     User principal = adminPrincipal("admin@example.com");
     Syllabus global = Syllabus.createGlobal("Global", "desc");
     when(contentService.getVisibleSyllabuses(null)).thenReturn(List.of(global));
@@ -79,7 +79,7 @@ class ManageSyllabusControllerTest {
     verify(contentService, never()).getPrivateSyllabuses(any());
     assertEquals(1, response.getBody().size());
     assertEquals(Visibility.GLOBAL.name(), response.getBody().get(0).visibility());
-    assertFalse(response.getBody().get(0).isEditable());
+    assertTrue(response.getBody().get(0).isEditable());
   }
 
   // --- POST /api/manage/syllabuses ---
@@ -144,7 +144,7 @@ class ManageSyllabusControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSyllabus(argThat(s -> s.getVisibility() == Visibility.GLOBAL && s.getOwnerId() == null));
     var body = assertInstanceOf(ManageSyllabusController.ManageSyllabusResponse.class, response.getBody());
-    assertFalse(body.isEditable());
+    assertTrue(body.isEditable());
   }
 
   // --- PUT /api/manage/syllabuses/{id} ---
@@ -197,17 +197,19 @@ class ManageSyllabusControllerTest {
   }
 
   @Test
-  void adminCannotUpdateGlobalSyllabusFromManage() {
+  void adminCanUpdateGlobalSyllabus() {
     User principal = adminPrincipal("admin@example.com");
     UUID syllabusId = UUID.randomUUID();
     Syllabus existing = new Syllabus(syllabusId, "Global", "desc", Visibility.GLOBAL, null);
+    Syllabus updated = new Syllabus(syllabusId, "New Name", "desc", Visibility.GLOBAL, null);
     when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(existing));
+    when(contentService.createSyllabus(any())).thenReturn(updated);
 
     var req = new ManageSyllabusController.SyllabusRequest("New Name", "desc", null);
     ResponseEntity<?> response = controller.update(syllabusId, req, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).createSyllabus(any());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).createSyllabus(any());
   }
 
   @Test
@@ -232,16 +234,17 @@ class ManageSyllabusControllerTest {
   }
 
   @Test
-  void deleteByAdminReturnsForbiddenForGlobalSyllabus() {
+  void adminCanDeleteGlobalSyllabus() {
     User principal = adminPrincipal("admin@example.com");
     UUID syllabusId = UUID.randomUUID();
     Syllabus existing = new Syllabus(syllabusId, "Global", "desc", Visibility.GLOBAL, null);
     when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(existing));
+    doNothing().when(contentService).deleteSyllabus(eq(syllabusId), any(), eq(true));
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).deleteSyllabus(any(), any(), anyBoolean());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).deleteSyllabus(eq(syllabusId), any(), eq(true));
   }
 
   @Test

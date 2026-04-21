@@ -22,7 +22,7 @@ export async function createSyllabus(data: {
   description?: string;
   visibility?: ContentVisibility;
 }): Promise<Syllabus> {
-  return apiJson<Syllabus>(`${apiBase}/api/syllabuses`, {
+  return apiJson<Syllabus>(`${apiBase}/api/manage/syllabuses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -41,7 +41,7 @@ export async function updateSyllabus(
 }
 
 export async function deleteSyllabus(id: string): Promise<void> {
-  return apiJson<void>(`${apiBase}/api/syllabuses/${id}`, { method: 'DELETE' });
+  return apiJson<void>(`${apiBase}/api/manage/syllabuses/${id}`, { method: 'DELETE' });
 }
 
 export async function startExamFromSyllabus(params: {
