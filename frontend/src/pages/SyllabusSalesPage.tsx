@@ -122,11 +122,11 @@ export default function SyllabusSalesPage() {
               <div className="flex items-center justify-between pt-4 border-t border-secondary/15">
                 <span className="text-3xl font-extrabold">25€</span>
                 <Link
-                  to={ROUTES.register}
+                  to={ROUTES.subalternoGva}
                   className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
                 >
                   <UserAdd className="w-4 h-4" />
-                  Empezar ahora
+                  Ver temario
                 </Link>
               </div>
             </article>

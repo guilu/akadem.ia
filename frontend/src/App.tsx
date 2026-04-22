@@ -27,13 +27,14 @@ import RagPage from './pages/RagPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import SyllabusSalesPage from './pages/SyllabusSalesPage';
+import SubalternoGVAPage from './pages/SubalternoGVAPage';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
-  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register || location.pathname === ROUTES.syllabusSales;
+  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register || location.pathname.startsWith('/temario');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [minutes, setMinutes] = useState(20);
@@ -253,6 +254,7 @@ export default function App() {
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage />} />
+          <Route path={ROUTES.subalternoGva} element={<SubalternoGVAPage />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.syllabuses} element={
