@@ -26,13 +26,14 @@ import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './pages/ProtectedRoute';
+import SyllabusSalesPage from './pages/SyllabusSalesPage';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
-  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register;
+  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register || location.pathname === ROUTES.syllabusSales;
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [minutes, setMinutes] = useState(20);
@@ -251,6 +252,7 @@ export default function App() {
       <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-7xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
+          <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage isAuthed={isAuthed} />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.syllabuses} element={
