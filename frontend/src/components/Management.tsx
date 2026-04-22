@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, CircleMinus, Pen, TrashBin, FileExport, FileImport, FileCsv, BookOpen, FolderOpen, FileLines, Inbox } from 'flowbite-react-icons/outline';
 import { apiBase, apiJson } from '../api';
-import { getSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
+import { getManageSyllabuses, createSyllabus, updateSyllabus, deleteSyllabus } from '../api/syllabusApi';
 import type { Syllabus } from '../types';
 
 export type AdminSubject = {
@@ -124,7 +124,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   async function loadSyllabuses() {
     try {
-      const data = await getSyllabuses();
+      const data = await getManageSyllabuses();
       setSyllabuses(data);
     } catch { setSyllabuses([]); }
   }
@@ -312,7 +312,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
   const navItems = [
     { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-4 h-4" /> },
-    { id: 'subjects' as Tab, label: 'Materias', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'subjects' as Tab, label: 'Temas', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
     { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
   ];
@@ -411,11 +411,11 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           </div>
         )}
 
-        {/* ── Materias ── */}
+        {/* ── Temas ── */}
         {tab === 'subjects' && (
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Materias</span></h2>
+              <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temas</span></h2>
             </div>
 
             <div className={card}>
@@ -434,7 +434,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               {!filterSyllabusId && (
-                <p className="text-sm text-text/50 mb-4">Selecciona el temario para crear la materia.</p>
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario para crear el tema.</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={subjectForm.name} onChange={e => setSubjectForm(f => ({ ...f, name: e.target.value }))} />
@@ -443,7 +443,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="flex gap-2">
                 <button onClick={saveSubject} disabled={subjectLoading || !filterSyllabusId} className={btnPrimary}>
                   {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  {isSubjectEditing ? 'Guardar cambios' : 'Crear materia'}
+                  {isSubjectEditing ? 'Guardar cambios' : 'Crear tema'}
                 </button>
                 {isSubjectEditing && (
                   <button onClick={resetSubjectForm} className={btnOutline}>
@@ -457,16 +457,16 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead><tr className="border-b border-secondary/20">
-                    <Th>Materia</Th>
+                    <Th>Tema</Th>
                     <Th className="hidden sm:table-cell">Temario</Th>
                     <Th className="hidden sm:table-cell">Visibilidad</Th>
                     <Th />
                   </tr></thead>
                   <tbody>
                     {!filterSyllabusId ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />Selecciona un temario para ver las materias.</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />Selecciona un temario para ver los temas.</td></tr>
                     ) : filteredSubjectsList.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay materias en este temario.</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />No hay temas en este temario.</td></tr>
                     ) : filteredSubjectsList.map(s => (
                       <tr key={s.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{s.name}</Td>
@@ -510,7 +510,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <select className={inp} value={unitForm.subjectId} onChange={e => setUnitForm(f => ({ ...f, subjectId: e.target.value }))} disabled={!filterUnitSyllabusId}>
-                  <option value="">Selecciona materia</option>
+                  <option value="">Selecciona tema</option>
                   {unitSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
@@ -518,7 +518,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               {!unitForm.subjectId && (
-                <p className="text-sm text-text/50 mb-4">Selecciona el temario y la materia para añadir una unidad.</p>
+                <p className="text-sm text-text/50 mb-4">Selecciona el temario y el tema para añadir una unidad.</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Nombre" value={unitForm.name} onChange={e => setUnitForm(f => ({ ...f, name: e.target.value }))} />
@@ -542,7 +542,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead><tr className="border-b border-secondary/20">
-                    <Th>Materia</Th>
+                    <Th>Tema</Th>
                     <Th>Unidad</Th>
                     <Th className="hidden sm:table-cell">Descripción</Th>
                     <Th className="hidden sm:table-cell">Orden</Th>
@@ -551,7 +551,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {units.length === 0 ? (
-                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{unitForm.subjectId ? 'No hay unidades disponibles.' : 'Selecciona un temario y materia para ver las unidades.'}</td></tr>
+                      <tr><td colSpan={6} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{unitForm.subjectId ? 'No hay unidades disponibles.' : 'Selecciona un temario y tema para ver las unidades.'}</td></tr>
                     ) : units.map(u => (
                       <tr key={u.id} className="border-b border-secondary/10 last:border-0">
                         <Td>{subjectById[u.subjectId]?.name || '-'}</Td>
@@ -595,7 +595,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   {syllabuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <select className={inp} value={questionSubjectId} onChange={e => { setQuestionSubjectId(e.target.value); setQuestionUnitId(''); }} disabled={!questionSyllabusId}>
-                  <option value="">Selecciona materia</option>
+                  <option value="">Selecciona tema</option>
                   {questionSubjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <select className={inp} value={questionUnitId} onChange={e => setQuestionUnitId(e.target.value)} disabled={!questionSubjectId}>
@@ -607,7 +607,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
             <div className={card}>
               {!questionUnitId && (
-                <p className="text-sm text-text/50 mb-4">Selecciona temario, materia y unidad para crear preguntas.</p>
+                <p className="text-sm text-text/50 mb-4">Selecciona temario, tema y unidad para crear preguntas.</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 mb-4">
                 <input className={inp} placeholder="Enunciado" value={questionForm.text} onChange={e => setQuestionForm(f => ({ ...f, text: e.target.value }))} />
@@ -674,7 +674,7 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </tr></thead>
                   <tbody>
                     {questions.length === 0 ? (
-                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona temario, materia y unidad para ver las preguntas.'}</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-sm text-text/55"><Inbox className="w-7 h-7 mx-auto mb-2 text-text/25" />{questionUnitId ? 'No hay preguntas disponibles.' : 'Selecciona temario, tema y unidad para ver las preguntas.'}</td></tr>
                     ) : questions.map(q => (
                       <tr key={q.id} className="border-b border-secondary/10 last:border-0">
                         <Td><span className="line-clamp-2">{q.text}</span></Td>
@@ -748,16 +748,16 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
         </div>
       )}
 
-      {/* ── Modal Eliminar materia ── */}
+      {/* ── Modal Eliminar tema ── */}
       {confirmSubjectDelete && (
         <DeleteModal
-          title="Eliminar materia"
+          title="Eliminar tema"
           body={
             <>
               <p className="text-sm text-text/70 mb-3">¿Seguro que quieres eliminar <strong>{confirmSubjectDelete.name}</strong>?</p>
               {(confirmSubjectDelete.unitCount ?? 0) > 0 && (
                 <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
-                  Esta materia tiene unidades asociadas. Si la eliminas se eliminarán todas sus unidades y preguntas. Esta acción es irreversible.
+                  Este tema tiene unidades asociadas. Si la eliminas se eliminarán todas sus unidades y preguntas. Esta acción es irreversible.
                 </div>
               )}
             </>

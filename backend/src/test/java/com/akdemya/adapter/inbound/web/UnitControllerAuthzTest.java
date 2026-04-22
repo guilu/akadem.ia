@@ -4,6 +4,7 @@ import com.akdemya.application.service.ContentManagement;
 import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -53,7 +54,7 @@ class UnitControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(unitId, principal);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(contentService).deleteUnitIfAuthorized(eq(unitId), eq(ownerId), eq(false));
     }
 
@@ -70,7 +71,7 @@ class UnitControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(unitId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     // Test 3: Admin can delete GLOBAL unit → 200
@@ -85,7 +86,7 @@ class UnitControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(unitId, principal);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(contentService).deleteUnitIfAuthorized(eq(unitId), eq(adminId), eq(true));
     }
 
@@ -102,14 +103,14 @@ class UnitControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(unitId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     // Test 5: Unauthenticated delete → 401
     @Test
     void unauthenticatedDeleteReturns401() {
         ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-        assertEquals(401, response.getStatusCode().value());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     // Test 6: Delete non-existent unit → 404
@@ -125,6 +126,6 @@ class UnitControllerAuthzTest {
 
         ResponseEntity<?> response = controller.delete(unitId, principal);
 
-        assertEquals(404, response.getStatusCode().value());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }

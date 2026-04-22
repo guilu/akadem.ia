@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -80,7 +81,7 @@ class UnitControllerVisibilityTest {
   void unauthenticatedCreateReturns401() {
     var req = new UnitController.CreateUnitRequest(UUID.randomUUID(), "Algebra", "desc", 1, null);
     ResponseEntity<Unit> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).createUnit(any());
   }
 
@@ -97,7 +98,7 @@ class UnitControllerVisibilityTest {
     var req = new UnitController.CreateUnitRequest(subjectId, "My Algebra", "desc", 1, Visibility.PRIVATE);
     ResponseEntity<Unit> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(Visibility.PRIVATE, response.getBody().getVisibility());
   }
@@ -111,7 +112,7 @@ class UnitControllerVisibilityTest {
     var req = new UnitController.CreateUnitRequest(UUID.randomUUID(), "Global Algebra", "desc", 1, Visibility.GLOBAL);
     ResponseEntity<Unit> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createUnit(any());
   }
 
@@ -128,7 +129,7 @@ class UnitControllerVisibilityTest {
     var req = new UnitController.CreateUnitRequest(subjectId, "Global Algebra", "desc", 1, Visibility.GLOBAL);
     ResponseEntity<Unit> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createUnit(any());
   }
 
@@ -146,7 +147,7 @@ class UnitControllerVisibilityTest {
     var req = new UnitController.CreateUnitRequest(subjectId, "My Unit", "desc", 0, null);
     ResponseEntity<Unit> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createUnit(argThat(u -> u.getVisibility() == Visibility.PRIVATE));
   }
 }

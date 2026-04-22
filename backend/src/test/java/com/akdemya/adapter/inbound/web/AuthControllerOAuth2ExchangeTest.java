@@ -7,6 +7,7 @@ import com.akdemya.domain.port.in.RefreshTokenUseCase;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -40,7 +41,7 @@ class AuthControllerOAuth2ExchangeTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.register(cmd, res);
 
-        assertEquals(200, resp.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
@@ -68,7 +69,7 @@ class AuthControllerOAuth2ExchangeTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.register(cmd, res);
 
-        assertEquals(400, resp.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
@@ -86,7 +87,7 @@ class AuthControllerOAuth2ExchangeTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.login(cmd, res);
 
-        assertEquals(200, resp.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
@@ -114,7 +115,7 @@ class AuthControllerOAuth2ExchangeTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> resp = controller.login(cmd, res);
 
-        assertEquals(401, resp.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) resp.getBody();
         assertNotNull(body);
@@ -131,7 +132,7 @@ class AuthControllerOAuth2ExchangeTest {
         var request = new AuthController.ExchangeCodeRequest(code);
         ResponseEntity<?> response = controller.exchangeOAuth2Code(request, res);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -159,7 +160,7 @@ class AuthControllerOAuth2ExchangeTest {
         var request = new AuthController.ExchangeCodeRequest(code);
         ResponseEntity<?> response = controller.exchangeOAuth2Code(request, res);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);

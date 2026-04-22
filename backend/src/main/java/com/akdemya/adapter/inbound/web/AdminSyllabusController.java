@@ -30,7 +30,7 @@ public class AdminSyllabusController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody SyllabusRequest req) {
+  public ResponseEntity<Object> create(@Valid @RequestBody SyllabusRequest req) {
     if (req.name() == null || req.name().trim().isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
@@ -39,7 +39,7 @@ public class AdminSyllabusController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody SyllabusRequest req) {
+  public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody SyllabusRequest req) {
     Syllabus current = syllabusRepo.findById(id).orElse(null);
     if (current == null) return ResponseEntity.notFound().build();
     String name = (req.name() == null ? "" : req.name().trim());
@@ -51,7 +51,7 @@ public class AdminSyllabusController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id) {
+  public ResponseEntity<Void> delete(@PathVariable UUID id) {
     syllabusRepo.deleteById(id);
     return ResponseEntity.ok().build();
   }

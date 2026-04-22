@@ -38,8 +38,8 @@ public class SyllabusController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody CreateSyllabusRequest req,
-                                   @AuthenticationPrincipal User principal) {
+  public ResponseEntity<Object> create(@Valid @RequestBody CreateSyllabusRequest req,
+                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -65,8 +65,8 @@ public class SyllabusController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id,
-                                   @AuthenticationPrincipal User principal) {
+  public ResponseEntity<Object> delete(@PathVariable UUID id,
+                                    @AuthenticationPrincipal User principal) {
     if (principal == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
@@ -87,7 +87,7 @@ public class SyllabusController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> getById(@PathVariable UUID id,
+  public ResponseEntity<SyllabusResponse> getById(@PathVariable UUID id,
                                     @AuthenticationPrincipal User principal) {
     return contentService.getSyllabusById(id)
         .map(s -> ResponseEntity.ok(SyllabusResponse.from(s)))
@@ -95,8 +95,8 @@ public class SyllabusController {
   }
 
   @GetMapping("/{id}/subjects")
-  public ResponseEntity<?> getSubjects(@PathVariable UUID id,
-                                        @AuthenticationPrincipal User principal) {
+  public ResponseEntity<Object> getSubjects(@PathVariable UUID id,
+                                         @AuthenticationPrincipal User principal) {
     if (contentService.getSyllabusById(id).isEmpty()) {
       return ResponseEntity.notFound().build();
     }

@@ -7,6 +7,7 @@ import com.akdemya.domain.port.in.RefreshTokenUseCase;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -37,7 +38,7 @@ class AuthControllerRefreshTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.refresh(rawToken, res);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -54,7 +55,7 @@ class AuthControllerRefreshTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.refresh(null, res);
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -70,7 +71,7 @@ class AuthControllerRefreshTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.refresh(rawToken, res);
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
@@ -84,7 +85,7 @@ class AuthControllerRefreshTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         ResponseEntity<?> response = controller.logout(rawToken, res);
 
-        assertEquals(204, response.getStatusCodeValue());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(refreshTokenUseCase).revoke(rawToken);
 
         Cookie akTokenCookie = res.getCookie("ak_token");

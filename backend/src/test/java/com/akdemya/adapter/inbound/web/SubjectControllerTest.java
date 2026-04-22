@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -48,7 +49,7 @@ class SubjectControllerTest {
     SubjectController.CreateSubjectRequest req =
         new SubjectController.CreateSubjectRequest("Math", "desc", null);
     ResponseEntity<Subject> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).createSubject(any());
   }
 
@@ -63,7 +64,7 @@ class SubjectControllerTest {
         new SubjectController.CreateSubjectRequest("Math", "desc", null);
     ResponseEntity<Subject> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     // null visibility should default to PRIVATE, so createPrivate path is taken
     verify(contentService).createSubject(any());
   }
@@ -73,7 +74,7 @@ class SubjectControllerTest {
   @Test
   void deleteUnauthenticatedReturns401() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).deleteSubjectIfAuthorized(any(), any(), anyBoolean());
   }
 
@@ -87,7 +88,7 @@ class SubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   @Test
@@ -99,7 +100,7 @@ class SubjectControllerTest {
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(true));
   }
 }

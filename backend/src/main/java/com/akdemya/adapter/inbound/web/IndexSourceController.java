@@ -32,7 +32,7 @@ public class IndexSourceController {
      */
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> upload(
+    public ResponseEntity<Object> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("subjectId") UUID subjectId) throws Exception {
 
@@ -74,7 +74,7 @@ public class IndexSourceController {
      */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> confirm(
+    public ResponseEntity<Object> confirm(
             @PathVariable UUID id,
             @Valid @RequestBody ConfirmRequest req) {
 
@@ -110,7 +110,7 @@ public class IndexSourceController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> get(@PathVariable UUID id) {
+    public ResponseEntity<SourceDocumentResponse> get(@PathVariable UUID id) {
         try {
             return ResponseEntity.ok(toDocResponse(useCase.findById(id)));
         } catch (java.util.NoSuchElementException e) {
@@ -120,7 +120,7 @@ public class IndexSourceController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         try {
             useCase.deleteSource(id);
             return ResponseEntity.noContent().build();

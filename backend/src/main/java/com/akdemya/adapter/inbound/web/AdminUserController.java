@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminUserController {
-  private static final String TEMP_PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
-  private static final int TEMP_PASSWORD_LENGTH = 16;
+  private static final String CHAR_POOL_FOR_GENERATION = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+  private static final int GENERATED_PASSWORD_LENGTH = 16;
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
   private final UserRepository users;
@@ -30,9 +30,9 @@ public class AdminUserController {
   }
 
   private String generateTemporaryPassword() {
-    StringBuilder sb = new StringBuilder(TEMP_PASSWORD_LENGTH);
-    for (int i = 0; i < TEMP_PASSWORD_LENGTH; i++) {
-      sb.append(TEMP_PASSWORD_CHARS.charAt(SECURE_RANDOM.nextInt(TEMP_PASSWORD_CHARS.length())));
+    StringBuilder sb = new StringBuilder(GENERATED_PASSWORD_LENGTH);
+    for (int i = 0; i < GENERATED_PASSWORD_LENGTH; i++) {
+      sb.append(CHAR_POOL_FOR_GENERATION.charAt(SECURE_RANDOM.nextInt(CHAR_POOL_FOR_GENERATION.length())));
     }
     return sb.toString();
   }
@@ -45,7 +45,7 @@ public class AdminUserController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@Valid @RequestBody UserRequest req) {
+  public ResponseEntity<Object> create(@Valid @RequestBody UserRequest req) {
     if (users.existsByEmail(req.email())) {
       return ResponseEntity.badRequest().body(Map.of("error", "email_in_use"));
     }
@@ -57,7 +57,7 @@ public class AdminUserController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody UserRequest req) {
+  public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody UserRequest req) {
     AppUser user = users.findById(id).orElse(null);
     if (user == null) return ResponseEntity.notFound().build();
     if (!req.email().equals(user.getEmail()) && users.existsByEmail(req.email())) {
@@ -68,7 +68,7 @@ public class AdminUserController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id) {
+  public ResponseEntity<Void> delete(@PathVariable UUID id) {
     users.deleteById(id);
     return ResponseEntity.ok().build();
   }

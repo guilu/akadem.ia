@@ -4,6 +4,7 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.in.UserSettingsUseCase;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,7 +40,7 @@ class UserSettingsControllerTest {
 
         ResponseEntity<UserSettingsController.SettingsResponse> response = controller.getSettings(principal);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(3, response.getBody().penaltyRatio());
     }
@@ -61,7 +62,7 @@ class UserSettingsControllerTest {
 
         ResponseEntity<UserSettingsController.SettingsResponse> response = controller.updateSettings(req, principal);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(settingsUseCase, never()).updateSettings(any(), any());
     }
 
@@ -74,7 +75,7 @@ class UserSettingsControllerTest {
         var req = new UserSettingsController.SettingsRequest(20, 100, 5);
         ResponseEntity<UserSettingsController.SettingsResponse> response = controller.updateSettings(req, principal);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(5, response.getBody().penaltyRatio());
     }

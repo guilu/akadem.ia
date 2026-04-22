@@ -86,6 +86,10 @@ public class ContentManagement {
     return subjectRepo.findAll();
   }
 
+  public Optional<Subject> getSubjectById(UUID id) {
+    return subjectRepo.findById(id);
+  }
+
   public List<Subject> getVisibleSubjects(UUID userId) {
     return subjectRepo.findVisibleByUserId(userId);
   }
@@ -127,6 +131,10 @@ public class ContentManagement {
 
   public List<Unit> getUnitsBySubject(UUID subjectId) {
     return unitRepo.findBySubjectId(subjectId);
+  }
+
+  public Optional<Unit> getUnitById(UUID id) {
+    return unitRepo.findById(id);
   }
 
   public List<Unit> getVisibleUnitsBySubject(UUID subjectId, UUID userId) {
@@ -211,6 +219,10 @@ public class ContentManagement {
 
   public List<Question> getAllQuestions() {
     return questionRepo.findAll();
+  }
+
+  public Optional<Question> getQuestionById(UUID id) {
+    return questionRepo.findById(id);
   }
 
   public List<Question> getVisibleQuestionsByUnit(UUID unitId, UUID userId) {

@@ -1,15 +1,13 @@
 package com.akdemya.adapter.outbound.persistence;
 
-import com.akdemya.adapter.outbound.persistence.entity.FlashcardEntity;
-import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewEntity;
-import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewLogEntity;
-import com.akdemya.adapter.outbound.persistence.mapper.FlashcardJpaMapper;
-import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewJpaMapper;
-import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewLogJpaMapper;
-import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardRepository;
-import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewLogRepository;
-import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewRepository;
-import com.akdemya.domain.model.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +15,26 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.akdemya.adapter.outbound.persistence.entity.FlashcardReviewEntity;
+import com.akdemya.adapter.outbound.persistence.mapper.FlashcardJpaMapper;
+import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewJpaMapper;
+import com.akdemya.adapter.outbound.persistence.mapper.FlashcardReviewLogJpaMapper;
+import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardRepository;
+import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewLogRepository;
+import com.akdemya.adapter.outbound.persistence.repository.JpaFlashcardReviewRepository;
+import com.akdemya.domain.model.Flashcard;
+import com.akdemya.domain.model.FlashcardReview;
+import com.akdemya.domain.model.FlashcardReviewLog;
+import com.akdemya.domain.model.ReviewGrade;
+import com.akdemya.domain.model.ReviewState;
 
 @DataJpaTest
 @TestPropertySource(properties = {
     "spring.flyway.enabled=false",
     "spring.sql.init.mode=never",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.show-sql=false",
+    "spring.jpa.properties.hibernate.show_sql=false"
 })
 @Import({
     FlashcardJpaMapper.class,
@@ -37,12 +43,18 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 class FlashcardPersistenceAdapterTest {
 
-  @Autowired JpaFlashcardRepository flashcardRepo;
-  @Autowired JpaFlashcardReviewRepository reviewRepo;
-  @Autowired JpaFlashcardReviewLogRepository logRepo;
-  @Autowired FlashcardJpaMapper flashcardMapper;
-  @Autowired FlashcardReviewJpaMapper reviewMapper;
-  @Autowired FlashcardReviewLogJpaMapper logMapper;
+  @Autowired
+  JpaFlashcardRepository flashcardRepo;
+  @Autowired
+  JpaFlashcardReviewRepository reviewRepo;
+  @Autowired
+  JpaFlashcardReviewLogRepository logRepo;
+  @Autowired
+  FlashcardJpaMapper flashcardMapper;
+  @Autowired
+  FlashcardReviewJpaMapper reviewMapper;
+  @Autowired
+  FlashcardReviewLogJpaMapper logMapper;
 
   private FlashcardRepositoryAdapter flashcardAdapter;
   private FlashcardReviewRepositoryAdapter reviewAdapter;
@@ -54,8 +66,8 @@ class FlashcardPersistenceAdapterTest {
   @BeforeEach
   void setUp() {
     flashcardAdapter = new FlashcardRepositoryAdapter(flashcardRepo, flashcardMapper);
-    reviewAdapter    = new FlashcardReviewRepositoryAdapter(reviewRepo, reviewMapper);
-    logAdapter       = new FlashcardReviewLogRepositoryAdapter(logRepo, logMapper);
+    reviewAdapter = new FlashcardReviewRepositoryAdapter(reviewRepo, reviewMapper);
+    logAdapter = new FlashcardReviewLogRepositoryAdapter(logRepo, logMapper);
   }
 
   // ── Flashcard ─────────────────────────────────────────────────────────────

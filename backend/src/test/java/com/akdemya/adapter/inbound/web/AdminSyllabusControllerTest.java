@@ -4,6 +4,7 @@ import com.akdemya.domain.model.Syllabus;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.SyllabusRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -40,7 +41,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest("Physics", "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(syllabusRepo).save(any());
   }
 
@@ -49,7 +50,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest(null, "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(syllabusRepo, never()).save(any());
   }
 
@@ -58,7 +59,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest("   ", "desc");
     ResponseEntity<?> response = controller.create(req);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(syllabusRepo, never()).save(any());
   }
 
@@ -73,7 +74,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest("New Name", "new desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(syllabusRepo).save(any());
   }
 
@@ -85,7 +86,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest("Name", "desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(404, response.getStatusCode().value());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     verify(syllabusRepo, never()).save(any());
   }
 
@@ -98,7 +99,7 @@ class AdminSyllabusControllerTest {
     var req = new AdminSyllabusController.SyllabusRequest("", "desc");
     ResponseEntity<?> response = controller.update(id, req);
 
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(syllabusRepo, never()).save(any());
   }
 
@@ -107,7 +108,7 @@ class AdminSyllabusControllerTest {
     UUID id = UUID.randomUUID();
     ResponseEntity<?> response = controller.delete(id);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(syllabusRepo).deleteById(id);
   }
 }

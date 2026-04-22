@@ -36,7 +36,7 @@ public class ExamController {
     }
 
     @PostMapping("/attempts/start-random")
-    public ResponseEntity<?> startRandom(@Valid @RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<ExamUseCase.StartResponse> startRandom(@Valid @RequestBody StartRandomRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
@@ -48,7 +48,7 @@ public class ExamController {
     }
 
     @PostMapping("/attempts/start-from-syllabus")
-    public ResponseEntity<?> startFromSyllabus(@RequestBody StartFromSyllabusRequest req,
+    public ResponseEntity<Object> startFromSyllabus(@RequestBody StartFromSyllabusRequest req,
             @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
@@ -69,7 +69,7 @@ public class ExamController {
     }
 
     @PostMapping("/attempts/start")
-    public ResponseEntity<?> start(@RequestBody StartRequest req, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<ExamUseCase.StartResponse> start(@RequestBody StartRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
@@ -80,7 +80,7 @@ public class ExamController {
     }
 
     @PostMapping("/attempts/{attemptId}/submit")
-    public ResponseEntity<?> submit(@PathVariable UUID attemptId, @RequestBody ExamUseCase.SubmitCommand req,
+    public ResponseEntity<ExamUseCase.SubmitResult> submit(@PathVariable UUID attemptId, @RequestBody ExamUseCase.SubmitCommand req,
             @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
@@ -105,7 +105,7 @@ public class ExamController {
     }
 
     @PutMapping("/attempts/{attemptId}/answers/{questionId}")
-    public ResponseEntity<?> updateAnswer(@PathVariable UUID attemptId, @PathVariable UUID questionId,
+    public ResponseEntity<Object> updateAnswer(@PathVariable UUID attemptId, @PathVariable UUID questionId,
             @RequestBody UpdateAnswerRequest req, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
@@ -128,7 +128,7 @@ public class ExamController {
     }
 
     @GetMapping("/attempts/{attemptId}")
-    public ResponseEntity<?> getAttempt(@PathVariable UUID attemptId, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<ExamUseCase.AttemptResponse> getAttempt(@PathVariable UUID attemptId, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
@@ -145,7 +145,7 @@ public class ExamController {
     }
 
     @GetMapping("/attempts")
-    public ResponseEntity<?> listAttempts(@AuthenticationPrincipal User principal) {
+    public ResponseEntity<java.util.List<ExamUseCase.AttemptSummary>> listAttempts(@AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
@@ -154,7 +154,7 @@ public class ExamController {
     }
 
     @GetMapping("/attempts/{attemptId}/result")
-    public ResponseEntity<?> getResult(@PathVariable UUID attemptId, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<Object> getResult(@PathVariable UUID attemptId, @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }

@@ -12,6 +12,7 @@ import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -90,7 +91,7 @@ class FlashcardControllerAuthzTest {
         var req = new FlashcardDto.UpdateRequest(unitId, "front", "back");
         ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(flashcardId, req, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     // Test 3: Admin can update GLOBAL flashcard → 200
@@ -129,7 +130,7 @@ class FlashcardControllerAuthzTest {
         var req = new FlashcardDto.UpdateRequest(unitId, "front", "back");
         ResponseEntity<FlashcardDto.FlashcardResponse> response = controller.update(flashcardId, req, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     // ======================== DELETE ========================
@@ -163,7 +164,7 @@ class FlashcardControllerAuthzTest {
 
         ResponseEntity<Void> response = controller.delete(flashcardId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     // Test 7: Admin can delete GLOBAL flashcard → 204
@@ -195,6 +196,6 @@ class FlashcardControllerAuthzTest {
 
         ResponseEntity<Void> response = controller.delete(flashcardId, principal);
 
-        assertEquals(403, response.getStatusCode().value());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 }

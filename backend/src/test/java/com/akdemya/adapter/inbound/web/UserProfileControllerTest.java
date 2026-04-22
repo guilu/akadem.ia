@@ -4,6 +4,7 @@ import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.port.in.UserProfileUseCase;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,7 +41,7 @@ class UserProfileControllerTest {
 
     ResponseEntity<UserProfileController.GetProfileResponse> response = controller.getProfile(principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("John", response.getBody().firstName());
     assertEquals("Doe", response.getBody().lastName());
@@ -51,7 +52,7 @@ class UserProfileControllerTest {
   void getProfile_unauthenticated_throws401() {
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> controller.getProfile(null));
-    assertEquals(401, ex.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
   }
 
   @Test
@@ -66,7 +67,7 @@ class UserProfileControllerTest {
     var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
     ResponseEntity<UserProfileController.GetProfileResponse> response = controller.updateProfile(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("Jane", response.getBody().firstName());
     assertEquals("Smith", response.getBody().lastName());
@@ -79,6 +80,6 @@ class UserProfileControllerTest {
     var req = new UserProfileController.UpdateProfileRequest("Jane", "Smith");
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> controller.updateProfile(req, null));
-    assertEquals(401, ex.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
   }
 }

@@ -6,6 +6,7 @@ import com.akdemya.domain.model.Question;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -83,7 +84,7 @@ class QuestionControllerVisibilityTest {
     var req = new QuestionController.CreateQuestionRequest(
         UUID.randomUUID(), "Q?", "exp", Question.Difficulty.EASY, null);
     ResponseEntity<Question> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCodeValue());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).createQuestion(any());
   }
 
@@ -101,7 +102,7 @@ class QuestionControllerVisibilityTest {
         unitId, "My Q?", "exp", Question.Difficulty.EASY, Visibility.PRIVATE);
     ResponseEntity<Question> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(Visibility.PRIVATE, response.getBody().getVisibility());
   }
@@ -116,7 +117,7 @@ class QuestionControllerVisibilityTest {
         UUID.randomUUID(), "Global Q?", "exp", Question.Difficulty.EASY, Visibility.GLOBAL);
     ResponseEntity<Question> response = controller.create(req, principal);
 
-    assertEquals(403, response.getStatusCodeValue());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createQuestion(any());
   }
 
@@ -134,7 +135,7 @@ class QuestionControllerVisibilityTest {
         unitId, "Global Q?", "exp", Question.Difficulty.MEDIUM, Visibility.GLOBAL);
     ResponseEntity<Question> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createQuestion(any());
   }
 
@@ -153,7 +154,7 @@ class QuestionControllerVisibilityTest {
         unitId, "My Q?", "exp", Question.Difficulty.EASY, null);
     ResponseEntity<Question> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createQuestion(argThat(q -> q.getVisibility() == Visibility.PRIVATE));
   }
 }

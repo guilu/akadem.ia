@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody AuthUseCase.RegisterCommand req, HttpServletResponse res) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody AuthUseCase.RegisterCommand req, HttpServletResponse res) {
         var response = authUseCase.register(req);
         if (response.error() != null) {
             return ResponseEntity.badRequest().body(Map.of("error", response.error()));
@@ -50,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody AuthUseCase.LoginCommand req, HttpServletResponse res) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody AuthUseCase.LoginCommand req, HttpServletResponse res) {
         var response = authUseCase.login(req);
         if (response.error() != null) {
             return ResponseEntity.status(401).body(Map.of("error", response.error()));
@@ -61,8 +61,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@CookieValue(name = "ak_refresh", required = false) String rawRefreshToken,
-                                    HttpServletResponse res) {
+    public ResponseEntity<Void> logout(@CookieValue(name = "ak_refresh", required = false) String rawRefreshToken,
+                                     HttpServletResponse res) {
         if (rawRefreshToken != null) {
             refreshTokenUseCase.revoke(rawRefreshToken);
         }
@@ -72,8 +72,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@CookieValue(name = "ak_refresh", required = false) String rawToken,
-                                     HttpServletResponse res) {
+    public ResponseEntity<Map<String, String>> refresh(@CookieValue(name = "ak_refresh", required = false) String rawToken,
+                                      HttpServletResponse res) {
         if (rawToken == null) {
             return ResponseEntity.status(401).body(Map.of("error", "missing_refresh_token"));
         }
@@ -86,7 +86,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpServletRequest req) {
+    public ResponseEntity<Map<String, String>> me(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return ResponseEntity.status(401).body(Map.of("error", "no_token"));
@@ -112,12 +112,12 @@ public class AuthController {
     }
 
     @PostMapping("/oauth2/exchange")
-    public ResponseEntity<?> exchangeOAuth2Code(@Valid @RequestBody ExchangeCodeRequest req, HttpServletResponse res) {
+    public ResponseEntity<Map<String, String>> exchangeOAuth2Code(@Valid @RequestBody ExchangeCodeRequest req, HttpServletResponse res) {
         return codeStore.exchange(req.code())
             .map(result -> {
                 addAuthCookie(res, result.accessToken(), 900);
                 addRefreshCookie(res, result.refreshToken(), 604800);
-                return ResponseEntity.ok((Object) Map.of("role", result.role()));
+                return ResponseEntity.ok(Map.of("role", result.role()));
             })
             .orElseGet(() -> ResponseEntity.badRequest().body(
                 Map.of("error", "invalid_code")));

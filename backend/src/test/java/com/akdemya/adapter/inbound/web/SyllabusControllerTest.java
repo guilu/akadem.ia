@@ -7,6 +7,7 @@ import com.akdemya.domain.model.Syllabus;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -75,7 +76,7 @@ class SyllabusControllerTest {
   void createUnauthenticatedReturns401() {
     var req = new SyllabusController.CreateSyllabusRequest("Test", "desc", null);
     ResponseEntity<?> response = controller.create(req, null);
-    assertEquals(401, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).createSyllabus(any());
   }
 
@@ -84,7 +85,7 @@ class SyllabusControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new SyllabusController.CreateSyllabusRequest(null, "desc", null);
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(400, response.getStatusCode().value());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     verify(contentService, never()).createSyllabus(any());
   }
 
@@ -93,7 +94,7 @@ class SyllabusControllerTest {
     User principal = userPrincipal("user@example.com");
     var req = new SyllabusController.CreateSyllabusRequest("Global", "desc", Visibility.GLOBAL);
     ResponseEntity<?> response = controller.create(req, principal);
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     verify(contentService, never()).createSyllabus(any());
   }
 
@@ -106,7 +107,7 @@ class SyllabusControllerTest {
     var req = new SyllabusController.CreateSyllabusRequest("My Syllabus", "desc", Visibility.PRIVATE);
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSyllabus(any());
   }
 
@@ -119,7 +120,7 @@ class SyllabusControllerTest {
     var req = new SyllabusController.CreateSyllabusRequest("Global Syllabus", "desc", Visibility.GLOBAL);
     ResponseEntity<?> response = controller.create(req, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).createSyllabus(any());
   }
 
@@ -128,7 +129,7 @@ class SyllabusControllerTest {
   @Test
   void deleteUnauthenticatedReturns401() {
     ResponseEntity<?> response = controller.delete(UUID.randomUUID(), null);
-    assertEquals(401, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     verify(contentService, never()).deleteSyllabus(any(), any(), anyBoolean());
   }
 
@@ -141,7 +142,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
-    assertEquals(409, response.getStatusCode().value());
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
   }
 
   @Test
@@ -153,7 +154,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   @Test
@@ -164,7 +165,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.delete(syllabusId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   // --- GET /api/syllabuses/{id}/subjects ---
@@ -176,7 +177,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.getSubjects(syllabusId, null);
 
-    assertEquals(404, response.getStatusCode().value());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   @Test
@@ -190,7 +191,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.getSubjects(syllabusId, principal);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsBySyllabus(eq(syllabusId), eq(userId));
   }
 
@@ -204,7 +205,7 @@ class SyllabusControllerTest {
 
     ResponseEntity<?> response = controller.getSubjects(syllabusId, null);
 
-    assertEquals(200, response.getStatusCode().value());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsBySyllabus(eq(syllabusId), isNull());
   }
 }

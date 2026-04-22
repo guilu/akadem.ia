@@ -63,7 +63,7 @@ public class UnitController {
             }
         }
         org.slf4j.LoggerFactory.getLogger(UnitController.class)
-            .info("Availability for subject {} difficulty {}", subjectId, difficulty);
+            .info("Availability for subject {} difficulty {}", subjectId, diff);
         return ResponseEntity.ok(contentService.getVisibleUnitAvailability(subjectId, userId, diff));
     }
 
@@ -91,7 +91,7 @@ public class UnitController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id,
+    public ResponseEntity<Object> delete(@PathVariable UUID id,
                                     @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Akadem.ia - Preparación para Opositores</title>
+<!-- BEGIN: Tailwind CSS & Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- END: Tailwind CSS & Plugins -->
+<!-- BEGIN: Custom Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#1a232e',      /* Main background color */
+              card: '#222d3a',      /* Card background color */
+              gold: '#eab308',      /* Primary accent gold */
+              blue: '#4c84ff',      /* Primary accent blue */
+              lightBlue: '#84adff', /* Secondary blue */
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Custom Tailwind Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="custom-layout">
+    body {
+      background-color: #1a232e;
+      color: #e2e8f0;
+    }
+    .gradient-text {
+      background: linear-gradient(to right, #ffffff, #eab308);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="antialiased">
+<!-- BEGIN: MainHeader -->
+<header class="w-full py-6 px-4 md:px-12 flex justify-between items-center" data-purpose="main-header">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2 cursor-pointer" data-purpose="logo">
+<div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<span class="text-xl font-bold text-white">Akadem.ia</span>
+</div>
+<nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-400" data-purpose="nav-links">
+<a class="flex items-center gap-1 text-brand-gold hover:text-white transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Home
+        </a>
+<a class="flex items-center gap-1 hover:text-white transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Flashcards
+        </a>
+<a class="flex items-center gap-1 hover:text-white transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Exámenes
+        </a>
+<a class="flex items-center gap-1 hover:text-white transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Gestionar
+        </a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-[#101824] p-1 rounded-full flex items-center" data-purpose="theme-toggle">
+<button class="p-2 rounded-full bg-[#1a232e] text-brand-blue">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+</button>
+<button class="p-2 rounded-full text-gray-500">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd"></path></svg>
+</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-brand-gold flex items-center justify-center text-brand-dark font-bold text-xs" data-purpose="user-avatar">
+        D
+      </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: HeroSection -->
+<main class="max-w-7xl mx-auto px-6 lg:px-12 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" data-purpose="hero-section">
+<div>
+<div class="inline-flex items-center gap-2 bg-[#2a2720] border border-yellow-900/50 px-3 py-1 rounded-full mb-6">
+<span class="text-brand-gold text-xs">★</span>
+<span class="text-brand-gold text-xs font-semibold tracking-wide">Preparación inteligente para opositores</span>
+</div>
+<h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+        Aprueba tus <br/>
+<span class="gradient-text">exámenes</span> <br/>
+        sin improvisar
+      </h1>
+<p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
+        Simulacros cronometrados, flashcards y análisis de progreso, todo en una plataforma diseñada para convertir tu esfuerzo en resultados.
+      </p>
+<div class="flex flex-wrap gap-4" data-purpose="hero-actions">
+<button class="bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold px-8 py-3 rounded-full flex items-center gap-2 transition-all">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" fill-rule="evenodd"></path></svg>
+          Crear examen
+        </button>
+<button class="bg-brand-blue hover:bg-blue-600 text-white font-bold px-8 py-3 rounded-full flex items-center gap-2 transition-all">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Estudiar flashcards
+        </button>
+</div>
+</div>
+<div class="relative" data-purpose="hero-illustration">
+<!-- We use the provided image as the main hero visual since it contains the original illustration -->
+<img alt="Illustration of a student studying" class="w-full h-auto object-contain rounded-xl" src="https://lh3.googleusercontent.com/aida/ADBb0ugHU41ErfnyQqRZO96Kn5AER31-J6Oz04uyzUkPhuAFGT8FQI98oiAsNr42-dtYrHGXdAT261lRsjDUacwtRusrP3Z9VpqQrnFLXGcvq-ddlKXeZabv40BFZYlwPoYBPrLpmyu-7NssBILgb6YzJ7z37EyuGnkk0qClk7H6BYs5h2m5L_3ubeDQylG-LR2LuEqWCJP0-UHve4ecZXZtseSTXHXWr0nryZK6i6lveo-DxpR0Dfdmt0dwhk-VWagqgwVh4-ENI_hgoA"/>
+</div>
+</main>
+<!-- END: HeroSection -->
+<!-- BEGIN: FeatureSummary -->
+<section class="max-w-4xl mx-auto px-6 py-12 flex justify-center gap-16 md:gap-24" data-purpose="feature-summary">
+<div class="text-center">
+<h3 class="text-brand-gold text-2xl font-bold">Materias</h3>
+<p class="text-gray-500 text-xs mt-1 uppercase tracking-wider">Organizadas por temas</p>
+</div>
+<div class="text-center">
+<h3 class="text-brand-gold text-2xl font-bold">Exámenes</h3>
+<p class="text-gray-500 text-xs mt-1 uppercase tracking-wider">Configurables tipo test</p>
+</div>
+<div class="text-center">
+<h3 class="text-brand-gold text-2xl font-bold">Flashcards</h3>
+<p class="text-gray-500 text-xs mt-1 uppercase tracking-wider">Inteligentes de repaso</p>
+</div>
+</section>
+<!-- END: FeatureSummary -->
+<!-- BEGIN: CoreFeatures -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-24" data-purpose="core-features">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Todo lo que necesitas para preparar tus exámenes</h2>
+<p class="text-gray-500">Sin distracciones. Sin excusas.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Card 1 -->
+<div class="bg-brand-card p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all cursor-default">
+<div class="w-10 h-10 bg-[#2d2a23] rounded-lg flex items-center justify-center mb-6">
+<svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h4 class="text-white text-lg font-bold mb-3">Simulacros cronometrados</h4>
+<p class="text-gray-400 text-sm leading-relaxed">Reproduce las condiciones exactas del examen. Entrena la presión del tiempo real antes del gran día.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-brand-card p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all cursor-default">
+<div class="w-10 h-10 bg-[#2d2a23] rounded-lg flex items-center justify-center mb-6">
+<svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h4 class="text-white text-lg font-bold mb-3">Seguimiento de progreso</h4>
+<p class="text-gray-400 text-sm leading-relaxed">Nota, tiempo y evolución guardados automáticamente. Observa tu mejora semana a semana.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-brand-card p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all cursor-default">
+<div class="w-10 h-10 bg-[#2d2a23] rounded-lg flex items-center justify-center mb-6">
+<svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h4 class="text-white text-lg font-bold mb-3">Reanuda cuando quieras</h4>
+<p class="text-gray-400 text-sm leading-relaxed">Empieza hoy, continúa mañana. Tu progreso se guarda en cada sesión sin perder nada.</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-brand-card p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all cursor-default">
+<div class="w-10 h-10 bg-[#2d2a23] rounded-lg flex items-center justify-center mb-6">
+<svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h4 class="text-white text-lg font-bold mb-3">Flashcards inteligentes</h4>
+<p class="text-gray-400 text-sm leading-relaxed">Repasa conceptos clave con tarjetas organizadas por tema para fijar el conocimiento a largo plazo.</p>
+</div>
+</div>
+</section>
+<!-- END: CoreFeatures -->
+<!-- BEGIN: HowItWorks -->
+<section class="max-w-4xl mx-auto px-6 py-24" data-purpose="how-it-works">
+<div class="text-center mb-20">
+<h2 class="text-4xl font-bold text-white mb-4">Cómo funciona</h2>
+<p class="text-gray-500">Tres pasos para empezar a prepararte hoy.</p>
+</div>
+<div class="space-y-16">
+<!-- Step 01 -->
+<div class="flex items-start gap-12 group" data-purpose="step-1">
+<span class="text-7xl font-black text-gray-800/50 group-hover:text-brand-gold/20 transition-colors">01</span>
+<div class="pt-4">
+<h4 class="text-2xl font-bold text-white mb-2">Regístrate gratis</h4>
+<p class="text-gray-400 leading-relaxed">Crea tu cuenta en segundos y accede a todos los temas de tu preparación.</p>
+</div>
+</div>
+<!-- Step 02 -->
+<div class="flex items-start gap-12 group" data-purpose="step-2">
+<span class="text-7xl font-black text-gray-800/50 group-hover:text-brand-gold/20 transition-colors">02</span>
+<div class="pt-4">
+<h4 class="text-2xl font-bold text-white mb-2">Elige tu examen</h4>
+<p class="text-gray-400 leading-relaxed">Selecciona temas, número de preguntas y dificultad. Tú controlas el entrenamiento.</p>
+</div>
+</div>
+<!-- Step 03 -->
+<div class="flex items-start gap-12 group" data-purpose="step-3">
+<span class="text-7xl font-black text-gray-800/50 group-hover:text-brand-gold/20 transition-colors">03</span>
+<div class="pt-4">
+<h4 class="text-2xl font-bold text-white mb-2">Analiza y mejora</h4>
+<p class="text-gray-400 leading-relaxed">Revisa tus resultados, identifica puntos débiles y vuelve a intentarlo hasta dominarlo.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HowItWorks -->
+<!-- BEGIN: Footer -->
+<footer class="w-full py-12 border-t border-gray-800 text-center" data-purpose="main-footer">
+<p class="text-gray-500 text-sm">© 2023 Akadem.ia - Tu plataforma de estudio definitiva.</p>
+</footer>
+<!-- END: Footer -->
+</body></html>
