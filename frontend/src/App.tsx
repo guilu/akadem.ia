@@ -252,7 +252,7 @@ export default function App() {
       <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-7xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
-          <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage isAuthed={isAuthed} />} />
+          <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.syllabuses} element={

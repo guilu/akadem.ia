@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ArrowsRepeat, UserAdd, ArrowRightToBracket, ArrowRight } from 'flowbite-react-icons/outline';
+import { BookOpen, ArrowsRepeat, UserAdd, ArrowRightToBracket } from 'flowbite-react-icons/outline';
 import { getSyllabuses } from '../api/syllabusApi';
 import type { Syllabus } from '../types';
 import { ROUTES } from '../constants/routes';
@@ -44,11 +44,7 @@ const TRUST_ITEMS = [
 
 const TAGS = ['#Oposiciones2024', '#ExitoAcademico', '#TemariosPremium', '#EstudioZen', '#GarantiaTotal'];
 
-interface Props {
-  isAuthed: boolean;
-}
-
-export default function SyllabusSalesPage({ isAuthed }: Props) {
+export default function SyllabusSalesPage() {
   const [syllabus, setSyllabus] = useState<Syllabus | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -125,23 +121,13 @@ export default function SyllabusSalesPage({ isAuthed }: Props) {
 
               <div className="flex items-center justify-between pt-4 border-t border-secondary/15">
                 <span className="text-3xl font-extrabold">25€</span>
-                {isAuthed ? (
-                  <Link
-                    to={ROUTES.syllabuses}
-                    className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2"
-                  >
-                    Acceder al temario
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                ) : (
-                  <Link
-                    to={ROUTES.register}
-                    className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
-                  >
-                    <UserAdd className="w-4 h-4" />
-                    Empezar ahora
-                  </Link>
-                )}
+                <Link
+                  to={ROUTES.register}
+                  className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
+                >
+                  <UserAdd className="w-4 h-4" />
+                  Empezar ahora
+                </Link>
               </div>
             </article>
           )}
@@ -212,35 +198,33 @@ export default function SyllabusSalesPage({ isAuthed }: Props) {
         </div>
       </section>
 
-      {/* Final CTA — guests only */}
-      {!isAuthed && (
-        <section className="px-6 py-20 text-center border-t border-secondary/20">
-          <div className="max-w-xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
-              ¿Listo para empezar?
-            </h2>
-            <p className="text-text/55 mb-8 text-lg">
-              Crea tu cuenta y accede a todo el material de preparación hoy mismo.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                to={ROUTES.register}
-                className="btn btn-primary rounded-full px-10 py-4 text-lg inline-flex items-center gap-2 shadow-xl shadow-primary/25"
-              >
-                <UserAdd className="w-5 h-5" />
-                Crear mi cuenta gratis
-              </Link>
-              <Link
-                to={ROUTES.login}
-                className="btn btn-outline rounded-full px-10 py-4 text-lg inline-flex items-center gap-2"
-              >
-                <ArrowRightToBracket className="w-5 h-5" />
-                Ya tengo cuenta
-              </Link>
-            </div>
+      {/* Final CTA */}
+      <section className="px-6 py-20 text-center border-t border-secondary/20">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
+            ¿Listo para empezar?
+          </h2>
+          <p className="text-text/55 mb-8 text-lg">
+            Crea tu cuenta y accede a todo el material de preparación hoy mismo.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              to={ROUTES.register}
+              className="btn btn-primary rounded-full px-10 py-4 text-lg inline-flex items-center gap-2 shadow-xl shadow-primary/25"
+            >
+              <UserAdd className="w-5 h-5" />
+              Crear mi cuenta gratis
+            </Link>
+            <Link
+              to={ROUTES.login}
+              className="btn btn-outline rounded-full px-10 py-4 text-lg inline-flex items-center gap-2"
+            >
+              <ArrowRightToBracket className="w-5 h-5" />
+              Ya tengo cuenta
+            </Link>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </div>
   );
 }
