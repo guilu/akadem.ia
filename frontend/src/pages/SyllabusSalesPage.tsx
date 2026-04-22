@@ -79,7 +79,7 @@ export default function SyllabusSalesPage() {
       </section>
 
       {/* Product card */}
-      <section className="px-6 pb-16">
+      <section className="px-6 py-16">
         <div className="max-w-lg mx-auto">
           {loading && (
             <div className="border border-secondary/25 rounded-3xl bg-card p-10 animate-pulse">
