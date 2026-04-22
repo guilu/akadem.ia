@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User, FolderOpen } from 'flowbite-react-icons/outline';
+import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, User, FolderOpen, ShoppingBag } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
 import type { NavUser } from '../types';
 import { UserMenuDropdown } from './UserMenuDropdown';
@@ -75,6 +75,10 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           <button onClick={() => go(ROUTES.home)} className={linkCls(ROUTES.home)}>
             <Home className="w-4 h-4" />
             Home
+          </button>
+          <button onClick={() => go(ROUTES.syllabusSales)} className={linkCls(ROUTES.syllabusSales)}>
+            <ShoppingBag className="w-4 h-4" />
+            Temarios
           </button>
           {!isAuthed && (
             <>
@@ -176,6 +180,10 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           <button onClick={() => go(ROUTES.home)} className={mobileLinkCls(ROUTES.home)}>
             <Home className="w-4 h-4" />
             Home
+          </button>
+          <button onClick={() => go(ROUTES.syllabusSales)} className={mobileLinkCls(ROUTES.syllabusSales)}>
+            <ShoppingBag className="w-4 h-4" />
+            Temarios
           </button>
           {!isAuthed && (
             <>
