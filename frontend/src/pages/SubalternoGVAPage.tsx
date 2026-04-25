@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserAdd, ArrowRightToBracket } from 'flowbite-react-icons/outline';
 import { ROUTES } from '../constants/routes';
+import PaymentModal from '../components/PaymentModal';
 
 const BookStoriesIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
@@ -128,6 +129,7 @@ const AVATARS = [
 
 export default function SubalternoGVAPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -156,13 +158,13 @@ export default function SubalternoGVAPage() {
                 <span className="text-sm text-on-surface-variant">Pago único · Sin suscripción</span>
               </div>
               <div className="flex flex-col items-start gap-2">
-                <Link
-                  to={ROUTES.register}
+                <button
+                  onClick={() => setPaymentOpen(true)}
                   className="btn btn-primary px-10 py-5 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
                 >
                   <UserAdd className="w-5 h-5" />
                   Comprar ahora
-                </Link>
+                </button>
                 <span className="text-xs text-on-surface-variant/70 pl-1">Pago seguro con Stripe · Acceso inmediato</span>
               </div>
             </div>
@@ -317,13 +319,13 @@ export default function SubalternoGVAPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                to={ROUTES.register}
+              <button
+                onClick={() => setPaymentOpen(true)}
                 className="btn btn-primary px-10 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
                 <UserAdd className="w-5 h-5" />
-                Comprar ahora — 25€
-              </Link>
+                Comprar ahora — 15€
+              </button>
               <Link
                 to={ROUTES.login}
                 className="border border-outline-variant px-10 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-all inline-flex items-center gap-3 text-on-surface"
@@ -337,6 +339,7 @@ export default function SubalternoGVAPage() {
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl" />
         </section>
       </main>
+      <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
     </div>
   );
 }
