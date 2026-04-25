@@ -178,13 +178,22 @@ export default function SubalternoGVAPage() {
                 <span className="text-sm text-on-surface-variant">Pago único · Sin suscripción</span>
               </div>
               <div className="flex flex-col items-start gap-2">
-                <button
-                  onClick={() => setPaymentOpen(true)}
-                  className="btn btn-primary px-10 py-5 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
-                >
-                  <UserAdd className="w-5 h-5" />
-                  Comprar ahora
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => document.getElementById('muestra-gratis')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn btn-secondary px-6 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2"
+                  >
+                    <DownloadIcon />
+                    Tema 1 gratis
+                  </button>
+                  <button
+                    onClick={() => setPaymentOpen(true)}
+                    className="btn btn-primary px-10 py-5 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
+                  >
+                    <UserAdd className="w-5 h-5" />
+                    Comprar ahora
+                  </button>
+                </div>
                 <span className="text-xs text-on-surface-variant/70 pl-1">Pago seguro con Stripe · Acceso inmediato</span>
               </div>
             </div>
@@ -314,7 +323,7 @@ export default function SubalternoGVAPage() {
         </section>
 
         {/* Free Sample Section */}
-        <section className="mb-32 bg-card border border-secondary/20 rounded-[3rem] p-12 lg:p-16 relative overflow-hidden">
+        <section id="muestra-gratis" className="mb-32 bg-card border border-secondary/20 rounded-[3rem] p-12 lg:p-16 relative overflow-hidden">
           <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
           <div className="relative">
@@ -358,15 +367,17 @@ export default function SubalternoGVAPage() {
                 onSubmit={e => { e.preventDefault(); setSampleSubmitted(true); }}
                 className="flex flex-col sm:flex-row gap-3"
               >
-                <div className="flex items-center gap-3 flex-1 bg-bg border border-secondary/30 rounded-full px-5 py-4 focus-within:border-primary/50 transition-colors">
-                  <MailIcon />
+                <div className="relative flex-1">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary pointer-events-none">
+                    <MailIcon />
+                  </span>
                   <input
                     type="email"
                     required
                     value={sampleEmail}
                     onChange={e => setSampleEmail(e.target.value)}
                     placeholder="Introduce tu email"
-                    className="flex-1 bg-transparent text-text placeholder:text-secondary text-base outline-none"
+                    className="w-full bg-white/50 dark:bg-[#24394c] border border-transparent rounded-xl pl-11 pr-4 py-4 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors"
                   />
                 </div>
                 <button
