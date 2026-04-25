@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Compra de Temarios | Akadem.ia</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface": "#fcf9f8",
+            "on-surface-variant": "#57423e",
+            "on-secondary-container": "#5c6669",
+            "primary-fixed": "#ffdad4",
+            "on-background": "#1b1c1c",
+            "on-primary": "#ffffff",
+            "tertiary-fixed-dim": "#f8bd37",
+            "on-secondary-fixed": "#141d1f",
+            "surface-bright": "#fcf9f8",
+            "secondary-container": "#dae4e7",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "error-container": "#ffdad6",
+            "inverse-surface": "#303030",
+            "tertiary-container": "#966e00",
+            "surface-container-high": "#eae7e7",
+            "secondary": "#566063",
+            "on-primary-fixed": "#400200",
+            "on-surface": "#1b1c1c",
+            "surface-container-low": "#f6f3f2",
+            "on-tertiary-container": "#fffbff",
+            "on-secondary-fixed-variant": "#3f484b",
+            "surface-variant": "#e4e2e1",
+            "surface-container": "#f0eded",
+            "outline": "#8b716c",
+            "surface-dim": "#dcd9d9",
+            "secondary-fixed-dim": "#bec8cb",
+            "secondary-fixed": "#dae4e7",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "on-primary-fixed-variant": "#862113",
+            "surface-tint": "#a73927",
+            "on-primary-container": "#fffbff",
+            "error": "#ba1a1a",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#f3f0f0",
+            "primary-fixed-dim": "#ffb4a6",
+            "on-tertiary-fixed": "#261900",
+            "on-error-container": "#93000a",
+            "surface-container-highest": "#e4e2e1",
+            "outline-variant": "#dfc0ba",
+            "primary-container": "#c44e3b",
+            "on-secondary": "#ffffff",
+            "tertiary": "#775600",
+            "tertiary-fixed": "#ffdea3",
+            "primary": "#a43625",
+            "background": "#fcf9f8",
+            "inverse-primary": "#ffb4a6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "xxl": "1.5rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fcf9f8;
+      color: #1b1c1c;
+    }
+
+    h1,
+    h2,
+    h3,
+    .brand-font {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-surface text-on-surface antialiased">
+  <!-- TopNavBar Shell -->
+  <header class="fixed top-0 w-full z-50 bg-[#fcf9f8]/70 backdrop-blur-lg shadow-sm">
+    <nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+      <div class="text-2xl font-extrabold tracking-tighter text-orange-600">Akadem.ia</div>
+      <div class="hidden md:flex items-center space-x-8 font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight">
+        <a class="text-slate-600 hover:text-orange-500 transition-colors" href="#">Home</a>
+        <a class="text-slate-600 hover:text-orange-500 transition-colors" href="#">Flashcards</a>
+        <a class="text-slate-600 hover:text-orange-500 transition-colors" href="#">Exámenes</a>
+        <a class="text-orange-600 font-bold border-b-2 border-orange-600 pb-1" href="#">Temarios</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-lg transition-all">
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </button>
+        <button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-lg transition-all">
+          <span class="material-symbols-outlined">account_circle</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+  <main class="pt-24 pb-32 max-w-7xl mx-auto px-6">
+    <!-- Hero Section -->
+    <section class="py-12 text-center">
+      <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-4">Compra tu Temario</h1>
+      <p class="text-on-surface-variant max-w-2xl mx-auto text-lg leading-relaxed font-medium">
+        Material de estudio de alta calidad, diseñado por expertos para maximizar tu rendimiento en el examen.
+      </p>
+    </section>
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+      <!-- Card 1 -->
+      <div
+        class="group bg-surface-container-low rounded-xxl overflow-hidden transition-all duration-300 hover:bg-surface-container-highest border border-outline-variant/10">
+        <div class="relative h-56 overflow-hidden">
+          <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            data-alt="Close-up of elegant leather-bound academic books and a fountain pen on a light wood desk with soft morning sunlight"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJnGU1mcjDzXydho6WthA7cZ2c1OKycfP39JeYxky9xaCqEWr53XIOmqyyVkpwul5gNZQHa5xCrkdF6bH3HcZAOu8O-P6EgdnLaOK-Tplwjgopp7xv4KgHyICzxu8qBkMunCE5NrY0rB8jt4GCLUNKF3dk4kNP9VfTQxXIWISW_pNWO4MmlP9nbF1Kls4Fe2irPTKFibWS6X3FL7a0DAblG9nbUmlX822XXQrkztD-74xXCEU55isDHV2tRjqru3kTuFppTmfxrz0" />
+          <div
+            class="absolute top-4 left-4 bg-primary text-on-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+            Best Seller</div>
+        </div>
+        <div class="p-8">
+          <h3 class="text-2xl font-bold mb-4">Administrativo Estado</h3>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">auto_stories</span>
+              Temas completos y revisados
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">update</span>
+              Actualizado 2026
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">download</span>
+              Descarga PDF inmediata
+            </li>
+          </ul>
+          <div class="flex items-center justify-between mt-auto">
+            <span class="text-3xl font-extrabold text-on-surface">25€</span>
+            <button
+              class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all text-sm">Comprar
+              temario</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div
+        class="group bg-surface-container-low rounded-xxl overflow-hidden transition-all duration-300 hover:bg-surface-container-highest border border-outline-variant/10">
+        <div class="relative h-56 overflow-hidden">
+          <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            data-alt="Minimalist workspace with an open laptop, a cup of coffee, and clean white notebooks in a bright airy studio apartment"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwxKKOk5mABt69kNmzcaDeTrCYlsCdNQdOqlUY0vmqau0y54rYa_KL4FeZQcVuOlqxkxeQpSLLUOXpyYw0Gn2YeZ8hW2nxAO_Mg-ZbB7uLEnOx1HvTzxNx_AStBK1JRuT3Y9ZLs0lYKDND__taBRILi4XV-xl7yPpTeVRWdUe4RijWOkFwHROjC0dI22UOCdtC0EF-obB1rJEzd_TciyQ5XQNASIxwe15xz2gcyJwPXLIUGn8pyDXWswzKqKW18CNr9McCR49VZq8" />
+        </div>
+        <div class="p-8">
+          <h3 class="text-2xl font-bold mb-4">Auxiliar Administrativo</h3>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">checklist</span>
+              Esquemas y resúmenes incluidos
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">update</span>
+              Actualizado 2026
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">quiz</span>
+              Batería de test premium
+            </li>
+          </ul>
+          <div class="flex items-center justify-between mt-auto">
+            <span class="text-3xl font-extrabold text-on-surface">25€</span>
+            <button
+              class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all text-sm">Comprar
+              temario</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div
+        class="group bg-surface-container-low rounded-xxl overflow-hidden transition-all duration-300 hover:bg-surface-container-highest border border-outline-variant/10">
+        <div class="relative h-56 overflow-hidden">
+          <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            data-alt="Overhead shot of architectural blueprints, a modern tablet showing charts, and geometric wooden blocks on a neutral textured surface"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsaQsw54sHa8_5yIdTRAwtk0YerjXwh5uYp3atoNtkgtShrhcXTU0-I7wAdSNudxg23sl6LyhitqBo-ztSdHTxZHEOq8C24XSwf5VvhbXBnyJ6VKEO-SwG8Tb_YGhynRNCFzBPq5lvwCH4FHx50C_csAzR2maJG5KxivnyPuYgx3XfxlEP08szlcK7XQFhTyrlnyO63mTyhBn8YQlWjMUW0Cz3erVIIP7cbK6rEFKXZoNJVTtiovHGoczhvhDt2FhR9wd3aeaZA38" />
+        </div>
+        <div class="p-8">
+          <h3 class="text-2xl font-bold mb-4">Gestión Procesal</h3>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">gavel</span>
+              Legislación comentada
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">update</span>
+              Actualizado 2026
+            </li>
+            <li class="flex items-center text-on-surface-variant font-medium text-sm">
+              <span class="material-symbols-outlined text-primary mr-3"
+                style="font-variation-settings: 'opsz' 20;">support_agent</span>
+              Soporte de dudas 24/7
+            </li>
+          </ul>
+          <div class="flex items-center justify-between mt-auto">
+            <span class="text-3xl font-extrabold text-on-surface">25€</span>
+            <button
+              class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all text-sm">Comprar
+              temario</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Trust Section -->
+    <section class="mt-24 py-16 px-12 bg-surface-container rounded-xxl relative overflow-hidden">
+      <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+        <div class="max-w-md">
+          <h2 class="text-4xl font-extrabold mb-4 tracking-tight">Tu éxito es nuestra prioridad</h2>
+          <p class="text-on-surface-variant font-medium">Estamos tan seguros de nuestro material que ofrecemos garantías
+            exclusivas para tu tranquilidad.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full md:w-auto">
+          <div class="flex items-start gap-4">
+            <div class="bg-tertiary-fixed text-on-tertiary-fixed p-3 rounded-xl">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-lg">Garantía de Actualización</h4>
+              <p class="text-on-surface-variant text-sm">Si el temario cambia en 6 meses, te enviamos la actualización
+                gratis.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="bg-secondary-fixed text-on-secondary-fixed p-3 rounded-xl">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-lg">Comunidad de Confianza</h4>
+              <p class="text-on-surface-variant text-sm">Más de 2.000 opositores ya confían en nuestro método.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Decorative circle -->
+      <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+      <div class="absolute -top-24 -left-24 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl"></div>
+    </section>
+    <!-- SEO/Description Section (Progressive Disclosure Style) -->
+    <section class="mt-24 border-t border-outline-variant/20 pt-16 grid grid-cols-1 md:grid-cols-2 gap-16">
+      <div>
+        <h4 class="text-primary font-bold uppercase tracking-widest text-xs mb-4">¿Por qué elegirnos?</h4>
+        <p class="text-on-surface-variant text-lg leading-relaxed">
+          Nuestros temarios no son simples transcripciones de la ley. Son herramientas didácticas diseñadas para la
+          retención a largo plazo, utilizando jerarquías visuales y un lenguaje claro que facilita el estudio intensivo.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3 content-start">
+        <span
+          class="px-5 py-2 bg-surface-container-high rounded-full text-sm font-semibold text-on-secondary-container">#Oposiciones2026</span>
+        <span
+          class="px-5 py-2 bg-surface-container-high rounded-full text-sm font-semibold text-on-secondary-container">#ExitoAcademico</span>
+        <span
+          class="px-5 py-2 bg-surface-container-high rounded-full text-sm font-semibold text-on-secondary-container">#TemariosPremium</span>
+        <span
+          class="px-5 py-2 bg-surface-container-high rounded-full text-sm font-semibold text-on-secondary-container">#EstudioZen</span>
+        <span
+          class="px-5 py-2 bg-surface-container-high rounded-full text-sm font-semibold text-on-secondary-container">#GarantiaTotal</span>
+      </div>
+    </section>
+  </main>
+  <!-- Footer Space -->
+  <footer class="bg-surface-container-lowest py-12 px-6 border-t border-outline-variant/10">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="text-xl font-extrabold tracking-tighter text-slate-400">Akadem.ia</div>
+      <div class="flex gap-8 text-sm font-medium text-on-surface-variant">
+        <a class="hover:text-primary transition-colors" href="#">Aviso Legal</a>
+        <a class="hover:text-primary transition-colors" href="#">Privacidad</a>
+        <a class="hover:text-primary transition-colors" href="#">Contacto</a>
+      </div>
+      <p class="text-xs text-on-surface-variant opacity-60">© 2026 Akadem.ia. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

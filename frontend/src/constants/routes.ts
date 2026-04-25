@@ -18,5 +18,7 @@ export const ROUTES = {
   flashcardsHistory: '/flashcards/history',
   flashcardsExamine: '/flashcards/examine',
   rag: '/rag',
+  syllabusSales: '/temario',
+  subalternoGva: '/temario/subalterno-gva',
   oauth2Callback: '/oauth2/callback'
 } as const;

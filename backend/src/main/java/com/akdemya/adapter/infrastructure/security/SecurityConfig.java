@@ -69,6 +69,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // OAuth2 endpoints are served under /api to go through the single nginx proxy rule
                 .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/syllabuses", "/api/syllabuses/**").permitAll()
                 .requestMatchers("/api/manage/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
