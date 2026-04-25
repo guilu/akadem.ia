@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-on-surface": "#f3f0f0",
+            "surface": "#fcf9f8",
+            "on-surface": "#1b1c1c",
+            "inverse-primary": "#ffb4a6",
+            "background": "#fcf9f8",
+            "primary": "#a43625",
+            "on-primary-container": "#fffbff",
+            "surface-container-highest": "#e4e2e1",
+            "tertiary-container": "#966e00",
+            "primary-fixed-dim": "#ffb4a6",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-surface-variant": "#57423e",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed-dim": "#f8bd37",
+            "secondary-fixed-dim": "#bec8cb",
+            "tertiary": "#775600",
+            "secondary-container": "#dae4e7",
+            "surface-tint": "#a73927",
+            "surface-container-high": "#eae7e7",
+            "on-tertiary-container": "#fffbff",
+            "on-secondary-container": "#5c6669",
+            "surface-variant": "#e4e2e1",
+            "surface-bright": "#fcf9f8",
+            "error-container": "#ffdad6",
+            "secondary": "#566063",
+            "tertiary-fixed": "#ffdea3",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#141d1f",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "on-secondary-fixed-variant": "#3f484b",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#862113",
+            "surface-container-low": "#f6f3f2",
+            "surface-dim": "#dcd9d9",
+            "outline": "#8b716c",
+            "on-primary-fixed": "#400200",
+            "on-background": "#1b1c1c",
+            "surface-container": "#f0eded",
+            "on-tertiary-fixed": "#261900",
+            "error": "#ba1a1a",
+            "inverse-surface": "#303030",
+            "outline-variant": "#dfc0ba",
+            "on-error": "#ffffff",
+            "primary-fixed": "#ffdad4",
+            "primary-container": "#c44e3b",
+            "secondary-fixed": "#dae4e7",
+            "accent": "#f1c24b",
+            "card": "#f0e9da"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fcf9f8;
+      color: #1b1c1c;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .glass-nav {
+      background: rgba(252, 249, 248, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .editorial-shadow {
+      box-shadow: 0 32px 48px -12px rgba(27, 28, 28, 0.04);
+    }
+
+    /* Accordion */
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .accordion-chevron { transform: rotate(90deg); }
+    details[open] .accordion-num { color: #a43625; }
+  </style>
+</head>
+
+<body class="bg-surface text-on-surface">
+  <!-- TopAppBar -->
+  <nav
+    class="bg-[#fcf9f8]/70 backdrop-blur-xl docked full-width top-0 sticky z-50 tonal-transition-bg-surface-container-low flat no shadows">
+    <div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+      <div class="text-2xl font-bold tracking-tighter text-[#DA5E49]">Scholar Pro</div>
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-[#DA5E49] border-b-2 border-[#DA5E49] pb-1 transition-colors duration-300"
+          href="#">Explorar</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-slate-600 hover:text-[#DA5E49] transition-colors duration-300"
+          href="#">Mis Cursos</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-slate-600 hover:text-[#DA5E49] transition-colors duration-300"
+          href="#">Comunidad</a>
+      </div>
+      <div class="flex items-center space-x-5">
+        <button
+          class="material-symbols-outlined text-slate-600 hover:text-[#DA5E49] transition-all">notifications</button>
+        <button
+          class="material-symbols-outlined text-slate-600 hover:text-[#DA5E49] transition-all">shopping_cart</button>
+        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-highest bg-primary flex items-center justify-center text-on-primary text-xs font-bold">
+          ML
+        </div>
+      </div>
+    </div>
+  </nav>
+  <main class="max-w-7xl mx-auto px-8 pt-12 pb-32">
+    <!-- Hero Section: Asymmetric Editorial Layout -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-24">
+      <div class="lg:col-span-7 space-y-8">
+        <div class="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span class="text-primary font-semibold text-xs tracking-widest uppercase font-label">Actualizado 2026</span>
+        </div>
+        <h1 class="text-6xl md:text-7xl font-extrabold tracking-tighter leading-tight">
+          Temario <span
+            style="background: linear-gradient(to right, #a43625, #f1c24b, #a43625); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"
+            class="italic">Subalterno GVA</span>
+        </h1>
+        <p class="text-xl text-on-surface-variant max-w-xl leading-relaxed">
+          Domina las oposiciones de la Generalitat Valenciana con el material más completo y estructurado bajo nuestra
+          filosofía de Aprendizaje Consciente.
+        </p>
+        <div class="flex items-center space-x-6">
+          <div class="flex flex-col">
+            <span class="text-4xl font-bold text-on-surface">25€</span>
+            <span class="text-sm text-on-surface-variant line-through decoration-primary/40">45€ Pago único</span>
+          </div>
+          <button
+            class="bg-primary text-on-primary px-10 py-5 rounded-xl font-bold text-lg hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/10">
+            Comprar ahora
+          </button>
+        </div>
+      </div>
+      <div class="lg:col-span-5 relative">
+        <div class="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl transform lg:rotate-3">
+          <img class="w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuApIE-f_XlFhUAfTJgP8mLERGL4K1xYY0iflEZCcQbFPhR4yJBn7bnpPbI2HYrFnfy2GWCcbR96-88lmb3cJkLo73VGzJwmPP4TlPsrM8Oaoa5x3OucTz0K7d2tlfzsPGyHUOic6-p_OYw7DIhLvDfuaiIdK7EXVzI28Mbg0fR9HXhGBFwmg0UXUNAbL3J3xkmExqvrLJETxPQkoyQSEk-14lLhkDXQn8t72q04aCiLltfBLbxqShj50Pzivh7uSMlcM2dkEk50VGA"
+            alt="Material de estudio Subalterno GVA" />
+        </div>
+        <!-- Floating Info Chip -->
+        <div
+          class="absolute -bottom-6 -left-6 bg-card p-6 rounded-3xl editorial-shadow border border-outline-variant/10 max-w-[200px]">
+          <div class="flex items-center space-x-3 mb-2">
+            <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="font-bold">4.9/5</span>
+          </div>
+          <p class="text-xs text-on-surface-variant leading-snug">Calificación media de más de 2.000 opositores este
+            año.</p>
+        </div>
+      </div>
+    </section>
+    <!-- Features Bento Grid -->
+    <section class="mb-32">
+      <h2 class="text-3xl font-bold mb-12 tracking-tight">Qué incluye tu preparación</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div
+          class="bg-surface-container-low p-10 rounded-[2.5rem] flex flex-col justify-between group hover:bg-surface-container-high transition-colors">
+          <div class="bg-surface-container-highest w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-primary text-3xl">auto_stories</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-3">Temas actualizados</h3>
+            <p class="text-on-surface-variant leading-relaxed">Contenido revisado semanalmente según las últimas
+              publicaciones del DOGV.</p>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-primary/5 p-10 rounded-[2.5rem] flex flex-col justify-between border border-primary/10">
+          <div class="bg-primary text-on-primary w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-3xl">quiz</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-3">Test ilimitados</h3>
+            <p class="text-on-surface-variant leading-relaxed">Generador inteligente de exámenes por temas o simulacros
+              reales cronometrados.</p>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div
+          class="bg-surface-container-low p-10 rounded-[2.5rem] flex flex-col justify-between group hover:bg-surface-container-high transition-colors">
+          <div class="bg-surface-container-highest w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-primary text-3xl">account_tree</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-3">Esquemas Visuales</h3>
+            <p class="text-on-surface-variant leading-relaxed">Mapas conceptuales de alta densidad para memorizar
+              jerarquías administrativas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Syllabus Section: Accordion -->
+    <section class="mb-32 grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <div class="lg:col-span-4">
+        <h2 class="text-4xl font-bold tracking-tight mb-6">Temario completo</h2>
+        <p class="text-on-surface-variant text-lg leading-relaxed">
+          Estructurado en Bloque General y Bloque Específico, diseñado para una lectura ágil y enfocada.
+        </p>
+        <div class="mt-8 flex items-center space-x-4">
+          <div class="flex -space-x-3">
+            <div class="w-10 h-10 rounded-full border-2 border-surface bg-primary text-on-primary flex items-center justify-center text-xs font-bold">ML</div>
+            <div class="w-10 h-10 rounded-full border-2 border-surface bg-[#775600] text-white flex items-center justify-center text-xs font-bold">CR</div>
+            <div class="w-10 h-10 rounded-full border-2 border-surface bg-[#566063] text-white flex items-center justify-center text-xs font-bold">PG</div>
+          </div>
+          <span class="text-sm font-medium text-on-surface-variant">+450 estudiantes hoy</span>
+        </div>
+      </div>
+      <div class="lg:col-span-8 space-y-3">
+
+        <!-- Tema 1 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">01</span>
+              <h4 class="font-bold text-lg">Tema 1 - Constitución Española I</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Princípios fundamentales y valores superiores</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Derechos y libertades fundamentales</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Garantías y suspensión de derechos</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Reforma constitucional</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 2 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">02</span>
+              <h4 class="font-bold text-lg">Tema 2 - Constitución Española II</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>La Corona: funciones del Rey</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Las Cortes Generales: composición y funciones</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>El Gobierno y la Administración</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>El Tribunal Constitucional y el Poder Judicial</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 3 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">03</span>
+              <h4 class="font-bold text-lg">Tema 3: El Estatuto de Autonomía de la Comunitat Valenciana</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Estructura y contenido del Estatuto</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Competencias de la Generalitat</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Instituciones: Les Corts, el Consell, el Síndic</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Organización territorial valenciana</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 4 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">04</span>
+              <h4 class="font-bold text-lg">Tema 4: La Ley del Consell (I)</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>El President de la Generalitat</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>El Consell: composición y funcionamiento</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Las Consellerias: organización</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Órganos superiores y directivos</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 5 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">05</span>
+              <h4 class="font-bold text-lg">Tema 5: La Ley del Consell (II)</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Administración territorial de la Generalitat</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Sector público instrumental</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Relaciones interadministrativas</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Potestad normativa del Consell</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 6 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">06</span>
+              <h4 class="font-bold text-lg">Tema 6: Igualdad, LGTBI y violencia sobre la mujer</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley de Igualdad entre mujeres y hombres</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley integral contra la violencia sobre la mujer</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley de igualdad LGTBI de la Comunitat Valenciana</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Planes de igualdad en la Administración</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 7 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">07</span>
+              <h4 class="font-bold text-lg">Tema 7: Transparencia y buen gobierno</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley de Transparencia (19/2013)</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley valenciana de transparencia (2/2015)</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Derecho de acceso a la información pública</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Publicidad activa y buen gobierno</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 8 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">08</span>
+              <h4 class="font-bold text-lg">Tema 8: Procedimiento administrativo común</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley 39/2015: ámbito y principios</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Los interesados: capacidad y representación</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Fases del procedimiento administrativo</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Plazos, cómputo de términos y silencio</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 9 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">09</span>
+              <h4 class="font-bold text-lg">Tema 9: Actos administrativos y recursos</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Requisitos y eficacia del acto administrativo</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Nulidad y anulabilidad</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Recurso de alzada y reposición</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Recurso extraordinario de revisión</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 10 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">10</span>
+              <h4 class="font-bold text-lg">Tema 10: Función pública valenciana</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley de Función Pública Valenciana (4/2021)</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Clases de personal al servicio de la Generalitat</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Acceso al empleo público: sistemas selectivos</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Situaciones administrativas y provisión de puestos</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 11 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">11</span>
+              <h4 class="font-bold text-lg">Tema 11: Condiciones de trabajo en la GVA</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Jornada, horarios y permisos</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Vacaciones y licencias</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Régimen retributivo</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Régimen disciplinario</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 12 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">12</span>
+              <h4 class="font-bold text-lg">Tema 12: Atención a la ciudadanía y registro</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Derechos de los ciudadanos ante la Administración</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Registro de entrada y salida</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Quejas, sugerencias y reclamaciones</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Atención presencial y telemática</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 13 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">13</span>
+              <h4 class="font-bold text-lg">Tema 13: Control de acceso y protección de datos</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>RGPD: principios y bases de legitimación</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Derechos ARCO-POL del interesado</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Control de acceso a edificios públicos</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Videovigilancia y seguridad de datos</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 14 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">14</span>
+              <h4 class="font-bold text-lg">Tema 14: Prevención de riesgos laborales</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Ley 31/1995 de PRL: conceptos básicos</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Derechos y obligaciones de los trabajadores</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Plan de prevención de la GVA</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Riesgos específicos del puesto de subalterno</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Tema 15 -->
+        <details class="bg-surface-container-lowest rounded-2xl overflow-hidden">
+          <summary class="p-6 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-all">
+            <div class="flex items-center space-x-6">
+              <span class="text-2xl font-black text-outline-variant accordion-num transition-colors">15</span>
+              <h4 class="font-bold text-lg">Tema 15: Seguridad digital en la GVA</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant accordion-chevron transition-transform">chevron_right</span>
+          </summary>
+          <div class="px-6 pb-6 border-t border-outline-variant/10">
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Esquema Nacional de Seguridad (ENS)</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Política de seguridad de la información de la GVA</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Uso seguro de dispositivos y contraseñas</li>
+              <li class="flex items-start gap-3 text-sm text-on-surface-variant"><span class="text-primary">•</span>Amenazas, incidentes y protocolos de actuación</li>
+            </ul>
+          </div>
+        </details>
+
+      </div>
+    </section>
+    <!-- Trust Section -->
+    <section class="bg-secondary-container/30 rounded-[3rem] p-12 lg:p-20 text-center relative overflow-hidden">
+      <div class="relative z-10 max-w-3xl mx-auto">
+        <div
+          class="w-20 h-20 bg-surface rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-secondary/5">
+          <span class="material-symbols-outlined text-primary text-4xl"
+            style="font-variation-settings: 'FILL' 1;">verified_user</span>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Garantía de Satisfacción 100%</h2>
+        <p class="text-lg text-on-surface-variant mb-10 leading-relaxed">
+          Si el contenido no se adapta a tus necesidades o hay un cambio legislativo importante en los primeros 15 días,
+          actualizamos tu material gratis o te devolvemos tu inversión. Sin preguntas.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex items-center justify-center space-x-3 text-sm font-semibold">
+            <span class="material-symbols-outlined text-primary">done_all</span>
+            <span>Pago seguro SSL</span>
+          </div>
+          <div class="flex items-center justify-center space-x-3 text-sm font-semibold">
+            <span class="material-symbols-outlined text-primary">cloud_download</span>
+            <span>Descarga inmediata</span>
+          </div>
+          <div class="flex items-center justify-center space-x-3 text-sm font-semibold">
+            <span class="material-symbols-outlined text-primary">update</span>
+            <span>Actualizaciones 2026</span>
+          </div>
+        </div>
+        <div class="mt-10 flex flex-wrap gap-4 justify-center">
+          <button
+            class="bg-primary text-on-primary px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/10 inline-flex items-center gap-3">
+            Comprar ahora — 25€
+          </button>
+        </div>
+      </div>
+      <!-- Decorative circle -->
+      <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl"></div>
+    </section>
+  </main>
+  <!-- BottomNavBar (Mobile Only) -->
+  <nav
+    class="md:hidden bg-[#fcf9f8]/80 backdrop-blur-lg fixed bottom-0 w-full z-50 rounded-t-3xl shadow-[0_-8px_32px_rgba(27,28,28,0.04)] px-4 pb-6 pt-3 flex justify-around items-center">
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">home</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Inicio</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-[#DA5E49]/10 text-[#DA5E49] rounded-2xl px-5 py-2 scale-95 transition-transform duration-200"
+      href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">import_contacts</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Biblioteca</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">orbit</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Progreso</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Perfil</span>
+    </a>
+  </nav>
+</body>
+
+</html>

@@ -27,8 +27,8 @@ const StarFilledIcon = () => (
   </svg>
 );
 
-const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 shrink-0">
+const ChevronRightIcon = ({ className = 'w-5 h-5 shrink-0' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
   </svg>
 );
@@ -57,34 +57,77 @@ const UpdateIcon = () => (
   </svg>
 );
 
-const ALL_TOPICS = [
-  { n: '01', title: 'La Constitución Española de 1978', desc: 'Principios rectores, derechos y deberes fundamentales.' },
-  { n: '02', title: "L'Estatut d'Autonomia de la Comunitat Valenciana", desc: 'Les Corts, el President y el Consell.' },
-  { n: '03', title: 'La Ley de la Función Pública Valenciana', desc: 'Personal al servicio de las administraciones públicas.' },
-  { n: '04', title: 'Funciones de Subalterno', desc: 'Notificaciones, traslados, manejo de máquinas y vigilancia.' },
-  { n: '05', title: 'La Generalitat Valenciana', desc: 'Organización, competencias y estructura orgánica.' },
-  { n: '06', title: 'Régimen jurídico de las Administraciones Públicas', desc: 'Ley 39/2015 y Ley 40/2015 sobre el sector público.' },
-  { n: '07', title: 'El procedimiento administrativo común', desc: 'Fases, plazos, recursos y actos administrativos.' },
-  { n: '08', title: 'Prevención de riesgos laborales', desc: 'Obligaciones, medidas de protección y plan de emergencias.' },
-  { n: '09', title: 'Protección de datos personales (RGPD)', desc: 'Reglamento europeo y Ley Orgánica 3/2018.' },
-  { n: '10', title: 'Igualdad efectiva de mujeres y hombres', desc: 'Ley Orgánica 3/2007 y perspectiva de género en la administración.' },
-  { n: '11', title: 'Medidas de seguridad y emergencias', desc: 'Planes de evacuación y actuación ante emergencias.' },
-  { n: '12', title: 'Registro, correspondencia y archivo', desc: 'Gestión documental, registro de entrada y salida.' },
-  { n: '13', title: 'Edificios e instalaciones de la GVA', desc: 'Distribución de espacios, accesos y control de llaves.' },
-  { n: '14', title: 'Servicios de reprografía y mensajería', desc: 'Equipos de impresión, copias y distribución interna de documentos.' },
-  { n: '15', title: 'Atención ciudadana y protocolo', desc: 'Comunicación, acogida y normas de conducta institucional.' },
-  { n: '16', title: 'Informática básica de usuario', desc: 'Herramientas ofimáticas y correo electrónico institucional.' },
-  { n: '17', title: "Valencià: nivell bàsic", desc: "Vocabulari i frases d'ús habitual a l'administració." },
-  { n: '18', title: 'Traslado de materiales y equipos', desc: 'Técnicas de carga, manejo y transporte seguro.' },
-  { n: '19', title: 'Vigilancia de accesos y espacios', desc: 'Control de entradas, identificación y rondas de revisión.' },
+const SUBJECTS = [
+  {
+    n: '01', title: 'Tema 1 - Constitución Española I',
+    units: ['Princípios fundamentales y valores superiores', 'Derechos y libertades fundamentales', 'Garantías y suspensión de derechos', 'Reforma constitucional'],
+  },
+  {
+    n: '02', title: 'Tema 2 - Constitución Española II',
+    units: ['La Corona: funciones del Rey', 'Las Cortes Generales: composición y funciones', 'El Gobierno y la Administración', 'El Tribunal Constitucional y el Poder Judicial'],
+  },
+  {
+    n: '03', title: 'Tema 3: El Estatuto de Autonomía de la Comunitat Valenciana',
+    units: ['Estructura y contenido del Estatuto', 'Competencias de la Generalitat', 'Instituciones: Les Corts, el Consell, el Síndic', 'Organización territorial valenciana'],
+  },
+  {
+    n: '04', title: 'Tema 4: La Ley del Consell (I)',
+    units: ['El President de la Generalitat', 'El Consell: composición y funcionamiento', 'Las Consellerias: organización', 'Órganos superiores y directivos'],
+  },
+  {
+    n: '05', title: 'Tema 5: La Ley del Consell (II)',
+    units: ['Administración territorial de la Generalitat', 'Sector público instrumental', 'Relaciones interadministrativas', 'Potestad normativa del Consell'],
+  },
+  {
+    n: '06', title: 'Tema 6: Igualdad, LGTBI y violencia sobre la mujer',
+    units: ['Ley de Igualdad entre mujeres y hombres', 'Ley integral contra la violencia sobre la mujer', 'Ley de igualdad LGTBI de la Comunitat Valenciana', 'Planes de igualdad en la Administración'],
+  },
+  {
+    n: '07', title: 'Tema 7: Transparencia y buen gobierno',
+    units: ['Ley de Transparencia (19/2013)', 'Ley valenciana de transparencia (2/2015)', 'Derecho de acceso a la información pública', 'Publicidad activa y buen gobierno'],
+  },
+  {
+    n: '08', title: 'Tema 8: Procedimiento administrativo común',
+    units: ['Ley 39/2015: ámbito y principios', 'Los interesados: capacidad y representación', 'Fases del procedimiento administrativo', 'Plazos, cómputo de términos y silencio'],
+  },
+  {
+    n: '09', title: 'Tema 9: Actos administrativos y recursos',
+    units: ['Requisitos y eficacia del acto administrativo', 'Nulidad y anulabilidad', 'Recurso de alzada y reposición', 'Recurso extraordinario de revisión'],
+  },
+  {
+    n: '10', title: 'Tema 10: Función pública valenciana',
+    units: ['Ley de Función Pública Valenciana (4/2021)', 'Clases de personal al servicio de la Generalitat', 'Acceso al empleo público: sistemas selectivos', 'Situaciones administrativas y provisión de puestos'],
+  },
+  {
+    n: '11', title: 'Tema 11: Condiciones de trabajo en la GVA',
+    units: ['Jornada, horarios y permisos', 'Vacaciones y licencias', 'Régimen retributivo', 'Régimen disciplinario'],
+  },
+  {
+    n: '12', title: 'Tema 12: Atención a la ciudadanía y registro',
+    units: ['Derechos de los ciudadanos ante la Administración', 'Registro de entrada y salida', 'Quejas, sugerencias y reclamaciones', 'Atención presencial y telemática'],
+  },
+  {
+    n: '13', title: 'Tema 13: Control de acceso y protección de datos',
+    units: ['RGPD: principios y bases de legitimación', 'Derechos ARCO-POL del interesado', 'Control de acceso a edificios públicos', 'Videovigilancia y seguridad de datos'],
+  },
+  {
+    n: '14', title: 'Tema 14: Prevención de riesgos laborales',
+    units: ['Ley 31/1995 de PRL: conceptos básicos', 'Derechos y obligaciones de los trabajadores', 'Plan de prevención de la GVA', 'Riesgos específicos del puesto de subalterno'],
+  },
+  {
+    n: '15', title: 'Tema 15: Seguridad digital en la GVA',
+    units: ['Esquema Nacional de Seguridad (ENS)', 'Política de seguridad de la información de la GVA', 'Uso seguro de dispositivos y contraseñas', 'Amenazas, incidentes y protocolos de actuación'],
+  },
 ];
 
-const INITIAL_VISIBLE = 4;
+const AVATARS = [
+  { initials: 'ML', bg: 'bg-primary', text: 'text-on-primary' },
+  { initials: 'CR', bg: 'bg-tertiary', text: 'text-on-tertiary' },
+  { initials: 'PG', bg: 'bg-secondary', text: 'text-on-secondary' },
+];
 
 export default function SubalternoGVAPage() {
-  const [showAll, setShowAll] = useState(false);
-  const visibleTopics = showAll ? ALL_TOPICS : ALL_TOPICS.slice(0, INITIAL_VISIBLE);
-  const remainingCount = ALL_TOPICS.length - INITIAL_VISIBLE;
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -95,11 +138,11 @@ export default function SubalternoGVAPage() {
           <div className="lg:col-span-7 space-y-8">
             <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-primary font-semibold text-xs tracking-widest uppercase">Actualizado 2026</span>
+              <span className="text-primary font-semibold text-xs tracking-widest uppercase">Actualizado {new Date().getFullYear()}</span>
             </div>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-tight">
               Temario{' '}
-              <span className="text-primary italic">Subalterno GVA</span>
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent italic">Subalterno GVA</span>
             </h1>
             <p className="text-xl text-on-surface-variant max-w-xl leading-relaxed">
               Domina las oposiciones de la Generalitat Valenciana con el material más completo y estructurado bajo nuestra filosofía de Aprendizaje Consciente.
@@ -111,7 +154,7 @@ export default function SubalternoGVAPage() {
               </div>
               <Link
                 to={ROUTES.register}
-                className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/10 inline-flex items-center gap-3"
+                className="btn btn-primary px-10 py-5 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
                 <UserAdd className="w-5 h-5" />
                 Comprar ahora
@@ -122,12 +165,17 @@ export default function SubalternoGVAPage() {
           <div className="lg:col-span-5 relative">
             <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl transform lg:rotate-3">
               <img
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuApIE-f_XlFhUAfTJgP8mLERGL4K1xYY0iflEZCcQbFPhR4yJBn7bnpPbI2HYrFnfy2GWCcbR96-88lmb3cJkLo73VGzJwmPP4TlPsrM8Oaoa5x3OucTz0K7d2tlfzsPGyHUOic6-p_OYw7DIhLvDfuaiIdK7EXVzI28Mbg0fR9HXhGBFwmg0UXUNAbL3J3xkmExqvrLJETxPQkoyQSEk-14lLhkDXQn8t72q04aCiLltfBLbxqShj50Pzivh7uSMlcM2dkEk50VGA"
+                className="w-full h-full object-cover dark:hidden"
+                src="/assets/subalterno-gva-light.png"
+                alt="Material de estudio Subalterno GVA 2026"
+              />
+              <img
+                className="w-full h-full object-cover hidden dark:block"
+                src="/assets/subalterno-gva-dark.png"
                 alt="Material de estudio Subalterno GVA 2026"
               />
             </div>
-            <div className="absolute -bottom-6 -left-6 bg-surface p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] border border-outline-variant/10 max-w-[200px]">
+            <div className="absolute -bottom-6 -left-6 bg-card p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] border border-outline-variant/10 max-w-[200px]">
               <div className="flex items-center space-x-3 mb-2">
                 <span className="text-tertiary"><StarFilledIcon /></span>
                 <span className="font-bold">4.9/5</span>
@@ -190,55 +238,50 @@ export default function SubalternoGVAPage() {
             </p>
             <div className="mt-8 flex items-center space-x-4">
               <div className="flex -space-x-3">
-                <img
-                  alt="Opositor"
-                  className="w-10 h-10 rounded-full border-2 border-surface object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9-vChmrg-6MqRDlZV5INvD6mLanj4-5lOxIofUayeiT8KlGesl-aqjIASjzcflPeigZcQ9JF1q_15_XEJOD6TL4fkPvpK9WntWZmeEXvziCVQH8Q8GmaZYi2x4s8ldf6N0h_1vUyzSDkI4pxLlmRsNEm533Qd5cki_w6BqxOE6vQEv8fUcnlb3kbJwH2H3gBah8mF7C-x2f5rvRIeFGk2RbNX198_SRMwS-z_Eb6A7rro_BjiWUf0HB2Bw8z5fMlBqc1Z4bhN4OE"
-                />
-                <img
-                  alt="Opositor"
-                  className="w-10 h-10 rounded-full border-2 border-surface object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuiQ12PbPkOz1DoVT0GRCSpTzABGHZqisKYf7kkc4iJCR2WGBu5K3talGp93MfjZ-zTQlG0V3XclM8KtBbIH6mU-IO7r-M6FWDLukzi2ps0fL-zMa2a7owwgvwJxsM9nAPyGOkwXuxW-r-vO4EayvGCwpaR86SRUbmvP3o3ChHSoMuRER_ZqYpirM8kz7srTimJ0DEZ-FnRLnpNYNJiaBhd9TZMDucXHq0aq--m1y2ePa_A4c6RbrMqFju-AGBEcDTc_JJF404z6I"
-                />
-                <img
-                  alt="Opositor"
-                  className="w-10 h-10 rounded-full border-2 border-surface object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr_Lf0It7p417MHr-sI8VCG_nP7S49oXoOWRKppJQU10EkKb4B0h5pBjLGAvMKR3OIENr2JBcADca3GYWrNF5tQcbOPS9iUNIYSuUv9fdAoKVL2CLtF4Nw_Tlpp8N1BA8RjkTN9tlg2YC6HGJtNKDQi6blDwwQx4I6w5cUXQRzpXeEmFPP08rNfpH6TPnkttzdf2P_mOcN_jc0TcZwraJEM1pkstCctGNKTniTC-BlUtBxOQzbsdZMrhx7lmPeMrKdJ725Rry3ic0"
-                />
+                {AVATARS.map((a) => (
+                  <div
+                    key={a.initials}
+                    className={`w-10 h-10 rounded-full border-2 border-surface ${a.bg} ${a.text} flex items-center justify-center text-xs font-bold shrink-0`}
+                  >
+                    {a.initials}
+                  </div>
+                ))}
               </div>
               <span className="text-sm font-medium text-on-surface-variant">+450 estudiantes hoy</span>
             </div>
           </div>
 
-          <div className="lg:col-span-8 space-y-4">
-            {visibleTopics.map(topic => (
-              <div
-                key={topic.n}
-                className="bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between group cursor-default hover:bg-surface-container-low transition-all"
-              >
-                <div className="flex items-center space-x-6">
-                  <span className="text-2xl font-black text-outline-variant group-hover:text-primary transition-colors w-8 shrink-0">
-                    {topic.n}
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-lg">{topic.title}</h4>
-                    <p className="text-sm text-on-surface-variant">{topic.desc}</p>
+          <div className="lg:col-span-8 space-y-3">
+            {SUBJECTS.map((subject, i) => (
+              <div key={subject.n} className="bg-surface-container-lowest rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                  className="w-full p-6 flex items-center justify-between hover:bg-surface-container-low transition-all text-left"
+                >
+                  <div className="flex items-center space-x-6">
+                    <span className={`text-2xl font-black transition-colors w-8 shrink-0 ${openIndex === i ? 'text-primary' : 'text-outline-variant'}`}>
+                      {subject.n}
+                    </span>
+                    <h4 className="font-bold text-lg">{subject.title}</h4>
                   </div>
-                </div>
-                <span className="text-outline-variant group-hover:text-primary transition-all ml-4">
-                  <ChevronRightIcon />
-                </span>
+                  <ChevronRightIcon
+                    className={`w-5 h-5 shrink-0 ml-4 transition-transform ${openIndex === i ? 'rotate-90 text-primary' : 'text-outline-variant'}`}
+                  />
+                </button>
+                {openIndex === i && (
+                  <div className="px-6 pb-6 border-t border-outline-variant/10">
+                    <ul className="mt-4 space-y-2">
+                      {subject.units.map((unit) => (
+                        <li key={unit} className="flex items-start gap-3 text-sm text-on-surface-variant">
+                          <span className="text-primary mt-0.5 shrink-0">•</span>
+                          {unit}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             ))}
-
-            {!showAll && (
-              <button
-                onClick={() => setShowAll(true)}
-                className="w-full py-4 text-primary font-bold text-sm tracking-widest uppercase hover:underline"
-              >
-                Ver los {remainingCount} temas restantes
-              </button>
-            )}
           </div>
         </section>
 
@@ -264,13 +307,13 @@ export default function SubalternoGVAPage() {
               </div>
               <div className="flex items-center justify-center space-x-3 text-sm font-semibold">
                 <span className="text-primary"><UpdateIcon /></span>
-                <span>Actualizaciones 2026</span>
+                <span>Actualizaciones {new Date().getFullYear()}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 to={ROUTES.register}
-                className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/10 inline-flex items-center gap-3"
+                className="btn btn-primary px-10 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
                 <UserAdd className="w-5 h-5" />
                 Comprar ahora — 25€
