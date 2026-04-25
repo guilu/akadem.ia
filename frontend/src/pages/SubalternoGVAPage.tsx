@@ -147,7 +147,7 @@ export default function SubalternoGVAPage() {
             <p className="text-xl text-on-surface-variant max-w-xl leading-relaxed">
               Domina las oposiciones de la Generalitat Valenciana con el material más completo y estructurado bajo nuestra filosofía de Aprendizaje Consciente.
             </p>
-            <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6">
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-primary">15€</span>
