@@ -141,7 +141,7 @@ export default function SubalternoGVAPage() {
               <span className="text-primary font-semibold text-xs tracking-widest uppercase">Actualizado {new Date().getFullYear()}</span>
             </div>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-tight">
-              Temario{' '}
+              Temario<br />
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent italic">Subalterno GVA</span>
             </h1>
             <p className="text-xl text-on-surface-variant max-w-xl leading-relaxed">
