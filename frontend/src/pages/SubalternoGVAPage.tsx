@@ -177,15 +177,15 @@ export default function SubalternoGVAPage() {
                 </div>
                 <span className="text-sm text-on-surface-variant">Pago único · Sin suscripción</span>
               </div>
-              <div className="flex flex-col items-start gap-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => document.getElementById('muestra-gratis')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="btn btn-secondary px-6 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2"
-                  >
-                    <DownloadIcon />
-                    Tema 1 gratis
-                  </button>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                <button
+                  onClick={() => document.getElementById('muestra-gratis')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="btn btn-secondary px-6 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2"
+                >
+                  <DownloadIcon />
+                  Tema 1 gratis
+                </button>
+                <div className="flex flex-col items-center lg:items-start gap-1">
                   <button
                     onClick={() => setPaymentOpen(true)}
                     className="btn btn-primary px-10 py-5 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
@@ -193,8 +193,8 @@ export default function SubalternoGVAPage() {
                     <UserAdd className="w-5 h-5" />
                     Comprar ahora
                   </button>
+                  <span className="text-xs text-secondary/70">Pago seguro con Stripe · Acceso inmediato</span>
                 </div>
-                <span className="text-xs text-on-surface-variant/70 pl-1">Pago seguro con Stripe · Acceso inmediato</span>
               </div>
             </div>
           </div>
