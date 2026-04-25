@@ -119,7 +119,7 @@ export default function SyllabusSalesPage() {
                 ))}
               </ul>
 
-              <div className="flex items-center justify-between pt-4 border-t border-secondary/15">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-secondary/15">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-extrabold text-primary">15€</span>
                   <span className="text-sm text-text/45 line-through">39€</span>
@@ -127,7 +127,7 @@ export default function SyllabusSalesPage() {
                 </div>
                 <Link
                   to={ROUTES.subalternoGva}
-                  className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
+                  className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto"
                 >
                   <UserAdd className="w-4 h-4" />
                   Ver temario
