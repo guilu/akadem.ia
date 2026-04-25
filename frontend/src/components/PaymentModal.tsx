@@ -99,9 +99,9 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0"
         onClick={onClose}
       />
       <div className="relative z-10 bg-surface w-full max-w-md rounded-3xl shadow-2xl p-8 border border-outline-variant/10">
