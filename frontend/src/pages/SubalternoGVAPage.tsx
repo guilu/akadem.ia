@@ -135,7 +135,7 @@ export default function SubalternoGVAPage() {
 
         {/* Hero */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-24">
-          <div className="lg:col-span-7 space-y-8">
+          <div className="lg:col-span-8 space-y-8">
             <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-primary font-semibold text-xs tracking-widest uppercase">Actualizado {new Date().getFullYear()}</span>
@@ -149,20 +149,26 @@ export default function SubalternoGVAPage() {
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <div className="flex flex-col">
-                <span className="text-4xl font-bold text-on-surface">25€</span>
-                <span className="text-sm text-on-surface-variant line-through decoration-primary/40">45€ Pago único</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-primary">15€</span>
+                  <span className="text-base text-on-surface-variant line-through">39€</span>
+                </div>
+                <span className="text-sm text-on-surface-variant">Pago único · Sin suscripción</span>
               </div>
-              <Link
-                to={ROUTES.register}
-                className="btn btn-primary px-10 py-5 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
-              >
-                <UserAdd className="w-5 h-5" />
-                Comprar ahora
-              </Link>
+              <div className="flex flex-col items-start gap-2">
+                <Link
+                  to={ROUTES.register}
+                  className="btn btn-primary px-10 py-5 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
+                >
+                  <UserAdd className="w-5 h-5" />
+                  Comprar ahora
+                </Link>
+                <span className="text-xs text-on-surface-variant/70 pl-1">Pago seguro con Stripe · Acceso inmediato</span>
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-5 relative">
+          <div className="lg:col-span-4 relative">
             <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl transform lg:rotate-3">
               <img
                 className="w-full h-full object-cover dark:hidden"
@@ -241,7 +247,7 @@ export default function SubalternoGVAPage() {
                 {AVATARS.map((a) => (
                   <div
                     key={a.initials}
-                    className={`w-10 h-10 rounded-full border-2 border-surface ${a.bg} ${a.text} flex items-center justify-center text-xs font-bold shrink-0`}
+                    className={`w-10 h-10 rounded-full border-2 border-card ${a.bg} ${a.text} flex items-center justify-center text-xs font-bold shrink-0`}
                   >
                     {a.initials}
                   </div>

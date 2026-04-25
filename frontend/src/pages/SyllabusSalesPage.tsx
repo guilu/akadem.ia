@@ -25,7 +25,7 @@ const UsersIcon = () => (
 
 const FEATURES = [
   { icon: <BookOpen className="w-5 h-5" />, label: 'Temas completos y revisados' },
-  { icon: <ArrowsRepeat className="w-5 h-5" />, label: 'Actualizado 2024' },
+  { icon: <ArrowsRepeat className="w-5 h-5" />, label: `Actualizado ${new Date().getFullYear()}` },
   { icon: <CheckIcon />, label: 'Acceso inmediato al material' },
 ];
 
@@ -106,9 +106,9 @@ export default function SyllabusSalesPage() {
               </div>
 
               <h3 className="text-2xl font-black tracking-tight mb-2">{syllabus.name}</h3>
-              {syllabus.description && (
-                <p className="text-sm text-text/55 leading-relaxed mb-6">{syllabus.description}</p>
-              )}
+              <p className="text-sm text-text/55 leading-relaxed mb-6">
+                Consigue tu plaza fija en la Generalitat. Temas y preguntas de tipo examen. Solo necesitas la ESO. Todo el temario oficial de la oposición.
+              </p>
 
               <ul className="space-y-4 mb-8">
                 {FEATURES.map(f => (
@@ -120,7 +120,11 @@ export default function SyllabusSalesPage() {
               </ul>
 
               <div className="flex items-center justify-between pt-4 border-t border-secondary/15">
-                <span className="text-3xl font-extrabold">25€</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-extrabold text-primary">15€</span>
+                  <span className="text-sm text-text/45 line-through">39€</span>
+                  <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full">Oferta</span>
+                </div>
                 <Link
                   to={ROUTES.subalternoGva}
                   className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
