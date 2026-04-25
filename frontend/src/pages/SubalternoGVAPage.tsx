@@ -127,9 +127,29 @@ const AVATARS = [
   { initials: 'PG', bg: 'bg-secondary', text: 'text-on-secondary' },
 ];
 
+const GiftIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 shrink-0 text-secondary">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+  </svg>
+);
+
 export default function SubalternoGVAPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [sampleEmail, setSampleEmail] = useState('');
+  const [sampleSubmitted, setSampleSubmitted] = useState(false);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen">
@@ -290,6 +310,78 @@ export default function SubalternoGVAPage() {
                 )}
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Free Sample Section */}
+        <section className="mb-32 bg-card border border-secondary/20 rounded-[3rem] p-12 lg:p-16 relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
+          <div className="relative max-w-xl">
+            <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-full text-sm font-bold mb-8">
+              <GiftIcon />
+              Gratis
+            </div>
+
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 text-text">
+              No te fíes.{' '}
+              <em className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent not-italic">Léelo</em>{' '}
+              y decide.
+            </h2>
+
+            <p className="text-text/65 text-lg leading-relaxed mb-4">
+              El Tema 1 del temario de Subalterno GVA es tuyo gratis. La Constitución Española. Sin correo comercial, sin trampa.
+            </p>
+            <p className="text-text/65 text-lg leading-relaxed mb-8">
+              Si el material te convence, ya sabes dónde está el resto. Si no, no compres. Así de sencillo.
+            </p>
+
+            <ul className="space-y-3 mb-10">
+              {[
+                'Tema 1 completo en PDF',
+                'Sin compromiso de compra',
+              ].map(item => (
+                <li key={item} className="flex items-center gap-3 text-sm font-semibold text-text/80">
+                  <span className="text-green-500 shrink-0"><CheckAllIcon /></span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {sampleSubmitted ? (
+              <div className="flex items-center gap-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-6 py-4 rounded-2xl text-sm font-semibold">
+                <span className="text-green-500"><CheckAllIcon /></span>
+                ¡Revisa tu correo! Te hemos enviado el Tema 1.
+              </div>
+            ) : (
+              <form
+                onSubmit={e => { e.preventDefault(); setSampleSubmitted(true); }}
+                className="flex flex-col sm:flex-row gap-3"
+              >
+                <div className="flex items-center gap-3 flex-1 bg-bg border border-secondary/30 rounded-2xl px-4 py-3 focus-within:border-primary/50 transition-colors">
+                  <MailIcon />
+                  <input
+                    type="email"
+                    required
+                    value={sampleEmail}
+                    onChange={e => setSampleEmail(e.target.value)}
+                    placeholder="Tu email"
+                    className="flex-1 bg-transparent text-text placeholder:text-secondary text-sm outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary rounded-2xl px-6 py-3 font-bold text-sm inline-flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-primary/20"
+                >
+                  <DownloadIcon />
+                  Empezar gratis
+                </button>
+              </form>
+            )}
+
+            <p className="text-xs text-secondary mt-4">
+              Te enviamos el PDF y punto. Sin spam, sin secuencia de 47 emails.
+            </p>
           </div>
         </section>
 
