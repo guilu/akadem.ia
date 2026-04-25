@@ -317,7 +317,7 @@ export default function SubalternoGVAPage() {
         <section className="mb-32 bg-card border border-secondary/20 rounded-[3rem] p-12 lg:p-16 relative overflow-hidden">
           <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
-          <div className="relative max-w-xl">
+          <div className="relative">
             <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-full text-sm font-bold mb-8">
               <GiftIcon />
               Gratis
@@ -358,23 +358,23 @@ export default function SubalternoGVAPage() {
                 onSubmit={e => { e.preventDefault(); setSampleSubmitted(true); }}
                 className="flex flex-col sm:flex-row gap-3"
               >
-                <div className="flex items-center gap-3 flex-1 bg-bg border border-secondary/30 rounded-2xl px-4 py-3 focus-within:border-primary/50 transition-colors">
+                <div className="flex items-center gap-3 flex-1 bg-bg border border-secondary/30 rounded-full px-5 py-4 focus-within:border-primary/50 transition-colors">
                   <MailIcon />
                   <input
                     type="email"
                     required
                     value={sampleEmail}
                     onChange={e => setSampleEmail(e.target.value)}
-                    placeholder="Tu email"
-                    className="flex-1 bg-transparent text-text placeholder:text-secondary text-sm outline-none"
+                    placeholder="Introduce tu email"
+                    className="flex-1 bg-transparent text-text placeholder:text-secondary text-base outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="btn btn-primary rounded-2xl px-6 py-3 font-bold text-sm inline-flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-primary/20"
+                  className="btn btn-primary rounded-full px-8 py-4 font-bold text-base inline-flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-primary/20"
                 >
                   <DownloadIcon />
-                  Empezar gratis
+                  Descarga gratis
                 </button>
               </form>
             )}
@@ -413,14 +413,14 @@ export default function SubalternoGVAPage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => setPaymentOpen(true)}
-                className="btn btn-primary px-10 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
+                className="btn btn-primary px-10 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
                 <UserAdd className="w-5 h-5" />
                 Comprar ahora — 15€
               </button>
               <Link
                 to={ROUTES.login}
-                className="border border-outline-variant px-10 py-4 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-all inline-flex items-center gap-3 text-on-surface"
+                className="btn btn-secondary px-10 py-4 rounded-full font-bold text-lg inline-flex items-center gap-3"
               >
                 <ArrowRightToBracket className="w-5 h-5" />
                 Ya tengo cuenta
