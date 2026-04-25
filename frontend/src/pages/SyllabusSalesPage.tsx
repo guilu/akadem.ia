@@ -123,13 +123,13 @@ export default function SyllabusSalesPage() {
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-extrabold text-primary">15€</span>
                   <span className="text-sm text-text/45 line-through">39€</span>
-                  <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full">Oferta</span>
+                  <span className="text-sm font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">Oferta</span>
                 </div>
                 <Link
                   to={ROUTES.subalternoGva}
-                  className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto"
+                  className="btn btn-primary rounded-full px-8 py-4 text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto"
                 >
-                  <UserAdd className="w-4 h-4" />
+                  <UserAdd className="w-5 h-5" />
                   Ver temario
                 </Link>
               </div>
