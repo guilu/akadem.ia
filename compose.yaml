@@ -50,7 +50,10 @@ services:
 
   web:
     container_name: akademia-dev-web
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     environment:
       VITE_API_URL: /api
     ports:
