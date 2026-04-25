@@ -42,8 +42,8 @@ function PaymentForm({ onSuccess }: { onSuccess: () => void }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <p className="text-lg font-bold text-on-surface">Pago completado</p>
-        <p className="text-sm text-on-surface-variant text-center">Acceso activado. ¡Bienvenido a akadem.ia!</p>
+        <p className="text-lg font-bold text-text">Pago completado</p>
+        <p className="text-sm text-secondary text-center">Acceso activado. ¡Bienvenido a akadem.ia!</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ function PaymentForm({ onSuccess }: { onSuccess: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />
       {error && (
-        <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-3">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">{error}</p>
       )}
       <button
         type="submit"
@@ -104,10 +104,10 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 bg-surface w-full max-w-md rounded-3xl shadow-2xl p-8 border border-outline-variant/10">
+      <div className="relative z-10 bg-card w-full max-w-md rounded-3xl shadow-2xl p-8 border border-secondary/20">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-on-surface-variant hover:text-on-surface transition-colors"
+          className="absolute top-5 right-5 text-secondary hover:text-text transition-colors"
           aria-label="Cerrar"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -116,12 +116,12 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
         </button>
 
         <div className="mb-8">
-          <h2 className="text-2xl font-bold tracking-tight text-on-surface">Completa tu compra</h2>
-          <p className="text-sm text-on-surface-variant mt-1">Temario Subalterno GVA — Pago único 15€</p>
+          <h2 className="text-2xl font-bold tracking-tight text-text">Completa tu compra</h2>
+          <p className="text-sm text-secondary mt-1">Temario Subalterno GVA — Pago único 15€</p>
         </div>
 
         {fetchError ? (
-          <div className="text-sm text-error bg-error/10 rounded-xl px-4 py-3">{fetchError}</div>
+          <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">{fetchError}</div>
         ) : !clientSecret ? (
           <div className="flex items-center justify-center py-12">
             <svg className="animate-spin w-8 h-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
