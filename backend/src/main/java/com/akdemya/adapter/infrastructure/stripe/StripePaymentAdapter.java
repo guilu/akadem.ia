@@ -20,7 +20,7 @@ public class StripePaymentAdapter implements CreatePaymentIntentUseCase {
 
     @PostConstruct
     public void init() {
-        Stripe.apiKey = stripeProperties.secretKey();
+        Stripe.apiKey = stripeProperties.getSecretKey();
     }
 
     @Override
