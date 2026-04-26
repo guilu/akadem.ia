@@ -123,7 +123,7 @@ const SUBJECTS = [
 
 const AVATARS = [
   { initials: 'ML', bg: 'bg-primary', text: 'text-on-primary' },
-  { initials: 'CR', bg: 'bg-tertiary', text: 'text-on-tertiary' },
+  { initials: 'CR', bg: 'bg-card', text: 'text-on-surface' },
   { initials: 'PG', bg: 'bg-secondary', text: 'text-on-secondary' },
 ];
 
@@ -148,6 +148,7 @@ const DownloadIcon = () => (
 export default function SubalternoGVAPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [showAllTopics, setShowAllTopics] = useState(false);
   const [sampleEmail, setSampleEmail] = useState('');
   const [sampleSubmitted, setSampleSubmitted] = useState(false);
 
@@ -172,8 +173,8 @@ export default function SubalternoGVAPage() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6">
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-primary">15€</span>
-                  <span className="text-base text-on-surface-variant line-through">39€</span>
+                  <span className="text-6xl font-bold text-primary">15€</span>
+                  <span className="text-2xl text-on-surface-variant line-through">39€</span>
                 </div>
                 <span className="text-sm text-on-surface-variant">Pago único · Sin suscripción</span>
               </div>
@@ -190,7 +191,7 @@ export default function SubalternoGVAPage() {
                     onClick={() => setPaymentOpen(true)}
                     className="btn btn-primary px-10 py-5 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
                   >
-                    <UserAdd className="w-5 h-5" />
+                    <UserAdd className="w-8 h-8" />
                     Comprar ahora
                   </button>
                   <span className="text-xs text-secondary/70">Pago seguro con Stripe · Acceso inmediato</span>
@@ -241,8 +242,8 @@ export default function SubalternoGVAPage() {
             </div>
 
             <div className="bg-primary/5 p-10 rounded-[2.5rem] flex flex-col justify-between border border-primary/10">
-              <div className="bg-primary text-on-primary w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
-                <QuizIcon />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+                <span className="text-primary"><QuizIcon /></span>
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-3">Test ilimitados</h3>
@@ -289,7 +290,7 @@ export default function SubalternoGVAPage() {
           </div>
 
           <div className="lg:col-span-8 space-y-3">
-            {SUBJECTS.map((subject, i) => (
+            {(showAllTopics ? SUBJECTS : SUBJECTS.slice(0, 5)).map((subject, i) => (
               <div key={subject.n} className="bg-surface-container-lowest rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setOpenIndex(openIndex === i ? null : i)}
@@ -306,7 +307,7 @@ export default function SubalternoGVAPage() {
                   />
                 </button>
                 {openIndex === i && (
-                  <div className="px-6 pb-6 border-t border-outline-variant/10">
+                  <div className="px-6 pb-6 bg-card">
                     <ul className="mt-4 space-y-2">
                       {subject.units.map((unit) => (
                         <li key={unit} className="flex items-start gap-3 text-sm text-on-surface-variant">
@@ -319,6 +320,15 @@ export default function SubalternoGVAPage() {
                 )}
               </div>
             ))}
+            {!showAllTopics && (
+              <button
+                onClick={() => setShowAllTopics(true)}
+                className="w-full pt-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2"
+              >
+                Mostrar el resto de temas
+                <ChevronRightIcon className="w-4 h-4 rotate-90" />
+              </button>
+            )}
           </div>
         </section>
 
