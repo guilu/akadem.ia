@@ -320,15 +320,13 @@ export default function SubalternoGVAPage() {
                 )}
               </div>
             ))}
-            {!showAllTopics && (
-              <button
-                onClick={() => setShowAllTopics(true)}
-                className="w-full pt-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2"
-              >
-                Mostrar el resto de temas
-                <ChevronRightIcon className="w-6 h-6 rotate-90" />
-              </button>
-            )}
+            <button
+              onClick={() => setShowAllTopics(v => !v)}
+              className="w-full pt-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2"
+            >
+              {showAllTopics ? 'Mostrar menos temas' : 'Mostrar el resto de temas'}
+              <ChevronRightIcon className={`w-6 h-6 transition-transform ${showAllTopics ? '-rotate-90' : 'rotate-90'}`} />
+            </button>
           </div>
         </section>
 
