@@ -438,7 +438,7 @@ export default function SubalternoGVAPage() {
                 onClick={() => setPaymentOpen(true)}
                 className="btn btn-primary px-10 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
-                <UserAdd className="w-5 h-5" />
+                <UserAdd className="w-8 h-8" />
                 Comprar ahora — 15€
               </button>
               <Link
