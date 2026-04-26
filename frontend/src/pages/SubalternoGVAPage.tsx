@@ -140,7 +140,7 @@ const MailIcon = () => (
 );
 
 const DownloadIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
   </svg>
 );
@@ -303,7 +303,7 @@ export default function SubalternoGVAPage() {
                     <h4 className="font-bold text-lg">{subject.title}</h4>
                   </div>
                   <ChevronRightIcon
-                    className={`w-5 h-5 shrink-0 ml-4 transition-transform ${openIndex === i ? 'rotate-90 text-primary' : 'text-outline-variant'}`}
+                    className={`w-6 h-6 shrink-0 ml-4 transition-transform ${openIndex === i ? 'rotate-90 text-primary' : 'text-outline-variant'}`}
                   />
                 </button>
                 {openIndex === i && (
@@ -326,7 +326,7 @@ export default function SubalternoGVAPage() {
                 className="w-full pt-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2"
               >
                 Mostrar el resto de temas
-                <ChevronRightIcon className="w-4 h-4 rotate-90" />
+                <ChevronRightIcon className="w-6 h-6 rotate-90" />
               </button>
             )}
           </div>
@@ -445,7 +445,7 @@ export default function SubalternoGVAPage() {
                 to={ROUTES.login}
                 className="btn btn-secondary px-10 py-4 rounded-full font-bold text-lg inline-flex items-center gap-3"
               >
-                <ArrowRightToBracket className="w-5 h-5" />
+                <ArrowRightToBracket className="w-6 h-6" />
                 Ya tengo cuenta
               </Link>
             </div>
