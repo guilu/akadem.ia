@@ -213,7 +213,7 @@ export default function SubalternoGVAPage() {
                 alt="Material de estudio Subalterno GVA 2026"
               />
             </div>
-            <div className="absolute -bottom-10 -right-6 bg-card p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] max-w-[200px]">
+            <div className="absolute -bottom-10 left-6 bg-card p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] max-w-[200px]">
               <div className="flex items-center space-x-3 mb-2">
                 <span className="text-tertiary"><StarFilledIcon /></span>
                 <span className="font-bold">4.9/5</span>
@@ -437,7 +437,7 @@ export default function SubalternoGVAPage() {
                 className="btn btn-primary px-10 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/10 inline-flex items-center gap-3"
               >
                 <UserAdd className="w-8 h-8" />
-                Comprar ahora — 15€
+                Comprar ahora <span className="text-xl font-extrabold">15€</span>
               </button>
               <Link
                 to={ROUTES.login}
