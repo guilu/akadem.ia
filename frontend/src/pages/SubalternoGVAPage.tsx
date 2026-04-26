@@ -337,9 +337,11 @@ export default function SubalternoGVAPage() {
           <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
           <div className="relative">
-            <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-full text-sm font-bold mb-8">
-              <GiftIcon />
-              Gratis
+            <div className="flex justify-end mb-8">
+              <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-full text-sm font-bold">
+                <GiftIcon />
+                1er tema GRATIS
+              </div>
             </div>
 
             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-6 text-text">
