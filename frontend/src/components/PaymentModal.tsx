@@ -88,12 +88,16 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     if (!isOpen) {
       setClientSecret(null);
       setFetchError(null);
+      document.body.style.overflow = '';
       return;
     }
 
+    document.body.style.overflow = 'hidden';
     createPaymentIntent()
       .then(({ clientSecret: cs }) => setClientSecret(cs))
       .catch(() => setFetchError('No se pudo iniciar el pago. Inténtalo de nuevo.'));
+
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -104,7 +108,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 bg-card w-full max-w-md rounded-3xl shadow-2xl p-8 border border-secondary/20">
+      <div className="relative z-10 bg-card w-full max-w-md rounded-3xl shadow-2xl p-8 border border-secondary/20 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-secondary hover:text-text transition-colors"

@@ -212,7 +212,7 @@ export default function SubalternoGVAPage() {
                 alt="Material de estudio Subalterno GVA 2026"
               />
             </div>
-            <div className="absolute -bottom-6 -left-6 bg-card p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] border border-outline-variant/10 max-w-[200px]">
+            <div className="absolute -bottom-6 -left-6 bg-card p-6 rounded-3xl shadow-[0_32px_48px_-12px_rgba(27,28,28,0.08)] max-w-[200px]">
               <div className="flex items-center space-x-3 mb-2">
                 <span className="text-tertiary"><StarFilledIcon /></span>
                 <span className="font-bold">4.9/5</span>
