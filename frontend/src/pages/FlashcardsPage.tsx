@@ -247,7 +247,7 @@ export default function FlashcardsPage() {
                 className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors"
                 aria-label="Volver atrás"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-6 h-6" />
               </button>
             )}
             <div>
@@ -271,7 +271,7 @@ export default function FlashcardsPage() {
             onClick={openImport}
             className="mt-1 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-primary/40 hover:text-text transition-colors"
           >
-            <ArrowUpFromBracket className="w-4 h-4" />
+            <ArrowUpFromBracket className="w-6 h-6" />
             Importar
           </button>
         </div>
@@ -295,7 +295,7 @@ export default function FlashcardsPage() {
             className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            <Close className="w-3.5 h-3.5" />
+            <Close className="w-6 h-6" />
           </button>
         </div>
       )}

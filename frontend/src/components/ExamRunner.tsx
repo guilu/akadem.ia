@@ -144,7 +144,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
             disabled={safeIndex === 0}
             className="btn btn-outline rounded-full px-4 py-2 text-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-6 h-6" />
             <span className="hidden sm:inline">Anterior</span>
           </button>
           <button
@@ -153,14 +153,14 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
             className="btn btn-outline rounded-full px-4 py-2 text-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <span className="hidden sm:inline">Siguiente</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-6 h-6" />
           </button>
         </div>
         <button
           onClick={() => setConfirmFinish(true)}
           className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-lg shadow-primary/20 flex items-center gap-2"
         >
-          <CheckCircle className="w-4 h-4" />
+          <CheckCircle className="w-6 h-6" />
           Finalizar
         </button>
       </footer>
@@ -175,11 +175,11 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
             </p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setConfirmFinish(false)} className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2">
-                <CircleMinus className="w-4 h-4" />
+                <CircleMinus className="w-6 h-6" />
                 Cancelar
               </button>
               <button onClick={finish} className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-lg shadow-primary/20 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
+                <CheckCircle className="w-6 h-6" />
                 Finalizar
               </button>
             </div>

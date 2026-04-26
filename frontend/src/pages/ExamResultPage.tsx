@@ -54,14 +54,14 @@ export default function ExamResultPage({ result, penaltyRatio = 3 }: { result: E
           to={ROUTES.subjects}
           className="btn btn-primary rounded-full px-6 py-2.5 text-sm shadow-lg shadow-primary/20 flex items-center gap-2"
         >
-          <ArrowsRepeat className="w-4 h-4" />
+          <ArrowsRepeat className="w-6 h-6" />
           Nuevo examen
         </Link>
         <Link
           to={ROUTES.home}
           className="btn btn-outline rounded-full px-6 py-2.5 text-sm flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-6 h-6" />
           Inicio
         </Link>
       </div>

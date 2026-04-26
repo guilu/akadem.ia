@@ -53,11 +53,11 @@ function DeleteModal({
         )}
         <div className="flex gap-2 justify-end">
           <button className={btnOutline} onClick={onClose}>
-            <CircleMinus className="w-4 h-4" />
+            <CircleMinus className="w-6 h-6" />
             Cancelar
           </button>
           <button className={btnDanger} disabled={loading} onClick={onConfirm}>
-            <TrashBin className="w-4 h-4" />
+            <TrashBin className="w-6 h-6" />
             {loading ? 'Eliminando...' : 'Eliminar'}
           </button>
         </div>
@@ -145,11 +145,11 @@ export default function Settings({ isAdmin }: { isAdmin: boolean }) {
   async function removeUser(id: string) { await apiJson(`${apiBase}/api/admin/users/${id}`, { method: 'DELETE' }); await loadUsers(userPage); }
 
   const generalNavItems = [
-    { id: 'general' as Tab, label: 'General', icon: <Cog className="w-4 h-4" /> },
+    { id: 'general' as Tab, label: 'General', icon: <Cog className="w-6 h-6" /> },
   ];
 
   const adminNavItems = [
-    { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-4 h-4" /> },
+    { id: 'users' as Tab, label: 'Usuarios', icon: <Users className="w-6 h-6" /> },
   ];
 
   return (
@@ -246,7 +246,7 @@ export default function Settings({ isAdmin }: { isAdmin: boolean }) {
               )}
               <div className="flex items-center gap-3 mt-5">
                 <button onClick={saveUserSettings} disabled={settingsLoading} className={btnPrimary}>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-6 h-6" />
                   {settingsLoading ? 'Guardando...' : settingsSaved ? 'Guardado' : 'Guardar cambios'}
                 </button>
                 {settingsSaved && (
@@ -282,12 +282,12 @@ export default function Settings({ isAdmin }: { isAdmin: boolean }) {
               </div>
               <div className="flex gap-2">
                 <button onClick={saveUser} disabled={loading} className={btnPrimary}>
-                  {isEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isEditing ? <Check className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                   {isEditing ? 'Guardar cambios' : 'Crear usuario'}
                 </button>
                 {isEditing && (
                   <button onClick={resetForm} className={btnOutline}>
-                    <CircleMinus className="w-4 h-4" />Cancelar
+                    <CircleMinus className="w-6 h-6" />Cancelar
                   </button>
                 )}
               </div>
@@ -310,8 +310,8 @@ export default function Settings({ isAdmin }: { isAdmin: boolean }) {
                         <Td className="hidden sm:table-cell">{[u.firstName, u.lastName].filter(Boolean).join(' ')}</Td>
                         <Td>
                           <div className="flex gap-2">
-                            <button onClick={() => setForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                            <button onClick={() => setConfirmDelete(u)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                            <button onClick={() => setForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-6 h-6" /></button>
+                            <button onClick={() => setConfirmDelete(u)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-6 h-6" /></button>
                           </div>
                         </Td>
                       </tr>

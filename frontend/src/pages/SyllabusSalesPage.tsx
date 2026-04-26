@@ -129,7 +129,7 @@ export default function SyllabusSalesPage() {
                   to={ROUTES.subalternoGva}
                   className="btn btn-primary rounded-full px-8 py-4 text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto"
                 >
-                  <UserAdd className="w-5 h-5" />
+                  <UserAdd className="w-6 h-6" />
                   Ver temario
                 </Link>
               </div>
@@ -144,7 +144,7 @@ export default function SyllabusSalesPage() {
               <p className="font-bold">Próximamente disponible</p>
               <p className="text-sm text-text/55">Regístrate para recibir novedades.</p>
               <Link to={ROUTES.register} className="btn btn-primary rounded-full px-6 py-2.5 text-sm inline-flex items-center gap-2 mt-2">
-                <UserAdd className="w-4 h-4" />
+                <UserAdd className="w-6 h-6" />
                 Crear cuenta
               </Link>
             </div>
@@ -216,14 +216,14 @@ export default function SyllabusSalesPage() {
               to={ROUTES.register}
               className="btn btn-primary rounded-full px-10 py-4 text-lg inline-flex items-center gap-2 shadow-xl shadow-primary/25"
             >
-              <UserAdd className="w-5 h-5" />
+              <UserAdd className="w-6 h-6" />
               Crear mi cuenta gratis
             </Link>
             <Link
               to={ROUTES.login}
               className="btn btn-outline rounded-full px-10 py-4 text-lg inline-flex items-center gap-2"
             >
-              <ArrowRightToBracket className="w-5 h-5" />
+              <ArrowRightToBracket className="w-6 h-6" />
               Ya tengo cuenta
             </Link>
           </div>

@@ -60,7 +60,7 @@ export default function SyllabusSubjectsPage() {
             to={ROUTES.manage}
             className="btn btn-primary rounded-full px-6 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-6 h-6" />
             Ir a Gestionar
           </Link>
         </div>
@@ -84,7 +84,7 @@ export default function SyllabusSubjectsPage() {
                 className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
                 to={ROUTES.subjectBuilder(s.id)}
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-6 h-6" />
                 Crear examen
               </Link>
             </article>
