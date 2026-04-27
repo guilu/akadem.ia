@@ -90,11 +90,11 @@
 
 ## Fase 4 — Config beans (application/config)
 
-- [ ] 4.1 Crear `application/config/ResendProperties.java`: `@ConfigurationProperties(prefix = "app.email.resend")` con campos `apiKey` y `from`. **Done when**: bean registrado y `@SpringBootTest` arranca sin error de binding.
+- [x] 4.1 Crear `application/config/ResendProperties.java`: `@ConfigurationProperties(prefix = "app.email.resend")` con campos `apiKey` y `from`. **Done when**: bean registrado y `@SpringBootTest` arranca sin error de binding.
   - Paths: `backend/src/main/java/com/akdemya/application/config/ResendProperties.java`
   - Deps: 0.1
 
-- [ ] 4.2 Crear `application/config/ProductsProperties.java`: `@ConfigurationProperties(prefix = "app.products")` con campo `storagePath` (default `/tmp/akademia-products`). **Done when**: bean registrado y `@SpringBootTest` arranca sin error.
+- [x] 4.2 Crear `application/config/ProductsProperties.java`: `@ConfigurationProperties(prefix = "app.products")` con campo `storagePath` (default `/tmp/akademia-products`). **Done when**: bean registrado y `@SpringBootTest` arranca sin error.
   - Paths: `backend/src/main/java/com/akdemya/application/config/ProductsProperties.java`
   - Deps: 0.1
 
