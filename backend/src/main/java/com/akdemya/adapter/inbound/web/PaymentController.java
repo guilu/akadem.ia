@@ -19,7 +19,12 @@ public class PaymentController {
 
     @PostMapping("/create-intent")
     public ResponseEntity<PaymentIntentResponse> createIntent() {
-        String clientSecret = createPaymentIntentUseCase.createIntent();
-        return ResponseEntity.ok(new PaymentIntentResponse(clientSecret));
+        // TODO Phase 9 (task 9.2): accept @Valid @RequestBody CreateIntentRequest and
+        // return CreateIntentResponse{clientSecret, downloadToken}. The temporary call
+        // below keeps the controller wired to the new use case signature so the build
+        // stays green; the final Phase 9 refactor replaces this with the real flow.
+        CreatePaymentIntentUseCase.Result result = createPaymentIntentUseCase.createIntent(
+                new CreatePaymentIntentUseCase.Command(null, null, null));
+        return ResponseEntity.ok(new PaymentIntentResponse(result.clientSecret()));
     }
 }

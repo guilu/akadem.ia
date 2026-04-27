@@ -3,9 +3,6 @@ package com.akdemya.adapter.infrastructure.stripe;
 import com.akdemya.application.config.StripeProperties;
 import com.akdemya.domain.port.in.CreatePaymentIntentUseCase;
 import com.stripe.Stripe;
-import com.stripe.exception.StripeException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
@@ -24,16 +21,12 @@ public class StripePaymentAdapter implements CreatePaymentIntentUseCase {
     }
 
     @Override
-    public String createIntent() {
-        try {
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                    .setAmount(1500L)
-                    .setCurrency("eur")
-                    .build();
-            PaymentIntent paymentIntent = PaymentIntent.create(params);
-            return paymentIntent.getClientSecret();
-        } catch (StripeException e) {
-            throw new RuntimeException(e);
-        }
+    public Result createIntent(Command command) {
+        // TODO Phase 7 (task 7.1): resolve DigitalProduct via ProductCatalog, build
+        // metadata (purchaseId/downloadToken/productId/email/userId), persist Purchase,
+        // and return {clientSecret, downloadToken}. Temporary stub keeps the build green
+        // while Phase 3 redefines the inbound port.
+        throw new UnsupportedOperationException(
+                "StripePaymentAdapter.createIntent(Command) not yet implemented — pending Phase 7");
     }
 }
