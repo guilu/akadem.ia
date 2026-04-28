@@ -138,19 +138,19 @@
 
 ## Fase 6 — Persistencia JPA
 
-- [ ] 6.1 Crear `adapter/outbound/persistence/entity/PurchaseEntity.java`: `@Entity @Table(name="purchases")`. Campos: `id` (UUID PK), `stripePaymentIntentId`, `downloadToken`, `email`, `productId`, `userId`, `status` (String), `amountCents`, `currency`, `createdAt`, `paidAt`, `emailSentAt`. Tipos `Instant` igual que `FlashcardEntity`. **Done when**: compilación sin error de JPA.
+- [x] 6.1 Crear `adapter/outbound/persistence/entity/PurchaseEntity.java`: `@Entity @Table(name="purchases")`. Campos: `id` (UUID PK), `stripePaymentIntentId`, `downloadToken`, `email`, `productId`, `userId`, `status` (String), `amountCents`, `currency`, `createdAt`, `paidAt`, `emailSentAt`. Tipos `Instant` igual que `FlashcardEntity`. **Done when**: compilación sin error de JPA.
   - Paths: `backend/src/main/java/com/akdemya/adapter/outbound/persistence/entity/PurchaseEntity.java`
   - Deps: 1.1, 1.4
 
-- [ ] 6.2 Crear `adapter/outbound/persistence/repository/JpaPurchaseRepository.java`: `JpaRepository<PurchaseEntity, UUID>` con queries: `findByDownloadToken`, `findByStripePaymentIntentId`, `findPendingOlderThan` (JPQL con `status='PENDING' AND createdAt < :cutoff`), `findPaidWithoutEmail` (JPQL). **Done when**: compila.
+- [x] 6.2 Crear `adapter/outbound/persistence/repository/JpaPurchaseRepository.java`: `JpaRepository<PurchaseEntity, UUID>` con queries: `findByDownloadToken`, `findByStripePaymentIntentId`, `findPendingOlderThan` (JPQL con `status='PENDING' AND createdAt < :cutoff`), `findPaidWithoutEmail` (JPQL). **Done when**: compila.
   - Paths: `backend/src/main/java/com/akdemya/adapter/outbound/persistence/repository/JpaPurchaseRepository.java`
   - Deps: 6.1
 
-- [ ] 6.3 Crear `adapter/outbound/persistence/mapper/PurchaseMapper.java`: `toDomain(PurchaseEntity)` y `toEntity(Purchase)`. **Done when**: compila.
+- [x] 6.3 Crear `adapter/outbound/persistence/mapper/PurchaseMapper.java`: `toDomain(PurchaseEntity)` y `toEntity(Purchase)`. **Done when**: compila.
   - Paths: `backend/src/main/java/com/akdemya/adapter/outbound/persistence/mapper/PurchaseMapper.java`
   - Deps: 6.1, 1.4
 
-- [ ] 6.4 Crear `adapter/outbound/persistence/PurchaseRepositoryAdapter.java`: implementa `PurchaseRepository`. `markPaid`/`markFailed` via `@Modifying @Query("UPDATE PurchaseEntity p SET p.status=... WHERE p.stripePaymentIntentId=:piId AND p.status='PENDING'")`. `updateEmailSentAt` via `@Modifying @Query`.
+- [x] 6.4 Crear `adapter/outbound/persistence/PurchaseRepositoryAdapter.java`: implementa `PurchaseRepository`. `markPaid`/`markFailed` via `@Modifying @Query("UPDATE PurchaseEntity p SET p.status=... WHERE p.stripePaymentIntentId=:piId AND p.status='PENDING'")`. `updateEmailSentAt` via `@Modifying @Query`.
   - [RED] Test de integración `PurchaseRepositoryAdapterIT` con Testcontainers Postgres: `save` persiste; `markPaid` retorna 1 primera vez, 0 segunda vez (idempotencia); `findPendingOlderThan` filtra correctamente; `findPaidWithoutEmail` respeta grace cutoff.
   - [GREEN] Implementar `PurchaseRepositoryAdapter` hasta que el test IT pase.
   - **Done when**: `PurchaseRepositoryAdapterIT` verde.
