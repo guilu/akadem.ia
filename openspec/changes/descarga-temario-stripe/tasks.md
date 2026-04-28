@@ -102,22 +102,22 @@
 
 ## Fase 5 — Adaptadores de infraestructura outbound
 
-- [ ] 5.1 Crear `application/service/InMemoryProductCatalog.java`: `@Component` implementando `ProductCatalog`. Map hardcoded con `TEMARIO_SUBALTERNO_GVA → DigitalProduct(sku, displayName, 1500, "eur", "temario-subalterno-gva.pdf", "Temario Subalterno GVA.pdf")`.
+- [x] 5.1 Crear `application/service/InMemoryProductCatalog.java`: `@Component` implementando `ProductCatalog`. Map hardcoded con `TEMARIO_SUBALTERNO_GVA → DigitalProduct(sku, displayName, 1500, "eur", "temario-subalterno-gva.pdf", "Temario Subalterno GVA.pdf")`.
   - [RED] Test: `InMemoryProductCatalogTest` — `findById("TEMARIO_SUBALTERNO_GVA")` present, `findById("UNKNOWN")` empty.
   - [GREEN] Implementar `InMemoryProductCatalog`.
   - **Done when**: test pasa.
   - Paths: `...application/service/InMemoryProductCatalog.java`, `...test/.../InMemoryProductCatalogTest.java`
   - Deps: 2.4, 1.5
 
-- [ ] 5.2 [RED] Test `LocalProductFileStorageAdapterTest`: `open("temario-subalterno-gva.pdf")` retorna InputStream cuando archivo existe en tmpdir; lanza RuntimeException cuando no existe. **Done when**: test compila pero falla.
+- [x] 5.2 [RED] Test `LocalProductFileStorageAdapterTest`: `open("temario-subalterno-gva.pdf")` retorna InputStream cuando archivo existe en tmpdir; lanza RuntimeException cuando no existe. **Done when**: test compila pero falla.
   - Paths: `backend/src/test/java/com/akdemya/adapter/infrastructure/storage/LocalProductFileStorageAdapterTest.java`
   - Deps: 2.2, 4.2
 
-- [ ] 5.3 [GREEN] Crear `adapter/infrastructure/storage/LocalProductFileStorageAdapter.java`: `@Component` implementando `ProductFileStoragePort`. Lee `ProductsProperties.storagePath`; abre `FileInputStream`; sanitiza path con `Paths.get(storageKey).getFileName()`. **Done when**: `LocalProductFileStorageAdapterTest` pasa.
+- [x] 5.3 [GREEN] Crear `adapter/infrastructure/storage/LocalProductFileStorageAdapter.java`: `@Component` implementando `ProductFileStoragePort`. Lee `ProductsProperties.storagePath`; abre `FileInputStream`; sanitiza path con `Paths.get(storageKey).getFileName()`. **Done when**: `LocalProductFileStorageAdapterTest` pasa.
   - Paths: `backend/src/main/java/com/akdemya/adapter/infrastructure/storage/LocalProductFileStorageAdapter.java`
   - Deps: 5.2
 
-- [ ] 5.4 Crear `adapter/infrastructure/stripe/StripeEventVerifierAdapter.java`: `@Component`. Wraps `Webhook.constructEvent(rawPayload, signature, webhookSecret)`. Lanza `SignatureVerificationException` si firma inválida.
+- [x] 5.4 Crear `adapter/infrastructure/stripe/StripeEventVerifierAdapter.java`: `@Component`. Wraps `Webhook.constructEvent(rawPayload, signature, webhookSecret)`. Lanza `SignatureVerificationException` si firma inválida.
   - [RED] Test `StripeEventVerifierAdapterTest`: payload + HMAC calculado con secret fijo → success; payload alterado → excepción.
   - [GREEN] Implementar `StripeEventVerifierAdapter`.
   - **Done when**: test pasa.
@@ -125,11 +125,11 @@
   - Deps: —
   - Test cmd: `./gradlew test --tests "*.StripeEventVerifierAdapterTest"`
 
-- [ ] 5.5 [RED] Test `ResendEmailAdapterTest` con MockWebServer (OkHttp): `sendDownloadEmail(...)` llama `POST /emails` con headers `Authorization: Bearer <key>` y body correcto, retorna `true`; Resend 500 → retorna `false` sin propagar excepción. **Done when**: test compila pero falla.
+- [x] 5.5 [RED] Test `ResendEmailAdapterTest` con MockWebServer (OkHttp): `sendDownloadEmail(...)` llama `POST /emails` con headers `Authorization: Bearer <key>` y body correcto, retorna `true`; Resend 500 → retorna `false` sin propagar excepción. **Done when**: test compila pero falla.
   - Paths: `backend/src/test/java/com/akdemya/adapter/infrastructure/email/ResendEmailAdapterTest.java`
   - Deps: 2.3, 4.1
 
-- [ ] 5.6 [GREEN] Crear `adapter/infrastructure/email/ResendEmailAdapter.java`: `@Component` implementando `TransactionalEmailPort`. `RestClient` con base URL `https://api.resend.com`. Método `buildHtml(url, name)` y `buildText(url, name)` inline. Catch `RestClientException` → log ERROR → return false. **Done when**: `ResendEmailAdapterTest` pasa.
+- [x] 5.6 [GREEN] Crear `adapter/infrastructure/email/ResendEmailAdapter.java`: `@Component` implementando `TransactionalEmailPort`. `RestClient` con base URL `https://api.resend.com`. Método `buildHtml(url, name)` y `buildText(url, name)` inline. Catch `RestClientException` → log ERROR → return false. **Done when**: `ResendEmailAdapterTest` pasa.
   - Paths: `backend/src/main/java/com/akdemya/adapter/infrastructure/email/ResendEmailAdapter.java`
   - Deps: 5.5
   - Test cmd: `./gradlew test --tests "*.ResendEmailAdapterTest"`
