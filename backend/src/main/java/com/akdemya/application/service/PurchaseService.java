@@ -146,11 +146,31 @@ public class PurchaseService implements
       log.warn("payment_intent.succeeded event without a PaymentIntent id; ignoring");
       return;
     }
+    settlePaidPurchase(piId);
+  }
+
+  /**
+   * Atomically marks the {@link Purchase} associated with the given Stripe
+   * PaymentIntent as PAID and, on a successful state transition, sends the
+   * download email and persists the delivery timestamp.
+   *
+   * <p>Shared between the webhook handler and the
+   * {@code PurchaseReconciliationScheduler} (Function A) so both paths agree
+   * on idempotency and email-retry semantics.</p>
+   *
+   * <p>Idempotent: when {@code markPaid} returns {@code 0} the row is already
+   * PAID/FAILED and no email is sent.</p>
+   */
+  public void settlePaidPurchase(String piId) {
+    if (piId == null || piId.isBlank()) {
+      log.warn("settlePaidPurchase called with blank PaymentIntent id; ignoring");
+      return;
+    }
 
     Instant now = Instant.now();
     int rows = purchaseRepository.markPaid(piId, now);
     if (rows == 0) {
-      log.info("Idempotent webhook delivery for paymentIntent={} — already settled", piId);
+      log.info("Idempotent settlement for paymentIntent={} — already settled", piId);
       return;
     }
 

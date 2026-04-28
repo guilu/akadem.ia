@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -74,6 +75,24 @@ public class StripePaymentAdapter implements StripePaymentGateway {
       log.error("Stripe PaymentIntent.create failed for productId={} purchaseId={}: {}",
           product.getSku(), purchaseId, ex.getMessage(), ex);
       throw new RuntimeException("Failed to create Stripe PaymentIntent", ex);
+    }
+  }
+
+  @Override
+  public Optional<StripePaymentIntentSnapshot> retrieve(String paymentIntentId) {
+    if (paymentIntentId == null || paymentIntentId.isBlank()) {
+      throw new IllegalArgumentException("paymentIntentId cannot be blank");
+    }
+    try {
+      PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+      if (intent == null) {
+        return Optional.empty();
+      }
+      return Optional.of(new StripePaymentIntentSnapshot(intent.getId(), intent.getStatus()));
+    } catch (StripeException ex) {
+      log.error("Stripe PaymentIntent.retrieve failed for paymentIntentId={}: {}",
+          paymentIntentId, ex.getMessage(), ex);
+      throw new RuntimeException("Failed to retrieve Stripe PaymentIntent", ex);
     }
   }
 }
