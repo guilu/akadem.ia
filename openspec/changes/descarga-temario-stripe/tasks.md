@@ -162,11 +162,11 @@
 
 ## Fase 7 — Application services
 
-- [ ] 7.1 Modificar `adapter/infrastructure/stripe/StripePaymentAdapter.java`: nueva firma `createIntent(CreatePaymentIntentUseCase.Command cmd)`, obtiene `DigitalProduct` del catálogo (inyectado), pone metadata `{purchaseId, downloadToken, productId, email, userId?}`, usa `product.getAmountCents()/getCurrency()`. Eliminar hard-code de 1500 EUR. **Done when**: compila y `StripePaymentAdapterTest` (si existe) sigue verde o se actualiza.
+- [x] 7.1 Modificar `adapter/infrastructure/stripe/StripePaymentAdapter.java`: nueva firma `createIntent(CreatePaymentIntentUseCase.Command cmd)`, obtiene `DigitalProduct` del catálogo (inyectado), pone metadata `{purchaseId, downloadToken, productId, email, userId?}`, usa `product.getAmountCents()/getCurrency()`. Eliminar hard-code de 1500 EUR. **Done when**: compila y `StripePaymentAdapterTest` (si existe) sigue verde o se actualiza. — extraído nuevo port `StripePaymentGateway` (en `domain/port/out/`) y el adapter implementa ese port en lugar de `CreatePaymentIntentUseCase`. PurchaseService es ahora quien implementa los use cases.
   - Paths: `backend/src/main/java/com/akdemya/adapter/infrastructure/stripe/StripePaymentAdapter.java`
   - Deps: 3.1, 2.4
 
-- [ ] 7.2 [RED] Test unitario `PurchaseServiceTest` (Mockito, sin Spring): escenarios:
+- [x] 7.2 [RED] Test unitario `PurchaseServiceTest` (Mockito, sin Spring): escenarios:
   - `createIntent` → catálogo encontrado → Stripe OK → Purchase guardado → retorna clientSecret + downloadToken.
   - `createIntent` → productId desconocido → `IllegalArgumentException` → no llama a Stripe ni a repo.
   - `handleEvent` → `payment_intent.succeeded` → `markPaid` retorna 1 → email enviado → `updateEmailSentAt` llamado.
@@ -179,12 +179,12 @@
   - Paths: `backend/src/test/java/com/akdemya/application/service/PurchaseServiceTest.java`
   - Deps: 2.1–2.4, 3.1–3.4, 5.1
 
-- [ ] 7.3 [GREEN] Crear `application/service/PurchaseService.java`: `@Service @Transactional`, implementa `CreatePaymentIntentUseCase`, `HandleStripeWebhookUseCase`, `DownloadPurchaseUseCase`, `GetPurchaseInfoUseCase`. Orquesta ports inyectados. `handleEvent` usa `StripeEventVerifierAdapter` (inyectado) y switch sobre `event.getType()`. **Done when**: `PurchaseServiceTest` verde.
+- [x] 7.3 [GREEN] Crear `application/service/PurchaseService.java`: `@Service @Transactional`, implementa `CreatePaymentIntentUseCase`, `HandleStripeWebhookUseCase`, `DownloadPurchaseUseCase`, `GetPurchaseInfoUseCase`. Orquesta ports inyectados. `handleEvent` usa `StripeEventVerifierAdapter` (inyectado) y switch sobre `event.getType()`. **Done when**: `PurchaseServiceTest` verde. — 11/11 tests verde.
   - Paths: `backend/src/main/java/com/akdemya/application/service/PurchaseService.java`
   - Deps: 7.2, 5.4
   - Test cmd: `./gradlew test --tests "*.PurchaseServiceTest"`
 
-- [ ] 7.4 Crear `application/service/ReconciliationService.java`: Function B — `retryFailedEmails(Instant graceCutoff)`. Usa `PurchaseRepository.findPaidWithoutEmail(graceCutoff)`, llama `TransactionalEmailPort`, si true → `updateEmailSentAt`.
+- [x] 7.4 Crear `application/service/ReconciliationService.java`: Function B — `retryFailedEmails(Instant graceCutoff)`. Usa `PurchaseRepository.findPaidWithoutEmail(graceCutoff)`, llama `TransactionalEmailPort`, si true → `updateEmailSentAt`. — 2/2 tests verde. Inyecta `ProductCatalog` + `frontendUrl` para construir URL/displayName del email (mismo patrón que PurchaseService).
   - [RED] Test `ReconciliationServiceTest`: stub `findPaidWithoutEmail` con 2 purchases; email retorna true para #1 y false para #2 → `updateEmailSentAt` llamado solo para #1; WARN log emitido para #2.
   - [GREEN] Implementar `ReconciliationService`.
   - **Done when**: test verde.
@@ -196,7 +196,7 @@
 
 ## Fase 8 — Scheduler
 
-- [ ] 8.1 Crear `adapter/infrastructure/scheduler/PurchaseReconciliationScheduler.java`: `@Component`, `@Scheduled(cron = "0 */15 * * * *")`. Function A: `purchaseRepository.findPendingOlderThan(now()-1h)` → por cada compra → `PaymentIntent.retrieve(piId)` → switch(status): `succeeded`→ markPaid + email; `canceled`/`payment_failed`→ markFailed; otros→ log WARN; excepción por compra → log ERROR + continuar. Function B: delegar a `ReconciliationService.retryFailedEmails(now()-5min)`. LOG INFO con count al inicio de cada función.
+- [x] 8.1 Crear `adapter/infrastructure/scheduler/PurchaseReconciliationScheduler.java`: `@Component`, `@Scheduled(cron = "0 */15 * * * *")`. Function A: `purchaseRepository.findPendingOlderThan(now()-1h)` → por cada compra → `PaymentIntent.retrieve(piId)` → switch(status): `succeeded`→ markPaid + email; `canceled`/`payment_failed`→ markFailed; otros→ log WARN; excepción por compra → log ERROR + continuar. Function B: delegar a `ReconciliationService.retryFailedEmails(now()-5min)`. LOG INFO con count al inicio de cada función.
   - [RED] Test `PurchaseReconciliationSchedulerTest` (Mockito): Function A — mock repo + Stripe client: assert markPaid for succeeded, markFailed for canceled, skip for processing, updateEmailSentAt si email=true; Function B — delega a ReconciliationService mockeado; fallo Stripe en una compra → las otras se procesan.
   - [GREEN] Implementar scheduler hasta que test pase.
   - **Done when**: test verde.
