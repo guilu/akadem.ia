@@ -72,6 +72,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/syllabuses", "/api/syllabuses/**").permitAll()
                 .requestMatchers("/api/v1/payments/webhook").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/payments/create-intent").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/downloads/**").permitAll()
                 .requestMatchers("/api/manage/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
