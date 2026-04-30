@@ -4,6 +4,7 @@ import com.akdemya.application.config.ResendProperties;
 import com.akdemya.domain.port.out.TransactionalEmailPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -30,6 +31,7 @@ public class ResendEmailAdapter implements TransactionalEmailPort {
   private final ResendProperties props;
   private final RestClient restClient;
 
+  @Autowired
   public ResendEmailAdapter(ResendProperties props) {
     this(props, DEFAULT_BASE_URL);
   }
