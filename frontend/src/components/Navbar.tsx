@@ -42,17 +42,15 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
   const isActive = (route: string) => location.pathname === route || location.pathname.startsWith(route + '/');
 
   const linkCls = (route: string) =>
-    `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-      isActive(route)
-        ? 'bg-primary/10 text-primary'
-        : 'text-text/65 hover:text-text hover:bg-secondary/10'
+    `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${isActive(route)
+      ? 'bg-primary/10 text-primary'
+      : 'text-text/65 hover:text-text hover:bg-secondary/10'
     }`;
 
   const mobileLinkCls = (route: string) =>
-    `w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-      isActive(route)
-        ? 'bg-primary/10 text-primary'
-        : 'text-text/65 hover:text-text hover:bg-secondary/10'
+    `w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive(route)
+      ? 'bg-primary/10 text-primary'
+      : 'text-text/65 hover:text-text hover:bg-secondary/10'
     }`;
 
   return (
@@ -67,7 +65,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
         >
           <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-8 h-8" />
-          Akadem.ia
+          akadem.ia
         </button>
 
         {/* Desktop links */}
@@ -170,9 +168,8 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
 
       {/* ── Mobile menu ── */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="px-4 pb-4 pt-2 border-t border-secondary/15 space-y-1 bg-bg/95 backdrop-blur-md">
 
