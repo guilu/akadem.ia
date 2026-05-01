@@ -452,7 +452,11 @@ export default function SubalternoGVAPage() {
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl" />
         </section>
       </main>
-      <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
+      <PaymentModal
+        isOpen={paymentOpen}
+        onClose={() => setPaymentOpen(false)}
+        productId="TEMARIO_SUBALTERNO_GVA"
+      />
     </div>
   );
 }
