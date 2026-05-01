@@ -134,7 +134,11 @@ describe('FlashcardsPage', () => {
   });
 
   it('reloads units when onImported is called from modal', async () => {
-    vi.mocked(api.apiJson).mockResolvedValue([]);
+    // 1st: initial units, 2nd: initial queue, 3rd: reloaded units
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ new: 0, due: 0, learning: 0 })
+      .mockResolvedValueOnce(mockUnits);
 
     render(<FlashcardsPage />);
 
@@ -143,8 +147,10 @@ describe('FlashcardsPage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     fireEvent.click(screen.getByText('Importado'));
 
-    // apiJson should be called again (reload)
-    expect(vi.mocked(api.apiJson).mock.calls.length).toBeGreaterThan(2);
+    // Wait for the reloaded data to be rendered
+    await waitFor(() => {
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
+    });
   });
 
   it('shows syllabuses when data loads', async () => {

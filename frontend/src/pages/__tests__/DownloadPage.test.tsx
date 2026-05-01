@@ -21,7 +21,7 @@ const TOKEN = '11111111-1111-1111-1111-111111111111';
 
 function renderAt(token: string = TOKEN) {
   return render(
-    <MemoryRouter initialEntries={[`/descarga/${token}`]}>
+    <MemoryRouter initialEntries={[`/descarga/${token}`]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/descarga/:token" element={<DownloadPage />} />
       </Routes>

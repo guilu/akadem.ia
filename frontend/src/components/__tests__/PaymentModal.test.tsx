@@ -32,7 +32,7 @@ import { createPaymentIntent } from '../../api/paymentApi';
 function renderModal(productId = 'TEMARIO_SUBALTERNO_GVA') {
   const onClose = vi.fn();
   const result = render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <PaymentModal isOpen={true} onClose={onClose} productId={productId} />
     </MemoryRouter>
   );

@@ -1,0 +1,34 @@
+
+> akdemya-web@1.2.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /Users/diegobarrioh/code/akadem.ia/frontend
+
+ ✓ src/__tests__/api.test.ts (30 tests) 169ms
+ ✓ src/__tests__/UserMenuDropdown.test.tsx (9 tests) 465ms
+   ✓ UserMenuDropdown > renders avatar initials when no avatarUrl provided 328ms
+ ✓ src/components/__tests__/PaymentModal.test.tsx (6 tests) 251ms
+ ✓ src/__tests__/flashcards/FlashcardsStudyPage.test.tsx (10 tests) 845ms
+ ✓ src/__tests__/flashcards/FlashcardsExamineUnitPage.test.tsx (10 tests) 788ms
+ ✓ src/__tests__/Navbar.test.tsx (9 tests) 647ms
+   ✓ Navbar — Desktop > shows user menu trigger when isAuthed=true and user provided 404ms
+ ✓ src/__tests__/flashcards/FlashcardsPage.test.tsx (18 tests) 1319ms
+ ✓ src/__tests__/rag/SourceUpload.test.tsx (6 tests) 516ms
+ ✓ src/pages/__tests__/DownloadPage.test.tsx (4 tests) 218ms
+ ✓ src/__tests__/ProfilePage.test.tsx (7 tests) 477ms
+ ✓ src/__tests__/rag/QuizResults.test.tsx (6 tests) 541ms
+ ✓ src/__tests__/rag/QuizGenerateForm.test.tsx (5 tests) 709ms
+   ✓ QuizGenerateForm > validates missing source and unit 342ms
+ ✓ src/__tests__/ScopeFilter.test.tsx (6 tests) 552ms
+   ✓ ScopeFilter — non-admin > renders Todo and Personal buttons only 422ms
+ ✓ src/__tests__/flashcards/SubjectCard.test.tsx (6 tests) 558ms
+   ✓ SubjectCard > renders subject name and pending count 318ms
+ ✓ src/__tests__/utils/format.test.ts (9 tests) 4ms
+ ✓ src/__tests__/flashcards/UnitList.test.tsx (7 tests) 121ms
+
+ Test Files  16 passed (16)
+      Tests  148 passed (148)
+   Start at  20:41:29
+   Duration  8.43s (transform 1.16s, setup 2.52s, collect 6.99s, tests 8.18s, environment 17.90s, prepare 2.42s)
+

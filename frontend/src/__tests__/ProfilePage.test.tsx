@@ -26,9 +26,11 @@ describe('ProfilePage', () => {
 
     render(<ProfilePage />);
 
-    expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/apellidos/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/apellidos/i)).toBeInTheDocument();
+    });
   });
 
   it('on mount calls getMyProfile and populates fields', async () => {
@@ -38,11 +40,10 @@ describe('ProfilePage', () => {
 
     await waitFor(() => {
       expect(api.getMyProfile).toHaveBeenCalledWith();
+      expect(screen.getByLabelText(/correo electrónico/i)).toHaveValue('test@example.com');
+      expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana');
+      expect(screen.getByLabelText(/apellidos/i)).toHaveValue('García');
     });
-
-    expect(screen.getByLabelText(/correo electrónico/i)).toHaveValue('test@example.com');
-    expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana');
-    expect(screen.getByLabelText(/apellidos/i)).toHaveValue('García');
   });
 
   it('submitting valid data calls updateMyProfile and shows success message', async () => {
@@ -84,7 +85,9 @@ describe('ProfilePage', () => {
 
     render(<ProfilePage />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo cargar el perfil/i);
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/no se pudo cargar el perfil/i);
+    });
   });
 
   it('button is disabled while loading', async () => {
