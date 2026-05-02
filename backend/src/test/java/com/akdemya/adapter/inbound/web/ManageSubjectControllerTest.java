@@ -86,7 +86,7 @@ class ManageSubjectControllerTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getSubjectsByScope(any(), eq(true), eq(Visibility.GLOBAL));
-    assertFalse(response.getBody().get(0).isEditable());
+    assertTrue(response.getBody().get(0).isEditable());
   }
 
   // Test 4: Non-admin POST with visibility=PRIVATE → 200, subject created
@@ -151,11 +151,12 @@ class ManageSubjectControllerTest {
     UUID subjectId = UUID.randomUUID();
     when(contentService.getSubjectById(subjectId))
         .thenReturn(Optional.of(new Subject(subjectId, "Global", "desc", Visibility.GLOBAL, null, null)));
+    doNothing().when(contentService).deleteSubjectIfAuthorized(any(), any(), anyBoolean());
 
     ResponseEntity<?> response = controller.delete(subjectId, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).deleteSubjectIfAuthorized(any(), any(), anyBoolean());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).deleteSubjectIfAuthorized(eq(subjectId), any(), eq(true));
   }
 
   // Test 9: Unauthenticated GET is handled by SecurityConfig (returns 401 at filter layer)
@@ -206,7 +207,7 @@ class ManageSubjectControllerTest {
     verify(contentService).createSubject(argThat(subject -> subject.getVisibility() == Visibility.GLOBAL
         && subject.getOwnerId() == null));
     var body = assertInstanceOf(ManageSubjectController.ManageSubjectResponse.class, response.getBody());
-    assertFalse(body.isEditable());
+    assertTrue(body.isEditable());
   }
 
   // Test 14: PUT with null principal → 401
@@ -305,6 +306,6 @@ class ManageSubjectControllerTest {
     ResponseEntity<List<ManageSubjectController.ManageSubjectResponse>> response = controller.list(principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertFalse(response.getBody().get(0).isEditable());
+    assertTrue(response.getBody().get(0).isEditable());
   }
 }

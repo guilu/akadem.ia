@@ -28,6 +28,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import SyllabusSalesPage from './pages/SyllabusSalesPage';
 import SubalternoGVAPage from './pages/SubalternoGVAPage';
+import DownloadPage from './pages/DownloadPage';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
@@ -255,6 +256,7 @@ export default function App() {
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage />} />
           <Route path={ROUTES.subalternoGva} element={<SubalternoGVAPage />} />
+          <Route path="/descarga/:token" element={<DownloadPage />} />
           <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
           <Route path={ROUTES.syllabuses} element={

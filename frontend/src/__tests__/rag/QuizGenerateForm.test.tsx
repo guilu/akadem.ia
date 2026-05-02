@@ -25,18 +25,23 @@ describe('QuizGenerateForm', () => {
 
   it('renders form fields', async () => {
     render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    // Wait for async units load to avoid act() warning
+    await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalledWith('subj-1'));
+    
     expect(screen.getByText(/documento fuente/i)).toBeInTheDocument();
     expect(screen.getByText(/unidad temática/i)).toBeInTheDocument();
     expect(screen.getByText(/dificultad/i)).toBeInTheDocument();
   });
 
-  it('shows warning when no processed sources', () => {
+  it('shows warning when no processed sources', async () => {
     render(<QuizGenerateForm sources={[]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalledWith('subj-1'));
     expect(screen.getByText(/no hay documentos procesados/i)).toBeInTheDocument();
   });
 
   it('validates missing source and unit', async () => {
     render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={false} />);
+    await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalledWith('subj-1'));
     fireEvent.click(screen.getByRole('button', { name: /generar preguntas/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/selecciona un documento/i);
     expect(onGenerate).not.toHaveBeenCalled();
@@ -57,8 +62,9 @@ describe('QuizGenerateForm', () => {
     })));
   });
 
-  it('disables submit button while loading', () => {
+  it('disables submit button while loading', async () => {
     render(<QuizGenerateForm sources={[processedSource]} subjectId="subj-1" onGenerate={onGenerate} loading={true} />);
+    await waitFor(() => expect(api.getUnitsForSubject).toHaveBeenCalledWith('subj-1'));
     expect(screen.getByRole('button', { name: /generando/i })).toBeDisabled();
   });
 });

@@ -87,7 +87,7 @@ class ManageQuestionControllerTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getQuestionsByScope(eq(unitId), any(), eq(true), eq(Visibility.GLOBAL), anyInt(), anyInt());
-    assertFalse(response.getBody().items().get(0).isEditable());
+    assertTrue(response.getBody().items().get(0).isEditable());
   }
 
   @Test
@@ -158,11 +158,12 @@ class ManageQuestionControllerTest {
     when(contentService.getQuestionById(questionId))
         .thenReturn(Optional.of(new Question(questionId, UUID.randomUUID(), "Global?", null,
             Question.Difficulty.EASY, Visibility.GLOBAL, null)));
+    doNothing().when(contentService).deleteQuestionIfAuthorized(any(), any(), anyBoolean());
 
     ResponseEntity<?> response = controller.delete(questionId, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).deleteQuestionIfAuthorized(any(), any(), anyBoolean());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).deleteQuestionIfAuthorized(eq(questionId), any(), eq(true));
   }
 
   @Test
@@ -287,7 +288,7 @@ class ManageQuestionControllerTest {
     verify(contentService).createQuestion(argThat(question -> question.getVisibility() == Visibility.GLOBAL
         && question.getOwnerId() == null));
     var body = assertInstanceOf(ManageQuestionController.ManageQuestionResponse.class, response.getBody());
-    assertFalse(body.isEditable());
+    assertTrue(body.isEditable());
   }
 
   @Test
@@ -450,20 +451,22 @@ class ManageQuestionControllerTest {
   }
 
   @Test
-  void adminCannotUpdateGlobalQuestionFromManage() {
+  void adminCanUpdateGlobalQuestionFromManage() {
     User principal = adminPrincipal("admin@example.com");
     UUID questionId = UUID.randomUUID();
     UUID unitId = UUID.randomUUID();
     Question existing = new Question(questionId, unitId, "Old?", null,
         Question.Difficulty.EASY, Visibility.GLOBAL, null);
     when(contentService.getQuestionsByUnit(unitId)).thenReturn(List.of(existing));
+    when(contentService.createQuestion(any())).thenReturn(existing);
+    when(answerRepo.findByQuestionId(any())).thenReturn(List.of());
 
     var req = new ManageQuestionController.QuestionRequest(unitId, "New?", null,
         Question.Difficulty.EASY, validAnswers(), "GLOBAL");
     ResponseEntity<?> response = controller.update(questionId, req, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).createQuestion(any());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).createQuestion(any());
   }
 
   @Test

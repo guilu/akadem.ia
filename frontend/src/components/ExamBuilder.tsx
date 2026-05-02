@@ -132,7 +132,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
               disabled={totalAvailable === 0 || randomCount < 1}
               className="btn btn-primary w-full mt-2 py-4 rounded-3xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Play className="w-5 h-5" />
+              <Play className="w-6 h-6" />
               Examen aleatorio
             </button>
           </div>
@@ -224,7 +224,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                   disabled={page === 0}
                   className="flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-6 h-6" />
                   <span className="hidden sm:inline">Anterior</span>
                 </button>
                 <div className="flex gap-2">
@@ -251,7 +251,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
                   className="flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl font-semibold text-text/55 hover:bg-secondary/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <span className="hidden sm:inline">Siguiente</span>
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-6 h-6" />
                 </button>
               </div>
             )}

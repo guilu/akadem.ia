@@ -59,7 +59,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized
             className="btn btn-outline rounded-full px-5 py-2.5 text-sm flex items-center gap-2"
             to={ROUTES.examAttempt(activeAttemptId)}
           >
-            <ArrowsRepeat className="w-4 h-4" />
+            <ArrowsRepeat className="w-6 h-6" />
             Reanudar examen
           </Link>
         )}
@@ -80,7 +80,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized
               to={ROUTES.manage}
               className="btn btn-primary rounded-full px-6 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-6 h-6" />
               Ir a Gestionar
             </Link>
           </div>
@@ -99,7 +99,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized
               className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
               to={ROUTES.subjectBuilder(s.id)}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-6 h-6" />
               Crear examen
             </Link>
           </article>
@@ -163,7 +163,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized
                         className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
                         onClick={() => onViewResult(h.attemptId)}
                       >
-                        <ClipboardCheck className="w-4 h-4" />
+                        <ClipboardCheck className="w-6 h-6" />
                         Ver resultados
                       </button>
                     ) : (
@@ -171,7 +171,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized
                         className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
-                        <ArrowsRepeat className="w-4 h-4" />
+                        <ArrowsRepeat className="w-6 h-6" />
                         Reanudar
                       </button>
                     )}

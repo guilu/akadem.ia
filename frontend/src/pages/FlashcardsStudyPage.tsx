@@ -116,7 +116,7 @@ export default function FlashcardsStudyPage() {
             className="btn btn-outline h-10 w-10 rounded-full p-0 flex items-center justify-center"
             aria-label="Volver"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6" />
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight">
             {nothingToReview ? 'Sin pendientes' : 'Sesión completada'}
@@ -139,7 +139,7 @@ export default function FlashcardsStudyPage() {
             className="btn btn-primary rounded-full px-8 py-2.5 text-sm shadow-lg shadow-primary/20 inline-flex items-center gap-2"
             onClick={() => navigate('/flashcards')}
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className="w-6 h-6" />
             Volver a unidades
           </button>
         </div>
@@ -157,7 +157,7 @@ export default function FlashcardsStudyPage() {
           className="btn btn-outline h-9 w-9 rounded-full p-0 flex items-center justify-center"
           aria-label="Volver"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-extrabold tracking-tight">Sesión de estudio</h1>
         <div className="w-9" />
@@ -200,7 +200,7 @@ export default function FlashcardsStudyPage() {
             className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            <Close className="w-3.5 h-3.5" />
+            <Close className="w-6 h-6" />
           </button>
         </div>
       )}
@@ -233,7 +233,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <CloseCircle className="w-4 h-4 mx-auto mb-0.5" />
+                    <CloseCircle className="w-6 h-6 mx-auto mb-0.5" />
                     <span>Repetir</span>
                     <span className="text-xs text-red-400/60">{currentItem?.intervalHints?.again}</span>
                   </div>
@@ -244,7 +244,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <Refresh className="w-4 h-4 mx-auto mb-0.5" />
+                    <Refresh className="w-6 h-6 mx-auto mb-0.5" />
                     <span>Revisar</span>
                     <span className="text-xs text-yellow-500/60">{currentItem?.intervalHints?.good}</span>
                   </div>
@@ -255,7 +255,7 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <Rocket className="w-4 h-4 mx-auto mb-0.5" />
+                    <Rocket className="w-6 h-6 mx-auto mb-0.5" />
                     <span>Memorizada</span>
                     <span className="text-xs text-lime-500/60">{currentItem?.intervalHints?.easy}</span>
                   </div>
@@ -272,7 +272,7 @@ export default function FlashcardsStudyPage() {
           className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
           onClick={() => setConfirmOpen(true)}
         >
-          <CircleMinus className="w-4 h-4" />
+          <CircleMinus className="w-6 h-6" />
           Terminar sesión
         </button>
       </div>

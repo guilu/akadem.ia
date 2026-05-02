@@ -78,7 +78,7 @@ class ManageUnitControllerTest {
     @SuppressWarnings("unchecked")
     List<ManageUnitController.ManageUnitResponse> body =
         (List<ManageUnitController.ManageUnitResponse>) response.getBody();
-    assertFalse(body.get(0).isEditable());
+    assertTrue(body.get(0).isEditable());
   }
 
   @Test
@@ -142,11 +142,12 @@ class ManageUnitControllerTest {
     UUID unitId = UUID.randomUUID();
     when(contentService.getUnitById(unitId))
         .thenReturn(Optional.of(new Unit(unitId, UUID.randomUUID(), "Global", "desc", 1, Visibility.GLOBAL, null)));
+    doNothing().when(contentService).deleteUnitIfAuthorized(any(), any(), anyBoolean());
 
     ResponseEntity<?> response = controller.delete(unitId, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).deleteUnitIfAuthorized(any(), any(), anyBoolean());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).deleteUnitIfAuthorized(eq(unitId), any(), eq(true));
   }
 
   @Test
@@ -239,7 +240,7 @@ class ManageUnitControllerTest {
     verify(contentService).createUnit(argThat(unit -> unit.getVisibility() == Visibility.GLOBAL
         && unit.getOwnerId() == null));
     var body = assertInstanceOf(ManageUnitController.ManageUnitResponse.class, response.getBody());
-    assertFalse(body.isEditable());
+    assertTrue(body.isEditable());
   }
 
   @Test
@@ -280,18 +281,20 @@ class ManageUnitControllerTest {
   }
 
   @Test
-  void adminCannotUpdateGlobalUnitFromManage() {
+  void adminCanUpdateGlobalUnitFromManage() {
     User principal = adminPrincipal("admin@example.com");
     UUID unitId = UUID.randomUUID();
     UUID subjectId = UUID.randomUUID();
     Unit existing = new Unit(unitId, subjectId, "Old Name", "desc", 1, Visibility.GLOBAL, null);
     when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of(existing));
+    when(contentService.createUnit(any())).thenReturn(existing);
+    when(contentService.getQuestionsByUnit(any())).thenReturn(List.of());
 
     var req = new ManageUnitController.UnitRequest(subjectId, "New Name", "desc", 1, "GLOBAL");
     ResponseEntity<?> response = controller.update(unitId, req, principal);
 
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    verify(contentService, never()).createUnit(any());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(contentService).createUnit(any());
   }
 
   @Test

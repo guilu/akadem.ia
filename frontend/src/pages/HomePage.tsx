@@ -96,14 +96,14 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
                     className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
                     to={ROUTES.subjects}
                   >
-                    <Play className="w-5 h-5" />
+                    <Play className="w-6 h-6" />
                     Crear examen
                   </Link>
                   <Link
                     className="btn btn-secondary rounded-full px-8 py-3 text-base flex items-center gap-2"
                     to={ROUTES.flashcards}
                   >
-                    <BookOpen className="w-5 h-5" />
+                    <BookOpen className="w-6 h-6" />
                     Estudiar flashcards
                   </Link>
                   {activeAttemptId && (
@@ -111,7 +111,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
                       className="btn btn-outline rounded-full px-8 py-3 text-base flex items-center gap-2"
                       to={ROUTES.examAttempt(activeAttemptId)}
                     >
-                      <ArrowsRepeat className="w-5 h-5" />
+                      <ArrowsRepeat className="w-6 h-6" />
                       Reanudar examen
                     </Link>
                   )}
@@ -122,14 +122,14 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
                     className="btn btn-primary rounded-full px-8 py-3 text-base shadow-lg shadow-primary/20 flex items-center gap-2"
                     to={ROUTES.register}
                   >
-                    <UserAdd className="w-5 h-5" />
+                    <UserAdd className="w-6 h-6" />
                     Empieza gratis
                   </Link>
                   <Link
                     className="btn btn-outline rounded-full px-8 py-3 text-base flex items-center gap-2"
                     to={ROUTES.login}
                   >
-                    <ArrowRightToBracket className="w-5 h-5" />
+                    <ArrowRightToBracket className="w-6 h-6" />
                     Ya tengo cuenta
                   </Link>
                 </>
@@ -234,7 +234,7 @@ export default function HomePage({ isAuthed, activeAttemptId }: { isAuthed: bool
               className="btn btn-primary rounded-full px-10 py-4 text-lg inline-flex items-center gap-2 shadow-xl shadow-primary/25"
               to={ROUTES.register}
             >
-              <UserAdd className="w-5 h-5" />
+              <UserAdd className="w-6 h-6" />
               Crear mi cuenta gratis
             </Link>
           </div>

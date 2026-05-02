@@ -42,17 +42,15 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
   const isActive = (route: string) => location.pathname === route || location.pathname.startsWith(route + '/');
 
   const linkCls = (route: string) =>
-    `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-      isActive(route)
-        ? 'bg-primary/10 text-primary'
-        : 'text-text/65 hover:text-text hover:bg-secondary/10'
+    `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${isActive(route)
+      ? 'bg-primary/10 text-primary'
+      : 'text-text/65 hover:text-text hover:bg-secondary/10'
     }`;
 
   const mobileLinkCls = (route: string) =>
-    `w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-      isActive(route)
-        ? 'bg-primary/10 text-primary'
-        : 'text-text/65 hover:text-text hover:bg-secondary/10'
+    `w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive(route)
+      ? 'bg-primary/10 text-primary'
+      : 'text-text/65 hover:text-text hover:bg-secondary/10'
     }`;
 
   return (
@@ -67,27 +65,27 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
         >
           <img src="/assets/icons/akdmia-icon-64x64.png" alt="AKDMIA" className="w-8 h-8" />
-          Akadem.ia
+          akadem.ia
         </button>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
           <button onClick={() => go(ROUTES.home)} className={linkCls(ROUTES.home)}>
-            <Home className="w-4 h-4" />
+            <Home className="w-6 h-6" />
             Home
           </button>
           <button onClick={() => go(ROUTES.syllabusSales)} className={linkCls(ROUTES.syllabusSales)}>
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-6 h-6" />
             Temarios
           </button>
           {!isAuthed && (
             <>
               <button onClick={() => go(ROUTES.login)} className={linkCls(ROUTES.login)}>
-                <ArrowRightToBracket className="w-4 h-4" />
+                <ArrowRightToBracket className="w-6 h-6" />
                 Login
               </button>
               <button onClick={() => go(ROUTES.register)} className={linkCls(ROUTES.register)}>
-                <UserAdd className="w-4 h-4" />
+                <UserAdd className="w-6 h-6" />
                 Registro
               </button>
             </>
@@ -95,16 +93,16 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           {isAuthed && (
             <>
               <button onClick={() => go(ROUTES.flashcards)} className={linkCls(ROUTES.flashcards)}>
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-6 h-6" />
                 Flashcards
               </button>
               <button onClick={() => go(ROUTES.syllabuses)} className={linkCls(ROUTES.syllabuses)}>
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-6 h-6" />
                 Exámenes
               </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={linkCls(ROUTES.rag)}>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                   </svg>
                   IA
@@ -123,7 +121,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
               aria-label="Tema oscuro"
               className={`p-1.5 rounded-full transition-all ${isDark ? 'bg-bg shadow-sm text-primary' : 'text-text/40 hover:text-text/60'}`}
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
               </svg>
             </button>
@@ -132,7 +130,7 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
               aria-label="Tema claro"
               className={`p-1.5 rounded-full transition-all ${!isDark ? 'bg-bg shadow-sm text-yellow-500' : 'text-text/40 hover:text-text/60'}`}
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
               </svg>
             </button>
@@ -170,29 +168,28 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
 
       {/* ── Mobile menu ── */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="px-4 pb-4 pt-2 border-t border-secondary/15 space-y-1 bg-bg/95 backdrop-blur-md">
 
           {/* Navigation zone */}
           <button onClick={() => go(ROUTES.home)} className={mobileLinkCls(ROUTES.home)}>
-            <Home className="w-4 h-4" />
+            <Home className="w-6 h-6" />
             Home
           </button>
           <button onClick={() => go(ROUTES.syllabusSales)} className={mobileLinkCls(ROUTES.syllabusSales)}>
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-6 h-6" />
             Temarios
           </button>
           {!isAuthed && (
             <>
               <button onClick={() => go(ROUTES.login)} className={mobileLinkCls(ROUTES.login)}>
-                <ArrowRightToBracket className="w-4 h-4" />
+                <ArrowRightToBracket className="w-6 h-6" />
                 Login
               </button>
               <button onClick={() => go(ROUTES.register)} className={mobileLinkCls(ROUTES.register)}>
-                <UserAdd className="w-4 h-4" />
+                <UserAdd className="w-6 h-6" />
                 Registro
               </button>
             </>
@@ -200,16 +197,16 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
           {isAuthed && (
             <>
               <button onClick={() => go(ROUTES.flashcards)} className={mobileLinkCls(ROUTES.flashcards)}>
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-6 h-6" />
                 Flashcards
               </button>
               <button onClick={() => go(ROUTES.syllabuses)} className={mobileLinkCls(ROUTES.syllabuses)}>
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-6 h-6" />
                 Exámenes
               </button>
               {isAdmin && (
                 <button onClick={() => go(ROUTES.rag)} className={mobileLinkCls(ROUTES.rag)}>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                   </svg>
                   IA
@@ -229,28 +226,28 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
                 onClick={() => { onProfile(); setMenuOpen(false); }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
               >
-                <User className="w-4 h-4" />
+                <User className="w-6 h-6" />
                 Mi perfil
               </button>
               <button
                 onClick={() => { go(ROUTES.manage); setMenuOpen(false); }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
               >
-                <FolderOpen className="w-4 h-4" />
+                <FolderOpen className="w-6 h-6" />
                 Gestionar
               </button>
               <button
                 onClick={() => { onSettings(); setMenuOpen(false); }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-text/65 hover:text-text hover:bg-secondary/10"
               >
-                <Cog className="w-4 h-4" />
+                <Cog className="w-6 h-6" />
                 Ajustes
               </button>
               <button
                 onClick={() => { onLogout(); setMenuOpen(false); }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors"
               >
-                <ArrowLeftToBracket className="w-4 h-4" />
+                <ArrowLeftToBracket className="w-6 h-6" />
                 Salir
               </button>
             </>

@@ -119,17 +119,17 @@ export default function SyllabusSalesPage() {
                 ))}
               </ul>
 
-              <div className="flex items-center justify-between pt-4 border-t border-secondary/15">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-secondary/15">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-extrabold text-primary">15€</span>
                   <span className="text-sm text-text/45 line-through">39€</span>
-                  <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full">Oferta</span>
+                  <span className="text-sm font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">Oferta</span>
                 </div>
                 <Link
                   to={ROUTES.subalternoGva}
-                  className="btn btn-primary rounded-xl px-6 py-3 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
+                  className="btn btn-primary rounded-full px-8 py-4 text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto"
                 >
-                  <UserAdd className="w-4 h-4" />
+                  <UserAdd className="w-6 h-6" />
                   Ver temario
                 </Link>
               </div>
@@ -144,7 +144,7 @@ export default function SyllabusSalesPage() {
               <p className="font-bold">Próximamente disponible</p>
               <p className="text-sm text-text/55">Regístrate para recibir novedades.</p>
               <Link to={ROUTES.register} className="btn btn-primary rounded-full px-6 py-2.5 text-sm inline-flex items-center gap-2 mt-2">
-                <UserAdd className="w-4 h-4" />
+                <UserAdd className="w-6 h-6" />
                 Crear cuenta
               </Link>
             </div>
@@ -216,14 +216,14 @@ export default function SyllabusSalesPage() {
               to={ROUTES.register}
               className="btn btn-primary rounded-full px-10 py-4 text-lg inline-flex items-center gap-2 shadow-xl shadow-primary/25"
             >
-              <UserAdd className="w-5 h-5" />
+              <UserAdd className="w-6 h-6" />
               Crear mi cuenta gratis
             </Link>
             <Link
               to={ROUTES.login}
               className="btn btn-outline rounded-full px-10 py-4 text-lg inline-flex items-center gap-2"
             >
-              <ArrowRightToBracket className="w-5 h-5" />
+              <ArrowRightToBracket className="w-6 h-6" />
               Ya tengo cuenta
             </Link>
           </div>

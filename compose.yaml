@@ -38,17 +38,30 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       # Set FRONTEND_URL=https://akademia.diegobarrioh.dev in .env for production.
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-onboarding@resend.dev}
+      # Container-side path; the host directory is mounted in via the volumes
+      # block below. Override PRODUCTS_HOST_PATH in .env to point at any
+      # absolute host path (defaults to ./products in the repo).
+      PRODUCTS_STORAGE_PATH: /var/lib/akademia/products
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "8080:8080"
+    volumes:
+      - ${PRODUCTS_HOST_PATH:-./products}:/var/lib/akademia/products:ro
     networks:
       - cluster_network
 
   web:
     container_name: akademia-dev-web
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     environment:
       VITE_API_URL: /api
     ports:

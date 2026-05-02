@@ -20,5 +20,6 @@ export const ROUTES = {
   rag: '/rag',
   syllabusSales: '/temario',
   subalternoGva: '/temario/subalterno-gva',
+  download: (token: string) => `/descarga/${token}`,
   oauth2Callback: '/oauth2/callback'
 } as const;

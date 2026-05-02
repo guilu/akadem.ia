@@ -95,7 +95,7 @@ export default function FlashcardsExamineUnitPage() {
           className="btn btn-outline h-9 w-9 rounded-full p-0 flex items-center justify-center"
           aria-label="Volver"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-extrabold tracking-tight">Examinar <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Flashcards</span></h1>
         <div className="w-9" />
@@ -137,7 +137,7 @@ export default function FlashcardsExamineUnitPage() {
           disabled={index === 0}
           className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-6 h-6" />
           Anterior
         </button>
         <button
@@ -146,7 +146,7 @@ export default function FlashcardsExamineUnitPage() {
           className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
           Siguiente
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-6 h-6" />
         </button>
       </div>
 

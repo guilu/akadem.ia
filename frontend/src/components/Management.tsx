@@ -82,7 +82,7 @@ function DeleteModal({
         )}
         <div className="flex gap-2 justify-end">
           <button className={btnOutline} onClick={onClose}>
-            <CircleMinus className="w-4 h-4" />
+            <CircleMinus className="w-6 h-6" />
             Cancelar
           </button>
           <button
@@ -90,7 +90,7 @@ function DeleteModal({
             disabled={loading || (requireText ? !requireText.passes : false)}
             onClick={onConfirm}
           >
-            <TrashBin className="w-4 h-4" />
+            <TrashBin className="w-6 h-6" />
             {loading ? 'Eliminando...' : 'Eliminar'}
           </button>
         </div>
@@ -311,10 +311,10 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   }
 
   const navItems = [
-    { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-4 h-4" /> },
-    { id: 'subjects' as Tab, label: 'Temas', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-4 h-4" /> },
-    { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-4 h-4" /> },
+    { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-6 h-6" /> },
+    { id: 'subjects' as Tab, label: 'Temas', icon: <BookOpen className="w-6 h-6" /> },
+    { id: 'units' as Tab, label: 'Unidades', icon: <FolderOpen className="w-6 h-6" /> },
+    { id: 'questions' as Tab, label: 'Preguntas', icon: <FileLines className="w-6 h-6" /> },
   ];
 
   return (
@@ -368,12 +368,12 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                       } catch { /* ignore */ }
                       finally { setSyllabusLoading(false); }
                     }}>
-                    <Check className="w-4 h-4" />
+                    <Check className="w-6 h-6" />
                     {isSyllabusEditing ? (syllabusLoading ? 'Guardando...' : 'Guardar') : (syllabusLoading ? 'Creando...' : 'Crear')}
                   </button>
                   {isSyllabusEditing && (
                     <button className={btnOutline} onClick={() => setSyllabusForm({ id: '', name: '', description: '' })}>
-                      <CircleMinus className="w-4 h-4" /> Cancelar
+                      <CircleMinus className="w-6 h-6" /> Cancelar
                     </button>
                   )}
                 </div>
@@ -397,8 +397,8 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                         <Td>
                           {(isAdmin || s.visibility === 'PRIVATE') && (
                             <div className="flex gap-2">
-                              <button onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                              <button onClick={() => setConfirmSyllabusDelete(s)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                              <button onClick={() => setSyllabusForm({ id: s.id, name: s.name, description: s.description || '' })} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-6 h-6" /></button>
+                              <button onClick={() => setConfirmSyllabusDelete(s)} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-6 h-6" /></button>
                             </div>
                           )}
                         </Td>
@@ -442,12 +442,12 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               </div>
               <div className="flex gap-2">
                 <button onClick={saveSubject} disabled={subjectLoading || !filterSyllabusId} className={btnPrimary}>
-                  {isSubjectEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isSubjectEditing ? <Check className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                   {isSubjectEditing ? 'Guardar cambios' : 'Crear tema'}
                 </button>
                 {isSubjectEditing && (
                   <button onClick={resetSubjectForm} className={btnOutline}>
-                    <CircleMinus className="w-4 h-4" />Cancelar
+                    <CircleMinus className="w-6 h-6" />Cancelar
                   </button>
                 )}
               </div>
@@ -481,8 +481,8 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                         <Td>
                           {s.isEditable !== false && (
                             <div className="flex gap-2">
-                              <button onClick={() => setSubjectForm(s)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                              <button onClick={() => { setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                              <button onClick={() => setSubjectForm(s)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-6 h-6" /></button>
+                              <button onClick={() => { setConfirmSubjectDelete(s); setSubjectDeleteText(''); setSubjectDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-6 h-6" /></button>
                             </div>
                           )}
                         </Td>
@@ -527,12 +527,12 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               </div>
               <div className="flex gap-2">
                 <button onClick={saveUnit} disabled={unitLoading || !unitForm.subjectId} className={btnPrimary}>
-                  {isUnitEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isUnitEditing ? <Check className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                   {isUnitEditing ? 'Guardar cambios' : 'Crear unidad'}
                 </button>
                 {isUnitEditing && (
                   <button onClick={resetUnitForm} className={btnOutline}>
-                    <CircleMinus className="w-4 h-4" />Cancelar
+                    <CircleMinus className="w-6 h-6" />Cancelar
                   </button>
                 )}
               </div>
@@ -566,8 +566,8 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                         <Td>
                           {u.isEditable !== false && (
                             <div className="flex gap-2">
-                              <button onClick={() => setUnitForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                              <button onClick={() => { setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                              <button onClick={() => setUnitForm(u)} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-6 h-6" /></button>
+                              <button onClick={() => { setConfirmUnitDelete(u); setUnitDeleteError(''); setUnitDeleteText(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-6 h-6" /></button>
                             </div>
                           )}
                         </Td>
@@ -641,23 +641,23 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
 
               <div className="flex flex-wrap gap-2">
                 <button onClick={saveQuestion} disabled={questionLoading || !questionSubjectId || !questionUnitId} className={btnPrimary}>
-                  {isQuestionEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {isQuestionEditing ? <Check className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                   {isQuestionEditing ? 'Guardar cambios' : 'Crear pregunta'}
                 </button>
                 {isQuestionEditing && (
                   <button onClick={resetQuestionForm} className={btnOutline}>
-                    <CircleMinus className="w-4 h-4" />Cancelar
+                    <CircleMinus className="w-6 h-6" />Cancelar
                   </button>
                 )}
                 <div className="ml-auto flex flex-wrap gap-2">
                   <button onClick={() => handleExport('json')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                    <FileExport className="w-4 h-4" />JSON
+                    <FileExport className="w-6 h-6" />JSON
                   </button>
                   <button onClick={() => handleExport('csv')} disabled={exportLoading || !questionUnitId || questions.length === 0} className={btnOutline}>
-                    <FileCsv className="w-4 h-4" />CSV
+                    <FileCsv className="w-6 h-6" />CSV
                   </button>
                   <button onClick={() => { setImportOpen(true); setImportMessage(''); setImportDone(false); setImportStats(null); setImportFile(null); }} disabled={!questionUnitId} className={btnOutline}>
-                    <FileImport className="w-4 h-4" />Importar
+                    <FileImport className="w-6 h-6" />Importar
                   </button>
                 </div>
               </div>
@@ -688,8 +688,8 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                                 if (unit?.subjectId) setQuestionSubjectId(unit.subjectId);
                                 setQuestionUnitId(q.unitId);
                                 setQuestionForm({ id: q.id, unitId: q.unitId, text: q.text, explanation: q.explanation || '', difficulty: q.difficulty, answers: q.answers.map(a => ({ text: a.text, correct: a.correct })) });
-                              }} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-4 h-4" /></button>
-                              <button onClick={() => { setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-4 h-4" /></button>
+                              }} className="text-accent hover:opacity-70 transition-opacity" title="Editar"><Pen className="w-6 h-6" /></button>
+                              <button onClick={() => { setConfirmQuestionDelete(q); setQuestionDeleteError(''); }} className="text-red-400 hover:opacity-70 transition-opacity" title="Eliminar"><TrashBin className="w-6 h-6" /></button>
                             </div>
                           )}
                         </Td>
@@ -736,10 +736,10 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
               ) : (
                 <>
                   <button className={btnOutline} onClick={() => setImportOpen(false)}>
-                    <CircleMinus className="w-4 h-4" />Cancelar
+                    <CircleMinus className="w-6 h-6" />Cancelar
                   </button>
                   <button className={btnPrimary} onClick={handleImport} disabled={importLoading}>
-                    <FileImport className="w-4 h-4" />{importLoading ? 'Importando...' : 'Importar'}
+                    <FileImport className="w-6 h-6" />{importLoading ? 'Importando...' : 'Importar'}
                   </button>
                 </>
               )}

@@ -81,7 +81,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
             className="btn btn-outline rounded-full px-5 py-2.5 text-sm flex items-center gap-2"
             to={ROUTES.examAttempt(activeAttemptId)}
           >
-            <ArrowsRepeat className="w-4 h-4" />
+            <ArrowsRepeat className="w-6 h-6" />
             Reanudar examen
           </Link>
         )}
@@ -155,14 +155,14 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                       className="btn btn-primary rounded-full px-6 py-2.5 text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform"
                       to={ROUTES.syllabusSubjects(s.id)}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-6 h-6" />
                       Ver temas
                     </Link>
                     <Link
                       className="btn btn-outline rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 hover:scale-105 transition-transform"
                       to={ROUTES.syllabusExamBuilder(s.id)}
                     >
-                      <Play className="w-4 h-4" />
+                      <Play className="w-6 h-6" />
                       Crear examen
                     </Link>
                   </div>
@@ -251,7 +251,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                         className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
                         onClick={() => onViewResult(h.attemptId)}
                       >
-                        <ClipboardCheck className="w-4 h-4" />
+                        <ClipboardCheck className="w-6 h-6" />
                         Ver resultados
                       </button>
                     ) : (
@@ -259,7 +259,7 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                         className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
-                        <ArrowsRepeat className="w-4 h-4" />
+                        <ArrowsRepeat className="w-6 h-6" />
                         Reanudar
                       </button>
                     )}
