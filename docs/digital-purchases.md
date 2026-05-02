@@ -59,7 +59,8 @@ that failed transiently.
 | `STRIPE_WEBHOOK_SECRET` | Per-endpoint signing secret. Created in step *Configure the Stripe webhook* below. | `whsec_…` |
 | `RESEND_API_KEY` | Resend dashboard → API Keys → Create API Key. *Send emails* permission is enough. | `re_…` |
 | `RESEND_FROM_EMAIL` | A verified sender address (see *Configure Resend*). | `noreply@yourdomain.com` |
-| `PRODUCTS_STORAGE_PATH` | Filesystem path holding the PDF file(s). | `/var/lib/akademia/products` (prod), `/tmp/akademia-products` (default in dev) |
+| `PRODUCTS_STORAGE_PATH` | Filesystem path holding the PDF file(s) **as seen by the backend process**. With Docker Compose this is fixed to `/var/lib/akademia/products` (the container path) and the host path is controlled by `PRODUCTS_HOST_PATH` (see *Place the PDF*). When running the backend bare-metal, set this directly. | `/var/lib/akademia/products` (Docker container), `/tmp/akademia-products` (default bare-metal dev) |
+| `PRODUCTS_HOST_PATH` *(Docker only)* | Absolute or relative host path bind-mounted into the api container at `/var/lib/akademia/products` (read-only). | `./products` (default — created next to `compose.yaml`), `/Users/you/akademia-products` |
 | `FRONTEND_URL` | Public URL of the frontend. Used to build the email download link. | `https://akademia.example.com` (prod), `http://localhost:3000` (dev) |
 
 `frontend/.env` (gitignored):
@@ -129,17 +130,31 @@ the events being forwarded and the Purchase row should flip to PAID.
 
 `InMemoryProductCatalog` (the seed catalog) maps the SKU
 `TEMARIO_SUBALTERNO_GVA` to the storage key
-`temario-subalterno-gva.pdf`. The file must live at:
+`temario-subalterno-gva.pdf`. The file name on disk is fixed; only its
+parent directory is configurable.
 
+### Docker Compose (default)
+
+`compose.yaml` mounts a host directory into the api container at
+`/var/lib/akademia/products` (read-only) and pins
+`PRODUCTS_STORAGE_PATH` to that container path. The host directory
+defaults to `./products` next to `compose.yaml`; override with
+`PRODUCTS_HOST_PATH` in `.env` to use an absolute path.
+
+```bash
+mkdir -p ./products
+cp /path/to/your.pdf ./products/temario-subalterno-gva.pdf
+docker compose up -d api      # or restart if already running
 ```
-${PRODUCTS_STORAGE_PATH}/temario-subalterno-gva.pdf
-```
+
+### Bare-metal backend
+
+Set `PRODUCTS_STORAGE_PATH` to any host path the backend process can
+read, e.g. `/Users/you/akademia-products`, and place the file at
+`${PRODUCTS_STORAGE_PATH}/temario-subalterno-gva.pdf`.
 
 If the file is missing, `GET /api/v1/downloads/{token}` returns 500 and
 the buyer's download page shows the generic error view.
-
-In Docker deployments, mount the host directory into the backend
-container at the same path — see `dist/docker-compose-prod.yaml`.
 
 ---
 
