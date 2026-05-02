@@ -332,9 +332,8 @@
 
 ## Fase 13 — Documentación
 
-- [ ] 13.1 Actualizar `.env.example` (ya hecho en 0.2) y añadir sección al `README.md` o `docs/` con instrucciones de configuración de Stripe webhook + Resend + PDF deploy. **Done when**: instrucciones claras para un operador que despliega desde cero.
-  - Paths: `README.md` o `docs/deployment.md`
-  - Deps: —
+- [x] 13.1 `docs/digital-purchases.md` con guía completa para operador (vars `.env`, webhook Stripe local + prod via `stripe listen`, dominio Resend con SPF/DKIM, ubicación del PDF en `PRODUCTS_STORAGE_PATH`, smoke checklist y troubleshooting). Pointer corto añadido en `README.md → Configuración → Compra digital del Temario`. `.env.example` ya documentaba las vars en 0.2 (no se commitea por convención `.gitignore`).
+  - Paths: `docs/digital-purchases.md`, `README.md`
 
 ---
 
