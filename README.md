@@ -229,6 +229,13 @@ com.akdemya
   - `SPRING_PROFILES_ACTIVE` (dev/prod)
   - `OPENAI_API_KEY` — requerida para funcionalidad RAG/IA
 
+### Compra digital del Temario (Stripe + Resend)
+La ruta pública `/temario/subalterno-gva` permite a un visitante anónimo
+comprar el PDF (15 €) y recibir un enlace de descarga por email. Configuración
+de webhook Stripe, dominio Resend, ubicación del PDF y variables (`STRIPE_*`,
+`RESEND_*`, `PRODUCTS_STORAGE_PATH`, `VITE_STRIPE_PUBLISHABLE_KEY`) en
+[`docs/digital-purchases.md`](docs/digital-purchases.md).
+
 ### Base de datos
 - Seeds de desarrollo en `data-dev.sql` (solo en profile `dev`)
 - `ddl-auto` por defecto en `create-drop` cuando se usa docker
