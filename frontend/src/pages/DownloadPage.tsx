@@ -67,15 +67,15 @@ export default function DownloadPage() {
       {state.kind === 'ready' && state.info.status === 'FAILED' && (
         <CenteredCard><FailedView /></CenteredCard>
       )}
-      {state.kind === 'not-found' && <CenteredCard><NotFoundView /></CenteredCard>}
-      {state.kind === 'error' && <CenteredCard><GenericErrorView /></CenteredCard>}
+      {state.kind === 'not-found' && <NotFoundView />}
+      {state.kind === 'error' && <GenericErrorView />}
     </div>
   );
 }
 
 function CenteredCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex justify-center px-4 py-10">
       <div className="bg-card w-full max-w-lg rounded-3xl shadow-2xl p-8 border border-secondary/20">
         {children}
       </div>
@@ -97,7 +97,7 @@ function LoadingView() {
 
 function ProcessingView() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <main className="max-w-4xl mx-auto flex flex-col items-center px-6 py-10">
       <div className="max-w-md w-full text-center space-y-8">
         <div className="relative w-24 h-24 mx-auto" role="status" aria-live="polite">
           <div className="absolute inset-0 rounded-full border-4 border-primary/10" />
@@ -198,22 +198,94 @@ function FailedView() {
 
 function NotFoundView() {
   return (
-    <div className="space-y-3">
-      <h1 className="text-2xl font-bold tracking-tight text-text">Enlace no válido</h1>
-      <p className="text-sm text-secondary">
-        Este enlace de descarga no existe o ha expirado. Comprueba el correo que te enviamos o vuelve a la página del temario.
-      </p>
-    </div>
+    <main className="relative overflow-hidden flex justify-center px-4 py-10">
+      <div className="pointer-events-none absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+      <section className="max-w-xl w-full text-center relative z-10">
+        <div className="flex justify-center mb-10">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/10 rounded-full scale-125" />
+            <div className="w-24 h-24 bg-primary text-bg rounded-full flex items-center justify-center shadow-2xl shadow-primary/30 relative z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-text tracking-tight leading-tight mb-6">
+          Enlace no válido
+        </h1>
+        <p className="text-lg text-secondary font-medium leading-relaxed mb-10 px-4 md:px-8">
+          Este enlace de descarga no existe o ha expirado. Comprueba el correo que te enviamos o vuelve a la página del temario.
+        </p>
+        <div className="flex flex-col items-center gap-6">
+          <Link
+            to={ROUTES.subalternoGva}
+            className="inline-flex items-center justify-center bg-primary text-bg px-10 py-4 rounded-xl text-lg font-bold shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.98] transition-all w-full sm:w-auto"
+          >
+            Volver al temario
+          </Link>
+          <p className="text-secondary text-sm font-medium">
+            ¿Tienes problemas con tu compra?{' '}
+            <a className="text-primary font-bold hover:underline ml-1" href={`mailto:soporte@akadem.ia?subject=${encodeURIComponent('Enlace de descarga no válido')}`}>
+              Contactar con soporte
+            </a>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
 
 function GenericErrorView() {
   return (
-    <div className="space-y-3">
-      <h1 className="text-2xl font-bold tracking-tight text-text">Algo ha ido mal</h1>
-      <p className="text-sm text-secondary">
-        No hemos podido cargar la información de tu compra. Inténtalo de nuevo en unos minutos.
-      </p>
-    </div>
+    <main className="flex justify-center px-6 py-10">
+      <div className="max-w-2xl w-full text-center space-y-8">
+        <div className="relative inline-flex items-center justify-center">
+          <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full" />
+          <div className="relative bg-card p-8 rounded-full border border-primary/20 shadow-xl shadow-primary/5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 text-primary">
+              <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text leading-tight">
+            Algo ha ido mal
+          </h1>
+          <p className="text-lg text-secondary max-w-xl mx-auto leading-relaxed">
+            No hemos podido cargar la información de tu compra. No te preocupes, no se ha realizado ningún cargo en tu cuenta. Inténtalo de nuevo en unos minutos.
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-6 pt-2">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="bg-primary text-bg px-10 py-4 rounded-xl text-lg font-bold shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.98] transition-all w-full sm:w-auto"
+          >
+            Intentar de nuevo
+          </button>
+          <p className="text-sm text-secondary">
+            ¿Has intentado varias veces y sigue fallando?{' '}
+            <a className="text-primary font-semibold hover:underline" href={`mailto:soporte@akadem.ia?subject=${encodeURIComponent('Error al cargar la información de compra')}`}>
+              Contactar con soporte
+            </a>
+          </p>
+        </div>
+        <div className="mt-8 bg-card rounded-2xl p-6 border border-secondary/20 max-w-md mx-auto">
+          <div className="flex items-start gap-4 text-left">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-secondary mt-1 shrink-0">
+              <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <h4 className="text-xs uppercase tracking-widest text-secondary font-bold mb-1">Información de seguridad</h4>
+              <p className="text-xs text-secondary leading-relaxed">
+                Nuestras pasarelas de pago están cifradas y protegidas. Si el problema persiste, es posible que tu entidad bancaria haya bloqueado el movimiento por seguridad.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
