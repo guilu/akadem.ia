@@ -64,9 +64,7 @@ export default function DownloadPage() {
         <ReadyView info={state.info} token={token} />
       )}
       {state.kind === 'ready' && state.info.status === 'PENDING' && <ProcessingView />}
-      {state.kind === 'ready' && state.info.status === 'FAILED' && (
-        <CenteredCard><FailedView /></CenteredCard>
-      )}
+      {state.kind === 'ready' && state.info.status === 'FAILED' && <FailedView />}
       {state.kind === 'not-found' && <NotFoundView />}
       {state.kind === 'error' && <GenericErrorView />}
     </div>
@@ -187,12 +185,48 @@ function ReadyView({ info, token }: { info: PurchaseInfoResponse; token: string 
 
 function FailedView() {
   return (
-    <div className="space-y-3">
-      <h1 className="text-2xl font-bold tracking-tight text-text">Pago fallido</h1>
-      <p className="text-sm text-secondary">
-        El pago no se completó. Si tu tarjeta fue rechazada, puedes volver a intentarlo desde la página del temario.
-      </p>
-    </div>
+    <main className="relative overflow-hidden flex justify-center px-4 py-10">
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute bottom-12 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
+
+      <section className="max-w-xl w-full text-center relative z-10">
+        <div className="flex justify-center mb-10">
+          <div className="w-24 h-24 bg-red-400/15 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-red-500">
+              <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
+
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text mb-6">
+          Pago fallido
+        </h1>
+        <p className="text-lg text-secondary leading-relaxed mb-12 max-w-md mx-auto">
+          El pago no se completó. No se ha realizado ningún cargo en tu cuenta. Si tu tarjeta fue rechazada, puedes volver a intentarlo desde la página del temario.
+        </p>
+
+        <div className="flex flex-col items-center gap-6">
+          <Link
+            to={ROUTES.subalternoGva}
+            className="inline-flex items-center justify-center gap-2 bg-primary text-bg px-12 py-5 rounded-xl text-lg font-bold shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.98] transition-all w-full sm:w-auto"
+          >
+            Intentar de nuevo
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
+              <path fillRule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 003.306 9.67a.75.75 0 101.45.388zm15.408 3.352a.75.75 0 00-.919.53 7.5 7.5 0 01-12.548 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H2.984a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.059-4.035.75.75 0 00-.53-.918z" clipRule="evenodd" />
+            </svg>
+          </Link>
+          <p className="text-sm text-secondary">
+            ¿Has intentado varias veces y tienes problemas con la compra?{' '}
+            <a
+              className="text-primary font-semibold hover:underline ml-1"
+              href={`mailto:soporte@akadem.ia?subject=${encodeURIComponent('Pago fallido')}`}
+            >
+              Contactar con soporte
+            </a>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
 
