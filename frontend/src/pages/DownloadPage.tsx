@@ -23,14 +23,38 @@ export default function DownloadPage() {
       return;
     }
     let cancelled = false;
-    fetchPurchaseInfo(token)
-      .then((info) => { if (!cancelled) setState({ kind: 'ready', info }); })
-      .catch((err: unknown) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let pollAttempts = 0;
+    const MAX_POLL_ATTEMPTS = 15;
+    const POLL_INTERVAL_MS = 2000;
+
+    async function load(isPoll: boolean) {
+      try {
+        const info = await fetchPurchaseInfo(token);
         if (cancelled) return;
+        setState({ kind: 'ready', info });
+        if (info.status === 'PENDING' && pollAttempts < MAX_POLL_ATTEMPTS) {
+          pollAttempts += 1;
+          timer = setTimeout(() => load(true), POLL_INTERVAL_MS);
+        }
+      } catch (err: unknown) {
+        if (cancelled) return;
+        if (isPoll && pollAttempts < MAX_POLL_ATTEMPTS) {
+          pollAttempts += 1;
+          timer = setTimeout(() => load(true), POLL_INTERVAL_MS);
+          return;
+        }
         const status = (err as { status?: number })?.status;
         setState({ kind: status === 404 ? 'not-found' : 'error' });
-      });
-    return () => { cancelled = true; };
+      }
+    }
+
+    load(false);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, [token]);
 
   return (
@@ -108,7 +132,7 @@ function ReadyView({ info, token }: { info: PurchaseInfoResponse; token: string 
   const registerHref = `${ROUTES.register}?email=${encodeURIComponent(info.email)}`;
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-20 flex flex-col items-center text-center">
+    <main className="max-w-4xl mx-auto px-6 py-10 flex flex-col items-center text-center">
       <div className="mb-12">
         <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
           <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -131,7 +155,7 @@ function ReadyView({ info, token }: { info: PurchaseInfoResponse; token: string 
           rel="noopener noreferrer"
           className="w-full bg-primary text-bg px-10 py-5 rounded-2xl font-bold text-lg hover:opacity-95 transition-all active:scale-[0.98] shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 shrink-0">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
           Descargar {info.productName}
@@ -145,7 +169,7 @@ function ReadyView({ info, token }: { info: PurchaseInfoResponse; token: string 
         </p>
         <Link
           to={registerHref}
-          className="inline-flex items-center justify-center bg-card text-text border border-secondary/40 px-8 py-4 rounded-xl font-bold hover:bg-secondary/10 transition-colors"
+          className="btn btn-secondary w-full sm:w-auto sm:inline-flex max-w-full px-8 py-4 rounded-xl font-bold text-center break-words"
         >
           Crear cuenta con {info.email}
         </Link>
