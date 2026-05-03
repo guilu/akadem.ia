@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BookOpen, Plus } from 'flowbite-react-icons/outline';
+import { BookOpen, Plus, Play } from 'flowbite-react-icons/outline';
 import { getSubjectsInSyllabus } from '../api/syllabusApi';
 import type { Subject } from '../types';
 import { ROUTES } from '../constants/routes';
@@ -85,7 +85,7 @@ export default function SyllabusSubjectsPage() {
                   className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
                   to={ROUTES.subjectBuilder(s.id)}
                 >
-                  <Plus className="w-6 h-6" />
+                  <Play className="w-6 h-6" />
                   Crear examen
                 </Link>
               </div>

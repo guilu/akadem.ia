@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus, ArrowsRepeat, ClipboardCheck, ChevronLeft, ChevronRight, Play } from 'flowbite-react-icons/outline';
+import { BookOpen, Eye, ArrowsRepeat, ClipboardCheck, ChevronLeft, ChevronRight, Play } from 'flowbite-react-icons/outline';
 import { getSyllabuses } from '../api/syllabusApi';
 import { apiJson, apiBase } from '../api';
 import type { Syllabus, ExamAttemptSummary } from '../types';
@@ -153,17 +153,17 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
                   <div className="flex items-center gap-3">
                     <Link
                       className="btn btn-primary rounded-full px-6 py-2.5 text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform"
-                      to={ROUTES.syllabusSubjects(s.id)}
-                    >
-                      <Plus className="w-6 h-6" />
-                      Ver temas
-                    </Link>
-                    <Link
-                      className="btn btn-outline rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 hover:scale-105 transition-transform"
                       to={ROUTES.syllabusExamBuilder(s.id)}
                     >
                       <Play className="w-6 h-6" />
                       Crear examen
+                    </Link>
+                    <Link
+                      className="btn btn-secondary rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+                      to={ROUTES.syllabusSubjects(s.id)}
+                    >
+                      <Eye className="w-6 h-6" />
+                      Ver temas
                     </Link>
                   </div>
                   {s.visibility && (
