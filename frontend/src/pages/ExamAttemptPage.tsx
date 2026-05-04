@@ -62,9 +62,9 @@ export default function ExamAttemptPage({ onUnauthorized, onFinish }:{
 
   if (error || !attempt) {
     return (
-      <main className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="pointer-events-none absolute bottom-12 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
+      <main className="min-h-screen -mt-8 -mx-6 flex flex-col items-center justify-center px-10 relative overflow-x-hidden">
+        <div className="pointer-events-none absolute top-0 right-0 w-[32rem] h-[32rem] bg-primary/5 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
 
         <div className="max-w-xl w-full text-center space-y-8 py-12 relative z-10">
           {/* Icon */}
