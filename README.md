@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://akademia.diegobarrioh.dev">Live Demo</a>
-  ·
-  <a href="https://github.com/guilu/akadem.ia">Repository</a>
+  <a href="https://akademia.diegobarrioh.dev">▶️ Live Demo</a>
+  •
+  <a href="https://github.com/guilu/akadem.ia">📦 Repository</a>
 </p>
 
 ---
@@ -56,8 +56,10 @@
 
 ### Exam Session
 
-![Exam Session](docs/images/exam-session.png)
-
+<p align="center">
+  <img src="docs/images/exam-session.png" width="49%">
+  <img src="docs/images/exam-result.png" width="49%">
+</p>
 ---
 
 ### Flashcards Study
@@ -68,9 +70,10 @@
 
 ### AI PDF Quiz Generation
 
-![AI Resource Upload and Generate Embedings](docs/images/rag-upload.png)
-
-![AI Quiz Generation](docs/images/question-generation.png)
+<p align="center">
+  <img src="docs/images/rag-upload.png" width="49%">
+  <img src="docs/images/question-generation.png" width="49%">
+</p>
 
 ---
 
@@ -192,11 +195,17 @@ Built-in flashcards system with:
 ## ⚙️ Environment Variables
 
 ```env
-SPRING_DATASOURCE_URL=
-SPRING_DATASOURCE_USERNAME=
-SPRING_DATASOURCE_PASSWORD=
-OPENAI_API_KEY=
 JWT_SECRET=
+GROQ_API_KEY=
+OPENROUTER_API_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FRONTEND_URL=
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=
+PRODUCTS_STORAGE_PATH=
 ```
 
 ---
