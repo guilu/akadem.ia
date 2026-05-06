@@ -150,19 +150,6 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
             </div>
           )}
 
-          {/* Desktop user menu */}
-          {isAuthed && user && (
-            <div className="hidden md:block">
-              <UserMenuDropdown
-                user={user}
-                isAdmin={isAdmin}
-                onProfile={onProfile}
-                onSettings={onSettings}
-                onLogout={onLogout}
-              />
-            </div>
-          )}
-
           {/* Hamburger / X button */}
           <button
             className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl border border-secondary/25 bg-secondary/5 hover:bg-secondary/10 transition-colors"

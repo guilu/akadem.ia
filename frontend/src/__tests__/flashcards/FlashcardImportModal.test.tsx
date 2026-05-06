@@ -7,11 +7,14 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    getSubjects: vi.fn(),
+    apiBase: 'http://localhost:8080',
+    apiJson: vi.fn(),
     getUnitsForSubject: vi.fn(),
-    importFlashcards: vi.fn(),
   };
 });
+
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 const mockSubjects = [
   { id: 'subj-1', name: 'Matemáticas', description: 'Álgebra' },
@@ -29,12 +32,13 @@ describe('FlashcardImportModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.getSubjects).mockResolvedValue(mockSubjects as any);
+    mockFetch.mockReset();
+    vi.mocked(api.apiJson).mockResolvedValue(mockSubjects as any);
     vi.mocked(api.getUnitsForSubject).mockResolvedValue(mockUnits);
   });
 
   it('renders the modal with subject and unit selectors', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => {
       expect(screen.getByText('Importar flashcards')).toBeInTheDocument();
@@ -44,10 +48,10 @@ describe('FlashcardImportModal', () => {
   });
 
   it('loads subjects on mount', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => {
-      expect(vi.mocked(api.getSubjects)).toHaveBeenCalledWith('test-token');
+      expect(vi.mocked(api.apiJson)).toHaveBeenCalledWith('http://localhost:8080/api/subjects');
     });
     await waitFor(() => {
       expect(screen.getByText('Matemáticas')).toBeInTheDocument();
@@ -55,10 +59,10 @@ describe('FlashcardImportModal', () => {
   });
 
   it('loads units when subject is selected', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => {
-      expect(vi.mocked(api.getUnitsForSubject)).toHaveBeenCalledWith('test-token', 'subj-1');
+      expect(vi.mocked(api.getUnitsForSubject)).toHaveBeenCalledWith('subj-1');
     });
     await waitFor(() => {
       expect(screen.getByText('Álgebra')).toBeInTheDocument();
@@ -66,7 +70,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('calls onClose when cancel button is clicked', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Cancelar'));
     fireEvent.click(screen.getByText('Cancelar'));
@@ -74,7 +78,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('calls onClose when X button is clicked', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar flashcards'));
     fireEvent.click(screen.getByText('✕'));
@@ -82,7 +86,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('calls onClose when clicking backdrop', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar flashcards'));
     const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
@@ -93,7 +97,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('shows error when import is submitted without a file', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar'));
     fireEvent.click(screen.getByText('Importar'));
@@ -104,7 +108,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('shows CSV format description', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => {
       expect(screen.getByText(/Columnas: front,back/)).toBeInTheDocument();
@@ -112,7 +116,7 @@ describe('FlashcardImportModal', () => {
   });
 
   it('switches to JSON format when JSON button is clicked', async () => {
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('JSON'));
     fireEvent.click(screen.getByText('JSON'));
@@ -123,9 +127,9 @@ describe('FlashcardImportModal', () => {
   });
 
   it('shows error when subjects fail to load', async () => {
-    vi.mocked(api.getSubjects).mockRejectedValue(new Error('network error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('network error'));
 
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => {
       expect(screen.getByText('No se pudieron cargar las materias.')).toBeInTheDocument();
@@ -133,11 +137,14 @@ describe('FlashcardImportModal', () => {
   });
 
   it('shows import result after successful import', async () => {
-    vi.mocked(api.getSubjects).mockResolvedValue(mockSubjects as any);
+    vi.mocked(api.apiJson).mockResolvedValue(mockSubjects as any);
     vi.mocked(api.getUnitsForSubject).mockResolvedValue(mockUnits);
-    vi.mocked(api.importFlashcards).mockResolvedValue({ imported: 5, skipped: 1, errors: [] });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ imported: 5, skipped: 1, errors: [] }),
+    } as Response);
 
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar'));
 
@@ -156,9 +163,9 @@ describe('FlashcardImportModal', () => {
   });
 
   it('shows error message when import throws', async () => {
-    vi.mocked(api.importFlashcards).mockRejectedValue(new Error('Error 400'));
+    mockFetch.mockResolvedValue({ ok: false, status: 400 } as Response);
 
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar'));
 
@@ -175,9 +182,12 @@ describe('FlashcardImportModal', () => {
   });
 
   it('calls onClose from result state when Cerrar is clicked', async () => {
-    vi.mocked(api.importFlashcards).mockResolvedValue({ imported: 3, skipped: 0, errors: [] });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ imported: 3, skipped: 0, errors: [] }),
+    } as Response);
 
-    render(<FlashcardImportModal token="test-token" onClose={onClose} onImported={onImported} />);
+    render(<FlashcardImportModal onClose={onClose} onImported={onImported} />);
 
     await waitFor(() => screen.getByText('Importar'));
 

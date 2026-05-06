@@ -21,7 +21,7 @@ function makeResponse(body: unknown, status = 200, ok = true): Response {
 }
 
 describe('Register component', () => {
-  const onToken = vi.fn();
+  const onAuthSuccess = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -29,7 +29,7 @@ describe('Register component', () => {
   });
 
   it('renders the registration form', () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     expect(screen.getByPlaceholderText('Email *')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Contraseña *')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Confirmar *')).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('Register component', () => {
   });
 
   it('shows error when email is empty', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.click(screen.getByRole('button', { name: /crear cuenta/i }));
     await waitFor(() => {
       expect(screen.getByText('El email es obligatorio')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('Register component', () => {
   });
 
   it('shows error for invalid email format', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'not-valid' },
     });
@@ -57,7 +57,7 @@ describe('Register component', () => {
   });
 
   it('shows error when password is empty', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -68,7 +68,7 @@ describe('Register component', () => {
   });
 
   it('shows error when password is too short', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -82,7 +82,7 @@ describe('Register component', () => {
   });
 
   it('shows error when confirm password is empty', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -96,7 +96,7 @@ describe('Register component', () => {
   });
 
   it('shows error when passwords do not match', async () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -112,10 +112,10 @@ describe('Register component', () => {
     });
   });
 
-  it('calls onToken on successful registration', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'new-tok' }));
+  it('calls onAuthSuccess on successful registration', async () => {
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -128,14 +128,14 @@ describe('Register component', () => {
     fireEvent.click(screen.getByRole('button', { name: /crear cuenta/i }));
 
     await waitFor(() => {
-      expect(onToken).toHaveBeenCalledWith('new-tok');
+      expect(onAuthSuccess).toHaveBeenCalledWith({ email: 'user@example.com', role: 'USER' });
     });
   });
 
   it('uses API_ROUTES.auth.register endpoint', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'tok' }));
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -157,7 +157,7 @@ describe('Register component', () => {
   it('shows server error message on failed registration', async () => {
     mockFetch.mockResolvedValue(makeResponse({ error: 'Email ya registrado' }, 409, false));
 
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'existing@example.com' },
     });
@@ -177,7 +177,7 @@ describe('Register component', () => {
   it('shows default error when server returns no error message', async () => {
     mockFetch.mockResolvedValue(makeResponse({}, 500, false));
 
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -197,7 +197,7 @@ describe('Register component', () => {
   it('shows network error on fetch failure', async () => {
     mockFetch.mockRejectedValue(new Error('network failure'));
 
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('Email *'), {
       target: { value: 'user@example.com' },
     });
@@ -215,13 +215,13 @@ describe('Register component', () => {
   });
 
   it('renders Google OAuth link with correct URL', () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     const googleLink = screen.getByText('Continuar con Google').closest('a');
     expect(googleLink?.getAttribute('href')).toContain(API_ROUTES.auth.oauthGoogle);
   });
 
   it('renders link to login page', () => {
-    render(<Register onToken={onToken} />);
+    render(<Register onAuthSuccess={onAuthSuccess} />);
     expect(screen.getByText('Inicia sesión')).toBeInTheDocument();
   });
 });

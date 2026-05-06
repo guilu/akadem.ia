@@ -23,7 +23,8 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    getFlashcardsHistory: vi.fn(),
+    apiBase: 'http://localhost:8080',
+    apiJson: vi.fn(),
   };
 });
 
@@ -63,11 +64,10 @@ const mockHistoryItems = [
 describe('FlashcardsHistoryPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
   });
 
   it('shows loading skeletons initially', () => {
-    vi.mocked(api.getFlashcardsHistory).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(api.apiJson).mockImplementation(() => new Promise(() => {}));
 
     render(<FlashcardsHistoryPage />);
 
@@ -77,7 +77,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows history items when loaded', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue(mockHistoryItems);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistoryItems);
 
     render(<FlashcardsHistoryPage />);
 
@@ -89,7 +89,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows grade labels for each item', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue(mockHistoryItems);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistoryItems);
 
     render(<FlashcardsHistoryPage />);
 
@@ -101,7 +101,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows interval info when intervalAfter is present', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue(mockHistoryItems);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistoryItems);
 
     render(<FlashcardsHistoryPage />);
 
@@ -111,7 +111,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows interval change when intervalBefore differs from intervalAfter', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue(mockHistoryItems);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistoryItems);
 
     render(<FlashcardsHistoryPage />);
 
@@ -121,7 +121,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows empty state when no history', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsHistoryPage />);
 
@@ -131,7 +131,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('navigates to study mode when "Empezar a estudiar" is clicked from empty state', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsHistoryPage />);
 
@@ -141,7 +141,7 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('shows error state on API failure', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockRejectedValue(new Error('network error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('network error'));
 
     render(<FlashcardsHistoryPage />);
 
@@ -151,30 +151,32 @@ describe('FlashcardsHistoryPage', () => {
   });
 
   it('navigates to flashcards page when examinar tab is clicked', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsHistoryPage />);
 
+    await waitFor(() => expect(vi.mocked(api.apiJson)).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByText('Examinar'));
     expect(mockNavigate).toHaveBeenCalledWith('/flashcards');
   });
 
   it('navigates to study mode when estudio tab is clicked', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsHistoryPage />);
 
+    await waitFor(() => expect(vi.mocked(api.apiJson)).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByText('Estudio'));
     expect(mockNavigate).toHaveBeenCalledWith('/flashcards?mode=study');
   });
 
   it('fetches history with limit 50', async () => {
-    vi.mocked(api.getFlashcardsHistory).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsHistoryPage />);
 
     await waitFor(() => {
-      expect(vi.mocked(api.getFlashcardsHistory)).toHaveBeenCalledWith('test-token', 50);
+      expect(vi.mocked(api.apiJson)).toHaveBeenCalledWith('http://localhost:8080/api/flashcards/history?limit=50');
     });
   });
 });
