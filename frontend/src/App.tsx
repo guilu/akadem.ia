@@ -84,7 +84,7 @@ export default function App() {
       setSubjects([]);
       return Promise.resolve();
     }
-    return authedJson<Subject[]>(`${apiBase}/api/subjects`)
+    return getSubjects(token)
       .then(setSubjects)
       .catch(() => setSubjects([]));
   };
@@ -156,12 +156,7 @@ export default function App() {
 
   async function startRandomExam(cfg: { subjectId: string; count: number; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
     try {
-      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start-random`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
-        timeoutMs: 15000
-      });
+      const data = await apiStartRandomExam(token, cfg);
       setAttemptId(data.attemptId);
       setMinutes(Math.round(data.totalTimeSeconds / 60));
       setQuestions(data.questions);
@@ -352,6 +347,11 @@ export default function App() {
           <Route path={ROUTES.profile} element={
             <ProtectedRoute allow={isAuthed}>
               <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.profile} element={
+            <ProtectedRoute allow={isAuthed}>
+              <ProfilePage token={token} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.oauth2Callback} element={null} />

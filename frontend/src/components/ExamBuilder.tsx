@@ -30,7 +30,7 @@ export default function ExamBuilder({ subjectId, onStart, onStartRandom, onUnaut
       .then(us => { setUnits(us.map(u => ({ id: u.id, name: u.name, available: Number(u.available) || 0 }))); setPage(0); })
       .catch((err: unknown) => { if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized(); })
       .finally(() => setAvailabilityLoading(false));
-  }, [subjectId, apiBase, difficulty]);
+  }, [subjectId, difficulty]);
 
   const totalPages = Math.ceil(units.length / PAGE_SIZE);
   const pagedUnits = units.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);

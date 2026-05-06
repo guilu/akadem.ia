@@ -11,5 +11,7 @@ public interface FlashcardImportExportUseCase {
 
   String exportFlashcardsBySubject(UUID subjectId, UUID userId, String format);
 
+  String exportFlashcardsBySubject(UUID subjectId, String format);
+
   record ImportResult(int imported, int skipped, List<String> errors) {}
 }

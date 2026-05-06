@@ -186,6 +186,72 @@ class FlashcardControllerTest {
     verify(importExportUseCase).exportFlashcards(eq(unitId), eq("csv"), eq(userId), eq(false));
   }
 
+  // --- export endpoint ---
+
+  @Test
+  void exportBySubjectIdCsvReturnsContent() {
+    UUID userId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(importExportUseCase.exportFlashcardsBySubject(subjectId, "csv"))
+        .thenReturn("front,back\nHello,Hola\n");
+
+    ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "csv", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello,Hola"));
+    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, "csv");
+  }
+
+  @Test
+  void exportBySubjectIdJsonReturnsContent() {
+    UUID userId = UUID.randomUUID();
+    UUID subjectId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(importExportUseCase.exportFlashcardsBySubject(subjectId, "json"))
+        .thenReturn("[{\"front\":\"Hello\",\"back\":\"Hola\"}]");
+
+    ResponseEntity<String> response = controller.exportFlashcards(null, subjectId, "json", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    org.junit.jupiter.api.Assertions.assertTrue(response.getBody().contains("Hello"));
+    verify(importExportUseCase).exportFlashcardsBySubject(subjectId, "json");
+  }
+
+  @Test
+  void exportWithNeitherParamReturns400() {
+    UUID userId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+
+    ResponseEntity<String> response = controller.exportFlashcards(null, null, "csv", principal);
+
+    assertEquals(400, response.getStatusCodeValue());
+  }
+
+  @Test
+  void exportByUnitIdStillWorksWhenUnitIdProvided() {
+    UUID userId = UUID.randomUUID();
+    UUID unitId = UUID.randomUUID();
+    var principal = new User("user@example.com", "", List.of());
+    when(userRepo.findByEmail("user@example.com"))
+        .thenReturn(Optional.of(new AppUser(userId, "user@example.com", "", "USER", null, null, null)));
+    when(importExportUseCase.exportFlashcards(unitId, "csv"))
+        .thenReturn("front,back\nQ,A\n");
+
+    ResponseEntity<String> response = controller.exportFlashcards(unitId, null, "csv", principal);
+
+    assertEquals(200, response.getStatusCodeValue());
+    verify(importExportUseCase).exportFlashcards(unitId, "csv");
+  }
+
   @Test
   void createWithoutAuthReturns401() {
     when(principalResolver.requireUserId(isNull())).thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));

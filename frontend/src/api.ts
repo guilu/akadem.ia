@@ -1,3 +1,5 @@
+import { API_ROUTES } from './constants/apiRoutes';
+
 const rawBase = import.meta.env.VITE_API_URL || '';
 const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 const envBase = normalizedBase.endsWith('/api') ? normalizedBase.slice(0, -4) : normalizedBase;
@@ -5,6 +7,10 @@ const envBase = normalizedBase.endsWith('/api') ? normalizedBase.slice(0, -4) : 
 const isExternalHost = window.location.hostname.endsWith('diegobarrioh.dev');
 const defaultBase = isExternalHost ? window.location.origin : `http://${window.location.hostname}:8080`;
 export const apiBase = envBase || defaultBase;
+
+export function apiUrl(path: string): string {
+  return `${apiBase}${path}`;
+}
 
 type RequestOptions = RequestInit & { timeoutMs?: number };
 
@@ -135,7 +141,7 @@ export async function uploadSource(file: File, subjectId: string): Promise<Index
   const form = new FormData();
   form.append('file', file);
   form.append('subjectId', subjectId);
-  const res = await fetch(`${apiBase}/api/sources`, {
+  const res = await fetch(apiUrl(API_ROUTES.sources.root), {
     method: 'POST',
     body: form,
     credentials: 'include'

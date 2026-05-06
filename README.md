@@ -1,56 +1,143 @@
-# Akadem.ia — MVP (Spring Boot + React + Tailwind + Postgres)
-Version: 1.2.0
+# Akadem.ia
 
-MVP para creación y ejecución de simulacros, estudio con flashcards y generación automática de preguntas desde PDFs con IA. Incluye:
-- **Frontend** React + Vite + Tailwind + Flowbite
-- **Backend** Spring Boot 3 (Hexagonal/Ports & Adapters)
-- **DB** Postgres
-- **IA** OpenAI API (embeddings + GPT-4o-mini)
-- **Docker Compose** para levantar todo el stack
+<p align="center">
+  <img src="docs/images/hero.png" alt="Akadem.ia Hero" width="100%">
+</p>
+
+<p align="center">
+  AI-assisted exam preparation platform with timed exams, spaced repetition flashcards and AI-generated quizzes from PDFs.
+</p>
+
+<p align="center">
+  <a href="https://akademia.diegobarrioh.dev">Live Demo</a>
+  ·
+  <a href="https://github.com/guilu/akadem.ia">Repository</a>
+</p>
 
 ---
 
-## 🚀 Run rápido
+## ✨ Features
+
+- 📝 Timed exams and mock tests
+- 🧠 SM-2 spaced repetition flashcards
+- 🤖 AI-generated quizzes from PDFs (RAG)
+- 🔐 JWT + Google OAuth2 authentication
+- 📚 Subjects → Units → Questions hierarchy
+- 📦 Dockerized full stack
+- 📱 Responsive UI
+- ⚡ Spring Boot + React + Tailwind
+
+---
+
+## 📸 Screenshots
+
+### Landing Page
+
+![Landing](docs/images/home-dark.png)
+
+---
+
+### Exam Builder
+
+![Exam Builder](docs/images/exam-builder.png)
+
+---
+
+### Exam Session
+
+![Exam Session](docs/images/exam-session.png)
+
+---
+
+### Flashcards Study
+
+![Flashcards Study](docs/images/flashcards-study.png)
+
+---
+
+### AI PDF Quiz Generation
+
+![AI Resource Upload and Generate Embedings](docs/images/rag-upload.png)
+
+![AI Quiz Generation](docs/images/question-generation.png)
+
+---
+
+## 🚀 Live Demo
+
+🔗 https://akademia.diegobarrioh.dev
+
+---
+
+## 🏗️ Tech Stack
+
+### Backend
+- Java 21
+- Spring Boot 3.3
+- Spring Security + JWT
+- PostgreSQL 16
+- Apache PDFBox
+- OpenAI API
+
+### Frontend
+- React 18
+- Vite
+- Tailwind CSS
+- Flowbite React
+
+### Infrastructure
+- Docker Compose
+- Nginx
+- PostgreSQL
+
+---
+
+## 🚀 Quick Start
+
 ```bash
 docker compose up --build
 ```
 
-Servicios:
-- **Frontend**: http://localhost:5173
-- **API**: http://localhost:8080
-- **Postgres**: `localhost:5432` (DB: `akdemya`, user: `ak_user`, pass: `ak_pass`)
+### Services
 
-> Nota: el `docker-compose.yml` usa una red **externa** llamada `cluster_network`. Debes crearla antes:
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:8080 |
+| Postgres | localhost:5432 |
+
+---
+
+## 🐳 Docker Network
+
+The `docker-compose.yml` uses an external Docker network called `cluster_network`.
+
+Create it before running the stack:
+
 ```bash
 docker network create cluster_network
 ```
 
 ---
 
-## 🧱 Arquitectura (Backend)
-El backend sigue un enfoque **hexagonal**:
+## 🧱 Backend Architecture
 
-```
+The backend follows a **Hexagonal Architecture (Ports & Adapters)** approach.
+
+```text
 com.akdemya
 ├── adapter
-│   ├── inbound/web           # Controllers REST
-│   ├── infrastructure        # AI (OpenAI), Storage, PDF, Security
-│   └── outbound/persistence  # JPA adapters
-├── application/service        # Casos de uso (use cases)
+│   ├── inbound/web
+│   ├── infrastructure
+│   └── outbound/persistence
+├── application/service
 ├── domain
-│   ├── model                  # Entidades del dominio
+│   ├── model
 │   └── port
-│       ├── in                 # Puertos de entrada (UseCases)
-│       └── out                # Puertos de salida (Repos, Hash, Token)
 └── Application.java
 ```
 
-### Capas principales
-- **Controllers** (adapter/inbound/web): Auth, Subjects, Units, Questions, Exams, Flashcards, AI
-- **Use Cases** (application/service): `AuthManager`, `ExamManager`, `ContentManagement`, `FlashcardManagementService`, `FlashcardStudyService`, `UserSettingsService`, `IndexDocumentService`, `GenerateQuizService`
-- **Infraestructura** (adapter/infrastructure): `OpenAiEmbeddingAdapter`, `OpenAiQuestionGeneratorAdapter`, `PdfBoxTextExtractor`
-- **Persistencia** (adapter/outbound/persistence): adapters JPA + repositorios Spring Data
-- **Dominio** (domain/model): entidades puras
+---
 
 ### Seguridad
 - JWT stateless (HS256)
@@ -65,11 +152,15 @@ com.akdemya
 - El resto requiere JWT (incluye `/api/settings`, `/api/flashcards`, `/api/exams/**`)
 - Endpoints `/api/admin/**`, `/api/sources/**` y `/api/ai/**` requieren rol ADMIN
 
-> ⚠️ **Importante**: la clave JWT está hardcodeada en `JwtService` y debe cambiarse en producción.
+- JWT stateless authentication
+- Google OAuth2 login
+- BCrypt password hashing
+- Role-based access control
+- Admin-only AI endpoints
 
 ---
 
-## 🧩 Funcionalidad (Backend)
+## 🧠 AI Features
 
 ### Auth
 - Registro y login con JWT
@@ -177,21 +268,9 @@ com.akdemya
 
 ---
 
-## 🎨 Frontend (React + Vite + Tailwind)
+## 📚 Flashcards System
 
-### Pantallas principales
-- **Home**: landing con CTA, stats y hero
-- **Subjects**: lista de asignaturas del usuario
-- **ExamBuilder**: configuración de simulacro por unidades, modo aleatorio y dificultad (EASY/MEDIUM/HARD)
-- **ExamRunner / ExamAttempt**: ejecución del examen con timer
-- **ExamResult**: resumen de resultados con puntuación y color por rango
-- **Login/Register**: autenticación
-- **Flashcards**: dashboard de materias y mazos con cola de estudio global
-- **FlashcardsStudy**: estudio de tarjetas con repetición espaciada SM-2
-- **FlashcardsHistory**: historial de revisiones con estado vacío y CTA
-- **FlashcardsExamine**: detalle de unidad con stats de tarjetas
-- **Settings**: gestión de contenido, límites de estudio, import/export de preguntas
-- **RAG** *(solo Admin)*: subida de PDFs, indexación y generación de preguntas IA
+Built-in flashcards system with:
 
 ### Flujo principal
 1. Usuario se registra, inicia sesión con email/contraseña o accede con Google → se guarda JWT en `localStorage` (`ak_token`)
@@ -217,7 +296,7 @@ com.akdemya
 
 ---
 
-## ⚙️ Configuración
+## ⚙️ Environment Variables
 
 ### Backend
 - Configuración en `application.properties`
@@ -242,31 +321,11 @@ de webhook Stripe, dominio Resend, ubicación del PDF y variables (`STRIPE_*`,
 
 ---
 
-## 🚚 Despliegue mínimo (prod)
+## 🚚 Production Deployment
 
-1. **Crear red Docker (solo primera vez)**
-   ```bash
-   docker network create prod_network
-   ```
-
-2. **Preparar variables de entorno** (archivo `.env` o variables del sistema)
-   ```env
-   AKADEMIA_DB_USER=...
-   AKADEMIA_DB_PASSWORD=...
-   JWT_SECRET=...
-   OPENAI_API_KEY=sk-...
-   ```
-
-3. **Levantar stack de producción**
-   ```bash
-   docker compose -f dist/docker-compose-prod.yaml up -d
-   ```
-
-4. **Verificar servicios**
-   - API: http://localhost:8082
-   - Web: http://localhost:5173
-
-> En prod **no** se cargan seeds (SQL init en `never`).
+```bash
+docker compose -f dist/docker-compose-prod.yaml up -d
+```
 
 ---
 
@@ -279,14 +338,6 @@ de webhook Stripe, dominio Resend, ubicación del PDF y variables (`STRIPE_*`,
 
 ---
 
-## 📦 Tech Stack
-- Java 21
-- Spring Boot 3.3
-- Spring Security + JWT
-- Apache PDFBox 3 (extracción de texto PDF)
-- PostgreSQL 16
-- React 18 + Vite + Tailwind CSS
-- Flowbite React (componentes UI)
-- OpenAI API (embeddings + generación de preguntas)
-- Vitest (testing frontend)
-- Docker Compose
+## 📄 License
+
+MIT

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRightToBracket } from 'flowbite-react-icons/outline';
-import { apiBase } from '../api';
+import { apiUrl } from '../api';
+import { API_ROUTES } from '../constants/apiRoutes';
 import { ROUTES } from '../constants/routes';
 
 const inputClass =
@@ -27,7 +28,7 @@ export default function Login({ onAuthSuccess }: { onAuthSuccess: (user: { email
     setErr('');
     setLoading(true);
     try {
-      const res = await fetch(`${apiBase}/api/auth/login`, {
+      const res = await fetch(apiUrl(API_ROUTES.auth.login), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -65,7 +66,7 @@ export default function Login({ onAuthSuccess }: { onAuthSuccess: (user: { email
 
           <div className="space-y-4">
             <a
-              href={`${apiBase}/api/oauth2/authorization/google`}
+              href={apiUrl(API_ROUTES.auth.oauthGoogle)}
               className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full border border-secondary/30 bg-bg hover:bg-secondary/10 transition-colors text-sm font-medium text-text/80"
             >
               <svg className="w-6 h-6 shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

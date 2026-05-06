@@ -128,6 +128,30 @@ public class FlashcardImportExportService implements FlashcardImportExportUseCas
     return sb.toString();
   }
 
+  @Override
+  public String exportFlashcardsBySubject(UUID subjectId, String format) {
+    List<Flashcard> flashcards = unitRepository.findBySubjectId(subjectId).stream()
+        .flatMap(unit -> managementUseCase.listByUnit(unit.getId()).stream())
+        .toList();
+
+    if ("json".equalsIgnoreCase(format)) {
+      List<Map<String, String>> list = flashcards.stream()
+          .map(f -> Map.of("front", f.getFront(), "back", f.getBack()))
+          .toList();
+      try {
+        return objectMapper.writeValueAsString(list);
+      } catch (Exception e) {
+        throw new RuntimeException("Error al generar JSON", e);
+      }
+    }
+
+    StringBuilder sb = new StringBuilder("front,back\n");
+    for (Flashcard f : flashcards) {
+      sb.append(csvEscape(f.getFront())).append(',').append(csvEscape(f.getBack())).append('\n');
+    }
+    return sb.toString();
+  }
+
   private List<String[]> parseCsv(String content) {
     List<String[]> rows = new ArrayList<>();
     String[] lines = content.split("\r?\n", -1);
