@@ -1,26 +1,19 @@
 package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.adapter.inbound.web.dto.FlashcardDto;
-import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.FlashcardReviewLog;
-import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.in.FlashcardImportExportUseCase;
 import com.akdemya.domain.port.in.FlashcardManagementUseCase;
 import com.akdemya.domain.port.in.FlashcardReviewUseCase;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
-import com.akdemya.domain.model.Subject;
-import com.akdemya.domain.port.out.FlashcardRepository;
-import com.akdemya.domain.port.out.FlashcardReviewLogRepository;
-import com.akdemya.domain.port.out.FlashcardReviewRepository;
-import com.akdemya.domain.port.out.SubjectRepository;
-import com.akdemya.domain.port.out.UnitRepository;
-import com.akdemya.domain.port.out.UserRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,18 +21,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/flashcards")
@@ -52,52 +41,54 @@ public class FlashcardController {
   private final FlashcardReviewUseCase reviewUseCase;
   private final FlashcardManagementUseCase managementUseCase;
   private final FlashcardImportExportUseCase importExportUseCase;
-  private final FlashcardRepository flashcardRepo;
-  private final FlashcardReviewRepository reviewRepo;
-  private final FlashcardReviewLogRepository reviewLogRepo;
-  private final UserRepository userRepo;
-  private final UnitRepository unitRepo;
-  private final SubjectRepository subjectRepo;
+  private final PrincipalResolver principalResolver;
 
   public FlashcardController(FlashcardStudyUseCase studyUseCase,
                              FlashcardReviewUseCase reviewUseCase,
                              FlashcardManagementUseCase managementUseCase,
                              FlashcardImportExportUseCase importExportUseCase,
-                             FlashcardRepository flashcardRepo,
-                             FlashcardReviewRepository reviewRepo,
-                             FlashcardReviewLogRepository reviewLogRepo,
-                             UserRepository userRepo,
-                             UnitRepository unitRepo,
-                             SubjectRepository subjectRepo) {
+                             PrincipalResolver principalResolver) {
     this.studyUseCase = studyUseCase;
     this.reviewUseCase = reviewUseCase;
     this.managementUseCase = managementUseCase;
     this.importExportUseCase = importExportUseCase;
-    this.flashcardRepo = flashcardRepo;
-    this.reviewRepo = reviewRepo;
-    this.reviewLogRepo = reviewLogRepo;
-    this.userRepo = userRepo;
-    this.unitRepo = unitRepo;
-    this.subjectRepo = subjectRepo;
+    this.principalResolver = principalResolver;
   }
 
   @GetMapping
-  public List<FlashcardDto.FlashcardResponse> listByUnit(@RequestParam UUID unitId) {
-    return managementUseCase.listByUnit(unitId).stream()
+  public List<FlashcardDto.FlashcardResponse> listByUnit(@RequestParam UUID unitId,
+                                                         @AuthenticationPrincipal User principal) {
+    List<Flashcard> flashcards;
+    if (principal == null) {
+      // Unauthenticated — return only global flashcards
+      flashcards = managementUseCase.listByUnit(unitId);
+    } else {
+      UUID userId = requireUserId(principal);
+      flashcards = managementUseCase.listVisibleByUnit(unitId, userId);
+    }
+    return flashcards.stream()
         .map(this::toFlashcardResponse)
         .toList();
   }
 
   @PostMapping
-  public ResponseEntity<FlashcardDto.FlashcardResponse> create(@RequestBody FlashcardDto.CreateRequest req,
+  public ResponseEntity<FlashcardDto.FlashcardResponse> create(@Valid @RequestBody FlashcardDto.CreateRequest req,
                                                                @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
     if (req == null || req.unitId() == null) {
       return ResponseEntity.badRequest().build();
     }
+    Visibility visibility = req.visibility() != null ? req.visibility() : Visibility.PRIVATE;
+
+    // Only ADMINs can create GLOBAL flashcards
+    if (visibility == Visibility.GLOBAL && !isAdmin(principal)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     try {
-      Flashcard saved = managementUseCase.createFlashcard(
-          new FlashcardManagementUseCase.CreateCommand(req.unitId(), req.front(), req.back()));
+      Flashcard saved = managementUseCase.createFlashcardWithVisibility(
+          new FlashcardManagementUseCase.CreateCommandWithVisibility(
+              req.unitId(), req.front(), req.back(), visibility, userId));
       return ResponseEntity.status(HttpStatus.CREATED).body(toFlashcardResponse(saved));
     } catch (IllegalArgumentException ex) {
       return ResponseEntity.badRequest().build();
@@ -108,14 +99,18 @@ public class FlashcardController {
   public ResponseEntity<FlashcardDto.FlashcardResponse> update(@PathVariable UUID id,
                                                                @RequestBody FlashcardDto.UpdateRequest req,
                                                                @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
     if (req == null) {
       return ResponseEntity.badRequest().build();
     }
     try {
-      Flashcard saved = managementUseCase.updateFlashcard(
-          new FlashcardManagementUseCase.UpdateCommand(id, req.unitId(), req.front(), req.back()));
+      Flashcard saved = managementUseCase.updateFlashcardIfAuthorized(
+          new FlashcardManagementUseCase.UpdateCommand(id, req.unitId(), req.front(), req.back()),
+          userId, admin);
       return ResponseEntity.ok(toFlashcardResponse(saved));
+    } catch (AccessDeniedException ex) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     } catch (NoSuchElementException ex) {
       return ResponseEntity.notFound().build();
     } catch (IllegalArgumentException ex) {
@@ -125,9 +120,16 @@ public class FlashcardController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
-    managementUseCase.deleteFlashcard(id);
-    return ResponseEntity.noContent().build();
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
+    try {
+      managementUseCase.deleteFlashcardIfAuthorized(id, userId, admin);
+      return ResponseEntity.noContent().build();
+    } catch (AccessDeniedException ex) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    } catch (NoSuchElementException ex) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping("/study/queue")
@@ -198,19 +200,12 @@ public class FlashcardController {
   @GetMapping("/units/summary")
   public List<FlashcardDto.UnitSummary> getUnitSummary(@AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);
-    LocalDateTime now = LocalDateTime.now();
-    Map<UUID, String> subjectNames = subjectRepo.findAll().stream()
-        .collect(Collectors.toMap(Subject::getId, Subject::getName));
-    return unitRepo.findAllWithFlashcards().stream()
-        .map(unit -> {
-          long newCount = flashcardRepo.countNewByUserIdAndUnitId(userId, unit.getId());
-          long reviewCount = reviewRepo.countByUserIdAndUnitIdAndStateIn(userId, unit.getId(),
-              List.of(ReviewState.LEARNING, ReviewState.REVIEW));
-          long dueCount = reviewRepo.countDueByUserIdAndUnitIdUpTo(userId, unit.getId(), now);
-          String subjectName = subjectNames.getOrDefault(unit.getSubjectId(), "");
-          return new FlashcardDto.UnitSummary(unit.getId(), unit.getName(),
-              unit.getSubjectId(), subjectName, newCount, reviewCount, dueCount);
-        })
+    return studyUseCase.getUnitSummaries(new FlashcardStudyUseCase.UnitSummaryCommand(userId, null))
+        .stream()
+        .map(r -> new FlashcardDto.UnitSummary(
+            r.unitId(), r.unitName(), r.subjectId(), r.subjectName(),
+            r.syllabusId(), r.syllabusName(),
+            r.newCount(), r.reviewCount(), r.dueCount()))
         .toList();
   }
 
@@ -220,9 +215,10 @@ public class FlashcardController {
       @RequestParam(defaultValue = "csv") String format,
       @RequestBody String content,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
+    boolean admin = isAdmin(principal);
     FlashcardImportExportUseCase.ImportResult result =
-        importExportUseCase.importFlashcards(unitId, format, content);
+        importExportUseCase.importFlashcards(unitId, format, content, userId, admin);
     return ResponseEntity.ok(
         new FlashcardDto.ImportResult(result.imported(), result.skipped(), result.errors()));
   }
@@ -233,13 +229,14 @@ public class FlashcardController {
       @RequestParam(required = false) UUID subjectId,
       @RequestParam(defaultValue = "csv") String format,
       @AuthenticationPrincipal User principal) {
-    requireUserId(principal);
+    UUID userId = requireUserId(principal);
     if (unitId == null && subjectId == null) {
       return ResponseEntity.badRequest().body("Se requiere unitId o subjectId");
     }
+    boolean admin = isAdmin(principal);
     String content = unitId != null
-        ? importExportUseCase.exportFlashcards(unitId, format)
-        : importExportUseCase.exportFlashcardsBySubject(subjectId, format);
+        ? importExportUseCase.exportFlashcards(unitId, format, userId, admin)
+        : importExportUseCase.exportFlashcardsBySubject(subjectId, userId, format);
     boolean isJson = "json".equalsIgnoreCase(format);
     String contentType = isJson ? "application/json; charset=UTF-8" : "text/csv; charset=UTF-8";
     String filename = isJson ? "flashcards.json" : "flashcards.csv";
@@ -258,26 +255,11 @@ public class FlashcardController {
     if (resolvedLimit < 0) {
       return ResponseEntity.badRequest().build();
     }
-    List<FlashcardReviewLog> logs = reviewLogRepo.findRecentByUserId(userId, resolvedLimit);
-    Map<UUID, Flashcard> flashcards = flashcardRepo.findByIds(
-            logs.stream().map(FlashcardReviewLog::getFlashcardId).toList())
-        .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
-    List<FlashcardDto.HistoryItem> items = logs.stream()
-        .map(log -> {
-          Flashcard card = flashcards.get(log.getFlashcardId());
-          return new FlashcardDto.HistoryItem(
-              log.getId(),
-              log.getFlashcardId(),
-              card != null ? card.getFront() : null,
-              card != null ? card.getBack() : null,
-              log.getGrade(),
-              log.getReviewedAt(),
-              log.getIntervalBefore(),
-              log.getIntervalAfter(),
-              log.getEaseBefore(),
-              log.getEaseAfter()
-          );
-        })
+    List<FlashcardDto.HistoryItem> items = reviewUseCase.getReviewHistory(userId, resolvedLimit)
+        .stream()
+        .map(r -> new FlashcardDto.HistoryItem(r.id(), r.flashcardId(), r.front(), r.back(),
+            r.grade(), r.reviewedAt(), r.intervalBefore(), r.intervalAfter(),
+            r.easeBefore(), r.easeAfter()))
         .toList();
     return ResponseEntity.ok(items);
   }
@@ -308,12 +290,12 @@ public class FlashcardController {
   }
 
   private UUID requireUserId(User principal) {
-    if (principal == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-    }
-    return userRepo.findByEmail(principal.getUsername())
-        .map(AppUser::getId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    return principalResolver.requireUserId(principal);
+  }
+
+  private boolean isAdmin(User principal) {
+    return principal != null && principal.getAuthorities().stream()
+        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
   }
 
   private int resolveLimit(Integer limit) {

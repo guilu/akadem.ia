@@ -9,6 +9,8 @@ public interface ExamUseCase {
 
   StartResponse startRandomExam(StartRandomCommand command);
 
+  StartResponse startExamFromSyllabus(StartFromSyllabusCommand command);
+
   SubmitResult submitExam(SubmitCommand command, String userEmail);
 
   AttemptResponse getAttempt(UUID attemptId, String userEmail);
@@ -17,10 +19,16 @@ public interface ExamUseCase {
 
   void updateAnswer(UpdateAnswerCommand command, String userEmail);
 
-  record StartCommand(String userEmail, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
+  SubmitResult getResult(UUID attemptId, String userEmail);
+
+  record StartCommand(String userEmail, UUID userId, Map<UUID, Integer> unitCounts, int minutes, String difficulty) {
   }
 
-  record StartRandomCommand(String userEmail, UUID subjectId, int count, int minutes, String difficulty) {
+  record StartRandomCommand(String userEmail, UUID userId, UUID subjectId, int count, int minutes, String difficulty) {
+  }
+
+  record StartFromSyllabusCommand(String userEmail, UUID userId, UUID syllabusId, List<UUID> subjectIds, int count,
+      int minutes, String difficulty) {
   }
 
   record StartResponse(UUID attemptId, int totalTimeSeconds, List<QuestionData> questions) {

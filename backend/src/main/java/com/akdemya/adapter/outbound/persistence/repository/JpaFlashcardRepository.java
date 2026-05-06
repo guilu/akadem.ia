@@ -18,6 +18,7 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
   @Query("""
       select f from FlashcardEntity f
       where f.unitId = :unitId
+        and (f.visibility = 'GLOBAL' or f.ownerId = :userId)
         and not exists (
           select 1 from FlashcardReviewEntity r
           where r.userId = :userId and r.flashcardId = f.id
@@ -31,6 +32,7 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
   @Query("""
       select count(f) from FlashcardEntity f
       where f.unitId = :unitId
+        and (f.visibility = 'GLOBAL' or f.ownerId = :userId)
         and not exists (
           select 1 from FlashcardReviewEntity r
           where r.userId = :userId and r.flashcardId = f.id
@@ -41,10 +43,28 @@ public interface JpaFlashcardRepository extends JpaRepository<FlashcardEntity, U
 
   @Query("""
       select count(f) from FlashcardEntity f
-      where not exists (
-        select 1 from FlashcardReviewEntity r
-        where r.userId = :userId and r.flashcardId = f.id
-      )
+      where (f.visibility = 'GLOBAL' or f.ownerId = :userId)
+        and not exists (
+          select 1 from FlashcardReviewEntity r
+          where r.userId = :userId and r.flashcardId = f.id
+        )
       """)
   long countNewByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT f FROM FlashcardEntity f WHERE f.visibility = 'GLOBAL' OR f.ownerId = :userId")
+  List<FlashcardEntity> findVisibleByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT f FROM FlashcardEntity f WHERE f.unitId = :unitId AND (f.visibility = 'GLOBAL' OR f.ownerId = :userId)")
+  List<FlashcardEntity> findVisibleByUnitIdAndUserId(@Param("unitId") UUID unitId, @Param("userId") UUID userId);
+
+  @Query("""
+      select f.unitId, count(f) from FlashcardEntity f
+      where (f.visibility = 'GLOBAL' or f.ownerId = :userId)
+        and not exists (
+          select 1 from FlashcardReviewEntity r
+          where r.userId = :userId and r.flashcardId = f.id
+        )
+      group by f.unitId
+      """)
+  List<Object[]> countNewByUserIdGroupByUnit(@Param("userId") UUID userId);
 }

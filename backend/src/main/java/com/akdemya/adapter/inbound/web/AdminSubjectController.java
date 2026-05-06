@@ -1,13 +1,17 @@
 package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.domain.model.Subject;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.SubjectRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/admin/subjects")
 public class AdminSubjectController {
@@ -27,23 +31,23 @@ public class AdminSubjectController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody SubjectRequest req) {
+  public ResponseEntity<?> create(@Valid @RequestBody SubjectRequest req) {
     if (req.name() == null || req.name().trim().isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
-    Subject subject = Subject.create(req.name().trim(), req.description());
+    Subject subject = Subject.createGlobal(req.name().trim(), req.description());
     return ResponseEntity.ok(SubjectResponse.from(subjects.save(subject), 0));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody SubjectRequest req) {
+  public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody SubjectRequest req) {
     Subject current = subjects.findById(id).orElse(null);
     if (current == null) return ResponseEntity.notFound().build();
     String name = (req.name() == null ? "" : req.name().trim());
     if (name.isEmpty()) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "name_required"));
     }
-    Subject updated = new Subject(id, name, req.description());
+    Subject updated = new Subject(id, name, req.description(), current.getVisibility(), current.getOwnerId());
     int unitCount = units.findBySubjectId(id).size();
     return ResponseEntity.ok(SubjectResponse.from(subjects.save(updated), unitCount));
   }
@@ -55,9 +59,9 @@ public class AdminSubjectController {
   }
 
   record SubjectRequest(String name, String description) {}
-  record SubjectResponse(UUID id, String name, String description, int unitCount) {
+  record SubjectResponse(UUID id, String name, String description, int unitCount, Visibility visibility) {
     static SubjectResponse from(Subject s, int unitCount) {
-      return new SubjectResponse(s.getId(), s.getName(), s.getDescription(), unitCount);
+      return new SubjectResponse(s.getId(), s.getName(), s.getDescription(), unitCount, s.getVisibility());
     }
   }
 }

@@ -3,9 +3,11 @@ package com.akdemya.adapter.infrastructure.security;
 import com.akdemya.domain.port.out.TokenProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,10 +16,22 @@ public class JwtService implements TokenProvider {
     @Value("${security.jwt.secret}")
     private String jwtSecret;
 
-    private final long ttlMs = 1000L * 60 * 60 * 24;
+    @Value("${security.jwt.ttl-minutes:15}")
+    private int ttlMinutes;
 
-    private Key signingKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    private long ttlMs() { return ttlMinutes * 60 * 1000L; }
+
+    @PostConstruct
+    void validateSecret() {
+        byte[] decoded = Base64.getDecoder().decode(jwtSecret);
+        if (decoded.length < 32) {
+            throw new IllegalArgumentException(
+                    "JWT secret must be at least 256 bits (32 bytes) when Base64-decoded");
+        }
+    }
+
+    Key signingKey() {
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret));
     }
 
     public String generate(String subject, Map<String, Object> claims) {
@@ -26,7 +40,7 @@ public class JwtService implements TokenProvider {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + ttlMs))
+                .setExpiration(new Date(now + ttlMs()))
                 .signWith(signingKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -19,4 +19,21 @@ public interface UnitRepository {
   Unit save(Unit unit);
 
   void deleteById(UUID id);
+
+  /** Returns all GLOBAL units plus the caller's own PRIVATE units for the given subject. */
+  List<Unit> findVisibleBySubjectIdAndUserId(UUID subjectId, UUID userId);
+
+  /**
+   * Returns all units visible to the caller (GLOBAL + own PRIVATE) that have at least one flashcard.
+   * Used by getUnitSummaries to avoid leaking other users' PRIVATE units.
+   */
+  List<Unit> findVisibleWithFlashcardsByUserId(UUID userId);
+
+  /**
+   * Scope-aware query for a given subject:
+   * - GLOBAL → visibility=GLOBAL
+   * - PRIVATE → visibility=PRIVATE AND ownerId=userId
+   * - ALL → visibility=GLOBAL OR (visibility=PRIVATE AND ownerId=userId)
+   */
+  List<Unit> findBySubjectIdAndScope(UUID subjectId, UUID userId, com.akdemya.domain.model.Visibility scope);
 }

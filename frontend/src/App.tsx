@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
-import { apiAuthJson, getSubjects, startExam as apiStartExam, startRandomExam as apiStartRandomExam, submitExam } from './api';
+import { apiBase, apiJson, getMe, logout } from './api';
 import type { Subject, ExamResult, ExamStartResponse, NavUser } from './types';
 import { timeoutMessage } from './utils/messages';
 import { deriveInitials } from './utils/format';
@@ -10,11 +10,15 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import SubjectsPage from './pages/SubjectsPage';
+import SyllabusesPage from './pages/SyllabusesPage';
+import SyllabusSubjectsPage from './pages/SyllabusSubjectsPage';
+import SyllabusExamBuilderPage from './pages/SyllabusExamBuilderPage';
 import ExamBuilderPage from './pages/ExamBuilderPage';
 import ExamRunnerPage from './pages/ExamRunnerPage';
 import ExamAttemptPage from './pages/ExamAttemptPage';
 import ExamResultPage from './pages/ExamResultPage';
 import SettingsPage from './pages/SettingsPage';
+import ManagePage from './pages/ManagePage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import FlashcardsStudyPage from './pages/FlashcardsStudyPage';
 import FlashcardsHistoryPage from './pages/FlashcardsHistoryPage';
@@ -22,18 +26,22 @@ import FlashcardsExamineUnitPage from './pages/FlashcardsExamineUnitPage';
 import RagPage from './pages/RagPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './pages/ProtectedRoute';
+import SyllabusSalesPage from './pages/SyllabusSalesPage';
+import SubalternoGVAPage from './pages/SubalternoGVAPage';
+import DownloadPage from './pages/DownloadPage';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
-  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register;
+  const isFullWidth = isHome || location.pathname === ROUTES.login || location.pathname === ROUTES.register || location.pathname.startsWith('/temario');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [minutes, setMinutes] = useState(20);
   const [attemptId, setAttemptId] = useState<string>('');
-  const [token, setToken] = useState<string>(localStorage.getItem('ak_token') || '');
+  const [authUser, setAuthUser] = useState<{ email: string; role: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [result, setResult] = useState<ExamResult | null>(null);
   const [activeAttemptId, setActiveAttemptId] = useState<string>(sessionStorage.getItem('akdmia.activeAttemptId') || '');
   const [toastError, setToastError] = useState<string>('');
@@ -43,30 +51,36 @@ export default function App() {
     setTimeout(() => setToastError(''), 5000);
   }
 
-  const isAuthed = useMemo(() => Boolean(token), [token]);
+  // On mount: check if there is a valid session via cookie
+  useEffect(() => {
+    getMe()
+      .then((data) => setAuthUser(data))
+      .catch(() => setAuthUser(null))
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  const isAuthed = Boolean(authUser) && !authLoading;
+
   const { role, user } = useMemo<{ role: string | null; user: NavUser | null }>(() => {
-    try {
-      if (!token) return { role: null, user: null };
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const email: string = payload.sub || '';
-      const initials = deriveInitials(email);
-      return { role: payload.role || null, user: { email, initials } };
-    } catch {
-      return { role: null, user: null };
-    }
-  }, [token]);
+    if (!authUser) return { role: null, user: null };
+    const email = authUser.email;
+    const initials = deriveInitials(email);
+    return { role: authUser.role || null, user: { email, initials } };
+  }, [authUser]);
 
   async function authedJson<T>(url: string, options: RequestInit & { timeoutMs?: number } = {}) {
     try {
-      return await apiAuthJson<T>(url, token, options);
-    } catch (err: any) {
-      if (err?.status === 401) onLogout();
+      return await apiJson<T>(url, options);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+        onLogout();
+      }
       throw err;
     }
   }
 
   const refreshSubjects = () => {
-    if (!token) {
+    if (!authUser) {
       setSubjects([]);
       return Promise.resolve();
     }
@@ -77,47 +91,62 @@ export default function App() {
 
   useEffect(() => {
     refreshSubjects();
-  }, [token]);
+  }, [authUser, apiBase]);
 
-  // Handle OAuth2 callback: extract token from URL query param
+  // Handle OAuth2 callback: exchange ephemeral code for JWT cookie
   useEffect(() => {
     if (location.pathname === ROUTES.oauth2Callback) {
       const params = new URLSearchParams(location.search);
-      const callbackToken = params.get('token');
-      if (callbackToken) {
-        onToken(callbackToken);
-      } else {
+      const code = params.get('code');
+      if (!code) {
         navigate(ROUTES.login);
+        return;
       }
+      fetch(`${apiBase}/api/auth/oauth2/exchange`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+        credentials: 'include',
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('exchange_failed');
+          return getMe();
+        })
+        .then((data) => onAuthSuccess(data))
+        .catch(() => navigate(ROUTES.login));
     }
   }, [location.pathname]);
 
-  function onToken(t: string) {
-    setToken(t);
-    localStorage.setItem('ak_token', t);
-    navigate(ROUTES.subjects);
+  function onAuthSuccess(userData: { email: string; role: string }) {
+    setAuthUser(userData);
+    navigate(ROUTES.syllabuses);
   }
 
-  function onLogout(){
-    localStorage.removeItem('ak_token');
+  function onLogout() {
+    logout().catch(() => {});
     sessionStorage.removeItem('akdmia.activeAttemptId');
     setActiveAttemptId('');
-    setToken('');
+    setAuthUser(null);
     navigate(ROUTES.home);
   }
 
   // timeoutMessage from utils
   async function startExam(cfg: { unitCounts: Record<string, number>; minutes: number; difficulty?: 'EASY' | 'MEDIUM' | 'HARD' }) {
     try {
-      const data = await apiStartExam(token, cfg);
+      const data = await authedJson<ExamStartResponse>(`${apiBase}/api/exams/attempts/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg),
+        timeoutMs: 15000
+      });
       setAttemptId(data.attemptId);
       setMinutes(Math.round(data.totalTimeSeconds / 60));
       setQuestions(data.questions);
       sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
       setActiveAttemptId(data.attemptId);
       navigate(ROUTES.examAttempt(data.attemptId));
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -134,8 +163,8 @@ export default function App() {
       sessionStorage.setItem('akdmia.activeAttemptId', data.attemptId);
       setActiveAttemptId(data.attemptId);
       navigate(ROUTES.examAttempt(data.attemptId));
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -151,13 +180,18 @@ export default function App() {
       }
     });
     try {
-      const data = await submitExam(token, attemptId, selections);
+      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attemptId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selections }),
+        timeoutMs: 15000
+      });
       sessionStorage.removeItem('akdmia.activeAttemptId');
       setActiveAttemptId('');
       setResult(data);
       navigate(ROUTES.examResult);
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -167,15 +201,17 @@ export default function App() {
 
   async function viewResult(attempt: string) {
     try {
-      const data = await submitExam(token, attempt, {});
+      const data = await authedJson<ExamResult>(`${apiBase}/api/exams/attempts/${attempt}/result`, {
+        timeoutMs: 15000
+      });
       if (activeAttemptId === attempt) {
         sessionStorage.removeItem('akdmia.activeAttemptId');
         setActiveAttemptId('');
       }
       setResult(data);
       navigate(ROUTES.examResult);
-    } catch (err: any) {
-      if (err?.code === 'timeout') {
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'timeout') {
         showError(timeoutMessage);
         return;
       }
@@ -187,6 +223,11 @@ export default function App() {
     sessionStorage.setItem('akdmia.activeAttemptId', attempt);
     setActiveAttemptId(attempt);
     navigate(ROUTES.examAttempt(attempt));
+  }
+
+  // While session is being verified, don't redirect protected routes
+  if (authLoading) {
+    return null;
   }
 
   return (
@@ -205,17 +246,39 @@ export default function App() {
           {toastError}
         </div>
       )}
-      <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-4xl mx-auto p-6 pt-24'}>
+      <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-7xl mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
-          <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onToken={onToken} />} />
-          <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onToken={onToken} />} />
+          <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage />} />
+          <Route path={ROUTES.subalternoGva} element={<SubalternoGVAPage />} />
+          <Route path="/descarga/:token" element={<DownloadPage />} />
+          <Route path={ROUTES.login} element={<LoginPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
+          <Route path={ROUTES.register} element={<RegisterPage isAuthed={isAuthed} onAuthSuccess={onAuthSuccess} />} />
+          <Route path={ROUTES.syllabuses} element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusesPage
+                activeAttemptId={activeAttemptId}
+                onUnauthorized={onLogout}
+                onViewResult={viewResult}
+                onResumeAttempt={resumeAttempt}
+              />
+            </ProtectedRoute>
+          } />
+          <Route path="/syllabuses/:syllabusId/subjects" element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusSubjectsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/syllabuses/:syllabusId/exam-builder" element={
+            <ProtectedRoute allow={isAuthed}>
+              <SyllabusExamBuilderPage onUnauthorized={onLogout} />
+            </ProtectedRoute>
+          } />
           <Route path={ROUTES.subjects} element={
             <ProtectedRoute allow={isAuthed}>
               <SubjectsPage
                 subjects={subjects}
                 activeAttemptId={activeAttemptId}
-                token={token}
                 onUnauthorized={onLogout}
                 onViewResult={viewResult}
                 onResumeAttempt={resumeAttempt}
@@ -234,7 +297,7 @@ export default function App() {
           } />
           <Route path="/exams/attempts/:attemptId" element={
             <ProtectedRoute allow={isAuthed}>
-              <ExamAttemptPage token={token} onUnauthorized={onLogout} onFinish={(res) => {
+              <ExamAttemptPage onUnauthorized={onLogout} onFinish={(res) => {
                 sessionStorage.removeItem('akdmia.activeAttemptId');
                 setActiveAttemptId('');
                 setResult(res);
@@ -248,7 +311,12 @@ export default function App() {
           } />
           <Route path={ROUTES.settings} element={
             <ProtectedRoute allow={isAuthed}>
-              <SettingsPage isAdmin={role === 'ADMIN'} token={token} onSubjectsChanged={refreshSubjects} />
+              <SettingsPage isAdmin={role === 'ADMIN'} />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.manage} element={
+            <ProtectedRoute allow={isAuthed}>
+              <ManagePage isAdmin={role === 'ADMIN'} onSubjectsChanged={refreshSubjects} />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.flashcards} element={
@@ -273,7 +341,12 @@ export default function App() {
           } />
           <Route path={ROUTES.rag} element={
             <ProtectedRoute allow={isAuthed && role === 'ADMIN'}>
-              <RagPage token={token} subjects={subjects} />
+              <RagPage subjects={subjects} />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.profile} element={
+            <ProtectedRoute allow={isAuthed}>
+              <ProfilePage />
             </ProtectedRoute>
           } />
           <Route path={ROUTES.profile} element={

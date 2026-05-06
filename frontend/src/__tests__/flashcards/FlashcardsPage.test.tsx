@@ -39,11 +39,8 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    apiAuthJson: vi.fn(),
+    apiJson: vi.fn(),
     exportFlashcardsBySubject: vi.fn(),
-    exportFlashcardsByUnit: vi.fn(),
-    getFlashcardsUnitsSummary: vi.fn(),
-    getFlashcardsStudyQueue: vi.fn(),
   };
 });
 
@@ -53,6 +50,8 @@ const mockUnits = [
     unitName: 'Álgebra',
     subjectId: 'subj-1',
     subjectName: 'Matemáticas',
+    syllabusId: 'syll-1',
+    syllabusName: 'Ciencias',
     newCount: 3,
     reviewCount: 2,
     dueCount: 1,
@@ -62,6 +61,8 @@ const mockUnits = [
     unitName: 'Trigonometría',
     subjectId: 'subj-1',
     subjectName: 'Matemáticas',
+    syllabusId: 'syll-1',
+    syllabusName: 'Ciencias',
     newCount: 1,
     reviewCount: 0,
     dueCount: 0,
@@ -71,19 +72,17 @@ const mockUnits = [
 describe('FlashcardsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
     globalThis.URL.createObjectURL = vi.fn(() => 'blob:test');
     globalThis.URL.revokeObjectURL = vi.fn();
   });
 
-  it('shows empty state with import CTA when no subjects available', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+  it('shows empty state with import CTA when no syllabuses available', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     expect(
@@ -92,13 +91,12 @@ describe('FlashcardsPage', () => {
   });
 
   it('opens import modal when empty state CTA is clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /importar flashcards/i }));
@@ -107,13 +105,12 @@ describe('FlashcardsPage', () => {
   });
 
   it('opens import modal when header Importar button is clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument();
+      expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument();
     });
 
     const importButtons = screen.getAllByRole('button', { name: /importar/i });
@@ -123,12 +120,11 @@ describe('FlashcardsPage', () => {
   });
 
   it('closes import modal when close is clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument());
 
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     expect(screen.getByTestId('import-modal')).toBeInTheDocument();
@@ -138,41 +134,48 @@ describe('FlashcardsPage', () => {
   });
 
   it('reloads units when onImported is called from modal', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    // 1st: initial units, 2nd: initial queue, 3rd: reloaded units
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ new: 0, due: 0, learning: 0 })
+      .mockResolvedValueOnce(mockUnits);
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('No hay materias disponibles.')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No hay temarios disponibles.')).toBeInTheDocument());
 
     fireEvent.click(screen.getAllByRole('button', { name: /importar/i })[0]);
     fireEvent.click(screen.getByText('Importado'));
 
-    // getFlashcardsUnitsSummary should be called again (reload)
-    expect(vi.mocked(api.getFlashcardsUnitsSummary).mock.calls.length).toBeGreaterThan(1);
+    // Wait for the reloaded data to be rendered
+    await waitFor(() => {
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
+    });
   });
 
-  it('shows subjects when data loads', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+  it('shows syllabuses when data loads', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Matemáticas')).toBeInTheDocument();
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
     });
   });
 
-  it('shows unit list when subject is selected', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+  it('shows unit list when syllabus and subject is selected', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
 
-    // We need SubjectCard to be real here — don't mock it
+    // We need components to be real here — don't mock it
     render(<FlashcardsPage />);
+
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Ciencias'));
 
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
-    // Click on the subject button (the main button inside SubjectCard)
+    // Click on the subject button
     fireEvent.click(screen.getByText('Matemáticas'));
 
     // UnitList should now show the units for the selected subject
@@ -182,21 +185,20 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows back button and navigates back when clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
+
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Matemáticas'));
 
-    await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
-
-    const backButton = screen.getByRole('button', { name: /volver a materias/i });
+    const backButton = screen.getByRole('button', { name: /volver/i });
     fireEvent.click(backButton);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    expect(screen.queryByText('Álgebra')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
   });
 
   it('navigates to study page when unit clicked in study mode', async () => {
@@ -205,16 +207,14 @@ describe('FlashcardsPage', () => {
       useSearchParams: () => [new URLSearchParams('mode=study')],
     }));
 
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
   });
 
   it('navigates to study page tab when Estudio tab clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
@@ -225,8 +225,7 @@ describe('FlashcardsPage', () => {
   });
 
   it('navigates to flashcards when Examinar tab clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
@@ -237,8 +236,7 @@ describe('FlashcardsPage', () => {
   });
 
   it('navigates to history when Historial tab clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsPage />);
 
@@ -249,15 +247,15 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows export error banner when unit export fetch fails', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
-    vi.mocked(api.exportFlashcardsByUnit).mockRejectedValue(Object.assign(new Error('api_error'), { status: 500 }));
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
     render(<FlashcardsPage />);
 
-    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
 
-    // Select subject to show units
+    fireEvent.click(screen.getByText('Ciencias'));
+    await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Matemáticas'));
 
     await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
@@ -274,12 +272,13 @@ describe('FlashcardsPage', () => {
   });
 
   it('dismisses export error banner when close button is clicked', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
-    vi.mocked(api.exportFlashcardsByUnit).mockRejectedValue(Object.assign(new Error('api_error'), { status: 500 }));
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Matemáticas'));
     await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
@@ -294,8 +293,7 @@ describe('FlashcardsPage', () => {
   });
 
   it('calls exportFlashcardsBySubject and creates download link on success', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
     vi.mocked(api.exportFlashcardsBySubject).mockResolvedValue('front,back\nHello,Hola\n');
 
     // Spy on link.click without mocking createElement globally
@@ -311,6 +309,8 @@ describe('FlashcardsPage', () => {
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
     // Click CSV export on the SubjectCard
@@ -318,7 +318,7 @@ describe('FlashcardsPage', () => {
     fireEvent.click(csvButtons[0]);
 
     await waitFor(() => {
-      expect(api.exportFlashcardsBySubject).toHaveBeenCalledWith('test-token', 'subj-1', 'csv');
+      expect(api.exportFlashcardsBySubject).toHaveBeenCalledWith('subj-1', 'csv');
     });
 
     expect(clickSpy).toHaveBeenCalled();
@@ -326,12 +326,13 @@ describe('FlashcardsPage', () => {
   });
 
   it('shows subject export error banner when exportFlashcardsBySubject fails', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+    vi.mocked(api.apiJson).mockResolvedValue(mockUnits);
     vi.mocked(api.exportFlashcardsBySubject).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
 
     const csvButtons = screen.getAllByTitle('Exportar CSV');
@@ -344,51 +345,64 @@ describe('FlashcardsPage', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/no se pudo exportar la materia/i);
   });
 
-  it('filters subjects by search term', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue([
+  it('filters syllabuses by search term', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue([
       ...mockUnits,
       {
         unitId: 'unit-3',
         unitName: 'Historia Medieval',
         subjectId: 'subj-2',
         subjectName: 'Historia',
+        syllabusId: 'syll-2',
+        syllabusName: 'Humanidades',
         newCount: 0,
         reviewCount: 0,
         dueCount: 0,
       },
     ]);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
 
     render(<FlashcardsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Matemáticas')).toBeInTheDocument();
-      expect(screen.getByText('Historia')).toBeInTheDocument();
+      expect(screen.getByText('Ciencias')).toBeInTheDocument();
+      expect(screen.getByText('Humanidades')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'histo' } });
+    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'humani' } });
 
     await waitFor(() => {
-      expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
-      expect(screen.getByText('Historia')).toBeInTheDocument();
+      expect(screen.queryByText('Ciencias')).not.toBeInTheDocument();
+      expect(screen.getByText('Humanidades')).toBeInTheDocument();
     });
   });
 
-  it('filters units by search term when subject is selected', async () => {
-    vi.mocked(api.getFlashcardsUnitsSummary).mockResolvedValue(mockUnits);
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue({ new: 0, due: 0, learning: 0 });
+  it('filters subjects by search term when syllabus is selected', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue([
+      ...mockUnits,
+      {
+        unitId: 'unit-3',
+        unitName: 'Física',
+        subjectId: 'subj-3',
+        subjectName: 'Física Clásica',
+        syllabusId: 'syll-1',
+        syllabusName: 'Ciencias',
+        newCount: 0,
+        reviewCount: 0,
+        dueCount: 0,
+      },
+    ]);
 
     render(<FlashcardsPage />);
 
+    await waitFor(() => expect(screen.getByText('Ciencias')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Ciencias'));
     await waitFor(() => expect(screen.getByText('Matemáticas')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Matemáticas'));
-    await waitFor(() => expect(screen.getByText('Álgebra')).toBeInTheDocument());
 
-    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'álge' } });
+    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'físi' } });
 
     await waitFor(() => {
-      expect(screen.getByText('Álgebra')).toBeInTheDocument();
-      expect(screen.queryByText('Trigonometría')).not.toBeInTheDocument();
+      expect(screen.getByText('Física Clásica')).toBeInTheDocument();
+      expect(screen.queryByText('Matemáticas')).not.toBeInTheDocument();
     });
   });
 });

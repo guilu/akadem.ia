@@ -1,15 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { formatDuration } from '../utils/format';
-import { Plus, ArrowsRepeat, ClipboardCheck } from 'flowbite-react-icons/outline';
-import { getExamAttempts } from '../api';
+import { Plus, ArrowsRepeat, ClipboardCheck, BookOpen } from 'flowbite-react-icons/outline';
+import { apiJson, apiBase } from '../api';
 import type { Subject, ExamAttemptSummary } from '../types';
 import { ROUTES } from '../constants/routes';
 
-export default function SubjectsPage({ subjects, activeAttemptId, token, onUnauthorized, onViewResult, onResumeAttempt }: {
+export default function SubjectsPage({ subjects, activeAttemptId, onUnauthorized, onViewResult, onResumeAttempt }: {
   subjects: Subject[];
   activeAttemptId?: string;
-  token: string;
   onUnauthorized: () => void;
   onViewResult: (attemptId: string) => void;
   onResumeAttempt: (attemptId: string) => void;
@@ -31,15 +30,15 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
   useEffect(() => {
     setLoading(true);
     setError('');
-    getExamAttempts(token)
+    apiJson<ExamAttemptSummary[]>(`${apiBase}/api/exams/attempts`)
       .then(setHistory)
-      .catch(err => {
-        if (err?.status === 401) onUnauthorized();
+      .catch((err: unknown) => {
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) onUnauthorized();
         setError('No se pudo cargar el historial.');
         setHistory([]);
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [apiBase]);
 
   return (
     <section className="mb-8">
@@ -60,7 +59,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
             className="btn btn-outline rounded-full px-5 py-2.5 text-sm flex items-center gap-2"
             to={ROUTES.examAttempt(activeAttemptId)}
           >
-            <ArrowsRepeat className="w-4 h-4" />
+            <ArrowsRepeat className="w-6 h-6" />
             Reanudar examen
           </Link>
         )}
@@ -68,6 +67,24 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
 
       {/* ── Subject cards ── */}
       <div className="grid sm:grid-cols-2 gap-4 mb-12">
+        {subjects.length === 0 && (
+          <div className="sm:col-span-2 border border-secondary/25 rounded-2xl px-5 py-10 text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-bold text-base mb-1">No hay materias disponibles</p>
+              <p className="text-sm text-text/55">Aún no hay contenido para crear un examen. Añade materias y preguntas desde el panel de gestión.</p>
+            </div>
+            <Link
+              to={ROUTES.manage}
+              className="btn btn-primary rounded-full px-6 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
+            >
+              <Plus className="w-6 h-6" />
+              Ir a Gestionar
+            </Link>
+          </div>
+        )}
         {subjects.map(s => (
           <article
             key={s.id}
@@ -82,7 +99,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
               className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
               to={ROUTES.subjectBuilder(s.id)}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-6 h-6" />
               Crear examen
             </Link>
           </article>
@@ -146,7 +163,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                         className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
                         onClick={() => onViewResult(h.attemptId)}
                       >
-                        <ClipboardCheck className="w-4 h-4" />
+                        <ClipboardCheck className="w-6 h-6" />
                         Ver resultados
                       </button>
                     ) : (
@@ -154,7 +171,7 @@ export default function SubjectsPage({ subjects, activeAttemptId, token, onUnaut
                         className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 flex items-center gap-2"
                         onClick={() => onResumeAttempt(h.attemptId)}
                       >
-                        <ArrowsRepeat className="w-4 h-4" />
+                        <ArrowsRepeat className="w-6 h-6" />
                         Reanudar
                       </button>
                     )}

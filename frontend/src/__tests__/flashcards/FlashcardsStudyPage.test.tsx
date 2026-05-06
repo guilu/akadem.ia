@@ -12,16 +12,18 @@ vi.mock('flowbite-react-icons/outline', () => ({
   ArrowLeft: () => <span data-testid="arrow-left" />,
   CircleMinus: () => <span data-testid="circle-minus" />,
   CheckCircle: () => <span data-testid="check-circle" />,
+  Close: () => <span data-testid="close" />,
+  CloseCircle: () => <span data-testid="close-circle" />,
+  Refresh: () => <span data-testid="refresh" />,
+  Rocket: () => <span data-testid="rocket" />,
+  Star: () => <span data-testid="star" />,
 }));
 
 vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    apiAuthJson: vi.fn(),
-    getFlashcardsStudyQueue: vi.fn(),
-    getFlashcardsStudyNext: vi.fn(),
-    reviewFlashcard: vi.fn(),
+    apiJson: vi.fn(),
   };
 });
 
@@ -38,12 +40,10 @@ const mockItem = {
 describe('FlashcardsStudyPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
   });
 
   it('shows skeleton while loading', () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockReturnValue(new Promise(() => {}));
-    vi.mocked(api.getFlashcardsStudyNext).mockReturnValue(new Promise(() => {}));
+    vi.mocked(api.apiJson).mockReturnValue(new Promise(() => {}));
 
     const { container } = render(<FlashcardsStudyPage />);
 
@@ -52,8 +52,9 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('renders study session when loaded', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue) // fetchQueue
+      .mockResolvedValueOnce(mockItem); // fetchNext
 
     render(<FlashcardsStudyPage />);
 
@@ -63,9 +64,10 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows inline review error without replacing session', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
-    vi.mocked(api.reviewFlashcard).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue) // initial fetchQueue
+      .mockResolvedValueOnce(mockItem) // initial fetchNext
+      .mockRejectedValueOnce(new Error('api_error')); // POST review fails
 
     render(<FlashcardsStudyPage />);
 
@@ -80,7 +82,7 @@ describe('FlashcardsStudyPage', () => {
     });
 
     // Click Repetir (AGAIN)
-    fireEvent.click(screen.getByText('❌ Repetir'));
+    fireEvent.click(screen.getByText('Repetir'));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -96,9 +98,10 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('review error can be dismissed', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
-    vi.mocked(api.reviewFlashcard).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue)
+      .mockResolvedValueOnce(mockItem)
+      .mockRejectedValueOnce(new Error('api_error'));
 
     render(<FlashcardsStudyPage />);
 
@@ -109,7 +112,7 @@ describe('FlashcardsStudyPage', () => {
     fireEvent.click(screen.getByText('Mostrar respuesta'));
     await waitFor(() => screen.getByText('4'));
 
-    fireEvent.click(screen.getByText('❌ Repetir'));
+    fireEvent.click(screen.getByText('Repetir'));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -121,8 +124,9 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows "Nada que repasar hoy" when finished with 0 answered cards', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(emptyQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(undefined);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(emptyQueue) // fetchQueue — empty
+      .mockResolvedValueOnce(undefined); // fetchNext — nothing
 
     render(<FlashcardsStudyPage />);
 
@@ -137,13 +141,12 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows answered count when finished after reviewing cards', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue)
-      .mockResolvedValueOnce(mockQueue)    // initial fetchQueue
-      .mockResolvedValueOnce(emptyQueue);  // fetchQueue after review
-    vi.mocked(api.getFlashcardsStudyNext)
-      .mockResolvedValueOnce(mockItem)     // initial fetchNext
-      .mockResolvedValueOnce(undefined);   // fetchNext after review — done
-    vi.mocked(api.reviewFlashcard).mockResolvedValue(undefined);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue) // initial fetchQueue
+      .mockResolvedValueOnce(mockItem) // initial fetchNext
+      .mockResolvedValueOnce(undefined) // POST review (204 no content)
+      .mockResolvedValueOnce(emptyQueue) // fetchQueue after review
+      .mockResolvedValueOnce(undefined); // fetchNext after review — done
 
     render(<FlashcardsStudyPage />);
 
@@ -154,7 +157,7 @@ describe('FlashcardsStudyPage', () => {
     fireEvent.click(screen.getByText('Mostrar respuesta'));
     await waitFor(() => screen.getByText('4'));
 
-    fireEvent.click(screen.getByText('🚀 Memorizada'));
+    fireEvent.click(screen.getByText('Memorizada'));
 
     await waitFor(() => {
       expect(screen.getByText('Sesión completada')).toBeInTheDocument();
@@ -164,8 +167,9 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('opens confirm modal when Terminar sesión is clicked', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue)
+      .mockResolvedValueOnce(mockItem);
 
     render(<FlashcardsStudyPage />);
 
@@ -177,8 +181,9 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('can cancel the confirm modal', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue)
+      .mockResolvedValueOnce(mockItem);
 
     render(<FlashcardsStudyPage />);
 
@@ -192,8 +197,9 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('finishes session when Terminar is confirmed in modal', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockResolvedValue(mockQueue);
-    vi.mocked(api.getFlashcardsStudyNext).mockResolvedValue(mockItem);
+    vi.mocked(api.apiJson)
+      .mockResolvedValueOnce(mockQueue)
+      .mockResolvedValueOnce(mockItem);
 
     render(<FlashcardsStudyPage />);
 
@@ -214,8 +220,7 @@ describe('FlashcardsStudyPage', () => {
   });
 
   it('shows error state when initial load fails', async () => {
-    vi.mocked(api.getFlashcardsStudyQueue).mockRejectedValue(new Error('api_error'));
-    vi.mocked(api.getFlashcardsStudyNext).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsStudyPage />);
 

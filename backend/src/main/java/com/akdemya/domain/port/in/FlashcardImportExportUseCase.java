@@ -5,9 +5,11 @@ import java.util.UUID;
 
 public interface FlashcardImportExportUseCase {
 
-  ImportResult importFlashcards(UUID unitId, String format, String content);
+  ImportResult importFlashcards(UUID unitId, String format, String content, UUID callerId, boolean isAdmin);
 
-  String exportFlashcards(UUID unitId, String format);
+  String exportFlashcards(UUID unitId, String format, UUID callerId, boolean isAdmin);
+
+  String exportFlashcardsBySubject(UUID subjectId, UUID userId, String format);
 
   String exportFlashcardsBySubject(UUID subjectId, String format);
 

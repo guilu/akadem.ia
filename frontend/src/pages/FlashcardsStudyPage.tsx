@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CircleMinus, CheckCircle } from 'flowbite-react-icons/outline';
-import { getFlashcardsStudyQueue, getFlashcardsStudyNext, reviewFlashcard } from '../api';
+import { ArrowLeft, CircleMinus, CheckCircle, Close, CloseCircle, Refresh, Rocket, Star } from 'flowbite-react-icons/outline';
+import { apiJson, apiBase } from '../api';
 
 type IntervalHints = { again: string; good: string; easy: string };
 type ReviewState = 'NEW' | 'LEARNING' | 'REVIEW';
@@ -26,13 +26,11 @@ export default function FlashcardsStudyPage() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [queueCounts, setQueueCounts] = useState({ new: 0, due: 0, learning: 0 });
 
-  const token = localStorage.getItem('ak_token') || '';
-
   const fetchNext = async () => {
-    const data = await getFlashcardsStudyNext<StudyItem | undefined>(token, unitId!);
+    const data = await apiJson<StudyItem | undefined>(`${apiBase}/api/flashcards/study/next?unitId=${unitId}`);
     return data || null;
   };
-  const fetchQueue = async () => getFlashcardsStudyQueue<StudyQueueResponse>(token, unitId!);
+  const fetchQueue = async () => apiJson<StudyQueueResponse>(`${apiBase}/api/flashcards/study/queue?unitId=${unitId}`);
 
   const currentItem = items[currentIndex];
   const remaining = Math.max(queueCounts.new + queueCounts.due + queueCounts.learning, 0);
@@ -56,7 +54,7 @@ export default function FlashcardsStudyPage() {
       .catch(() => { if (mounted) setError('No se pudo cargar la sesión de estudio.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token, unitId]);
+  }, [unitId]);
 
   useEffect(() => {
     if (!loading && remaining === 0 && !currentItem) setFinished(true);
@@ -67,7 +65,11 @@ export default function FlashcardsStudyPage() {
     setSubmitting(true);
     setReviewError(null);
     try {
-      await reviewFlashcard(token, { flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest);
+      await apiJson(`${apiBase}/api/flashcards/study/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flashcardId: currentItem.flashcardId, grade, reviewedAt: new Date().toISOString() } satisfies ReviewRequest)
+      });
       const [newQueue, next] = await Promise.all([fetchQueue(), fetchNext()]);
       if (newQueue) setQueueCounts(newQueue);
       setAnsweredCount((prev) => prev + 1);
@@ -114,14 +116,17 @@ export default function FlashcardsStudyPage() {
             className="btn btn-outline h-10 w-10 rounded-full p-0 flex items-center justify-center"
             aria-label="Volver"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6" />
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight">
             {nothingToReview ? 'Sin pendientes' : 'Sesión completada'}
           </h1>
         </header>
         <div className="border border-secondary/25 rounded-2xl p-8 text-center">
-          <div className="text-5xl mb-4">{nothingToReview ? '✅' : '🎉'}</div>
+          {nothingToReview
+            ? <CheckCircle className="w-14 h-14 mx-auto mb-4 text-lime-500" />
+            : <Star className="w-14 h-14 mx-auto mb-4 text-primary" />
+          }
           <div className="text-xl font-bold mb-2">
             {nothingToReview ? 'Nada que repasar hoy' : '¡Bien hecho!'}
           </div>
@@ -134,7 +139,7 @@ export default function FlashcardsStudyPage() {
             className="btn btn-primary rounded-full px-8 py-2.5 text-sm shadow-lg shadow-primary/20 inline-flex items-center gap-2"
             onClick={() => navigate('/flashcards')}
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className="w-6 h-6" />
             Volver a unidades
           </button>
         </div>
@@ -152,7 +157,7 @@ export default function FlashcardsStudyPage() {
           className="btn btn-outline h-9 w-9 rounded-full p-0 flex items-center justify-center"
           aria-label="Volver"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-extrabold tracking-tight">Sesión de estudio</h1>
         <div className="w-9" />
@@ -162,9 +167,18 @@ export default function FlashcardsStudyPage() {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs text-text/50">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-red-400">🔴 {queueCounts.learning} aprendiendo</span>
-            <span className="text-accent">🟡 {queueCounts.due} pendientes</span>
-            <span className="text-lime-500">🟢 {queueCounts.new} nuevas</span>
+            <span className="flex items-center gap-1 text-red-400">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-400 shrink-0" />
+              {queueCounts.learning} aprendiendo
+            </span>
+            <span className="flex items-center gap-1 text-yellow-500">
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 shrink-0" />
+              {queueCounts.due} pendientes
+            </span>
+            <span className="flex items-center gap-1 text-lime-500">
+              <span className="inline-block w-2 h-2 rounded-full bg-lime-400 shrink-0" />
+              {queueCounts.new} nuevas
+            </span>
           </div>
           <span className="font-medium">{progressPct}%</span>
         </div>
@@ -183,10 +197,10 @@ export default function FlashcardsStudyPage() {
           <button
             type="button"
             onClick={() => setReviewError(null)}
-            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            ✕
+            <Close className="w-6 h-6" />
           </button>
         </div>
       )}
@@ -194,7 +208,7 @@ export default function FlashcardsStudyPage() {
       {/* ── Card ── */}
       <div className="relative">
         <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-bg brightness-90 dark:brightness-75" />
-        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[52vh] max-h-[52vh] flex flex-col bg-bg">
+        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[52vh] max-h-[52vh] flex flex-col bg-white dark:bg-card">
           <div className="flex-1 overflow-y-auto min-h-0">
             {!showAnswer ? (
               <p className="text-xl font-semibold leading-relaxed">{currentItem?.front || 'Sin tarjetas disponibles.'}</p>
@@ -219,7 +233,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>❌ Repetir</span>
+                    <CloseCircle className="w-6 h-6 mx-auto mb-0.5" />
+                    <span>Repetir</span>
                     <span className="text-xs text-red-400/60">{currentItem?.intervalHints?.again}</span>
                   </div>
                 </button>
@@ -229,7 +244,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>⚡ Revisar</span>
+                    <Refresh className="w-6 h-6 mx-auto mb-0.5" />
+                    <span>Revisar</span>
                     <span className="text-xs text-yellow-500/60">{currentItem?.intervalHints?.good}</span>
                   </div>
                 </button>
@@ -239,7 +255,8 @@ export default function FlashcardsStudyPage() {
                   disabled={submitting}
                 >
                   <div className="flex flex-col items-center gap-0.5">
-                    <span>🚀 Memorizada</span>
+                    <Rocket className="w-6 h-6 mx-auto mb-0.5" />
+                    <span>Memorizada</span>
                     <span className="text-xs text-lime-500/60">{currentItem?.intervalHints?.easy}</span>
                   </div>
                 </button>
@@ -255,7 +272,7 @@ export default function FlashcardsStudyPage() {
           className="btn btn-outline rounded-full px-5 py-2 text-sm flex items-center gap-2"
           onClick={() => setConfirmOpen(true)}
         >
-          <CircleMinus className="w-4 h-4" />
+          <CircleMinus className="w-6 h-6" />
           Terminar sesión
         </button>
       </div>

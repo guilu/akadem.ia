@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.akdemya.adapter.outbound.persistence.mapper.QuestionMapper;
 import com.akdemya.adapter.outbound.persistence.repository.SpringDataQuestionRepository;
 import com.akdemya.domain.model.Question;
+import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.QuestionRepository;
 
 @Component
@@ -74,5 +75,32 @@ public class QuestionPersistenceAdapter implements QuestionRepository {
   @Override
   public long countByUnitIdAndDifficulty(UUID unitId, String difficulty) {
     return repository.countByUnit_IdAndDifficulty(unitId, difficulty);
+  }
+
+  @Override
+  public List<Question> findVisibleByUserId(UUID userId) {
+    return repository.findVisibleByUserId(userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Question> findVisibleByUnitIdAndUserId(UUID unitId, UUID userId) {
+    return repository.findVisibleByUnitIdAndUserId(unitId, userId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public org.springframework.data.domain.Page<Question> findPageByUnitIdAndScope(UUID unitId, UUID userId, Visibility scope, int page, int size) {
+    var pageable = org.springframework.data.domain.PageRequest.of(page, size);
+    if (scope == null) {
+      // null = ALL: GLOBAL + user's PRIVATE
+      return repository.findAllByUnitIdAndScope(unitId, userId, pageable).map(mapper::toDomain);
+    }
+    return switch (scope) {
+      case GLOBAL -> repository.findGlobalByUnitId(unitId, pageable).map(mapper::toDomain);
+      case PRIVATE -> repository.findPrivateByUnitIdAndOwner(unitId, userId, pageable).map(mapper::toDomain);
+    };
   }
 }

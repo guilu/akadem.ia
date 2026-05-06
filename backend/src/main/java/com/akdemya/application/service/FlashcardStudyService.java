@@ -5,9 +5,15 @@ import com.akdemya.domain.model.Flashcard;
 import com.akdemya.domain.model.FlashcardReview;
 import com.akdemya.domain.model.ReviewState;
 import com.akdemya.domain.model.StudySettingsDefaults;
+import com.akdemya.domain.model.Subject;
+import com.akdemya.domain.model.Syllabus;
+import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.FlashcardStudyUseCase;
 import com.akdemya.domain.port.out.FlashcardRepository;
 import com.akdemya.domain.port.out.FlashcardReviewRepository;
+import com.akdemya.domain.port.out.SubjectRepository;
+import com.akdemya.domain.port.out.SyllabusRepository;
+import com.akdemya.domain.port.out.UnitRepository;
 import com.akdemya.domain.port.out.UserSettingsRepository;
 import com.akdemya.domain.service.Sm2Scheduler;
 import org.springframework.stereotype.Service;
@@ -15,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,15 +32,24 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
   private final FlashcardRepository flashcardRepo;
   private final FlashcardReviewRepository reviewRepo;
   private final UserSettingsRepository settingsRepo;
+  private final UnitRepository unitRepo;
+  private final SubjectRepository subjectRepo;
+  private final SyllabusRepository syllabusRepo;
   private final Sm2Scheduler scheduler;
 
   public FlashcardStudyService(FlashcardRepository flashcardRepo,
                                FlashcardReviewRepository reviewRepo,
                                UserSettingsRepository settingsRepo,
+                               UnitRepository unitRepo,
+                               SubjectRepository subjectRepo,
+                               SyllabusRepository syllabusRepo,
                                FlashcardSchedulerProperties schedulerProperties) {
     this.flashcardRepo = flashcardRepo;
     this.reviewRepo = reviewRepo;
     this.settingsRepo = settingsRepo;
+    this.unitRepo = unitRepo;
+    this.subjectRepo = subjectRepo;
+    this.syllabusRepo = syllabusRepo;
     this.scheduler = new Sm2Scheduler(
         schedulerProperties.getLearningStepsMinutes(),
         schedulerProperties.getEasyIntervalDays(),
@@ -126,5 +143,51 @@ public class FlashcardStudyService implements FlashcardStudyUseCase {
     long totalDue = dueToday + dueIn1to3 + dueIn4to7 + dueIn8to30;
 
     return new DashboardResponse(dueToday, dueIn1to3, dueIn4to7, dueIn8to30, newCards, totalDue);
+  }
+
+  @Override
+  public List<UnitSummaryResult> getUnitSummaries(UnitSummaryCommand command) {
+    if (command == null) throw new IllegalArgumentException("command cannot be null");
+    if (command.userId() == null) throw new IllegalArgumentException("userId cannot be null");
+    LocalDateTime now = command.now() != null ? command.now() : LocalDateTime.now();
+
+    Map<UUID, Long> newCounts = flashcardRepo.countNewByUserIdGroupByUnit(command.userId());
+    Map<UUID, Long> reviewCounts = reviewRepo.countByUserIdAndStateInGroupByUnit(
+        command.userId(), List.of(ReviewState.LEARNING, ReviewState.REVIEW));
+    Map<UUID, Long> dueCounts = reviewRepo.countDueByUserIdUpToGroupByUnit(command.userId(), now);
+
+    List<Subject> subjects = subjectRepo.findVisibleByUserId(command.userId());
+    Map<UUID, String> subjectNames = subjects.stream()
+        .collect(Collectors.toMap(Subject::getId, Subject::getName));
+    Map<UUID, UUID> subjectToSyllabus = subjects.stream()
+        .filter(s -> s.getSyllabusId() != null)
+        .collect(Collectors.toMap(Subject::getId, Subject::getSyllabusId));
+
+    Map<UUID, String> syllabusNames = syllabusRepo.findVisibleByUserId(command.userId()).stream()
+        .collect(Collectors.toMap(Syllabus::getId, Syllabus::getName));
+
+    return unitRepo.findVisibleWithFlashcardsByUserId(command.userId()).stream()
+        .map(unit -> {
+          UUID syllabusId = null;
+          String syllabusName = null;
+          if (unit.getSubjectId() != null) {
+            syllabusId = subjectToSyllabus.get(unit.getSubjectId());
+            if (syllabusId != null) {
+              syllabusName = syllabusNames.get(syllabusId);
+            }
+          }
+          return new UnitSummaryResult(
+              unit.getId(),
+              unit.getName(),
+              unit.getSubjectId(),
+              subjectNames.getOrDefault(unit.getSubjectId(), ""),
+              syllabusId,
+              syllabusName != null ? syllabusName : "",
+              newCounts.getOrDefault(unit.getId(), 0L),
+              reviewCounts.getOrDefault(unit.getId(), 0L),
+              dueCounts.getOrDefault(unit.getId(), 0L)
+          );
+        })
+        .toList();
   }
 }

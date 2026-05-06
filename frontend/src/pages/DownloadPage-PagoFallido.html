@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff",
+            "on-surface": "#1b1c1c",
+            "error": "#ba1a1a",
+            "on-secondary-fixed": "#141d1f",
+            "surface-container-lowest": "#ffffff",
+            "background": "#fcf9f8",
+            "outline": "#8b716c",
+            "inverse-surface": "#303030",
+            "on-background": "#1b1c1c",
+            "tertiary-container": "#966e00",
+            "primary-fixed": "#ffdad4",
+            "on-primary-fixed": "#400200",
+            "surface-variant": "#e4e2e1",
+            "secondary": "#566063",
+            "on-secondary-fixed-variant": "#3f484b",
+            "on-primary-container": "#fffbff",
+            "on-tertiary-fixed": "#261900",
+            "error-container": "#ffdad6",
+            "tertiary": "#775600",
+            "inverse-on-surface": "#f3f0f0",
+            "on-secondary-container": "#5c6669",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "on-error-container": "#93000a",
+            "inverse-primary": "#ffb4a6",
+            "secondary-container": "#dae4e7",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "secondary-fixed": "#dae4e7",
+            "primary-fixed-dim": "#ffb4a6",
+            "primary": "#a43625",
+            "on-surface-variant": "#57423e",
+            "outline-variant": "#dfc0ba",
+            "tertiary-fixed-dim": "#f8bd37",
+            "primary-container": "#c44e3b",
+            "tertiary-fixed": "#ffdea3",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#862113",
+            "surface-container-low": "#f6f3f2",
+            "surface-container-high": "#eae7e7",
+            "surface-tint": "#a73927",
+            "surface-container": "#f0eded",
+            "on-tertiary-container": "#fffbff",
+            "surface": "#fcf9f8",
+            "secondary-fixed-dim": "#bec8cb",
+            "surface-container-highest": "#e4e2e1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "1.5rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      background-color: #fcf9f8;
+      font-family: 'Inter', sans-serif;
+      color: #1b1c1c;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed">
+  <!-- TopNavBar Component -->
+  <header class="bg-[#fcf9f8]/70 dark:bg-slate-950/70 backdrop-blur-xl docked full-width top-0 sticky z-50">
+    <nav class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <div class="text-xl font-bold tracking-tighter text-[#1b1c1c] dark:text-white font-['Plus_Jakarta_Sans']">
+        Scholar Pro
+      </div>
+      <div class="hidden md:flex items-center gap-8">
+        <a class="text-[#1b1c1c]/60 dark:text-white/60 hover:text-[#1b1c1c] dark:hover:text-white font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight transition-all duration-300"
+          href="#">Dashboard</a>
+        <a class="text-[#1b1c1c]/60 dark:text-white/60 hover:text-[#1b1c1c] dark:hover:text-white font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight transition-all duration-300"
+          href="#">Courses</a>
+        <a class="text-[#1b1c1c]/60 dark:text-white/60 hover:text-[#1b1c1c] dark:hover:text-white font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight transition-all duration-300"
+          href="#">Library</a>
+        <a class="text-[#1b1c1c]/60 dark:text-white/60 hover:text-[#1b1c1c] dark:hover:text-white font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight transition-all duration-300"
+          href="#">Schedule</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="p-2 rounded-full hover:bg-stone-200/40 dark:hover:bg-slate-800/40 transition-all duration-300 scale-95 active:scale-90">
+          <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+        </button>
+        <button
+          class="p-2 rounded-full hover:bg-stone-200/40 dark:hover:bg-slate-800/40 transition-all duration-300 scale-95 active:scale-90">
+          <span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
+        </button>
+        <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/30">
+          <img alt="User profile" class="h-full w-full object-cover"
+            data-alt="A professional close-up headshot of a student with a focused expression, set against a soft, out-of-focus academic library background. The lighting is warm and natural, reinforcing the Cognitive Sanctuary aesthetic with cream tones and soft shadows. The overall mood is academic, serene, and highly professional, matching the Scholar Pro brand identity."
+            src="https://lh3.googleusercontent.com/aida/ADBb0uhpaZzrbMTMIM278uBNYivB5V1Kr2QsaHrtyW1JHDXe9iWhXhEWaVbaLsPzIyXfgFS0-qYqsNap6K4oZ0HZexo_3IrDFluivr8O6dyX0W2ed1JF73MaBrJxVr34bO79IXN-KZjIlYwgzY6Cg9c93nHvS25jOP64fo092d-EeD7ozdRI3m1NI4V0TgE1FWmLLDJi8rLtfsSC7szvaxeVCb59bnHDF74OEGl4RsTL9zrmjd6eHDArTTGABgT9R7zZqELxXujQ2aeq" />
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="flex-grow flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <!-- Asymmetric Background Accents -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-fixed/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-12 -left-24 w-64 h-64 bg-secondary-container/30 rounded-full blur-3xl"></div>
+    <!-- Main Content Card -->
+    <div class="relative w-full max-w-xl text-center z-10">
+      <div
+        class="inline-flex items-center justify-center w-24 h-24 mb-10 rounded-full bg-error-container/30 text-primary">
+        <span class="material-symbols-outlined !text-6xl" style="font-variation-settings: 'FILL' 1;">error</span>
+      </div>
+      <h1 class="font-display text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-6">
+        Pago fallido
+      </h1>
+      <p class="font-body text-lg leading-relaxed text-on-surface-variant mb-12 max-w-md mx-auto">
+        El pago no se completó. No se ha realizado ningún cargo en tu cuenta. Si tu tarjeta fue rechazada, puedes volver
+        a intentarlo desde la página del temario.
+      </p>
+      <div class="flex flex-col items-center gap-6">
+        <button
+          class="group relative px-12 py-5 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold text-lg rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 overflow-hidden">
+          <span class="relative z-10 flex items-center gap-2">
+            Intentar de nuevo
+            <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">refresh</span>
+          </span>
+          <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </button>
+        <p class="font-label text-sm text-on-surface-variant/70 tracking-tight">
+          ¿Has intentado varias veces y tienes problemas con la compra?
+          <a class="text-primary font-semibold hover:underline decoration-2 underline-offset-4 ml-1" href="#">Contactar
+            con soporte</a>
+        </p>
+      </div>
+      <!-- Contextual Visual Element -->
+    </div>
+  </main>
+  <!-- Footer Component -->
+  <footer class="bg-[#fcf9f8] dark:bg-slate-950 w-full py-12 mt-auto border-t border-stone-200/10">
+    <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6 md:gap-0">
+      <p class="font-['Inter'] text-xs uppercase tracking-widest text-[#1b1c1c]/40 dark:text-white/40">
+        © 2024 Scholar Pro. The Cognitive Sanctuary.
+      </p>
+      <div class="flex gap-8">
+        <a class="font-['Inter'] text-xs uppercase tracking-widest text-[#1b1c1c]/40 dark:text-white/40 hover:text-[#a43625] dark:hover:text-[#c44e3b] transition-colors opacity-80 hover:opacity-100"
+          href="#">Support</a>
+        <a class="font-['Inter'] text-xs uppercase tracking-widest text-[#1b1c1c]/40 dark:text-white/40 hover:text-[#a43625] dark:hover:text-[#c44e3b] transition-colors opacity-80 hover:opacity-100"
+          href="#">Privacy Policy</a>
+        <a class="font-['Inter'] text-xs uppercase tracking-widest text-[#1b1c1c]/40 dark:text-white/40 hover:text-[#a43625] dark:hover:text-[#c44e3b] transition-colors opacity-80 hover:opacity-100"
+          href="#">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

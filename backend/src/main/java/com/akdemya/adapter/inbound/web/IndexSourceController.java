@@ -5,6 +5,7 @@ import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.port.in.IndexSourceUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +32,7 @@ public class IndexSourceController {
      */
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> upload(
+    public ResponseEntity<Object> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("subjectId") UUID subjectId) throws Exception {
 
@@ -73,9 +74,9 @@ public class IndexSourceController {
      */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> confirm(
+    public ResponseEntity<Object> confirm(
             @PathVariable UUID id,
-            @RequestBody ConfirmRequest req) {
+            @Valid @RequestBody ConfirmRequest req) {
 
         if (req.approvedUnits() == null || req.approvedUnits().isEmpty()) {
             return ResponseEntity.badRequest().body(error("approved_units_required"));
@@ -109,7 +110,7 @@ public class IndexSourceController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> get(@PathVariable UUID id) {
+    public ResponseEntity<SourceDocumentResponse> get(@PathVariable UUID id) {
         try {
             return ResponseEntity.ok(toDocResponse(useCase.findById(id)));
         } catch (java.util.NoSuchElementException e) {
@@ -119,7 +120,7 @@ public class IndexSourceController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         try {
             useCase.deleteSource(id);
             return ResponseEntity.noContent().build();

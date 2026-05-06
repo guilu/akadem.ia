@@ -30,6 +30,12 @@ public class FlashcardEntity {
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
 
+  @Column(nullable = false)
+  private String visibility = "GLOBAL";
+
+  @Column(name = "owner_id")
+  private UUID ownerId;
+
   public FlashcardEntity() {}
 
   public UUID getId() { return id; }
@@ -49,4 +55,10 @@ public class FlashcardEntity {
 
   public Instant getUpdatedAt() { return updatedAt; }
   public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+  public String getVisibility() { return visibility; }
+  public void setVisibility(String visibility) { this.visibility = visibility; }
+
+  public UUID getOwnerId() { return ownerId; }
+  public void setOwnerId(UUID ownerId) { this.ownerId = ownerId; }
 }

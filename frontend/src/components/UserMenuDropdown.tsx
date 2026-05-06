@@ -5,11 +5,12 @@ interface Props {
   user: NavUser;
   isAdmin: boolean;
   onProfile: () => void;
+  onManage: () => void;
   onSettings: () => void;
   onLogout: () => void;
 }
 
-export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogout }: Props) {
+export function UserMenuDropdown({ user, isAdmin, onProfile, onManage, onSettings, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,12 +35,12 @@ export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogou
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(prev => !prev)}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary text-sm font-semibold hover:bg-primary/25 transition-colors"
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 text-primary text-sm font-semibold hover:bg-primary/25 transition-colors"
         aria-label="User menu"
         aria-expanded={open}
       >
         {user.avatarUrl ? (
-          <img src={user.avatarUrl} alt={user.initials} className="w-8 h-8 rounded-full object-cover" />
+          <img src={user.avatarUrl} alt={user.initials} className="w-10 h-10 rounded-full object-cover" />
         ) : (
           user.initials
         )}
@@ -55,6 +56,12 @@ export function UserMenuDropdown({ user, isAdmin, onProfile, onSettings, onLogou
             className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"
           >
             Mi perfil
+          </button>
+          <button
+            onClick={() => { onManage(); setOpen(false); }}
+            className="w-full text-left px-3 py-2 text-sm text-text hover:bg-secondary/10 transition-colors"
+          >
+            Gestionar
           </button>
           <button
             onClick={() => { onSettings(); setOpen(false); }}

@@ -20,6 +20,12 @@ public class QuestionEntity {
     private String explanation;
     private String difficulty; // EASY|MEDIUM|HARD
 
+    @Column(nullable = false)
+    private String visibility = "GLOBAL";
+
+    @Column(name = "owner_id")
+    private UUID ownerId;
+
     public QuestionEntity() {
     }
 
@@ -79,5 +85,21 @@ public class QuestionEntity {
 
     public void setAnswers(java.util.List<AnswerEntity> answers) {
         this.answers = answers;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 }

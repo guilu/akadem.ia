@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +37,7 @@ public class UserProfileController {
   }
 
   @PatchMapping
-  public ResponseEntity<GetProfileResponse> updateProfile(@RequestBody UpdateProfileRequest req,
+  public ResponseEntity<GetProfileResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest req,
       @AuthenticationPrincipal User principal) {
     UUID userId = requireUserId(principal);
     var result = userProfileUseCase.updateProfile(userId,

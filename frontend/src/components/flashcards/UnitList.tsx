@@ -1,3 +1,4 @@
+import { Inbox } from 'flowbite-react-icons/outline';
 import UnitCard from './UnitCard';
 import type { UnitSummary } from '../../pages/FlashcardsPage';
 
@@ -32,6 +33,7 @@ export default function UnitList({ units, loading, error, onUnitClick, onExport,
   if (!units.length) {
     return (
       <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center space-y-4">
+        <Inbox className="w-8 h-8 mx-auto text-text/25" />
         <p className="text-sm text-text/55">No hay unidades disponibles.</p>
         {onImport && (
           <button

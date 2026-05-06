@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Error al reanudar el intento - Study Sanctuary</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#f0eded",
+            "surface-bright": "#fcf9f8",
+            "inverse-surface": "#303030",
+            "secondary-fixed-dim": "#bec8cb",
+            "on-surface": "#1b1c1c",
+            "primary": "#a43625",
+            "secondary": "#566063",
+            "on-tertiary": "#ffffff",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "primary-container": "#c44e3b",
+            "secondary-fixed": "#dae4e7",
+            "on-tertiary-container": "#fffbff",
+            "surface-tint": "#a73927",
+            "on-tertiary-fixed": "#261900",
+            "on-secondary-fixed-variant": "#3f484b",
+            "tertiary-fixed-dim": "#f8bd37",
+            "tertiary-container": "#966e00",
+            "secondary-container": "#dae4e7",
+            "on-surface-variant": "#57423e",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "primary-fixed": "#ffdad4",
+            "outline-variant": "#dfc0ba",
+            "on-background": "#1b1c1c",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#ffdea3",
+            "surface-dim": "#dcd9d9",
+            "surface-container-lowest": "#ffffff",
+            "on-error": "#ffffff",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#fffbff",
+            "on-secondary-container": "#5c6669",
+            "surface-container-highest": "#e4e2e1",
+            "on-primary-fixed-variant": "#862113",
+            "primary-fixed-dim": "#ffb4a6",
+            "error-container": "#ffdad6",
+            "surface": "#fcf9f8",
+            "on-error-container": "#93000a",
+            "background": "#fcf9f8",
+            "surface-variant": "#e4e2e1",
+            "on-secondary-fixed": "#141d1f",
+            "inverse-on-surface": "#f3f0f0",
+            "surface-container-low": "#f6f3f2",
+            "outline": "#8b716c",
+            "tertiary": "#775600",
+            "on-primary-fixed": "#400200",
+            "inverse-primary": "#ffb4a6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .btn-gradient {
+      background: linear-gradient(135deg, #a43625 0%, #c44e3b 100%);
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed-dim">
+  <!-- TopAppBar -->
+  <header class="fixed top-0 w-full z-50 bg-[#fcf9f8]/70 backdrop-blur-lg shadow-sm shadow-slate-200/50">
+    <div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-bold text-[#1b1c1c] font-headline tracking-tight">Akadem.ia</span>
+      </div>
+      <nav class="hidden md:flex items-center space-x-8">
+        <a class="text-slate-600 font-medium font-headline hover:text-[#c44e3b] transition-colors duration-200"
+          href="#">Home</a>
+        <a class="text-slate-600 font-medium font-headline hover:text-[#c44e3b] transition-colors duration-200"
+          href="#">Temarios</a>
+        <a class="text-slate-600 font-medium font-headline hover:text-[#c44e3b] transition-colors duration-200"
+          href="#">Flashcards</a>
+        <a class="text-[#a43625] font-bold border-b-2 border-[#a43625] pb-1 font-headline" href="#">Exámenes</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button
+          class="material-symbols-outlined text-slate-600 scale-95 active:scale-90 transition-transform">notifications</button>
+        <button
+          class="material-symbols-outlined text-slate-600 scale-95 active:scale-90 transition-transform">settings</button>
+        <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border-2 border-surface-container">
+          <img alt="Student Profile" class="w-full h-full object-cover"
+            data-alt="A professional, clean close-up portrait of a student in a brightly lit, modern educational environment. The subject has a focused and calm expression, with a blurred library background consisting of warm oak bookshelves and soft white lighting. The image maintains the brand's sophisticated cream and rich red color palette for a cohesive aesthetic."
+            src="https://lh3.googleusercontent.com/aida/ADBb0uhF9czgNdYYlbf_1iN3b2naIBXqaYCqQ6Ye1RAvfgA32CzdHk7gNVNXjqQjiIVgy_9eOaWNuyl-yxmSTf-uFK9NA4vhtjRKajDk-J8g8_RoSyti1PshVcrJcUBS7WEekdLgpUcQ1pOuB5m8Wql4h-Lffxp5vvlsYtSnvw9f9brCk3AdFQ-X1qsg2AaKA_b4jaD9VEr3bp-Ue1z8F1Zaw3O3g1Xb9WEkneqCIVwLrDLJ9ptiALBM8z4e6MErA75dOr3r3PCSk9E3yA" />
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Main Content: Error Screen -->
+  <main class="min-h-screen pt-24 flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <!-- Decorative subtle background gradient (No images as per instructions) -->
+    <div
+      class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,_rgba(164,54,37,0.03)_0%,_rgba(252,249,248,1)_70%)]">
+    </div>
+    <div class="max-w-xl w-full text-center space-y-8 py-12">
+      <!-- Icon Section -->
+      <div class="relative inline-flex items-center justify-center">
+        <div class="absolute inset-0 bg-[#DA5E49]/10 rounded-full blur-2xl animate-pulse"></div>
+        <div class="relative bg-surface-container-lowest p-8 rounded-full shadow-sm">
+          <span class="material-symbols-outlined text-8xl text-[#DA5E49]"
+            style="font-variation-settings: 'FILL' 1;">warning</span>
+        </div>
+      </div>
+      <!-- Content Section -->
+      <div class="space-y-4">
+        <h1 class="text-4xl md:text-5xl font-extrabold font-headline text-on-surface tracking-tight leading-tight">
+          Error al reanudar el intento
+        </h1>
+        <p class="text-lg md:text-xl text-on-surface-variant font-body leading-relaxed px-6">
+          No hemos podido cargar tu sesión de examen. Por favor, inténtalo de nuevo o vuelve a la selección de temas.
+        </p>
+      </div>
+      <!-- Action Section -->
+      <div class="flex flex-col items-center gap-6 pt-4">
+        <button
+          class="btn-gradient text-white px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+          Intentar de nuevo
+        </button>
+        <div class="space-y-2">
+          <p class="text-sm font-medium text-on-surface-variant">
+            ¿Sigues teniendo problemas?
+            <a class="text-primary hover:underline font-bold transition-all" href="#">Contactar con soporte</a>
+          </p>
+        </div>
+      </div>
+      <!-- Asymmetric detail for high-end feel -->
+      <div class="mt-20 pt-12 flex justify-center items-center gap-12 border-t-0 opacity-40">
+        <div class="flex flex-col items-center gap-2">
+          <span class="material-symbols-outlined text-slate-400">cloud_off</span>
+          <span class="text-xs uppercase tracking-widest text-slate-400 font-bold">Sync Error</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <span class="material-symbols-outlined text-slate-400">timer</span>
+          <span class="text-xs uppercase tracking-widest text-slate-400 font-bold">Session Timeout</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <span class="material-symbols-outlined text-slate-400">encrypted</span>
+          <span class="text-xs uppercase tracking-widest text-slate-400 font-bold">Secure Connection</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Visual Footer Signature -->
+  <footer class="w-full py-8 text-center bg-surface-container-low mt-auto">
+    <p class="text-slate-400 text-xs font-medium tracking-wide">
+      © 2024 Akadem.ia Cognitive Sanctuary. Todos los derechos reservados.
+    </p>
+  </footer>
+</body>
+
+</html>

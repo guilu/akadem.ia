@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft } from 'flowbite-react-icons/outline';
-import { getFlashcardsByUnit } from '../api';
+import { ArrowLeft, ArrowRight, Inbox } from 'flowbite-react-icons/outline';
+import { apiJson, apiBase } from '../api';
 
 type Flashcard = {
   id: string;
@@ -20,17 +20,15 @@ export default function FlashcardsExamineUnitPage() {
   const [error, setError] = useState('');
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const token = localStorage.getItem('ak_token') || '';
-
   useEffect(() => {
     if (!unitId) { setError('Falta el unitId.'); setLoading(false); return; }
     let mounted = true;
-    getFlashcardsByUnit<Flashcard[]>(token, unitId)
+    apiJson<Flashcard[]>(`${apiBase}/api/flashcards?unitId=${unitId}`)
       .then((data) => { if (mounted) setCards(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las tarjetas.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token, unitId]);
+  }, [unitId]);
 
   const card = cards[index];
   const total = cards.length;
@@ -65,7 +63,7 @@ export default function FlashcardsExamineUnitPage() {
   if (!card) return (
     <div className="space-y-4 max-w-2xl mx-auto">
       <div className="border border-secondary/25 rounded-2xl px-5 py-12 text-center">
-        <div className="text-4xl mb-3">📭</div>
+        <Inbox className="w-12 h-12 mx-auto mb-3 text-text/25" />
         <p className="text-text/55 text-sm">No hay tarjetas en esta unidad.</p>
       </div>
       <div className="flex items-center gap-3 flex-wrap">
@@ -97,7 +95,7 @@ export default function FlashcardsExamineUnitPage() {
           className="btn btn-outline h-9 w-9 rounded-full p-0 flex items-center justify-center"
           aria-label="Volver"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-extrabold tracking-tight">Examinar <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Flashcards</span></h1>
         <div className="w-9" />
@@ -119,8 +117,8 @@ export default function FlashcardsExamineUnitPage() {
 
       {/* Card – tap to flip */}
       <div className="relative cursor-pointer" onClick={() => setFlipped((f) => !f)}>
-        <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-bg brightness-90 dark:brightness-75" />
-        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[45vh] max-h-[45vh] flex flex-col bg-bg select-none">
+        <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-white dark:bg-card brightness-90 dark:brightness-75" />
+        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[45vh] max-h-[45vh] flex flex-col bg-white dark:bg-card select-none">
           <div className="flex-1 overflow-y-auto min-h-0 flex items-center">
             <p className="text-xl font-semibold leading-relaxed w-full">
               {flipped ? card.back : card.front}
@@ -137,16 +135,18 @@ export default function FlashcardsExamineUnitPage() {
         <button
           onClick={prev}
           disabled={index === 0}
-          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30"
+          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
-          ← Anterior
+          <ArrowLeft className="w-6 h-6" />
+          Anterior
         </button>
         <button
           onClick={next}
           disabled={index === total - 1}
-          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30"
+          className="btn btn-outline rounded-full px-5 py-2 text-sm disabled:opacity-30 flex items-center gap-2"
         >
-          Siguiente →
+          Siguiente
+          <ArrowRight className="w-6 h-6" />
         </button>
       </div>
 

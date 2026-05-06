@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Inbox } from 'flowbite-react-icons/outline';
 import type { SourceDocument } from '../../types';
 
 interface Props {
@@ -45,7 +46,12 @@ export default function SourceList({ sources, selectedId, onSelect, loading, onD
   }
 
   if (sources.length === 0) {
-    return <p className="text-sm text-text/50 py-4 text-center">No hay documentos subidos todavía.</p>;
+    return (
+      <div className="text-center py-6 space-y-2">
+        <Inbox className="w-8 h-8 mx-auto text-text/25" />
+        <p className="text-sm text-text/50">No hay documentos subidos todavía.</p>
+      </div>
+    );
   }
 
   return (
@@ -62,7 +68,7 @@ export default function SourceList({ sources, selectedId, onSelect, loading, onD
                 onClick={() => onSelect(src.id)}
                 className="flex items-center gap-3 min-w-0 flex-1 text-left"
               >
-                <svg className="w-5 h-5 text-text/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6 text-text/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span className="text-sm font-medium truncate">{src.name}</span>
@@ -77,7 +83,7 @@ export default function SourceList({ sources, selectedId, onSelect, loading, onD
                     title="Eliminar documento"
                     className="p-1.5 rounded-lg text-text/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>

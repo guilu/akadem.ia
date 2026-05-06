@@ -4,12 +4,11 @@ import type { SourceDocument, IndexPreview } from '../../types';
 import SourceIndexPreview from './SourceIndexPreview';
 
 interface Props {
-  token: string;
   subjectId: string;
   onUploaded: (doc: SourceDocument) => void;
 }
 
-export default function SourceUpload({ token, subjectId, onUploaded }: Props) {
+export default function SourceUpload({ subjectId, onUploaded }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,15 +27,16 @@ export default function SourceUpload({ token, subjectId, onUploaded }: Props) {
     setError('');
     setLoading(true);
     try {
-      const result = await uploadSource(token, file, subjectId);
+      const result = await uploadSource(file, subjectId);
       if (result.document.status === 'FAILED') {
         setError('El documento se subió pero no pudo procesarse. Comprueba las API keys del servidor.');
         onUploaded(result.document);
       } else {
         setPreview(result);
       }
-    } catch (err: any) {
-      setError(err?.body?.message || 'Error al subir el documento.');
+    } catch (err: unknown) {
+      const e = err as { body?: { message?: string } };
+      setError(e?.body?.message || 'Error al subir el documento.');
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,6 @@ export default function SourceUpload({ token, subjectId, onUploaded }: Props) {
     return (
       <SourceIndexPreview
         preview={preview}
-        token={token}
         onConfirmed={handleConfirmed}
         onCancel={() => setPreview(null)}
       />

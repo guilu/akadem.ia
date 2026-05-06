@@ -37,7 +37,7 @@ public class SemanticChunker implements TextChunkerPort {
     private static final Logger log = LoggerFactory.getLogger(SemanticChunker.class);
 
     private static final Pattern ARTICLE_PATTERN = Pattern.compile(
-            "(?m)^\\s*(T[ií]tulo|TÍTULO|Art[ií]culo|Art\\.?|ARTÍCULO|Secci[oó]n|SECCIÓN|Cap[ií]tulo|CAPÍTULO)\\s+(\\d+[\\w.-]*)(.*)$",
+            "(?m)^\\s*(T[ií]tulo|Art[ií]culo|Art\\.?|Secci[oó]n|Cap[ií]tulo)\\s+(\\d+[\\w.-]*)(.*)$",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
     );
 

@@ -5,5 +5,6 @@ import java.util.UUID;
 public record UserSettings(
     UUID userId,
     Integer newCardsLimit,
-    Integer reviewCardsLimit
+    Integer reviewCardsLimit,
+    Integer penaltyRatio
 ) {}

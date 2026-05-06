@@ -13,8 +13,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class FlashcardReviewRepositoryAdapter implements FlashcardReviewRepository {
@@ -82,6 +84,20 @@ public class FlashcardReviewRepositoryAdapter implements FlashcardReviewReposito
   @Override
   public long countDueByUserIdAndStateIn(UUID userId, LocalDateTime upTo, List<ReviewState> states) {
     return jpa.countDueByUserIdAndStateIn(userId, upTo.toInstant(ZoneOffset.UTC), states);
+  }
+
+  @Override
+  public Map<UUID, Long> countByUserIdAndStateInGroupByUnit(UUID userId, List<ReviewState> states) {
+    return jpa.countByUserIdAndStateInGroupByUnit(userId, states)
+        .stream()
+        .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
+  }
+
+  @Override
+  public Map<UUID, Long> countDueByUserIdUpToGroupByUnit(UUID userId, LocalDateTime upTo) {
+    return jpa.countDueByUserIdUpToGroupByUnit(userId, upTo.toInstant(ZoneOffset.UTC))
+        .stream()
+        .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
   }
 
   /**

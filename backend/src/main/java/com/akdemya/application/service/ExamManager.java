@@ -3,11 +3,12 @@ package com.akdemya.application.service;
 import com.akdemya.domain.model.*;
 import com.akdemya.domain.port.in.ExamUseCase;
 import com.akdemya.domain.port.out.*;
+import com.akdemya.domain.model.StudySettingsDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -19,17 +20,29 @@ public class ExamManager implements ExamUseCase {
   private final AnswerRepository answerRepo;
   private final UnitRepository unitRepo;
   private final SubjectRepository subjectRepo;
+  private final UserRepository userRepo;
+  private final UserSettingsRepository userSettingsRepo;
   private final Random rnd = new Random();
   private final ExamScoringCalculator scoringCalculator = new ExamScoringCalculator();
 
   public ExamManager(ExamAttemptRepository attemptRepo, ExamAttemptAnswerRepository attemptAnsRepo,
-      QuestionRepository questionRepo, AnswerRepository answerRepo, UnitRepository unitRepo, SubjectRepository subjectRepo) {
+      QuestionRepository questionRepo, AnswerRepository answerRepo, UnitRepository unitRepo,
+      SubjectRepository subjectRepo, UserRepository userRepo, UserSettingsRepository userSettingsRepo) {
     this.attemptRepo = attemptRepo;
     this.attemptAnsRepo = attemptAnsRepo;
     this.questionRepo = questionRepo;
     this.answerRepo = answerRepo;
     this.unitRepo = unitRepo;
     this.subjectRepo = subjectRepo;
+    this.userRepo = userRepo;
+    this.userSettingsRepo = userSettingsRepo;
+  }
+
+  private int getPenaltyRatioForEmail(String userEmail) {
+    return userRepo.findByEmail(userEmail)
+        .flatMap(u -> userSettingsRepo.findByUserId(u.getId()))
+        .map(UserSettings::penaltyRatio)
+        .orElse(StudySettingsDefaults.DEFAULT_PENALTY_RATIO);
   }
 
   @Override
@@ -65,9 +78,11 @@ public class ExamManager implements ExamUseCase {
     for (Map.Entry<UUID, Integer> entry : command.unitCounts().entrySet()) {
       UUID unitId = entry.getKey();
       int count = entry.getValue() != null ? entry.getValue() : 0;
-      List<Question> qs = questionRepo.findByUnitId(unitId);
+      List<Question> qs = questionRepo.findVisibleByUnitIdAndUserId(unitId, command.userId());
       if (selectedDifficulty != null) {
-        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
+        qs = new ArrayList<>(qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).toList());
+      } else {
+        qs = new ArrayList<>(qs);
       }
       Collections.shuffle(qs, rnd);
       if (count > 0 && count < qs.size()) {
@@ -87,9 +102,9 @@ public class ExamManager implements ExamUseCase {
     attemptAnsRepo.saveAll(answerPlaceholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
-      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .collect(Collectors.toList());
+          .toList());
       Collections.shuffle(answers, rnd);
       return new QuestionData(q.getId(), q.getText(), answers);
     }).toList();
@@ -113,12 +128,12 @@ public class ExamManager implements ExamUseCase {
     }
     final Question.Difficulty selectedDifficulty = difficulty;
 
-    List<Unit> units = unitRepo.findBySubjectId(command.subjectId());
+    List<Unit> units = unitRepo.findVisibleBySubjectIdAndUserId(command.subjectId(), command.userId());
     List<Question> allQuestions = new ArrayList<>();
     for (Unit u : units) {
-      List<Question> qs = questionRepo.findByUnitId(u.getId());
+      List<Question> qs = questionRepo.findVisibleByUnitIdAndUserId(u.getId(), command.userId());
       if (selectedDifficulty != null) {
-        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).collect(Collectors.toList());
+        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).toList();
       }
       allQuestions.addAll(qs);
     }
@@ -133,9 +148,68 @@ public class ExamManager implements ExamUseCase {
     attemptAnsRepo.saveAll(placeholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
-      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .collect(Collectors.toList());
+          .toList());
+      Collections.shuffle(answers, rnd);
+      return new QuestionData(q.getId(), q.getText(), answers);
+    }).toList();
+
+    return new StartResponse(attempt.getId(), totalSec, questionDataList);
+  }
+
+  @Override
+  public StartResponse startExamFromSyllabus(StartFromSyllabusCommand command) {
+    int totalSec = Math.max(60, command.minutes() * 60);
+    ExamAttempt attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(),
+        java.time.OffsetDateTime.now(), null, totalSec, null);
+    attemptRepo.save(attempt);
+
+    Question.Difficulty selectedDifficulty = parseDifficulty(command.difficulty());
+
+    List<com.akdemya.domain.model.Subject> subjects = getFilteredSubjects(command);
+
+    if (subjects.isEmpty()) {
+      throw new java.util.NoSuchElementException("No subjects found for the given syllabus");
+    }
+
+    // Gather all visible questions per subject
+    Map<UUID, List<Question>> questionsBySubject = new LinkedHashMap<>();
+    for (com.akdemya.domain.model.Subject subject : subjects) {
+      List<Unit> units = unitRepo.findVisibleBySubjectIdAndUserId(subject.getId(), command.userId());
+      List<Question> subjectQuestions = new ArrayList<>();
+      for (Unit unit : units) {
+        List<Question> qs = questionRepo.findVisibleByUnitIdAndUserId(unit.getId(), command.userId());
+        if (selectedDifficulty != null) {
+          qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).toList();
+        }
+        subjectQuestions.addAll(qs);
+      }
+      if (!subjectQuestions.isEmpty()) {
+        questionsBySubject.put(subject.getId(), subjectQuestions);
+      }
+    }
+
+    int totalAvailable = questionsBySubject.values().stream().mapToInt(List::size).sum();
+    if (totalAvailable == 0) {
+      throw new java.util.NoSuchElementException("No questions available for the given syllabus and filters");
+    }
+
+    // Distribute count proportionally across subjects, then pick randomly within each
+    int totalCount = command.count() > 0 ? Math.min(command.count(), totalAvailable) : totalAvailable;
+    List<Question> pool = distributeQuestionsProportionally(questionsBySubject, totalCount, totalAvailable);
+    Collections.shuffle(pool, rnd);
+
+    List<ExamAttemptAnswer> placeholders = new ArrayList<>();
+    for (Question q : pool) {
+      placeholders.add(ExamAttemptAnswer.create(attempt.getId(), q.getId(), null));
+    }
+    attemptAnsRepo.saveAll(placeholders);
+
+    List<QuestionData> questionDataList = pool.stream().map(q -> {
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
+          .map(a -> new AnswerData(a.getId(), a.getText()))
+          .toList());
       Collections.shuffle(answers, rnd);
       return new QuestionData(q.getId(), q.getText(), answers);
     }).toList();
@@ -185,7 +259,8 @@ public class ExamManager implements ExamUseCase {
       }
     }
 
-    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
 
     if (attempt.getFinishedAt() == null) {
       attempt.finish(attempt.getTotalTimeSeconds(), scoring.net());
@@ -211,7 +286,7 @@ public class ExamManager implements ExamUseCase {
           .orElseThrow(() -> new IllegalArgumentException("Invalid question ID"));
       List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .collect(Collectors.toList());
+          .toList();
       return new AttemptQuestionData(q.getId(), q.getText(), answers, e.getAnswerId());
     }).toList();
 
@@ -234,6 +309,7 @@ public class ExamManager implements ExamUseCase {
     List<ExamAttempt> attempts = new ArrayList<>(attemptRepo.findByUserEmail(userEmail));
     attempts.sort(Comparator.comparing(ExamAttempt::getStartedAt).reversed());
 
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
     Map<UUID, Answer> answerCache = new HashMap<>();
     Map<UUID, Question> questionCache = new HashMap<>();
     Map<UUID, Unit> unitCache = new HashMap<>();
@@ -241,52 +317,104 @@ public class ExamManager implements ExamUseCase {
 
     List<AttemptSummary> summaries = new ArrayList<>();
     for (ExamAttempt attempt : attempts) {
-      List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attempt.getId());
-      int total = entries.size();
-      int correct = 0;
-      int wrong = 0;
-      for (ExamAttemptAnswer e : entries) {
-        if (e.getAnswerId() == null)
-          continue;
-        Answer ans = answerCache.computeIfAbsent(e.getAnswerId(), id -> answerRepo.findById(id).orElse(null));
-        if (ans != null && ans.isCorrect()) {
-          correct++;
-        } else if (ans != null) {
-          wrong++;
-        }
-      }
-      ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong);
-
-      String subjectName = "Desconocida";
-      if (!entries.isEmpty()) {
-        Question q = questionCache.computeIfAbsent(entries.get(0).getQuestionId(),
-            id -> questionRepo.findById(id).orElse(null));
-        if (q != null) {
-          Unit unit = unitCache.computeIfAbsent(q.getUnitId(), id -> unitRepo.findById(id).orElse(null));
-          if (unit != null) {
-            Subject subject = subjectCache.computeIfAbsent(unit.getSubjectId(), id -> subjectRepo.findById(id).orElse(null));
-            if (subject != null) {
-              subjectName = subject.getName();
-            }
-          }
-        }
-      }
-
-      summaries.add(new AttemptSummary(
-          attempt.getId(),
-          subjectName,
-          attempt.getStartedAt(),
-          attempt.getFinishedAt(),
-          attempt.getTotalTimeSeconds() == null ? 0 : attempt.getTotalTimeSeconds(),
-          attempt.getScore(),
-          total,
-          correct,
-          wrong,
-          scoring.percentage()
-      ));
+      summaries.add(getAttemptSummary(attempt, penaltyRatio, answerCache, questionCache, unitCache, subjectCache));
     }
 
     return summaries;
+  }
+
+  private Question.Difficulty parseDifficulty(String difficulty) {
+    if (difficulty == null || difficulty.isBlank()) {
+      return null;
+    }
+    try {
+      return Question.Difficulty.valueOf(difficulty);
+    } catch (IllegalArgumentException ignored) {
+      return null;
+    }
+  }
+
+  private List<Subject> getFilteredSubjects(StartFromSyllabusCommand command) {
+    List<Subject> subjects = subjectRepo.findVisibleBySyllabusId(command.syllabusId(), command.userId());
+    if (command.subjectIds() != null && !command.subjectIds().isEmpty()) {
+      java.util.Set<UUID> filter = new java.util.HashSet<>(command.subjectIds());
+      return subjects.stream().filter(s -> filter.contains(s.getId())).toList();
+    }
+    return subjects;
+  }
+
+  private List<Question> distributeQuestionsProportionally(Map<UUID, List<Question>> questionsBySubject, int totalCount,
+      int totalAvailable) {
+    List<Question> pool = new ArrayList<>();
+    int remaining = totalCount;
+    List<Map.Entry<UUID, List<Question>>> entries = new ArrayList<>(questionsBySubject.entrySet());
+
+    for (int i = 0; i < entries.size(); i++) {
+      List<Question> subjectQs = new ArrayList<>(entries.get(i).getValue());
+      int quota = (i == entries.size() - 1)
+          ? remaining
+          : (int) Math.round((double) subjectQs.size() / totalAvailable * totalCount);
+      quota = Math.min(quota, Math.min(subjectQs.size(), remaining));
+
+      Collections.shuffle(subjectQs, rnd);
+      pool.addAll(subjectQs.subList(0, quota));
+      remaining -= quota;
+      if (remaining <= 0)
+        break;
+    }
+    return pool;
+  }
+
+  private AttemptSummary getAttemptSummary(ExamAttempt attempt, int penaltyRatio,
+      Map<UUID, Answer> answerCache, Map<UUID, Question> questionCache,
+      Map<UUID, Unit> unitCache, Map<UUID, Subject> subjectCache) {
+
+    List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attempt.getId());
+    int total = entries.size();
+    int correct = 0;
+    int wrong = 0;
+
+    for (ExamAttemptAnswer e : entries) {
+      if (e.getAnswerId() == null)
+        continue;
+      Answer ans = answerCache.computeIfAbsent(e.getAnswerId(), id -> answerRepo.findById(id).orElse(null));
+      if (ans != null && ans.isCorrect()) {
+        correct++;
+      } else if (ans != null) {
+        wrong++;
+      }
+    }
+
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
+    String subjectName = resolveSubjectName(entries, questionCache, unitCache, subjectCache);
+
+    return new AttemptSummary(
+        attempt.getId(),
+        subjectName,
+        attempt.getStartedAt(),
+        attempt.getFinishedAt(),
+        attempt.getTotalTimeSeconds() == null ? 0 : attempt.getTotalTimeSeconds(),
+        attempt.getScore(),
+        total,
+        correct,
+        wrong,
+        scoring.percentage());
+  }
+
+  private String resolveSubjectName(List<ExamAttemptAnswer> entries, Map<UUID, Question> questionCache,
+      Map<UUID, Unit> unitCache, Map<UUID, Subject> subjectCache) {
+    if (entries.isEmpty()) {
+      return "Desconocida";
+    }
+    Question q = questionCache.computeIfAbsent(entries.get(0).getQuestionId(),
+        id -> questionRepo.findById(id).orElse(null));
+    if (q == null) return "Desconocida";
+
+    Unit unit = unitCache.computeIfAbsent(q.getUnitId(), id -> unitRepo.findById(id).orElse(null));
+    if (unit == null) return "Desconocida";
+
+    Subject subject = subjectCache.computeIfAbsent(unit.getSubjectId(), id -> subjectRepo.findById(id).orElse(null));
+    return subject != null ? subject.getName() : "Desconocida";
   }
 
   @Override
@@ -307,5 +435,31 @@ public class ExamManager implements ExamUseCase {
     ExamAttemptAnswer updated = new ExamAttemptAnswer(existing.getId(), existing.getExamAttemptId(),
         existing.getQuestionId(), command.selectedAnswerId());
     attemptAnsRepo.save(updated);
+  }
+
+  @Override
+  public SubmitResult getResult(UUID attemptId, String userEmail) {
+    ExamAttempt attempt = attemptRepo.findById(attemptId)
+        .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+    if (!attempt.getUserEmail().equals(userEmail)) {
+      throw new SecurityException("Forbidden");
+    }
+    if (attempt.getFinishedAt() == null) {
+      throw new IllegalStateException("Exam not yet submitted");
+    }
+    List<ExamAttemptAnswer> entries = attemptAnsRepo.findByAttemptId(attemptId);
+    int total = entries.size();
+    int correct = 0;
+    int wrong = 0;
+    for (ExamAttemptAnswer e : entries) {
+      if (e.getAnswerId() == null) continue;
+      Answer ans = answerRepo.findById(e.getAnswerId()).orElse(null);
+      if (ans != null && ans.isCorrect()) correct++;
+      else if (ans != null) wrong++;
+    }
+    int penaltyRatio = getPenaltyRatioForEmail(userEmail);
+    ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
+    return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),
+        scoring.percentage());
   }
 }

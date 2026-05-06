@@ -97,4 +97,68 @@ class Sm2SchedulerTest {
 
     assertEquals(1.3, result.getEaseAfter());
   }
+
+  @Test
+  void defaultConstructorUsesDefaultLearningSteps() {
+    // Exercises the no-arg constructor; default steps are [1, 10] minutes
+    // NEW + GOOD moves learningStep from 0 to 1, then dueAt = now + steps[1] = 10 minutes
+    Sm2Scheduler scheduler = new Sm2Scheduler();
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.NEW, 2.5, 0, 0, 0, 0,
+        now, now, now, now);
+    var result = scheduler.schedule(review, ReviewGrade.GOOD, now);
+    // Moves to next step index=1, which is 10 minutes
+    assertEquals(now.plusMinutes(10), result.getDueAt());
+  }
+
+  @Test
+  void reviewGoodRepetition1GivesInterval1() {
+    // Tests computeGoodInterval(repetitions=1) branch
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.REVIEW, 2.5, 1, 0, 0, 0,
+        now, now.minusDays(1), now.minusDays(10), now.minusDays(1));
+    var result = new Sm2Scheduler().schedule(review, ReviewGrade.GOOD, now);
+    assertEquals(1, result.getIntervalAfter());
+  }
+
+  @Test
+  void reviewGoodRepetition2GivesInterval3() {
+    // Tests computeGoodInterval(repetitions=2) branch
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.REVIEW, 2.5, 3, 0, 1, 0,
+        now, now.minusDays(1), now.minusDays(10), now.minusDays(1));
+    var result = new Sm2Scheduler().schedule(review, ReviewGrade.GOOD, now);
+    assertEquals(3, result.getIntervalAfter());
+  }
+
+  @Test
+  void reviewHardReducesEaseAndScalesInterval() {
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.REVIEW, 2.5, 10, 0, 5, 0,
+        now, now.minusDays(1), now.minusDays(10), now.minusDays(1));
+    var result = new Sm2Scheduler().schedule(review, ReviewGrade.HARD, now);
+    assertEquals(ReviewState.REVIEW, result.getState());
+    assertEquals(2.35, result.getEaseAfter(), 0.01);
+    assertEquals(12, result.getIntervalAfter()); // round(10 * 1.2)
+  }
+
+  @Test
+  void reviewEasyIncreasesEaseAndScalesInterval() {
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.REVIEW, 2.5, 10, 0, 5, 0,
+        now, now.minusDays(1), now.minusDays(10), now.minusDays(1));
+    var result = new Sm2Scheduler().schedule(review, ReviewGrade.EASY, now);
+    assertEquals(ReviewState.REVIEW, result.getState());
+    assertEquals(2.65, result.getEaseAfter(), 0.01);
+  }
+
+  @Test
+  void learningHardStaysAtSameStepWithReducedEase() {
+    var review = new FlashcardReview(UUID.randomUUID(), userId, flashcardId,
+        ReviewState.LEARNING, 2.5, 0, 0, 1, 0,
+        now, now.minusMinutes(1), now.minusDays(1), now.minusMinutes(1));
+    var result = new Sm2Scheduler().schedule(review, ReviewGrade.HARD, now);
+    assertEquals(ReviewState.LEARNING, result.getState());
+    assertEquals(2.35, result.getEaseAfter(), 0.01);
+  }
 }

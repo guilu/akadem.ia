@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### ✨ Nuevas funcionalidades
+- [AKDMIA-214](https://akadem-ia-app.atlassian.net/browse/AKDMIA-214) ✨ feat(payments): compra digital del Temario Subalterno GVA — pago único 15 € con Stripe + email Resend con enlace de descarga + página `/descarga/:token` (guest checkout sin cuenta de usuario, idempotencia webhook + reconciliation scheduler para reintentos)
 - [AKDMIA-50](https://akadem-ia-app.atlassian.net/browse/AKDMIA-50) ✨ feat(flashcards): bulk import/export por unidad en CSV y JSON
 - [AKDMIA-48](https://akadem-ia-app.atlassian.net/browse/AKDMIA-48) ✨ feat(settings): límites de estudio configurables por usuario
 - [AKDMIA-75](https://akadem-ia-app.atlassian.net/browse/AKDMIA-75) 🎨 feat: actualizar assets e icono del home

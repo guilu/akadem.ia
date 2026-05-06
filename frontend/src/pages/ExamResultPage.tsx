@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowsRepeat } from 'flowbite-react-icons/outline';
 import type { ExamResult } from '../types';
 import { ROUTES } from '../constants/routes';
 
-export default function ExamResultPage({ result }: { result: ExamResult | null }) {
+export default function ExamResultPage({ result, penaltyRatio = 3 }: { result: ExamResult | null; penaltyRatio?: number }) {
   if (!result) return <Navigate to={ROUTES.subjects} replace />;
 
   const score10 = result.total === 0 ? 0 : (result.net / result.total) * 10;
@@ -24,7 +24,7 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
     <div className="max-w-xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight mb-1">Resultados</h1>
-        <p className="text-text/55 text-sm">Cada 3 fallos restan 1 acierto.</p>
+        <p className="text-text/55 text-sm">Cada {penaltyRatio} {penaltyRatio === 1 ? 'fallo resta' : 'fallos restan'} 1 acierto.</p>
       </div>
 
       {/* ── Score card ── */}
@@ -54,14 +54,14 @@ export default function ExamResultPage({ result }: { result: ExamResult | null }
           to={ROUTES.subjects}
           className="btn btn-primary rounded-full px-6 py-2.5 text-sm shadow-lg shadow-primary/20 flex items-center gap-2"
         >
-          <ArrowsRepeat className="w-4 h-4" />
+          <ArrowsRepeat className="w-6 h-6" />
           Nuevo examen
         </Link>
         <Link
           to={ROUTES.home}
           className="btn btn-outline rounded-full px-6 py-2.5 text-sm flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-6 h-6" />
           Inicio
         </Link>
       </div>

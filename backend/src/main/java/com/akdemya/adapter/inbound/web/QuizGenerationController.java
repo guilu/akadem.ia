@@ -6,6 +6,7 @@ import com.akdemya.domain.port.in.GenerateQuizUseCase;
 import com.akdemya.domain.port.in.ReviewGeneratedQuestionsUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/quizzes/generate")
-    public ResponseEntity<?> generate(@RequestBody GenerateRequest req) {
+    public ResponseEntity<Object> generate(@Valid @RequestBody GenerateRequest req) {
         try {
             req.validate();
         } catch (IllegalArgumentException e) {
@@ -71,7 +72,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/drafts/{id}/approve")
-    public ResponseEntity<?> approve(@PathVariable UUID id) {
+    public ResponseEntity<Object> approve(@PathVariable UUID id) {
         try {
             GeneratedQuestionDraft updated = reviewUseCase.approve(id);
             return ResponseEntity.ok(toResponse(updated));
@@ -83,7 +84,7 @@ public class QuizGenerationController {
     }
 
     @PostMapping("/api/ai/drafts/{id}/reject")
-    public ResponseEntity<?> reject(@PathVariable UUID id) {
+    public ResponseEntity<Object> reject(@PathVariable UUID id) {
         try {
             GeneratedQuestionDraft updated = reviewUseCase.reject(id);
             return ResponseEntity.ok(toResponse(updated));

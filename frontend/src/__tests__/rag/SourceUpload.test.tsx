@@ -28,13 +28,13 @@ describe('SourceUpload', () => {
   });
 
   it('renders the upload zone', () => {
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     expect(screen.getByRole('button', { name: /zona de subida/i })).toBeInTheDocument();
     expect(screen.getByText(/arrastra un pdf/i)).toBeInTheDocument();
   });
 
   it('rejects non-PDF files', async () => {
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'doc.docx', { type: 'application/msword' });
     Object.defineProperty(input, 'files', { value: [file] });
@@ -44,7 +44,7 @@ describe('SourceUpload', () => {
   });
 
   it('rejects files over 50 MB', async () => {
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const bigContent = new Uint8Array(51 * 1024 * 1024);
     const file = new File([bigContent], 'big.pdf', { type: 'application/pdf' });
@@ -56,21 +56,20 @@ describe('SourceUpload', () => {
 
   it('calls uploadSource and shows preview for valid PDF', async () => {
     vi.mocked(api.uploadSource).mockResolvedValue(mockPreview);
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF-1.4'], 'test.pdf', { type: 'application/pdf' });
     Object.defineProperty(input, 'files', { value: [file] });
     fireEvent.change(input);
-    await waitFor(() => expect(api.uploadSource).toHaveBeenCalledWith('tok', file, 'subj-1'));
+    await waitFor(() => expect(api.uploadSource).toHaveBeenCalledWith(file, 'subj-1'));
     // After upload shows the index preview
     expect(await screen.findByText(/temas detectados/i)).toBeInTheDocument();
   });
 
   it('shows error when upload fails', async () => {
-    const err: any = new Error('api_error');
-    err.body = { message: 'Server error' };
+    const err = Object.assign(new Error('api_error'), { body: { message: 'Server error' } });
     vi.mocked(api.uploadSource).mockRejectedValue(err);
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'fail.pdf', { type: 'application/pdf' });
     Object.defineProperty(input, 'files', { value: [file] });
@@ -84,7 +83,7 @@ describe('SourceUpload', () => {
       detectedUnits: []
     };
     vi.mocked(api.uploadSource).mockResolvedValue(failedPreview);
-    render(<SourceUpload token="tok" subjectId="subj-1" onUploaded={onUploaded} />);
+    render(<SourceUpload subjectId="subj-1" onUploaded={onUploaded} />);
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'fail.pdf', { type: 'application/pdf' });
     Object.defineProperty(input, 'files', { value: [file] });

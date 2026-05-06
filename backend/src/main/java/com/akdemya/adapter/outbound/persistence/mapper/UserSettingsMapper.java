@@ -10,7 +10,7 @@ import java.time.Instant;
 public class UserSettingsMapper {
 
     public UserSettings toDomain(UserSettingsEntity e) {
-        return new UserSettings(e.getUserId(), e.getNewCardsLimit(), e.getReviewCardsLimit());
+        return new UserSettings(e.getUserId(), e.getNewCardsLimit(), e.getReviewCardsLimit(), e.getPenaltyRatio());
     }
 
     public UserSettingsEntity toEntity(UserSettings d, UserSettingsEntity existing) {
@@ -18,6 +18,7 @@ public class UserSettingsMapper {
         e.setUserId(d.userId());
         e.setNewCardsLimit(d.newCardsLimit());
         e.setReviewCardsLimit(d.reviewCardsLimit());
+        e.setPenaltyRatio(d.penaltyRatio());
         e.setUpdatedAt(Instant.now());
         if (existing == null) {
             e.setCreatedAt(Instant.now());

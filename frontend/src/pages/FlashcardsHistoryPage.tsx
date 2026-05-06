@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFlashcardsHistory } from '../api';
+import { Inbox } from 'flowbite-react-icons/outline';
+import { apiJson, apiBase } from '../api';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 
 type HistoryItem = {
@@ -25,16 +26,14 @@ export default function FlashcardsHistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const token = localStorage.getItem('ak_token') || '';
-
   useEffect(() => {
     let mounted = true;
-    getFlashcardsHistory<HistoryItem[]>(token, 50)
+    apiJson<HistoryItem[]>(`${apiBase}/api/flashcards/history?limit=50`)
       .then((data) => { if (mounted) setItems(data || []); })
       .catch(() => { if (mounted) setError('No se pudo cargar el historial.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -61,7 +60,7 @@ export default function FlashcardsHistoryPage() {
         <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">{error}</div>
       ) : items.length === 0 ? (
         <div className="border border-secondary/25 rounded-2xl px-5 py-12 text-center">
-          <div className="text-4xl mb-3">📭</div>
+          <Inbox className="w-12 h-12 mx-auto mb-3 text-text/25" />
           <p className="text-text/55 text-sm">Aún no has revisado ninguna tarjeta.</p>
           <button
             className="mt-5 btn btn-primary rounded-full px-6 py-2 text-sm shadow-sm shadow-primary/15"

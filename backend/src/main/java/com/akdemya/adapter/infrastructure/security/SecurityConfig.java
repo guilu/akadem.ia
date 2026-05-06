@@ -1,8 +1,10 @@
 package com.akdemya.adapter.infrastructure.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,6 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -32,6 +35,15 @@ public class SecurityConfig {
     private final JwtService jwt;
     private final GoogleOAuth2UserService googleOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
+    @Value("${app.rate-limit.login.requests-per-minute:5}")
+    private int loginRateLimit;
+
+    @Value("${app.rate-limit.register.requests-per-minute:3}")
+    private int registerRateLimit;
 
     public SecurityConfig(JwtService jwt,
                           GoogleOAuth2UserService googleOAuth2UserService,
@@ -44,6 +56,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // CSRF disabled: all API endpoints authenticate via JWT (stateless).
+            // The OAuth2 flow uses IF_REQUIRED session only internally (state param);
+            // no business endpoint accepts session-based auth, so CSRF risk is negligible.
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // IF_REQUIRED: stateless for JWT requests, creates a session only
@@ -54,6 +69,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // OAuth2 endpoints are served under /api to go through the single nginx proxy rule
                 .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/syllabuses", "/api/syllabuses/**").permitAll()
+                .requestMatchers("/api/v1/payments/webhook").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/payments/create-intent").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/downloads/**").permitAll()
+                .requestMatchers("/api/manage/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .oauth2Login(oauth2 -> oauth2
@@ -68,6 +88,9 @@ public class SecurityConfig {
                 .userInfoEndpoint(ui -> ui.userService(googleOAuth2UserService))
                 .successHandler(oAuth2SuccessHandler));
 
+        http.addFilterBefore(new RateLimitFilter(loginRateLimit, registerRateLimit),
+            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+
         http.addFilterBefore(new JwtAuthFilter(jwt),
             org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
@@ -77,16 +100,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of(
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://192.168.1.175:3000",
-            "https://akademia.diegobarrioh.dev"
-        ));
+        cfg.setAllowedOrigins(allowedOrigins);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "Cookie"));
         cfg.setExposedHeaders(List.of("Authorization", "Content-Type"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
@@ -108,9 +124,8 @@ public class SecurityConfig {
         @Override
         protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                 throws ServletException, IOException {
-            String header = req.getHeader(HttpHeaders.AUTHORIZATION);
-            if (header != null && header.startsWith("Bearer ")) {
-                String token = header.substring(7);
+            String token = resolveToken(req);
+            if (token != null) {
                 try {
                     var jws = jwt.parse(token);
                     String email = jws.getBody().getSubject();
@@ -126,6 +141,23 @@ public class SecurityConfig {
                 }
             }
             chain.doFilter(req, res);
+        }
+
+        private String resolveToken(HttpServletRequest req) {
+            String header = req.getHeader(HttpHeaders.AUTHORIZATION);
+            if (header != null && header.startsWith("Bearer ")) {
+                return header.substring(7);
+            }
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                return Arrays.stream(cookies)
+                    .filter(c -> "ak_token".equals(c.getName()))
+                    .map(Cookie::getValue)
+                    .filter(v -> v != null && !v.isBlank())
+                    .findFirst()
+                    .orElse(null);
+            }
+            return null;
         }
     }
 }

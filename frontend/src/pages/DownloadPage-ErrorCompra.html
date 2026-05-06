@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Scholar Pro - Error en el Pago</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#a73927",
+            "on-surface-variant": "#57423e",
+            "on-surface": "#1b1c1c",
+            "tertiary-fixed": "#ffdea3",
+            "primary-fixed": "#ffdad4",
+            "tertiary-fixed-dim": "#f8bd37",
+            "outline-variant": "#dfc0ba",
+            "on-primary-fixed": "#400200",
+            "surface-container-low": "#f6f3f2",
+            "primary-fixed-dim": "#ffb4a6",
+            "on-error": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "secondary-fixed": "#dae4e7",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#5c6669",
+            "on-tertiary-fixed": "#261900",
+            "surface-bright": "#fcf9f8",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#141d1f",
+            "tertiary-container": "#966e00",
+            "surface-container-highest": "#e4e2e1",
+            "background": "#0F172A",
+            "tertiary": "#775600",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed-dim": "#bec8cb",
+            "inverse-primary": "#ffb4a6",
+            "secondary-container": "#dae4e7",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed-variant": "#3f484b",
+            "inverse-surface": "#303030",
+            "error": "#ba1a1a",
+            "primary": "#a43625",
+            "on-background": "#1b1c1c",
+            "on-primary-container": "#fffbff",
+            "surface": "#0F172A",
+            "on-primary": "#ffffff",
+            "outline": "#8b716c",
+            "inverse-on-surface": "#f3f0f0",
+            "primary-container": "#c44e3b",
+            "on-primary-fixed-variant": "#862113",
+            "on-tertiary-container": "#fffbff",
+            "surface-variant": "#e4e2e1",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "error-container": "#ffdad6",
+            "surface-container": "#f0eded",
+            "surface-container-high": "#eae7e7",
+            "secondary": "#566063"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-[#0F172A] text-slate-100 min-h-full flex flex-col">
+  <!-- TopAppBar -->
+  <header class="bg-slate-950/70 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-2xl shadow-black/20">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
+      <div class="text-xl font-bold tracking-tighter text-slate-100">
+        Scholar Pro
+      </div>
+      <nav class="hidden md:flex items-center gap-8">
+        <a class="font-plus-jakarta text-sm tracking-tight text-slate-400 hover:text-slate-100 transition-colors active:scale-95 duration-200"
+          href="#">Home</a>
+        <a class="font-plus-jakarta text-sm tracking-tight text-slate-400 hover:text-slate-100 transition-colors active:scale-95 duration-200"
+          href="#">Courses</a>
+        <a class="font-plus-jakarta text-sm tracking-tight text-slate-400 hover:text-slate-100 transition-colors active:scale-95 duration-200"
+          href="#">Library</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button
+          class="material-symbols-outlined text-slate-400 hover:text-slate-100 transition-colors active:scale-95 duration-200">help</button>
+        <button
+          class="material-symbols-outlined text-[#DA5E49] font-semibold active:scale-95 duration-200">account_circle</button>
+      </div>
+    </div>
+  </header>
+  <!-- Main Content: Focused Error Canvas -->
+  <main class="flex-grow flex items-center justify-center px-6 py-12">
+    <div class="max-w-2xl w-full text-center space-y-8 animate-in fade-in duration-700">
+      <!-- Error Icon Cluster -->
+      <div class="relative inline-flex items-center justify-center">
+        <div class="absolute inset-0 bg-[#DA5E49]/10 blur-3xl rounded-full"></div>
+        <div class="relative bg-slate-900/40 p-8 rounded-full border border-[#DA5E49]/20">
+          <span class="material-symbols-outlined text-7xl text-[#DA5E49]" style="font-variation-settings: 'FILL' 1;">
+            error
+          </span>
+        </div>
+      </div>
+      <!-- Typography Content -->
+      <div class="space-y-4">
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-50 leading-tight">
+          Ups, algo no ha salido como esperábamos
+        </h1>
+        <p class="text-lg md:text-xl text-slate-400 font-light max-w-xl mx-auto leading-relaxed">
+          No te preocupes, no se ha realizado ningún cargo en tu cuenta. Ha habido un problema técnico al procesar la
+          transacción.
+        </p>
+      </div>
+      <!-- CTA Section -->
+      <div class="flex flex-col items-center gap-6 pt-4">
+        <button
+          class="bg-gradient-to-br from-[#DA5E49] to-[#c44e3b] text-white px-10 py-4 rounded-xl text-lg font-bold shadow-lg shadow-[#DA5E49]/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
+          Intentar de nuevo
+        </button>
+        <div class="text-sm font-label text-slate-500">
+          ¿Has intentado varias veces y tienes problemas con la compra?
+          <a class="text-[#DA5E49] font-semibold hover:underline decoration-2 underline-offset-4 ml-1 transition-all"
+            href="#">
+            Contactar con soporte
+          </a>
+        </div>
+      </div>
+      <!-- Transaction Hint (Progressive Disclosure Style) -->
+      <div class="mt-12 bg-slate-900/30 rounded-2xl p-6 border border-slate-800/50 max-w-md mx-auto">
+        <div class="flex items-start gap-4 text-left">
+          <span class="material-symbols-outlined text-slate-500 mt-1">info</span>
+          <div>
+            <h4 class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-1">Información de Seguridad</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Nuestras pasarelas de pago están cifradas y protegidas. Si el problema persiste, es posible que tu entidad
+              bancaria haya bloqueado el movimiento por seguridad.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Footer -->
+  <footer class="bg-slate-950 w-full mt-auto">
+    <div
+      class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 border-t border-slate-800/20 max-w-screen-2xl mx-auto">
+      <div class="font-plus-jakarta text-xs uppercase tracking-widest text-slate-500">
+        © 2024 Scholar Pro. Cognitive Sanctuary Design.
+      </div>
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+        <a class="font-plus-jakarta text-xs uppercase tracking-widest text-slate-500 hover:text-[#DA5E49] transition-all opacity-80 hover:opacity-100"
+          href="#">Support Center</a>
+        <a class="font-plus-jakarta text-xs uppercase tracking-widest text-slate-500 hover:text-[#DA5E49] transition-all opacity-80 hover:opacity-100"
+          href="#">Terms of Service</a>
+        <a class="font-plus-jakarta text-xs uppercase tracking-widest text-slate-500 hover:text-[#DA5E49] transition-all opacity-80 hover:opacity-100"
+          href="#">Privacy Policy</a>
+        <a class="font-plus-jakarta text-xs uppercase tracking-widest text-slate-500 hover:text-[#DA5E49] transition-all opacity-80 hover:opacity-100"
+          href="#">Contact Us</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

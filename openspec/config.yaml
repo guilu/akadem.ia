@@ -1,0 +1,43 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Java 21 + Spring Boot 3.4.13 (Gradle, package com.akdemya); PostgreSQL + Flyway;
+    React 18 + TypeScript + Vite 5 + TailwindCSS 3 (feature-based src/features/*).
+  Architecture: Backend hexagonal/DDD (domain / application / adapter); Stripe + JWT + OAuth2;
+    Frontend feature folders, services layer for API calls, hooks for business logic.
+  Testing: JUnit 5 + Spring Boot Test (H2 in tests, Testcontainers planned), JaCoCo;
+    Vitest + Testing Library (jsdom) on the frontend.
+  Style: gitmoji + conventional commits; SonarCloud quality gate;
+    git-flow branching with feature/AKDMIA-* branches targeting main.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes (Stripe, payments, auth, migrations)
+    - Identify affected modules (backend package + frontend feature folder)
+    - Reference the Jira ticket (AKDMIA-XXX) when applicable
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Backend = source of truth; frontend specs validate UX only
+  design:
+    - Map components to hexagonal layers (domain / application / adapter)
+    - Document architecture decisions with rationale
+    - Include sequence diagrams for cross-layer or external-service flows (Stripe, AI APIs)
+  tasks:
+    - Group tasks by phase (infrastructure, backend, frontend, testing, docs)
+    - Use hierarchical numbering (1.1, 1.2, ...)
+    - Keep tasks small enough to complete in one session
+    - Backend contract before frontend implementation
+  apply:
+    - Follow existing code patterns (records for DTOs, constructor injection, no field injection)
+    - UI components stay presentational; logic in hooks/services
+    - Never hardcode API URLs in components — use apiClient
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas (large removals)
+    - Update CHANGELOG.md when archiving user-facing changes

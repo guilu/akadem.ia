@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Inbox } from 'flowbite-react-icons/outline';
 import { getUnitsForSubject } from '../../api';
 import type { SourceDocument, GenerateQuizCommand } from '../../types';
 
 interface Props {
-  token: string;
   sources: SourceDocument[];
   subjectId: string;
   onGenerate: (cmd: GenerateQuizCommand) => void;
@@ -16,7 +16,7 @@ const DIFFICULTIES = [
   { value: 'HARD', label: 'Difícil' }
 ] as const;
 
-export default function QuizGenerateForm({ token, sources, subjectId, onGenerate, loading }: Props) {
+export default function QuizGenerateForm({ sources, subjectId, onGenerate, loading }: Props) {
   const processed = sources.filter((s) => s.status === 'PROCESSED');
 
   const [sourceId, setSourceId] = useState('');
@@ -33,11 +33,11 @@ export default function QuizGenerateForm({ token, sources, subjectId, onGenerate
   useEffect(() => {
     if (!subjectId) { setUnits([]); setUnitId(''); return; }
     setUnitsLoading(true);
-    getUnitsForSubject(token, subjectId)
+    getUnitsForSubject(subjectId)
       .then((u) => { setUnits(u); setUnitId(''); })
       .catch(() => setUnits([]))
       .finally(() => setUnitsLoading(false));
-  }, [subjectId, token]);
+  }, [subjectId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -62,7 +62,10 @@ export default function QuizGenerateForm({ token, sources, subjectId, onGenerate
           ))}
         </select>
         {processed.length === 0 && (
-          <p className="text-xs text-yellow-600 mt-1">No hay documentos procesados. Súbelos en la pestaña Fuentes.</p>
+          <p className="text-xs text-yellow-600 mt-1 flex items-center gap-1">
+            <Inbox className="w-3.5 h-3.5 shrink-0" />
+            No hay documentos procesados. Súbelos en la pestaña Fuentes.
+          </p>
         )}
       </div>
 
@@ -82,7 +85,8 @@ export default function QuizGenerateForm({ token, sources, subjectId, onGenerate
           ))}
         </select>
         {units.length === 0 && !unitsLoading && (
-          <p className="text-xs text-yellow-600 mt-1">
+          <p className="text-xs text-yellow-600 mt-1 flex items-center gap-1">
+            <Inbox className="w-3.5 h-3.5 shrink-0" />
             No hay unidades en esta asignatura. Indexa un documento primero.
           </p>
         )}

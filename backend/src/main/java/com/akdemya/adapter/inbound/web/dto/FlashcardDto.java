@@ -2,7 +2,10 @@ package com.akdemya.adapter.inbound.web.dto;
 
 import com.akdemya.domain.model.ReviewGrade;
 import com.akdemya.domain.model.ReviewState;
+import com.akdemya.domain.model.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +17,7 @@ public class FlashcardDto {
                                   LocalDateTime createdAt, LocalDateTime updatedAt) {
   }
 
-  public record CreateRequest(UUID unitId, String front, String back) {
+  public record CreateRequest(@NotNull UUID unitId, @NotBlank String front, @NotBlank String back, Visibility visibility) {
   }
 
   public record UpdateRequest(UUID unitId, String front, String back) {
@@ -59,6 +62,7 @@ public class FlashcardDto {
   }
 
   public record UnitSummary(UUID unitId, String unitName, UUID subjectId, String subjectName,
+                            UUID syllabusId, String syllabusName,
                             long newCount, long reviewCount, long dueCount) {
   }
 

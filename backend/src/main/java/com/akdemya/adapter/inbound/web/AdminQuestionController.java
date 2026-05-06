@@ -6,10 +6,14 @@ import com.akdemya.domain.port.out.AnswerRepository;
 import com.akdemya.domain.port.out.QuestionRepository;
 import com.akdemya.domain.port.out.UnitRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/admin/questions")
 public class AdminQuestionController {
@@ -32,7 +36,7 @@ public class AdminQuestionController {
   }
 
   @GetMapping("/export")
-  public ResponseEntity<?> export(@RequestParam(required = false) UUID unitId,
+  public ResponseEntity<Object> export(@RequestParam(required = false) UUID unitId,
                                   @RequestParam(defaultValue = "json") String format) {
     List<Question> data = unitId == null ? questions.findAll() : questions.findByUnitId(unitId);
     if (format.equalsIgnoreCase("csv")) {
@@ -48,13 +52,13 @@ public class AdminQuestionController {
     return ResponseEntity.ok(payload);
   }
 
-  private static final long MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10 MB
+  private static final long MAX_UPLOAD_SIZE = 10L * 1024 * 1024; // 10 MB
   private static final java.util.Set<String> ALLOWED_CONTENT_TYPES = java.util.Set.of(
       "application/json", "text/csv", "application/octet-stream", "text/plain"
   );
 
   @PostMapping(value = "/import", consumes = "multipart/form-data")
-  public ResponseEntity<?> importQuestions(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+  public ResponseEntity<Object> importQuestions(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
                                            @RequestParam(defaultValue = "json") String format,
                                            @RequestParam(required = false) UUID unitId) throws Exception {
     if (file.isEmpty()) {
@@ -104,7 +108,7 @@ public class AdminQuestionController {
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody QuestionRequest req) {
+  public ResponseEntity<Object> create(@Valid @RequestBody QuestionRequest req) {
     var validation = validateRequest(req);
     if (validation != null) return validation;
 
@@ -113,7 +117,7 @@ public class AdminQuestionController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody QuestionRequest req) {
+  public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody QuestionRequest req) {
     var validation = validateRequest(req);
     if (validation != null) return validation;
 
@@ -239,12 +243,12 @@ public class AdminQuestionController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable UUID id) {
+  public ResponseEntity<Void> delete(@PathVariable UUID id) {
     questions.deleteById(id);
     return ResponseEntity.ok().build();
   }
 
-  private ResponseEntity<?> validateRequest(QuestionRequest req) {
+  private ResponseEntity<Object> validateRequest(QuestionRequest req) {
     if (req.unitId() == null) {
       return ResponseEntity.badRequest().body(java.util.Map.of("error", "unit_required"));
     }

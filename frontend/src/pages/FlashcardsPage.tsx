@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { exportFlashcardsBySubject, exportFlashcardsByUnit, getFlashcardsUnitsSummary, getFlashcardsStudyQueue } from '../api';
+import { ArrowLeft, ArrowUpFromBracket, Close, CheckCircle, CirclePlus, Refresh, Clock, Inbox } from 'flowbite-react-icons/outline';
+import { apiJson, apiBase, exportFlashcardsBySubject } from '../api';
 import FlashcardImportModal from '../components/flashcards/FlashcardImportModal';
 import FlashcardsTabs from '../components/flashcards/FlashcardsTabs';
 import SearchInput from '../components/flashcards/SearchInput';
 import SubjectCard from '../components/flashcards/SubjectCard';
 import type { SubjectSummary } from '../components/flashcards/SubjectCard';
+import SyllabusCard from '../components/flashcards/SyllabusCard';
+import type { SyllabusSummary } from '../components/flashcards/SyllabusCard';
 import UnitList from '../components/flashcards/UnitList';
 
 export type UnitSummary = {
@@ -13,6 +16,8 @@ export type UnitSummary = {
   unitName: string;
   subjectId: string;
   subjectName: string;
+  syllabusId: string | null;
+  syllabusName: string | null;
   newCount: number;
   reviewCount: number;
   dueCount?: number;
@@ -32,15 +37,14 @@ export default function FlashcardsPage() {
   const [globalQueue, setGlobalQueue] = useState<GlobalQueue | null>(null);
   const [globalLoading, setGlobalLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
+  const [selectedSyllabusId, setSelectedSyllabusId] = useState<string | null>(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string>('');
-
-  const token = localStorage.getItem('ak_token') || '';
 
   const loadUnits = () => {
     setLoading(true);
     setError('');
-    getFlashcardsUnitsSummary<UnitSummary[]>(token)
+    apiJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`)
       .then((data) => setUnits(data || []))
       .catch(() => setError('No se pudieron cargar las unidades.'))
       .finally(() => setLoading(false));
@@ -50,28 +54,70 @@ export default function FlashcardsPage() {
     let mounted = true;
     setLoading(true);
     setError('');
-    getFlashcardsUnitsSummary<UnitSummary[]>(token)
+    apiJson<UnitSummary[]>(`${apiBase}/api/flashcards/units/summary`)
       .then((data) => { if (mounted) setUnits(data || []); })
       .catch(() => { if (mounted) setError('No se pudieron cargar las unidades.'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     setGlobalLoading(true);
-    getFlashcardsStudyQueue<GlobalQueue>(token)
+    apiJson<GlobalQueue>(`${apiBase}/api/flashcards/study/queue`)
       .then((data) => { if (mounted) setGlobalQueue(data || null); })
       .catch(() => {})
       .finally(() => { if (mounted) setGlobalLoading(false); });
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
-  // Derive subject summaries from unit data
+  // Derive syllabus summaries from unit data
+  const syllabuses = useMemo<SyllabusSummary[]>(() => {
+    const map = new Map<string, SyllabusSummary>();
+    const syllabusSubjectsMap = new Map<string, Set<string>>();
+
+    for (const u of units) {
+      const sId = u.syllabusId || 'no-syllabus';
+      if (!map.has(sId)) {
+        map.set(sId, {
+          syllabusId: u.syllabusId,
+          syllabusName: u.syllabusName || 'Sin temario',
+          newCount: 0,
+          reviewCount: 0,
+          dueCount: 0,
+          subjectCount: 0,
+        });
+        syllabusSubjectsMap.set(sId, new Set<string>());
+      }
+      const s = map.get(sId)!;
+      s.newCount += u.newCount;
+      s.reviewCount += u.reviewCount;
+      s.dueCount += u.dueCount ?? 0;
+      if (u.subjectId) {
+        syllabusSubjectsMap.get(sId)!.add(u.subjectId);
+      }
+    }
+
+    for (const [sId, subjects] of syllabusSubjectsMap.entries()) {
+      map.get(sId)!.subjectCount = subjects.size;
+    }
+
+    return Array.from(map.values());
+  }, [units]);
+
+  const selectedSyllabus = selectedSyllabusId
+    ? syllabuses.find((s) => s.syllabusId === selectedSyllabusId || (s.syllabusId === null && selectedSyllabusId === 'no-syllabus')) ?? null
+    : null;
+
+  // Derive subject summaries from unit data, filtered by selected syllabus
   const subjects = useMemo<SubjectSummary[]>(() => {
+    if (!selectedSyllabusId) return [];
     const map = new Map<string, SubjectSummary>();
     for (const u of units) {
       if (!u.subjectId) continue;
+      const sId = u.syllabusId || 'no-syllabus';
+      if (sId !== selectedSyllabusId) continue;
+
       if (!map.has(u.subjectId)) {
         map.set(u.subjectId, {
           subjectId: u.subjectId,
@@ -89,7 +135,7 @@ export default function FlashcardsPage() {
       s.unitCount++;
     }
     return Array.from(map.values());
-  }, [units]);
+  }, [units, selectedSyllabusId]);
 
   const selectedSubject = selectedSubjectId
     ? subjects.find((s) => s.subjectId === selectedSubjectId) ?? null
@@ -99,6 +145,11 @@ export default function FlashcardsPage() {
     () => (selectedSubjectId ? units.filter((u) => u.subjectId === selectedSubjectId) : []),
     [units, selectedSubjectId]
   );
+
+  const filteredSyllabuses = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q ? syllabuses.filter((s) => s.syllabusName.toLowerCase().includes(q)) : syllabuses;
+  }, [syllabuses, search]);
 
   const filteredSubjects = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -123,7 +174,15 @@ export default function FlashcardsPage() {
   const handleExport = async (unit: UnitSummary, format: 'csv' | 'json') => {
     setExportError('');
     try {
-      const content = await exportFlashcardsByUnit(token, unit.unitId, format);
+      const res = await fetch(
+        `${apiBase}/api/flashcards/export?unitId=${unit.unitId}&format=${format}`,
+        { credentials: 'include' }
+      );
+      if (!res.ok) {
+        setExportError('No se pudo exportar. Inténtalo de nuevo.');
+        return;
+      }
+      const content = await res.text();
       const blob = new Blob([content], {
         type: format === 'json' ? 'application/json' : 'text/csv',
       });
@@ -140,7 +199,7 @@ export default function FlashcardsPage() {
   const handleSubjectExport = async (subject: SubjectSummary, format: 'csv' | 'json') => {
     setExportError('');
     try {
-      const content = await exportFlashcardsBySubject(token, subject.subjectId, format);
+      const content = await exportFlashcardsBySubject(subject.subjectId, format);
       const blob = new Blob([content], {
         type: format === 'json' ? 'application/json' : 'text/csv',
       });
@@ -154,13 +213,23 @@ export default function FlashcardsPage() {
     }
   };
 
+  const handleSelectSyllabus = (syllabusId: string | null) => {
+    setSelectedSyllabusId(syllabusId || 'no-syllabus');
+    setSelectedSubjectId(null);
+    setSearch('');
+  };
+
   const handleSelectSubject = (subjectId: string) => {
     setSelectedSubjectId(subjectId);
     setSearch('');
   };
 
   const handleBack = () => {
-    setSelectedSubjectId(null);
+    if (selectedSubjectId) {
+      setSelectedSubjectId(null);
+    } else if (selectedSyllabusId) {
+      setSelectedSyllabusId(null);
+    }
     setSearch('');
   };
 
@@ -171,14 +240,14 @@ export default function FlashcardsPage() {
       <header className="space-y-3">
         <div className="py-[1.5rem] flex items-start justify-between">
           <div className="flex items-center gap-3">
-            {selectedSubjectId && (
+            {(selectedSyllabusId || selectedSubjectId) && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors text-sm"
-                aria-label="Volver a materias"
+                className="flex items-center justify-center w-8 h-8 rounded-xl border border-secondary/30 text-text/60 hover:border-primary/40 hover:text-text transition-colors"
+                aria-label="Volver atrás"
               >
-                ←
+                <ArrowLeft className="w-6 h-6" />
               </button>
             )}
             <div>
@@ -190,6 +259,8 @@ export default function FlashcardsPage() {
               </h1>
               {selectedSubject ? (
                 <p className="text-text/55 text-sm mt-1">{selectedSubject.subjectName}</p>
+              ) : selectedSyllabus ? (
+                <p className="text-text/55 text-sm mt-1">{selectedSyllabus.syllabusName}</p>
               ) : (
                 <p className="text-text/55 text-sm mt-1">Repasa por unidades con repetición espaciada.</p>
               )}
@@ -200,7 +271,8 @@ export default function FlashcardsPage() {
             onClick={openImport}
             className="mt-1 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-secondary/30 text-sm text-text/60 hover:border-primary/40 hover:text-text transition-colors"
           >
-            <span>⬆</span> Importar
+            <ArrowUpFromBracket className="w-6 h-6" />
+            Importar
           </button>
         </div>
         <FlashcardsTabs active={mode} onTab={(tab) => {
@@ -220,27 +292,37 @@ export default function FlashcardsPage() {
           <button
             type="button"
             onClick={() => setExportError('')}
-            className="text-red-400/70 hover:text-red-400 transition-colors text-xs shrink-0"
+            className="text-red-400/70 hover:text-red-400 transition-colors shrink-0"
             aria-label="Cerrar error"
           >
-            ✕
+            <Close className="w-6 h-6" />
           </button>
         </div>
       )}
 
-      {/* Global queue strip — only in study mode and subject list view */}
+      {/* Global queue strip — only in study mode and main listing views */}
       {mode === 'estudio' && !selectedSubjectId && (
         globalLoading ? (
           <div className="h-12 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
         ) : globalQueue && totalPending === 0 ? (
-          <div className="border border-secondary/25 rounded-2xl px-5 py-3 text-center text-sm text-text/60">
-            Nada pendiente hoy 🎉
+          <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-center gap-2 text-sm text-text/60">
+            <CheckCircle className="w-4 h-4 text-lime-500" />
+            Nada pendiente hoy
           </div>
         ) : globalQueue ? (
           <div className="border border-secondary/25 rounded-2xl px-5 py-3 flex items-center justify-around text-sm font-medium">
-            <span className="text-lime-500">🆕 {globalQueue.new} nuevas</span>
-            <span className="text-accent">⚡ {globalQueue.learning} aprendiendo</span>
-            <span className="text-primary">🔁 {globalQueue.due} pendientes</span>
+            <span className="flex items-center gap-1.5 text-lime-500 whitespace-nowrap">
+              <CirclePlus className="w-4 h-4 shrink-0" />
+              {globalQueue.new} nuevas
+            </span>
+            <span className="flex items-center gap-1.5 text-accent whitespace-nowrap">
+              <Refresh className="w-4 h-4 shrink-0" />
+              {globalQueue.learning}<span className="sm:hidden"> aprend.</span><span className="hidden sm:inline"> aprendiendo</span>
+            </span>
+            <span className="flex items-center gap-1.5 text-primary whitespace-nowrap">
+              <Clock className="w-4 h-4 shrink-0" />
+              {globalQueue.due}<span className="sm:hidden"> pend.</span><span className="hidden sm:inline"> pendientes</span>
+            </span>
           </div>
         ) : null
       )}
@@ -257,6 +339,34 @@ export default function FlashcardsPage() {
             onExport={handleExport}
             onImport={openImport}
           />
+        ) : selectedSyllabusId ? (
+          loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 rounded-2xl border border-secondary/15 bg-secondary/5 animate-pulse" />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
+              {error}
+            </div>
+          ) : filteredSubjects.length === 0 ? (
+            <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center space-y-4">
+              <Inbox className="w-8 h-8 mx-auto text-text/25" />
+              <p className="text-sm text-text/55">No hay materias disponibles en este temario.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredSubjects.map((subject) => (
+                <SubjectCard
+                  key={subject.subjectId}
+                  subject={subject}
+                  onClick={() => handleSelectSubject(subject.subjectId)}
+                  onExport={(fmt) => handleSubjectExport(subject, fmt)}
+                />
+              ))}
+            </div>
+          )
         ) : loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -267,9 +377,10 @@ export default function FlashcardsPage() {
           <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
             {error}
           </div>
-        ) : filteredSubjects.length === 0 ? (
+        ) : filteredSyllabuses.length === 0 ? (
           <div className="border border-secondary/25 rounded-2xl px-5 py-8 text-center space-y-4">
-            <p className="text-sm text-text/55">No hay materias disponibles.</p>
+            <Inbox className="w-8 h-8 mx-auto text-text/25" />
+            <p className="text-sm text-text/55">No hay temarios disponibles.</p>
             <button
               type="button"
               onClick={openImport}
@@ -280,12 +391,11 @@ export default function FlashcardsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredSubjects.map((subject) => (
-              <SubjectCard
-                key={subject.subjectId}
-                subject={subject}
-                onClick={() => handleSelectSubject(subject.subjectId)}
-                onExport={(fmt) => handleSubjectExport(subject, fmt)}
+            {filteredSyllabuses.map((syllabus) => (
+              <SyllabusCard
+                key={syllabus.syllabusId || 'no-syllabus'}
+                syllabus={syllabus}
+                onClick={() => handleSelectSyllabus(syllabus.syllabusId)}
               />
             ))}
           </div>
@@ -294,7 +404,6 @@ export default function FlashcardsPage() {
 
       {showImport && (
         <FlashcardImportModal
-          token={token}
           onClose={() => setShowImport(false)}
           onImported={loadUnits}
         />

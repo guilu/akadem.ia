@@ -1,7 +1,7 @@
 # Akadem.ia
 
 <p align="center">
-  <img src="docs/images/hero.png" alt="Akadem.ia Hero" width="100%">
+  <img src="docs/images/home-light.png" alt="Akadem.ia Hero" width="100%">
 </p>
 
 <p align="center">

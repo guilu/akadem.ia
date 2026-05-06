@@ -1,3 +1,5 @@
+import { BookOpen, CirclePlus, Clock, Refresh, ChevronRight } from 'flowbite-react-icons/outline';
+
 type SubjectSummary = {
   subjectId: string;
   subjectName: string;
@@ -23,11 +25,11 @@ export default function SubjectCard({ subject, onClick, onExport }: Props) {
       <button
         type="button"
         onClick={onClick}
-        className="w-full text-left border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+        className="w-full text-left border border-secondary/25 rounded-2xl bg-card p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent group-hover:bg-accent/15 transition-colors text-xl">
-            📚
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent group-hover:bg-accent/15 transition-colors">
+            <BookOpen className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
@@ -38,14 +40,32 @@ export default function SubjectCard({ subject, onClick, onExport }: Props) {
               </div>
             </div>
           </div>
-          <div className="text-text/30 text-lg">›</div>
+          <ChevronRight className="w-4 h-4 text-text/30 shrink-0" />
         </div>
 
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-text/55">
-          <span>📖 {subject.unitCount} {subject.unitCount === 1 ? 'mazo' : 'mazos'}</span>
-          {subject.newCount > 0 && <span>🆕 {subject.newCount} nuevas</span>}
-          {subject.reviewCount > 0 && <span>🟡 {subject.reviewCount} en repaso</span>}
-          {subject.dueCount > 0 && <span>🔁 {subject.dueCount} pendientes</span>}
+          <span className="flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5" />
+            {subject.unitCount} {subject.unitCount === 1 ? 'mazo' : 'mazos'}
+          </span>
+          {subject.newCount > 0 && (
+            <span className="flex items-center gap-1 text-lime-500">
+              <CirclePlus className="w-3.5 h-3.5" />
+              {subject.newCount} nuevas
+            </span>
+          )}
+          {subject.reviewCount > 0 && (
+            <span className="flex items-center gap-1 text-yellow-500">
+              <Clock className="w-3.5 h-3.5" />
+              {subject.reviewCount} en repaso
+            </span>
+          )}
+          {subject.dueCount > 0 && (
+            <span className="flex items-center gap-1 text-primary">
+              <Refresh className="w-3.5 h-3.5" />
+              {subject.dueCount} pendientes
+            </span>
+          )}
         </div>
       </button>
 

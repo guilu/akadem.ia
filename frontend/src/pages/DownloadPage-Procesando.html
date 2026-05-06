@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-on-surface": "#f3f0f0",
+            "surface": "#fcf9f8",
+            "on-surface": "#1b1c1c",
+            "inverse-primary": "#ffb4a6",
+            "background": "#fcf9f8",
+            "primary": "#a43625",
+            "on-primary-container": "#fffbff",
+            "surface-container-highest": "#e4e2e1",
+            "tertiary-container": "#966e00",
+            "primary-fixed-dim": "#ffb4a6",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-surface-variant": "#57423e",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed-dim": "#f8bd37",
+            "secondary-fixed-dim": "#bec8cb",
+            "tertiary": "#775600",
+            "secondary-container": "#dae4e7",
+            "surface-tint": "#a73927",
+            "surface-container-high": "#eae7e7",
+            "on-tertiary-container": "#fffbff",
+            "on-secondary-container": "#5c6669",
+            "surface-variant": "#e4e2e1",
+            "surface-bright": "#fcf9f8",
+            "error-container": "#ffdad6",
+            "secondary": "#566063",
+            "tertiary-fixed": "#ffdea3",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#141d1f",
+            "on-tertiary-fixed-variant": "#5c4200",
+            "on-secondary-fixed-variant": "#3f484b",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#862113",
+            "surface-container-low": "#f6f3f2",
+            "surface-dim": "#dcd9d9",
+            "outline": "#8b716c",
+            "on-primary-fixed": "#400200",
+            "on-background": "#1b1c1c",
+            "surface-container": "#f0eded",
+            "on-tertiary-fixed": "#261900",
+            "error": "#ba1a1a",
+            "inverse-surface": "#303030",
+            "outline-variant": "#dfc0ba",
+            "on-error": "#ffffff",
+            "primary-fixed": "#ffdad4",
+            "primary-container": "#c44e3b",
+            "secondary-fixed": "#dae4e7"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fcf9f8;
+      color: #1b1c1c;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .loading-ring {
+      animation: ring 1.5s linear infinite;
+    }
+
+    @keyframes ring {
+      0% {
+        transform: rotate(0deg);
+        box-shadow: 1px 3px 2px #a43625;
+      }
+
+      50% {
+        transform: rotate(180deg);
+        box-shadow: 1px 3px 2px #da5e49;
+      }
+
+      100% {
+        transform: rotate(360deg);
+        box-shadow: 1px 3px 2px #a43625;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-surface text-on-surface">
+  <!-- TopAppBar -->
+  <nav class="bg-[#fcf9f8]/70 backdrop-blur-xl docked full-width top-0 sticky z-50">
+    <div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+      <div class="text-2xl font-bold tracking-tighter text-[#DA5E49]">Scholar Pro</div>
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-slate-600 hover:text-[#DA5E49] transition-colors duration-300"
+          href="#">Explorar</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-slate-600 hover:text-[#DA5E49] transition-colors duration-300"
+          href="#">Mis Cursos</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight text-slate-600 hover:text-[#DA5E49] transition-colors duration-300"
+          href="#">Comunidad</a>
+      </div>
+      <div class="flex items-center space-x-5">
+        <button
+          class="material-symbols-outlined text-slate-600 hover:text-[#DA5E49] transition-all">notifications</button>
+        <button
+          class="material-symbols-outlined text-slate-600 hover:text-[#DA5E49] transition-all">shopping_cart</button>
+        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-highest">
+          <img alt="Avatar de usuario"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHspWcVs8pd2zPpkx52TbDSmtZ7FNJ7OffqpfAEVzEQdKxlVzhV46D1BpMjlBNe5vtnKP5PT32YTldbiIV_1Kh81IPjNyQIzICGKqQhp-ihpCtKNeWV-MYeiOHIWEruMtLVAOYAXEaL71xQnUqZpj3rLypaAMT_KYYVoPOEq_K55Btc_ZKXSzjpUVWvMZ-owgL33sCBGKFdE5IIlM8-UQsG_MVbeNDpa6LzfDl7Wdi-VEmc3BOx1JUhB5ti0kU07dP57TnFaACDtg" />
+        </div>
+      </div>
+    </div>
+  </nav>
+  <main class="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-8 py-12">
+    <div class="max-w-md w-full text-center space-y-8">
+      <!-- Loader Animation -->
+      <div class="relative w-24 h-24 mx-auto">
+        <div class="absolute inset-0 rounded-full border-4 border-primary/10"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-4xl"
+            style="font-variation-settings: 'FILL' 1;">payments</span>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Procesando tu pago...</h1>
+        <p class="text-lg text-on-surface-variant leading-relaxed">
+          Estamos confirmando tu compra con Stripe. No cierres esta ventana, recibirás un correo con el enlace en unos
+          segundos.
+        </p>
+      </div>
+      <!-- Progress Bar Subtle -->
+      <div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+        <div class="bg-primary h-full w-2/3 rounded-full animate-[progress_2s_ease-in-out_infinite]"></div>
+      </div>
+      <div class="pt-8 flex items-center justify-center space-x-3 text-sm font-medium text-on-surface-variant/60">
+        <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z">
+          </path>
+        </svg>
+        <span>Conexión segura cifrada</span>
+      </div>
+    </div>
+  </main>
+  <style>
+    @keyframes progress {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(200%);
+      }
+    }
+  </style>
+  <!-- BottomNavBar (Mobile Only) -->
+  <nav
+    class="md:hidden bg-[#fcf9f8]/80 backdrop-blur-lg fixed bottom-0 w-full z-50 rounded-t-3xl shadow-[0_-8px_32px_rgba(27,28,28,0.04)] px-4 pb-6 pt-3 flex justify-around items-center">
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">home</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Inicio</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-[#DA5E49]/10 text-[#DA5E49] rounded-2xl px-5 py-2 scale-95"
+      href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">import_contacts</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Biblioteca</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">orbit</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Progreso</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-['Inter'] text-[11px] uppercase tracking-widest font-semibold mt-1">Perfil</span>
+    </a>
+  </nav>
+</body>
+
+</html>

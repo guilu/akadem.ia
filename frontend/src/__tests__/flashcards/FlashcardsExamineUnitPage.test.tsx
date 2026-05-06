@@ -8,12 +8,17 @@ vi.mock('react-router-dom', () => ({
   useSearchParams: () => [new URLSearchParams('unitId=unit-1')],
 }));
 
+vi.mock('flowbite-react-icons/outline', () => ({
+  ArrowLeft: () => <span data-testid="arrow-left" />,
+  ArrowRight: () => <span data-testid="arrow-right" />,
+  Inbox: () => <span data-testid="inbox" />,
+}));
+
 vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    apiAuthJson: vi.fn(),
-    getFlashcardsByUnit: vi.fn(),
+    apiJson: vi.fn(),
   };
 });
 
@@ -25,11 +30,10 @@ const mockCards = [
 describe('FlashcardsExamineUnitPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('ak_token', 'test-token');
   });
 
   it('shows skeleton while loading', () => {
-    vi.mocked(api.getFlashcardsByUnit).mockReturnValue(new Promise(() => {}));
+    vi.mocked(api.apiJson).mockReturnValue(new Promise(() => {}));
 
     const { container } = render(<FlashcardsExamineUnitPage />);
 
@@ -38,7 +42,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('renders cards when loaded', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -48,7 +52,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('shows empty state with Volver and import CTA when no cards', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -61,7 +65,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('shows error state on API failure', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockRejectedValue(new Error('api_error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('api_error'));
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -71,7 +75,7 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('flips card when clicked to show back, and again to show front', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -97,13 +101,13 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('navigates to next card when Siguiente is clicked', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
 
     await waitFor(() => {
       expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument();
@@ -111,47 +115,47 @@ describe('FlashcardsExamineUnitPage', () => {
   });
 
   it('navigates to previous card when Anterior is clicked', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
     // Go to second card
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument());
 
     // Go back
-    fireEvent.click(screen.getByText('← Anterior'));
+    fireEvent.click(screen.getByRole('button', { name: /anterior/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
   });
 
   it('disables Anterior button on first card', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    const prevBtn = screen.getByText('← Anterior');
+    const prevBtn = screen.getByRole('button', { name: /anterior/i });
     expect(prevBtn).toBeDisabled();
   });
 
   it('disables Siguiente button on last card', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
     await waitFor(() => expect(screen.getByText('¿Qué es la derivada?')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument());
 
-    expect(screen.getByText('Siguiente →')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /siguiente/i })).toBeDisabled();
   });
 
   it('resets flip state when navigating to next card', async () => {
-    vi.mocked(api.getFlashcardsByUnit).mockResolvedValue(mockCards);
+    vi.mocked(api.apiJson).mockResolvedValue(mockCards);
 
     render(<FlashcardsExamineUnitPage />);
 
@@ -162,7 +166,7 @@ describe('FlashcardsExamineUnitPage', () => {
     await waitFor(() => expect(screen.getByText('Tasa de cambio instantánea.')).toBeInTheDocument());
 
     // Navigate to next — flip should reset
-    fireEvent.click(screen.getByText('Siguiente →'));
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await waitFor(() => {
       expect(screen.getByText('¿Qué es la integral?')).toBeInTheDocument();
     });

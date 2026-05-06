@@ -10,11 +10,10 @@ import DraftList from '../components/rag/DraftList';
 type Tab = 'sources' | 'generate' | 'drafts';
 
 interface Props {
-  token: string;
   subjects: Subject[];
 }
 
-export default function RagPage({ token, subjects }: Props) {
+export default function RagPage({ subjects }: Props) {
   const [tab, setTab] = useState<Tab>('sources');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
   const [sources, setSources] = useState<SourceDocument[]>([]);
@@ -27,18 +26,18 @@ export default function RagPage({ token, subjects }: Props) {
   useEffect(() => {
     if (!selectedSubjectId) { setSources([]); return; }
     setSourcesLoading(true);
-    getSources(token, selectedSubjectId)
+    getSources(selectedSubjectId)
       .then(setSources)
       .catch(() => setSources([]))
       .finally(() => setSourcesLoading(false));
-  }, [token, selectedSubjectId]);
+  }, [selectedSubjectId]);
 
   function onUploaded(doc: SourceDocument) {
     setSources((prev) => [doc, ...prev]);
   }
 
   async function onDelete(id: string) {
-    await deleteSource(token, id);
+    await deleteSource(id);
     setSources((prev) => prev.filter((s) => s.id !== id));
   }
 
@@ -47,7 +46,7 @@ export default function RagPage({ token, subjects }: Props) {
     setGenerateError('');
     setResult(null);
     try {
-      const res = await generateQuiz(token, cmd);
+      const res = await generateQuiz(cmd);
       setResult(res);
     } catch (err: any) {
       if (err?.code === 'timeout') {
@@ -125,7 +124,6 @@ export default function RagPage({ token, subjects }: Props) {
                 <section>
                   <h2 className="text-base font-semibold mb-3">Subir documento PDF</h2>
                   <SourceUpload
-                    token={token}
                     subjectId={selectedSubjectId}
                     onUploaded={onUploaded}
                   />
@@ -151,7 +149,6 @@ export default function RagPage({ token, subjects }: Props) {
                   <>
                     <h2 className="text-base font-semibold">Configurar generación</h2>
                     <QuizGenerateForm
-                      token={token}
                       sources={sources}
                       subjectId={selectedSubjectId}
                       onGenerate={onGenerate}
@@ -168,7 +165,7 @@ export default function RagPage({ token, subjects }: Props) {
             {tab === 'drafts' && (
               <div className="space-y-6">
                 <h2 className="text-base font-semibold">Borradores guardados</h2>
-                <DraftList token={token} sources={sources} />
+                <DraftList sources={sources} />
               </div>
             )}
           </div>
