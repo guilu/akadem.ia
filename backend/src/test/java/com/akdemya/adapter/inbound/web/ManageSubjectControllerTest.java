@@ -3,6 +3,7 @@ package com.akdemya.adapter.inbound.web;
 import com.akdemya.application.service.ContentManagement;
 import com.akdemya.domain.model.AppUser;
 import com.akdemya.domain.model.Subject;
+import com.akdemya.domain.model.Syllabus;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -307,5 +310,149 @@ class ManageSubjectControllerTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertTrue(response.getBody().get(0).isEditable());
+  }
+
+  // Test 22: importSubjectsValidCsvCreatesSubjects — admin, 3-row CSV → 200, created=3, errors empty
+  @Test
+  void importSubjectsValidCsvCreatesSubjects() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\nTema 1,Desc 1\nTema 2,Desc 2\nTema 3,Desc 3\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    when(contentService.getSubjectsByScope(any(), eq(true), eq(Visibility.GLOBAL))).thenReturn(List.of());
+    Subject created = Subject.createGlobal("Tema 1", "Desc 1", syllabusId);
+    when(contentService.createSubject(any())).thenReturn(created);
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(3, body.get("created"));
+    assertTrue(((List<?>) body.get("errors")).isEmpty());
+    verify(contentService, times(3)).createSubject(any());
+  }
+
+  // Test 23: importSubjectsNonAdminEmptyFileReturnsBadRequest — non-admin, empty file → 400
+  // Per design: non-admins import PRIVATE subjects (no blanket 403). Guard fires on empty file.
+  @Test
+  void importSubjectsNonAdminEmptyFileReturnsBadRequest() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    User principal = userPrincipal("user@example.com");
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(true);
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    verify(contentService, never()).createSubject(any());
+  }
+
+  // Test 24: importSubjectsExceedingRowLimitReturnsBadRequest — admin, 501 rows → 400 row_limit_exceeded
+  @Test
+  void importSubjectsExceedingRowLimitReturnsBadRequest() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    StringBuilder sb = new StringBuilder("name,description\n");
+    for (int i = 1; i <= 501; i++) {
+      sb.append("Tema ").append(i).append(",Desc ").append(i).append("\n");
+    }
+    String csv = sb.toString();
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+    when(contentService.getSubjectsByScope(any(), eq(true), eq(Visibility.GLOBAL))).thenReturn(List.of());
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals("row_limit_exceeded", body.get("error"));
+    verify(contentService, never()).createSubject(any());
+  }
+
+  // Test 25: importSubjectsPartialErrorReportsRowErrors — 3-row CSV where row 2 has blank name
+  @Test
+  void importSubjectsPartialErrorReportsRowErrors() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\nTema 1,Desc 1\n,Desc 2\nTema 3,Desc 3\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    when(contentService.getSubjectsByScope(any(), eq(true), eq(Visibility.GLOBAL))).thenReturn(List.of());
+    Subject created = Subject.createGlobal("Tema 1", "Desc 1", syllabusId);
+    when(contentService.createSubject(any())).thenReturn(created);
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(2, body.get("created"));
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> errors = (List<Map<String, Object>>) body.get("errors");
+    assertEquals(1, errors.size());
+    assertEquals(2, errors.get(0).get("row"));
+    verify(contentService, times(2)).createSubject(any());
+  }
+
+  // Test 26: importSubjectsDuplicateNameReportsRowError — existing "Tema A" → duplicate row error
+  @Test
+  void importSubjectsDuplicateNameReportsRowError() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\nTema A,Desc\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    Subject existing = Subject.createGlobal("Tema A", "Existing desc", syllabusId);
+    when(contentService.getSubjectsByScope(any(), eq(true), eq(Visibility.GLOBAL))).thenReturn(List.of(existing));
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(0, body.get("created"));
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> errors = (List<Map<String, Object>>) body.get("errors");
+    assertEquals(1, errors.size());
+    assertEquals(1, errors.get(0).get("row"));
+    verify(contentService, never()).createSubject(any());
+  }
+
+  // Test 27: importSubjects_nonOwnerSyllabus_returnsForbidden
+  // Non-admin user tries to import into a syllabus that belongs to another user → 403
+  @Test
+  void importSubjects_nonOwnerSyllabus_returnsForbidden() throws Exception {
+    UUID syllabusId = UUID.randomUUID();
+    UUID otherOwnerId = UUID.randomUUID(); // different from userId
+    User principal = userPrincipal("user@example.com");
+
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn(30L);
+
+    Syllabus otherUserSyllabus = Syllabus.createPrivate("Other Syllabus", "desc", otherOwnerId);
+    when(contentService.getSyllabusById(syllabusId)).thenReturn(Optional.of(otherUserSyllabus));
+
+    ResponseEntity<Object> response = controller.importSubjects(file, "csv", syllabusId, principal);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals("not_authorized", body.get("error"));
+    verify(contentService, never()).createSubject(any());
   }
 }
