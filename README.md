@@ -19,6 +19,7 @@
 ## ✨ Features
 
 - 📝 Timed exams and mock tests
+- 🛒 Course store with stripe integration
 - 🧠 SM-2 spaced repetition flashcards
 - 🤖 AI-generated quizzes from PDFs (RAG)
 - 🔐 JWT + Google OAuth2 authentication
