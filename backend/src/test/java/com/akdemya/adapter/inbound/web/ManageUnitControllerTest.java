@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -338,5 +340,144 @@ class ManageUnitControllerTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(contentService).getUnitsByScope(eq(subjectId), any(), anyBoolean(), eq(Visibility.PRIVATE));
+  }
+
+  // Test: importUnits_validCsv_returnsCreatedCount — admin, 3-row CSV → 200, created=3, errors empty
+  @Test
+  void importUnits_validCsv_returnsCreatedCount() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\nUnidad 1,Desc 1\nUnidad 2,Desc 2\nUnidad 3,Desc 3\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of());
+    Unit created = Unit.createGlobal(subjectId, "Unidad 1", "Desc 1", 1);
+    when(contentService.createUnit(any())).thenReturn(created);
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(3, body.get("created"));
+    assertTrue(((List<?>) body.get("errors")).isEmpty());
+    verify(contentService, times(3)).createUnit(any());
+  }
+
+  // Test: importUnits_emptyFile_returnsBadRequest — empty file → 400
+  @Test
+  void importUnits_emptyFile_returnsBadRequest() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    User principal = userPrincipal("user@example.com");
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(true);
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    verify(contentService, never()).createUnit(any());
+  }
+
+  // Test: importUnits_rowLimitExceeded_returnsBadRequest — 501 rows → 400 row_limit_exceeded
+  @Test
+  void importUnits_rowLimitExceeded_returnsBadRequest() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    StringBuilder sb = new StringBuilder("name,description\n");
+    for (int i = 1; i <= 501; i++) {
+      sb.append("Unidad ").append(i).append(",Desc ").append(i).append("\n");
+    }
+    String csv = sb.toString();
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of());
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals("row_limit_exceeded", body.get("error"));
+    verify(contentService, never()).createUnit(any());
+  }
+
+  // Test: importUnits_blankNameRow_returnsRowError — one blank name → {created:0, errors:[{row:1,...}]}
+  @Test
+  void importUnits_blankNameRow_returnsRowError() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\n,Desc 1\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of());
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(0, body.get("created"));
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> errors = (List<Map<String, Object>>) body.get("errors");
+    assertEquals(1, errors.size());
+    assertEquals(1, errors.get(0).get("row"));
+    verify(contentService, never()).createUnit(any());
+  }
+
+  // Test: importUnits_duplicateNameRow_returnsRowError — duplicate unit name → row error
+  @Test
+  void importUnits_duplicateNameRow_returnsRowError() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    User principal = adminPrincipal("admin@example.com");
+    String csv = "name,description\nUnidad A,Desc\n";
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn((long) csv.length());
+    when(file.getBytes()).thenReturn(csv.getBytes());
+
+    Unit existing = Unit.createGlobal(subjectId, "Unidad A", "Existing desc", 1);
+    when(contentService.getUnitsBySubject(subjectId)).thenReturn(List.of(existing));
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals(0, body.get("created"));
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> errors = (List<Map<String, Object>>) body.get("errors");
+    assertEquals(1, errors.size());
+    assertEquals(1, errors.get(0).get("row"));
+    verify(contentService, never()).createUnit(any());
+  }
+
+  // Test: importUnits_nonOwnerSubject_returnsForbidden — non-admin + foreign subject → 403
+  @Test
+  void importUnits_nonOwnerSubject_returnsForbidden() throws Exception {
+    UUID subjectId = UUID.randomUUID();
+    UUID otherOwnerId = UUID.randomUUID(); // different from userId
+    User principal = userPrincipal("user@example.com");
+
+    var file = mock(MultipartFile.class);
+    when(file.isEmpty()).thenReturn(false);
+    when(file.getSize()).thenReturn(30L);
+
+    Subject otherUserSubject = Subject.createPrivate("Other Subject", "desc", otherOwnerId);
+    when(contentService.getSubjectById(subjectId)).thenReturn(Optional.of(otherUserSubject));
+
+    ResponseEntity<Object> response = controller.importUnits(file, "csv", subjectId, principal);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> body = (Map<String, Object>) response.getBody();
+    assertEquals("not_authorized", body.get("error"));
+    verify(contentService, never()).createUnit(any());
   }
 }
