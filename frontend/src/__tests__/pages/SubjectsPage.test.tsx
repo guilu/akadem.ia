@@ -13,7 +13,8 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    getExamAttempts: vi.fn(),
+    apiBase: 'http://localhost:8080',
+    apiJson: vi.fn(),
   };
 });
 
@@ -53,12 +54,11 @@ describe('SubjectsPage', () => {
   });
 
   it('renders subject cards', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -67,16 +67,15 @@ describe('SubjectsPage', () => {
 
     expect(screen.getByText('Matemáticas')).toBeInTheDocument();
     expect(screen.getByText('Física')).toBeInTheDocument();
-    await waitFor(() => expect(vi.mocked(api.getExamAttempts)).toHaveBeenCalledOnce());
+    await waitFor(() => expect(vi.mocked(api.apiJson)).toHaveBeenCalledOnce());
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(api.getExamAttempts).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(api.apiJson).mockImplementation(() => new Promise(() => {}));
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -87,12 +86,11 @@ describe('SubjectsPage', () => {
   });
 
   it('shows empty state when no exam history', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -105,12 +103,11 @@ describe('SubjectsPage', () => {
   });
 
   it('shows exam history when attempts exist', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue(mockHistory as any);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistory as any);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -125,12 +122,11 @@ describe('SubjectsPage', () => {
   });
 
   it('calls onViewResult when "Ver resultados" is clicked', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue(mockHistory as any);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistory as any);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -143,12 +139,11 @@ describe('SubjectsPage', () => {
   });
 
   it('calls onResumeAttempt when "Reanudar" is clicked', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue(mockHistory as any);
+    vi.mocked(api.apiJson).mockResolvedValue(mockHistory as any);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -161,12 +156,11 @@ describe('SubjectsPage', () => {
   });
 
   it('shows error state when API fails', async () => {
-    vi.mocked(api.getExamAttempts).mockRejectedValue(new Error('network error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('network error'));
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -180,12 +174,11 @@ describe('SubjectsPage', () => {
 
   it('calls onUnauthorized when API returns 401', async () => {
     const err = Object.assign(new Error('Unauthorized'), { status: 401 });
-    vi.mocked(api.getExamAttempts).mockRejectedValue(err);
+    vi.mocked(api.apiJson).mockRejectedValue(err);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
@@ -198,19 +191,19 @@ describe('SubjectsPage', () => {
   });
 
   it('shows active attempt resume link when activeAttemptId is provided', async () => {
-    vi.mocked(api.getExamAttempts).mockResolvedValue([]);
+    vi.mocked(api.apiJson).mockResolvedValue([]);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
         activeAttemptId="active-123"
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}
       />
     );
 
+    await waitFor(() => expect(vi.mocked(api.apiJson)).toHaveBeenCalledOnce());
     expect(screen.getByText('Reanudar examen')).toBeInTheDocument();
   });
 
@@ -224,12 +217,11 @@ describe('SubjectsPage', () => {
       percent: 80,
       totalTimeSeconds: 1800,
     }));
-    vi.mocked(api.getExamAttempts).mockResolvedValue(longHistory as any);
+    vi.mocked(api.apiJson).mockResolvedValue(longHistory as any);
 
     render(
       <SubjectsPage
         subjects={mockSubjects}
-        token="test-token"
         onUnauthorized={onUnauthorized}
         onViewResult={onViewResult}
         onResumeAttempt={onResumeAttempt}

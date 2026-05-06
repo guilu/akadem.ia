@@ -24,9 +24,8 @@ vi.mock('../../api', async (importOriginal) => {
   const actual = await importOriginal<typeof api>();
   return {
     ...actual,
-    getExamAttempt: vi.fn(),
-    saveExamAnswer: vi.fn(),
-    submitExam: vi.fn(),
+    apiBase: 'http://localhost:8080',
+    apiJson: vi.fn(),
   };
 });
 
@@ -58,20 +57,20 @@ describe('ExamAttemptPage', () => {
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(api.getExamAttempt).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(api.apiJson).mockImplementation(() => new Promise(() => {}));
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     expect(screen.getByText('Cargando intento...')).toBeInTheDocument();
   });
 
   it('renders ExamRunner when attempt loads successfully', async () => {
-    vi.mocked(api.getExamAttempt).mockResolvedValue(mockAttemptData);
+    vi.mocked(api.apiJson).mockResolvedValue(mockAttemptData);
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     await waitFor(() => {
@@ -81,24 +80,23 @@ describe('ExamAttemptPage', () => {
   });
 
   it('shows error state when API fails', async () => {
-    vi.mocked(api.getExamAttempt).mockRejectedValue(new Error('network error'));
+    vi.mocked(api.apiJson).mockRejectedValue(new Error('network error'));
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument();
-      expect(screen.getByText('No se pudo cargar el intento')).toBeInTheDocument();
+      expect(screen.getByText('Error al reanudar el intento')).toBeInTheDocument();
     });
   });
 
   it('calls onUnauthorized when API returns 401', async () => {
     const err = Object.assign(new Error('Unauthorized'), { status: 401 });
-    vi.mocked(api.getExamAttempt).mockRejectedValue(err);
+    vi.mocked(api.apiJson).mockRejectedValue(err);
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     await waitFor(() => {
@@ -108,14 +106,14 @@ describe('ExamAttemptPage', () => {
 
   it('shows timeout error message when API times out', async () => {
     const err = Object.assign(new Error('timeout'), { code: 'timeout' });
-    vi.mocked(api.getExamAttempt).mockRejectedValue(err);
+    vi.mocked(api.apiJson).mockRejectedValue(err);
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument();
+      expect(screen.getByText('Error al reanudar el intento')).toBeInTheDocument();
     });
   });
 
@@ -123,21 +121,24 @@ describe('ExamAttemptPage', () => {
     mockAttemptId = undefined;
 
     render(
-      <ExamAttemptPage token="test-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     expect(screen.getByTestId('navigate')).toBeInTheDocument();
   });
 
-  it('calls getExamAttempt with correct token and attemptId', async () => {
-    vi.mocked(api.getExamAttempt).mockResolvedValue(mockAttemptData);
+  it('calls apiJson with correct attempt URL and timeout', async () => {
+    vi.mocked(api.apiJson).mockResolvedValue(mockAttemptData);
 
     render(
-      <ExamAttemptPage token="my-token" onUnauthorized={onUnauthorized} onFinish={onFinish} />
+      <ExamAttemptPage onUnauthorized={onUnauthorized} onFinish={onFinish} />
     );
 
     await waitFor(() => {
-      expect(vi.mocked(api.getExamAttempt)).toHaveBeenCalledWith('my-token', 'attempt-123');
+      expect(vi.mocked(api.apiJson)).toHaveBeenCalledWith(
+        'http://localhost:8080/api/exams/attempts/attempt-123',
+        { timeoutMs: 15000 }
+      );
     });
   });
 });

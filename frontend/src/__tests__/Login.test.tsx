@@ -21,7 +21,7 @@ function makeResponse(body: unknown, status = 200, ok = true): Response {
 }
 
 describe('Login component', () => {
-  const onToken = vi.fn();
+  const onAuthSuccess = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -29,14 +29,14 @@ describe('Login component', () => {
   });
 
   it('renders the login form', () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
   });
 
   it('shows validation error when email is empty', async () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
     await waitFor(() => {
       expect(screen.getByText('El email es obligatorio')).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe('Login component', () => {
   });
 
   it('shows validation error for invalid email', async () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'not-an-email' },
     });
@@ -57,7 +57,7 @@ describe('Login component', () => {
   });
 
   it('shows validation error when password is empty', async () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -68,10 +68,10 @@ describe('Login component', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('calls onToken with accessToken on successful login', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'tok-123' }));
+  it('calls onAuthSuccess with authenticated user on successful login', async () => {
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -81,14 +81,14 @@ describe('Login component', () => {
     fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
 
     await waitFor(() => {
-      expect(onToken).toHaveBeenCalledWith('tok-123');
+      expect(onAuthSuccess).toHaveBeenCalledWith({ email: 'user@example.com', role: 'USER' });
     });
   });
 
   it('uses API_ROUTES.auth.login endpoint', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'tok' }));
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -107,7 +107,7 @@ describe('Login component', () => {
   it('shows error message from server on failed login', async () => {
     mockFetch.mockResolvedValue(makeResponse({ error: 'Credenciales incorrectas' }, 401, false));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -124,7 +124,7 @@ describe('Login component', () => {
   it('shows default error when server returns no error message', async () => {
     mockFetch.mockResolvedValue(makeResponse({}, 401, false));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -141,7 +141,7 @@ describe('Login component', () => {
   it('shows network error on fetch failure', async () => {
     mockFetch.mockRejectedValue(new Error('network failure'));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -156,9 +156,9 @@ describe('Login component', () => {
   });
 
   it('triggers login on Enter key in email field', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'tok' }));
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -173,9 +173,9 @@ describe('Login component', () => {
   });
 
   it('triggers login on Enter key in password field', async () => {
-    mockFetch.mockResolvedValue(makeResponse({ accessToken: 'tok' }));
+    mockFetch.mockResolvedValue(makeResponse({ email: 'user@example.com', role: 'USER' }));
 
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
       target: { value: 'user@example.com' },
     });
@@ -190,14 +190,14 @@ describe('Login component', () => {
   });
 
   it('renders Google OAuth link with correct URL', () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     const googleLink = screen.getByText('Continuar con Google').closest('a');
     expect(googleLink).toHaveAttribute('href');
     expect(googleLink?.getAttribute('href')).toContain(API_ROUTES.auth.oauthGoogle);
   });
 
   it('renders link to register page', () => {
-    render(<Login onToken={onToken} />);
+    render(<Login onAuthSuccess={onAuthSuccess} />);
     expect(screen.getByText('Regístrate gratis')).toBeInTheDocument();
   });
 });

@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://akademia.diegobarrioh.dev">Live Demo</a>
-  ·
-  <a href="https://github.com/guilu/akadem.ia">Repository</a>
+  <a href="https://akademia.diegobarrioh.dev">▶️ Live Demo</a>
+  •
+  <a href="https://github.com/guilu/akadem.ia">📦 Repository</a>
 </p>
 
 ---
@@ -19,6 +19,7 @@
 ## ✨ Features
 
 - 📝 Timed exams and mock tests
+- 🛒 Course store with stripe integration
 - 🧠 SM-2 spaced repetition flashcards
 - 🤖 AI-generated quizzes from PDFs (RAG)
 - 🔐 JWT + Google OAuth2 authentication
@@ -31,22 +32,34 @@
 
 ## 📸 Screenshots
 
-### Landing Page
+### Store Page
 
-![Landing](docs/images/home-dark.png)
+<p align="center">
+  <img src="docs/images/store-1.png" width="49%">
+  <img src="docs/images/store-2.png" width="49%">
+</p>
+<p align="center">
+  <img src="docs/images/store-3.png" width="49%">
+  <img src="docs/images/store-4.png" width="49%">
+</p>
 
 ---
 
 ### Exam Builder
 
-![Exam Builder](docs/images/exam-builder.png)
+<p align="center">
+  <img src="docs/images/exam-builder.png" width="49%">
+  <img src="docs/images/exam-question-session.png" width="49%">
+</p>
 
 ---
 
 ### Exam Session
 
-![Exam Session](docs/images/exam-session.png)
-
+<p align="center">
+  <img src="docs/images/exam-session.png" width="49%">
+  <img src="docs/images/exam-result.png" width="49%">
+</p>
 ---
 
 ### Flashcards Study
@@ -57,21 +70,23 @@
 
 ### AI PDF Quiz Generation
 
-![AI Resource Upload and Generate Embedings](docs/images/rag-upload.png)
-
-![AI Quiz Generation](docs/images/question-generation.png)
+<p align="center">
+  <img src="docs/images/rag-upload.png" width="49%">
+  <img src="docs/images/question-generation.png" width="49%">
+</p>
 
 ---
 
 ## 🚀 Live Demo
 
-🔗 https://akademia.diegobarrioh.dev
+🔗 <https://akademia.diegobarrioh.dev>
 
 ---
 
 ## 🏗️ Tech Stack
 
 ### Backend
+
 - Java 21
 - Spring Boot 3.3
 - Spring Security + JWT
@@ -80,12 +95,14 @@
 - OpenAI API
 
 ### Frontend
+
 - React 18
 - Vite
 - Tailwind CSS
 - Flowbite React
 
 ### Infrastructure
+
 - Docker Compose
 - Nginx
 - PostgreSQL
@@ -102,8 +119,8 @@ docker compose up --build
 
 | Service | URL |
 |---|---|
-| Frontend | http://localhost:5173 |
-| API | http://localhost:8080 |
+| Frontend | <http://localhost:5173> |
+| API | <http://localhost:8080> |
 | Postgres | localhost:5432 |
 
 ---
@@ -178,11 +195,17 @@ Built-in flashcards system with:
 ## ⚙️ Environment Variables
 
 ```env
-SPRING_DATASOURCE_URL=
-SPRING_DATASOURCE_USERNAME=
-SPRING_DATASOURCE_PASSWORD=
-OPENAI_API_KEY=
 JWT_SECRET=
+GROQ_API_KEY=
+OPENROUTER_API_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FRONTEND_URL=
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=
+PRODUCTS_STORAGE_PATH=
 ```
 
 ---
