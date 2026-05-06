@@ -31,15 +31,25 @@
 
 ## 📸 Screenshots
 
-### Landing Page
+### Store Page
 
-![Landing](docs/images/home-dark.png)
+<p align="center">
+  <img src="docs/images/store-1.png" width="49%">
+  <img src="docs/images/store-2.png" width="49%">
+</p>
+<p align="center">
+  <img src="docs/images/store-3.png" width="49%">
+  <img src="docs/images/store-4.png" width="49%">
+</p>
 
 ---
 
 ### Exam Builder
 
-![Exam Builder](docs/images/exam-builder.png)
+<p align="center">
+  <img src="docs/images/exam-builder.png" width="49%">
+  <img src="docs/images/exam-question-session.png" width="49%">
+</p>
 
 ---
 
@@ -65,13 +75,14 @@
 
 ## 🚀 Live Demo
 
-🔗 https://akademia.diegobarrioh.dev
+🔗 <https://akademia.diegobarrioh.dev>
 
 ---
 
 ## 🏗️ Tech Stack
 
 ### Backend
+
 - Java 21
 - Spring Boot 3.3
 - Spring Security + JWT
@@ -80,12 +91,14 @@
 - OpenAI API
 
 ### Frontend
+
 - React 18
 - Vite
 - Tailwind CSS
 - Flowbite React
 
 ### Infrastructure
+
 - Docker Compose
 - Nginx
 - PostgreSQL
@@ -102,8 +115,8 @@ docker compose up --build
 
 | Service | URL |
 |---|---|
-| Frontend | http://localhost:5173 |
-| API | http://localhost:8080 |
+| Frontend | <http://localhost:5173> |
+| API | <http://localhost:8080> |
 | Postgres | localhost:5432 |
 
 ---
