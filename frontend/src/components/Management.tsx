@@ -446,14 +446,13 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temas</span></h2>
-              {filterSyllabusId && (
-                <button
-                  className={btnOutline}
-                  onClick={() => { setSubjectImportOpen(true); setSubjectImportMessage(''); setSubjectImportResult(null); setSubjectImportFile(null); }}
-                >
-                  <FileImport className="w-6 h-6" />Importar
-                </button>
-              )}
+              <button
+                className={btnOutline}
+                disabled={!filterSyllabusId}
+                onClick={() => { setSubjectImportOpen(true); setSubjectImportMessage(''); setSubjectImportResult(null); setSubjectImportFile(null); }}
+              >
+                <FileImport className="w-6 h-6" />Importar
+              </button>
             </div>
 
             <div className={card}>
