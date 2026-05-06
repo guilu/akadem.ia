@@ -117,8 +117,8 @@ export default function FlashcardsExamineUnitPage() {
 
       {/* Card – tap to flip */}
       <div className="relative cursor-pointer" onClick={() => setFlipped((f) => !f)}>
-        <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-bg brightness-90 dark:brightness-75" />
-        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[45vh] max-h-[45vh] flex flex-col bg-bg select-none">
+        <div className="absolute -left-1.5 -bottom-1.5 h-full w-full rounded-2xl bg-white dark:bg-card brightness-90 dark:brightness-75" />
+        <div className="relative border border-secondary/25 rounded-2xl p-7 min-h-[45vh] max-h-[45vh] flex flex-col bg-white dark:bg-card select-none">
           <div className="flex-1 overflow-y-auto min-h-0 flex items-center">
             <p className="text-xl font-semibold leading-relaxed w-full">
               {flipped ? card.back : card.front}

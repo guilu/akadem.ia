@@ -113,25 +113,30 @@ export default function PaymentModal({ isOpen, onClose, productId }: PaymentModa
 
         {step === 'email-entry' && (
           <form onSubmit={handleEmailContinue} className="space-y-4">
-            <label className="block">
-              <span className="text-sm font-medium text-text">Tu email</span>
+            <p className="text-sm text-text/80 leading-relaxed">
+              Danos tu mejor e-mail para que podamos contactar contigo, además de descargarlo ahora mismo, te enviaremos un enlace con la descarga disponible.
+            </p>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 shrink-0">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+              </span>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailSuggestion(null); }}
                 onBlur={handleEmailBlur}
-                placeholder="tu@email.com"
+                placeholder="Introduce tu email"
                 required
-                className="mt-1 w-full rounded-xl border border-secondary/30 bg-card px-4 py-3 text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Tu email"
+                className="w-full bg-white/50 dark:bg-[#24394c] border border-transparent rounded-xl pl-11 pr-4 py-4 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors"
               />
-            </label>
+            </div>
             <MailcheckHint
               suggestion={emailSuggestion}
               onAccept={(s) => { setEmail(s); setEmailSuggestion(null); }}
             />
-            <p className="text-xs text-secondary">
-              Te enviaremos el enlace de descarga a este email. Es la única forma de recuperarlo.
-            </p>
             {error && (
               <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">{error}</p>
             )}

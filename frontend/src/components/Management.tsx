@@ -177,6 +177,20 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
   const [importDone, setImportDone] = useState(false);
   const [importStats, setImportStats] = useState<{ created: number; errors: number } | null>(null);
 
+  const [subjectImportOpen, setSubjectImportOpen] = useState(false);
+  const [subjectImportFile, setSubjectImportFile] = useState<File | null>(null);
+  const [subjectImportFormat, setSubjectImportFormat] = useState<'csv' | 'json'>('csv');
+  const [subjectImportLoading, setSubjectImportLoading] = useState(false);
+  const [subjectImportMessage, setSubjectImportMessage] = useState('');
+  const [subjectImportResult, setSubjectImportResult] = useState<{ created: number; errors: { row: number; message: string }[] } | null>(null);
+
+  const [unitImportOpen, setUnitImportOpen] = useState(false);
+  const [unitImportFile, setUnitImportFile] = useState<File | null>(null);
+  const [unitImportFormat, setUnitImportFormat] = useState<'csv' | 'json'>('csv');
+  const [unitImportLoading, setUnitImportLoading] = useState(false);
+  const [unitImportMessage, setUnitImportMessage] = useState('');
+  const [unitImportResult, setUnitImportResult] = useState<{ created: number; errors: { row: number; message: string }[] } | null>(null);
+
   const [filterSyllabusId, setFilterSyllabusId] = useState('');
   const [filterUnitSyllabusId, setFilterUnitSyllabusId] = useState('');
   const [questionSyllabusId, setQuestionSyllabusId] = useState('');
@@ -310,6 +324,51 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
     finally { setImportLoading(false); }
   }
 
+  async function handleSubjectImport() {
+    if (!subjectImportFile || subjectImportLoading) return;
+    if (!filterSyllabusId) { setSubjectImportMessage('Selecciona un temario'); return; }
+    setSubjectImportLoading(true); setSubjectImportMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', subjectImportFile);
+      const res = await fetch(
+        `${apiBase}/api/manage/subjects/import?format=${subjectImportFormat}&syllabusId=${filterSyllabusId}`,
+        { method: 'POST', credentials: 'include', body: formData }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'import_failed');
+      setSubjectImportResult({ created: data.created || 0, errors: data.errors || [] });
+      setSubjectImportMessage(`Temas creados: ${data.created || 0}`);
+      await loadSubjects();
+      onSubjectsChanged?.();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo importar';
+      setSubjectImportMessage(msg);
+    } finally { setSubjectImportLoading(false); }
+  }
+
+  async function handleUnitImport() {
+    if (!unitImportFile || unitImportLoading) return;
+    if (!unitForm.subjectId) { setUnitImportMessage('Selecciona un tema'); return; }
+    setUnitImportLoading(true); setUnitImportMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', unitImportFile);
+      const res = await fetch(
+        `${apiBase}/api/manage/units/import?format=${unitImportFormat}&subjectId=${unitForm.subjectId}`,
+        { method: 'POST', credentials: 'include', body: formData }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'import_failed');
+      setUnitImportResult({ created: data.created || 0, errors: data.errors || [] });
+      setUnitImportMessage(`Unidades creadas: ${data.created || 0}`);
+      await loadUnits(unitForm.subjectId);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo importar';
+      setUnitImportMessage(msg);
+    } finally { setUnitImportLoading(false); }
+  }
+
   const navItems = [
     { id: 'syllabuses' as Tab, label: 'Temarios', icon: <Inbox className="w-6 h-6" /> },
     { id: 'subjects' as Tab, label: 'Temas', icon: <BookOpen className="w-6 h-6" /> },
@@ -416,6 +475,13 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Temas</span></h2>
+              <button
+                className={btnOutline}
+                disabled={!filterSyllabusId}
+                onClick={() => { setSubjectImportOpen(true); setSubjectImportMessage(''); setSubjectImportResult(null); setSubjectImportFile(null); }}
+              >
+                <FileImport className="w-6 h-6" />Importar
+              </button>
             </div>
 
             <div className={card}>
@@ -500,6 +566,13 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
           <div className="grid gap-5 py-[1.5rem]">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-xl font-extrabold tracking-tight">Gestión de <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Unidades</span></h2>
+              <button
+                className={btnOutline}
+                disabled={!unitForm.subjectId}
+                onClick={() => { setUnitImportOpen(true); setUnitImportMessage(''); setUnitImportResult(null); setUnitImportFile(null); }}
+              >
+                <FileImport className="w-6 h-6" />Importar
+              </button>
             </div>
 
             <div className={card}>
@@ -743,6 +816,108 @@ export default function Management({ isAdmin, onSubjectsChanged }: { isAdmin: bo
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Importar temas ── */}
+      {subjectImportOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-bg border border-secondary/25 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Importar temas</h3>
+            <div className="grid gap-3 mb-4">
+              <select className={inp} value={subjectImportFormat} onChange={e => setSubjectImportFormat(e.target.value as 'csv' | 'json')}>
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </select>
+              <input
+                type="file"
+                accept={subjectImportFormat === 'csv' ? '.csv' : '.json'}
+                onChange={e => setSubjectImportFile(e.target.files?.[0] || null)}
+                className="text-sm text-text/70 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:transition-colors"
+              />
+              {subjectImportMessage && (
+                <div className={`text-sm rounded-lg px-3 py-2 font-medium ${
+                  subjectImportResult
+                    ? subjectImportResult.created > 0 && subjectImportResult.errors.length === 0
+                      ? 'bg-green-500/15 text-green-600 border border-green-500/30'
+                      : subjectImportResult.created === 0 && subjectImportResult.errors.length > 0
+                        ? 'bg-red-500/15 text-red-600 border border-red-500/30'
+                        : 'bg-yellow-500/15 text-yellow-600 border border-yellow-500/30'
+                    : 'bg-secondary/20 text-text/70'
+                }`}>{subjectImportMessage}</div>
+              )}
+              {subjectImportResult && subjectImportResult.errors.length > 0 && (
+                <ul className="text-xs text-red-500 space-y-1 max-h-40 overflow-y-auto">
+                  {subjectImportResult.errors.map(err => (
+                    <li key={err.row}>Fila {err.row}: {err.message}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className={btnOutline} onClick={() => setSubjectImportOpen(false)}>
+                <CircleMinus className="w-6 h-6" />Cancelar
+              </button>
+              <button
+                className={btnPrimary}
+                onClick={handleSubjectImport}
+                disabled={subjectImportLoading || !subjectImportFile}
+              >
+                <FileImport className="w-6 h-6" />{subjectImportLoading ? 'Importando...' : 'Importar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Importar unidades ── */}
+      {unitImportOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-bg border border-secondary/25 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Importar unidades</h3>
+            <div className="grid gap-3 mb-4">
+              <select className={inp} value={unitImportFormat} onChange={e => setUnitImportFormat(e.target.value as 'csv' | 'json')}>
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </select>
+              <input
+                type="file"
+                accept={unitImportFormat === 'csv' ? '.csv' : '.json'}
+                onChange={e => setUnitImportFile(e.target.files?.[0] || null)}
+                className="text-sm text-text/70 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:transition-colors"
+              />
+              {unitImportMessage && (
+                <div className={`text-sm rounded-lg px-3 py-2 font-medium ${
+                  unitImportResult
+                    ? unitImportResult.created > 0 && unitImportResult.errors.length === 0
+                      ? 'bg-green-500/15 text-green-600 border border-green-500/30'
+                      : unitImportResult.created === 0 && unitImportResult.errors.length > 0
+                        ? 'bg-red-500/15 text-red-600 border border-red-500/30'
+                        : 'bg-yellow-500/15 text-yellow-600 border border-yellow-500/30'
+                    : 'bg-secondary/20 text-text/70'
+                }`}>{unitImportMessage}</div>
+              )}
+              {unitImportResult && unitImportResult.errors.length > 0 && (
+                <ul className="text-xs text-red-500 space-y-1 max-h-40 overflow-y-auto">
+                  {unitImportResult.errors.map(err => (
+                    <li key={err.row}>Fila {err.row}: {err.message}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className={btnOutline} onClick={() => setUnitImportOpen(false)}>
+                <CircleMinus className="w-6 h-6" />Cancelar
+              </button>
+              <button
+                className={btnPrimary}
+                onClick={handleUnitImport}
+                disabled={unitImportLoading || !unitImportFile}
+              >
+                <FileImport className="w-6 h-6" />{unitImportLoading ? 'Importando...' : 'Importar'}
+              </button>
             </div>
           </div>
         </div>

@@ -80,7 +80,9 @@ public class ExamManager implements ExamUseCase {
       int count = entry.getValue() != null ? entry.getValue() : 0;
       List<Question> qs = questionRepo.findVisibleByUnitIdAndUserId(unitId, command.userId());
       if (selectedDifficulty != null) {
-        qs = qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).toList();
+        qs = new ArrayList<>(qs.stream().filter(q -> q.getDifficulty() == selectedDifficulty).toList());
+      } else {
+        qs = new ArrayList<>(qs);
       }
       Collections.shuffle(qs, rnd);
       if (count > 0 && count < qs.size()) {
@@ -100,9 +102,9 @@ public class ExamManager implements ExamUseCase {
     attemptAnsRepo.saveAll(answerPlaceholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
-      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .toList();
+          .toList());
       Collections.shuffle(answers, rnd);
       return new QuestionData(q.getId(), q.getText(), answers);
     }).toList();
@@ -146,9 +148,9 @@ public class ExamManager implements ExamUseCase {
     attemptAnsRepo.saveAll(placeholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
-      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .toList();
+          .toList());
       Collections.shuffle(answers, rnd);
       return new QuestionData(q.getId(), q.getText(), answers);
     }).toList();
@@ -205,9 +207,9 @@ public class ExamManager implements ExamUseCase {
     attemptAnsRepo.saveAll(placeholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
-      List<AnswerData> answers = answerRepo.findByQuestionId(q.getId()).stream()
+      List<AnswerData> answers = new ArrayList<>(answerRepo.findByQuestionId(q.getId()).stream()
           .map(a -> new AnswerData(a.getId(), a.getText()))
-          .toList();
+          .toList());
       Collections.shuffle(answers, rnd);
       return new QuestionData(q.getId(), q.getText(), answers);
     }).toList();

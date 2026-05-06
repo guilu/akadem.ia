@@ -46,7 +46,7 @@ describe('PaymentModal', () => {
 
   it('step 1: shows email input and Continuar button', () => {
     renderModal();
-    expect(screen.getByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/introduce tu email/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continuar/i })).toBeInTheDocument();
   });
 
@@ -55,7 +55,7 @@ describe('PaymentModal', () => {
     const button = screen.getByRole('button', { name: /continuar/i });
     expect(button).toBeDisabled();
 
-    const input = screen.getByPlaceholderText(/tu@email\.com/i);
+    const input = screen.getByPlaceholderText(/introduce tu email/i);
     fireEvent.change(input, { target: { value: 'not-an-email' } });
     expect(button).toBeDisabled();
 
@@ -65,7 +65,7 @@ describe('PaymentModal', () => {
 
   it('shows mailcheck hint on blur for typo domain and applies correction on click', () => {
     renderModal();
-    const input = screen.getByPlaceholderText(/tu@email\.com/i) as HTMLInputElement;
+    const input = screen.getByPlaceholderText(/introduce tu email/i) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'foo@gmial.com' } });
     fireEvent.blur(input);
 
@@ -82,7 +82,7 @@ describe('PaymentModal', () => {
     });
 
     renderModal();
-    const input = screen.getByPlaceholderText(/tu@email\.com/i);
+    const input = screen.getByPlaceholderText(/introduce tu email/i);
     fireEvent.change(input, { target: { value: 'buyer@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /continuar/i }));
 
@@ -101,7 +101,7 @@ describe('PaymentModal', () => {
     });
 
     renderModal();
-    fireEvent.change(screen.getByPlaceholderText(/tu@email\.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/introduce tu email/i), {
       target: { value: 'buyer@example.com' },
     });
     fireEvent.click(screen.getByRole('button', { name: /continuar/i }));
@@ -109,7 +109,7 @@ describe('PaymentModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /volver/i }));
 
-    const input = await screen.findByPlaceholderText(/tu@email\.com/i);
+    const input = await screen.findByPlaceholderText(/introduce tu email/i);
     expect((input as HTMLInputElement).value).toBe('buyer@example.com');
   });
 
@@ -117,7 +117,7 @@ describe('PaymentModal', () => {
     vi.mocked(createPaymentIntent).mockRejectedValue(new Error('boom'));
 
     renderModal();
-    fireEvent.change(screen.getByPlaceholderText(/tu@email\.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/introduce tu email/i), {
       target: { value: 'buyer@example.com' },
     });
     fireEvent.click(screen.getByRole('button', { name: /continuar/i }));

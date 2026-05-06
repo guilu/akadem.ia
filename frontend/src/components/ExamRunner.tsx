@@ -114,7 +114,7 @@ export default function ExamRunner({ questions, totalTimeSeconds, onFinish, init
       </div>
 
       {/* ── Question ── */}
-      <div className="border border-secondary/25 rounded-2xl p-6 mb-5">
+      <div className="bg-card border border-secondary/25 rounded-2xl p-6 mb-5">
         <h2 className="text-xl font-bold leading-snug mb-6">{q.text}</h2>
         <div className="grid gap-3">
           {q.answers.map(a => {

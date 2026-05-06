@@ -168,7 +168,9 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
 
       {/* ── Mobile menu ── */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`md:hidden transition-all duration-300 ease-in-out ${menuOpen
+          ? 'max-h-[calc(100vh-4rem)] opacity-100 overflow-y-auto'
+          : 'max-h-0 opacity-0 overflow-hidden'
           }`}
       >
         <div className="px-4 pb-4 pt-2 border-t border-secondary/15 space-y-1 bg-bg/95 backdrop-blur-md">

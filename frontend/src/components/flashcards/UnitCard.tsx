@@ -20,7 +20,7 @@ export default function UnitCard({ unit, onClick, onExport }: Props) {
       <button
         type="button"
         onClick={() => onClick ? onClick() : navigate(`/flashcards/study?unitId=${unit.unitId}`)}
-        className="w-full text-left border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+        className="w-full text-left bg-card border border-secondary/25 rounded-2xl p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
       >
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">

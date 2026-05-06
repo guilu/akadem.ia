@@ -2,6 +2,7 @@ package com.akdemya.adapter.inbound.web;
 
 import com.akdemya.application.service.ContentManagement;
 import com.akdemya.domain.model.AppUser;
+import com.akdemya.domain.model.Subject;
 import com.akdemya.domain.model.Unit;
 import com.akdemya.domain.model.Visibility;
 import com.akdemya.domain.port.out.UserRepository;
@@ -12,8 +13,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -177,6 +182,152 @@ public class ManageUnitController {
     return unit.getVisibility() == Visibility.PRIVATE
         && caller.getId().equals(unit.getOwnerId());
   }
+
+  private static final long MAX_UPLOAD_SIZE = 10L * 1024 * 1024;
+  private static final int MAX_IMPORT_ROWS = 500;
+
+  @PostMapping(value = "/import", consumes = "multipart/form-data")
+  public ResponseEntity<Object> importUnits(
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(defaultValue = "csv") String format,
+      @RequestParam UUID subjectId,
+      @AuthenticationPrincipal User principal) throws Exception {
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    AppUser caller = resolveUser(principal);
+    boolean isAdmin = isAdmin(principal);
+
+    if (file == null || file.isEmpty()) {
+      return ResponseEntity.badRequest().body(Map.of("error", "file_required"));
+    }
+    if (file.getSize() > MAX_UPLOAD_SIZE) {
+      return ResponseEntity.badRequest().body(Map.of("error", "file_too_large"));
+    }
+    if (subjectId == null) {
+      return ResponseEntity.badRequest().body(Map.of("error", "subjectId_required"));
+    }
+
+    // Ownership check: non-admins can only import into subjects they own
+    if (!isAdmin) {
+      Subject subject = contentService.getSubjectById(subjectId).orElse(null);
+      if (subject == null || !caller.getId().equals(subject.getOwnerId())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(Map.of("error", "not_authorized"));
+      }
+    }
+
+    // Load existing unit names once (no N+1) for duplicate detection
+    List<Unit> existing = contentService.getUnitsBySubject(subjectId);
+    Set<String> existingNames = new java.util.HashSet<>();
+    for (Unit u : existing) {
+      existingNames.add(u.getName().trim().toLowerCase());
+    }
+
+    int created = 0;
+    List<Map<String, Object>> errors = new ArrayList<>();
+
+    if (format.equalsIgnoreCase("csv")) {
+      String content = new String(file.getBytes());
+      List<String[]> rows = parseCsv(content);
+      // rows.get(0) is header; data rows start at index 1
+      int dataRowCount = rows.size() - 1;
+      if (dataRowCount > MAX_IMPORT_ROWS) {
+        return ResponseEntity.badRequest().body(Map.of("error", "row_limit_exceeded"));
+      }
+      for (int i = 1; i < rows.size(); i++) {
+        int rowNum = i; // 1-based data row number
+        String[] row = rows.get(i);
+        String name = row.length > 0 ? row[0].trim() : "";
+        String description = row.length > 1 ? row[1].trim() : null;
+        if (description != null && description.isBlank()) description = null;
+
+        if (name.isEmpty()) {
+          errors.add(Map.of("row", rowNum, "message", "name_required"));
+          continue;
+        }
+        if (existingNames.contains(name.toLowerCase())) {
+          errors.add(Map.of("row", rowNum, "message", "duplicate_name"));
+          continue;
+        }
+        try {
+          int orderIndex = created + existing.size() + 1;
+          Unit unit = isAdmin
+              ? Unit.createGlobal(subjectId, name, description, orderIndex)
+              : Unit.createPrivate(subjectId, name, description, orderIndex, caller.getId());
+          contentService.createUnit(unit);
+          existingNames.add(name.toLowerCase());
+          created++;
+        } catch (Exception e) {
+          errors.add(Map.of("row", rowNum, "message", e.getMessage() != null ? e.getMessage() : "import_error"));
+        }
+      }
+    } else {
+      com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+      ImportUnitRow[] rows = mapper.readValue(file.getBytes(), ImportUnitRow[].class);
+      if (rows.length > MAX_IMPORT_ROWS) {
+        return ResponseEntity.badRequest().body(Map.of("error", "row_limit_exceeded"));
+      }
+      for (int i = 0; i < rows.length; i++) {
+        int rowNum = i + 1;
+        ImportUnitRow row = rows[i];
+        String name = row.name() != null ? row.name().trim() : "";
+        String description = row.description() != null && !row.description().isBlank() ? row.description().trim() : null;
+
+        if (name.isEmpty()) {
+          errors.add(Map.of("row", rowNum, "message", "name_required"));
+          continue;
+        }
+        if (existingNames.contains(name.toLowerCase())) {
+          errors.add(Map.of("row", rowNum, "message", "duplicate_name"));
+          continue;
+        }
+        try {
+          int orderIndex = created + existing.size() + 1;
+          Unit unit = isAdmin
+              ? Unit.createGlobal(subjectId, name, description, orderIndex)
+              : Unit.createPrivate(subjectId, name, description, orderIndex, caller.getId());
+          contentService.createUnit(unit);
+          existingNames.add(name.toLowerCase());
+          created++;
+        } catch (Exception e) {
+          errors.add(Map.of("row", rowNum, "message", e.getMessage() != null ? e.getMessage() : "import_error"));
+        }
+      }
+    }
+
+    return ResponseEntity.ok(Map.of("created", created, "errors", errors));
+  }
+
+  private List<String[]> parseCsv(String content) {
+    List<String[]> rows = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    List<String> row = new ArrayList<>();
+    boolean inQuotes = false;
+    for (int i = 0; i < content.length(); i++) {
+      char c = content.charAt(i);
+      if (c == '"') {
+        if (inQuotes && i + 1 < content.length() && content.charAt(i + 1) == '"') {
+          current.append('"'); i++;
+        } else { inQuotes = !inQuotes; }
+      } else if (c == ',' && !inQuotes) {
+        row.add(current.toString()); current.setLength(0);
+      } else if ((c == '\n' || c == '\r') && !inQuotes) {
+        if (current.length() > 0 || !row.isEmpty()) {
+          row.add(current.toString());
+          rows.add(row.toArray(new String[0]));
+          row = new ArrayList<>();
+          current.setLength(0);
+        }
+      } else { current.append(c); }
+    }
+    if (current.length() > 0 || !row.isEmpty()) {
+      row.add(current.toString()); rows.add(row.toArray(new String[0]));
+    }
+    return rows;
+  }
+
+  record ImportUnitRow(String name, String description) {}
 
   public record UnitRequest(UUID subjectId, String name, String description,
                               int orderIndex, String visibility) {}
