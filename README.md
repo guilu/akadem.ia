@@ -1,9 +1,10 @@
-# Akadem.ia
-
 <p align="center">
-  <img src="docs/images/home-light.png" alt="Akadem.ia Hero" width="100%">
+  <img src="docs/assets/akadem-ia-header.png" alt="Akadem.ia — Flashcards. Simulacros. Tu plaza." width="100%">
 </p>
-
+<p align="center">
+  <img src="docs/images/home-light.png" alt="Akadem.ia home (light)" width="49%">
+  <img src="docs/images/home-dark.png" alt="Akadem.ia home (dark)" width="49%">
+</p>
 <p align="center">
   AI-assisted exam preparation platform with timed exams, spaced repetition flashcards and AI-generated quizzes from PDFs.
 </p>
@@ -12,6 +13,15 @@
   <a href="https://akademia.diegobarrioh.dev">▶️ Live Demo</a>
   •
   <a href="https://github.com/guilu/akadem.ia">📦 Repository</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/guilu/akadem.ia/stargazers"><img src="https://img.shields.io/github/stars/guilu/akadem.ia?style=flat&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/guilu/akadem.ia/commits/main"><img src="https://img.shields.io/github/last-commit/guilu/akadem.ia?color=blue" alt="Last commit"></a>
+  <img src="https://img.shields.io/badge/java-21-red" alt="Java 21">
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/react-18-61DAFB" alt="React 18">
+  <img src="https://img.shields.io/badge/vite-5-646CFF" alt="Vite 5">
 </p>
 
 ---
@@ -226,6 +236,19 @@ docker compose -f dist/docker-compose-prod.yaml up -d
 - [ ] Multiplayer study sessions
 - [ ] Native mobile app
 - [ ] AI study assistant
+
+---
+
+## 💖 Apoyar el proyecto
+
+Akadem.ia es un proyecto open source mantenido en mi tiempo libre. Si te resulta útil y quieres ayudar a que siga creciendo:
+
+- ⭐ Dale una estrella al repo — es gratis y ayuda muchísimo a la visibilidad
+- 💛 [Conviérteme en sponsor en GitHub](https://github.com/sponsors/guilu) — soporte recurrente
+- ☕ [Invítame a un café](https://buymeacoffee.com/diegobarrioh) — donación puntual
+- 🐛 Abre issues o PRs con bugs, ideas o mejoras
+
+Cualquier apoyo se traduce directamente en más tiempo para desarrollar features, mejorar la IA y mantener la plataforma online.
 
 ---
 
