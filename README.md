@@ -21,6 +21,11 @@
   <img src="https://img.shields.io/badge/vite-5-646CFF" alt="Vite 5">
 </p>
 
+<p align="center">
+  <img src="docs/images/home-light.png" alt="Akadem.ia home (light)" width="49%">
+  <img src="docs/images/home-dark.png" alt="Akadem.ia home (dark)" width="49%">
+</p>
+
 ---
 
 ## ✨ Features
