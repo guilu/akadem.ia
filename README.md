@@ -1,7 +1,10 @@
 <p align="center">
   <img src="docs/assets/akadem-ia-header.png" alt="Akadem.ia — Flashcards. Simulacros. Tu plaza." width="100%">
 </p>
-
+<p align="center">
+  <img src="docs/images/home-light.png" alt="Akadem.ia home (light)" width="49%">
+  <img src="docs/images/home-dark.png" alt="Akadem.ia home (dark)" width="49%">
+</p>
 <p align="center">
   AI-assisted exam preparation platform with timed exams, spaced repetition flashcards and AI-generated quizzes from PDFs.
 </p>
@@ -19,11 +22,6 @@
   <img src="https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F" alt="Spring Boot">
   <img src="https://img.shields.io/badge/react-18-61DAFB" alt="React 18">
   <img src="https://img.shields.io/badge/vite-5-646CFF" alt="Vite 5">
-</p>
-
-<p align="center">
-  <img src="docs/images/home-light.png" alt="Akadem.ia home (light)" width="49%">
-  <img src="docs/images/home-dark.png" alt="Akadem.ia home (dark)" width="49%">
 </p>
 
 ---
