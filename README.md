@@ -238,6 +238,19 @@ docker compose -f dist/docker-compose-prod.yaml up -d
 
 ---
 
+## 💖 Apoyar el proyecto
+
+Akadem.ia es un proyecto open source mantenido en mi tiempo libre. Si te resulta útil y quieres ayudar a que siga creciendo:
+
+- ⭐ Dale una estrella al repo — es gratis y ayuda muchísimo a la visibilidad
+- 💛 [Conviérteme en sponsor en GitHub](https://github.com/sponsors/guilu) — soporte recurrente
+- ☕ [Invítame a un café](https://buymeacoffee.com/diegobarrioh) — donación puntual
+- 🐛 Abre issues o PRs con bugs, ideas o mejoras
+
+Cualquier apoyo se traduce directamente en más tiempo para desarrollar features, mejorar la IA y mantener la plataforma online.
+
+---
+
 ## 📄 License
 
 MIT
