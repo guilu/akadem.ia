@@ -14,6 +14,15 @@
   <a href="https://github.com/guilu/akadem.ia">📦 Repository</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/guilu/akadem.ia/stargazers"><img src="https://img.shields.io/github/stars/guilu/akadem.ia?style=flat&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/guilu/akadem.ia/commits/main"><img src="https://img.shields.io/github/last-commit/guilu/akadem.ia?color=blue" alt="Last commit"></a>
+  <img src="https://img.shields.io/badge/java-21-red" alt="Java 21">
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/react-18-61DAFB" alt="React 18">
+  <img src="https://img.shields.io/badge/vite-5-646CFF" alt="Vite 5">
+</p>
+
 ---
 
 ## ✨ Features
