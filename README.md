@@ -1,7 +1,5 @@
-# Akadem.ia
-
 <p align="center">
-  <img src="docs/images/home-light.png" alt="Akadem.ia Hero" width="100%">
+  <img src="docs/assets/akadem-ia-header.png" alt="Akadem.ia — Flashcards. Simulacros. Tu plaza." width="100%">
 </p>
 
 <p align="center">
