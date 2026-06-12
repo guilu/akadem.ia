@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+---
+
+## v1.3.0 - 2026-06-12
+
 ### ✨ Nuevas funcionalidades
 - [AKDMIA-214](https://akadem-ia-app.atlassian.net/browse/AKDMIA-214) ✨ feat(payments): compra digital del Temario Subalterno GVA — pago único 15 € con Stripe + email Resend con enlace de descarga + página `/descarga/:token` (guest checkout sin cuenta de usuario, idempotencia webhook + reconciliation scheduler para reintentos)
 - [AKDMIA-50](https://akadem-ia-app.atlassian.net/browse/AKDMIA-50) ✨ feat(flashcards): bulk import/export por unidad en CSV y JSON
@@ -17,6 +21,26 @@
 - ✨ feat(settings): mejora UX del modal de importación de preguntas
 - 🐛 fix(flashcards): contenido largo de tarjeta hace scroll en lugar de expandir
 - 🐛 fix(flashcards): modal de importar carga todas las materias y mazos
+
+### 💄 Marketing y branding (#138)
+- 💄 feat(branding): nuevo logo de Akadem.ia en navbar y favicons; eliminado set de iconos legacy
+- 🔧 chore(branding): meta tags OG/Twitter y título SEO
+- ✨ feat(marketing): footer con enlaces de sponsor y sección de soporte
+- 📝 docs(readme): cabecera con marca, capturas home light/dark, badges de shields.io
+
+### 🐛 Correcciones de la revisión de código (#139)
+- 🐛 fix(auth): restauración de sesión tras expirar el access token — `/api/auth/me` ahora hace refresh+retry; recargar la página ya no desloguea con cookie de refresh válida
+- 🐛 fix(auth): peticiones concurrentes ya no quedan colgadas si el refresh de token falla
+- 🐛 fix(auth): registro concurrente con el mismo email devuelve `email_in_use` en vez de 500; mismo race corregido en primer login OAuth2 (retry)
+- 🔒 security(auth): rate limit usa el último salto de `X-Forwarded-For` (no falsificable) y acota los buckets a 10k IPs; purga de códigos OAuth2 expirados
+- 🐛 fix(payments): PaymentIntents abandonados (>24h) se cancelan en Stripe y se marcan FAILED — antes quedaban PENDING para siempre por una rama muerta (`payment_failed` no es un status)
+- 🐛 fix(payments): email de descarga se envía tras el commit de la transacción — evita duplicados en rollback y no retiene conexión DB durante HTTP
+- 🐛 fix(exams): submit de examen atómico (`WHERE finished_at IS NULL`) — el doble submit concurrente ya no finaliza dos veces
+- 🐛 fix(rag): upload en 3 transacciones — un fallo al persistir chunks ya no descarta el estado FAILED ni hace desaparecer el documento (trampa rollback-only)
+- 🐛 fix(manage): import de preguntas atómico por fila — sin preguntas huérfanas si fallan sus respuestas; export CSV registra WARN por preguntas omitidas
+- 🐛 fix(flashcards): lock pesimista en registro de reviews — el doble-tap ya no aplica la calificación SM-2 dos veces
+- ♻️ refactor(exams): eliminados comentarios de andamiaje y factory muerta `ExamAttempt.start()`
+- 🔧 chore(config): eliminada config duplicada `app.flashcards.*` del perfil dev
 
 ---
 
