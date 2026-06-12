@@ -79,17 +79,57 @@ class PurchaseReconciliationSchedulerTest {
   }
 
   @Test
-  void reconcilePendingPurchases_paymentFailedIntent_marksFailed() {
-    Purchase pending = pendingPurchase("pi_failed");
+  void reconcilePendingPurchases_abandonedIntent_cancelsAtStripeThenMarksFailed() {
+    // requires_payment_method older than the 24h abandonment cutoff:
+    // cancel at Stripe first, then mark FAILED.
+    Purchase abandoned = pendingPurchase("pi_abandoned",
+        Instant.now().minus(java.time.Duration.ofHours(25)));
     when(purchaseRepository.findPendingOlderThan(any(Instant.class)))
-        .thenReturn(List.of(pending));
-    when(stripeGateway.retrieve("pi_failed"))
-        .thenReturn(Optional.of(new StripePaymentIntentSnapshot("pi_failed", "payment_failed")));
+        .thenReturn(List.of(abandoned));
+    when(stripeGateway.retrieve("pi_abandoned"))
+        .thenReturn(Optional.of(new StripePaymentIntentSnapshot("pi_abandoned", "requires_payment_method")));
 
     scheduler.reconcilePendingPurchases();
 
-    verify(purchaseRepository, times(1)).markFailed("pi_failed");
+    var order = org.mockito.Mockito.inOrder(stripeGateway, purchaseRepository);
+    order.verify(stripeGateway).cancel("pi_abandoned");
+    order.verify(purchaseRepository).markFailed("pi_abandoned");
     verify(purchaseService, never()).settlePaidPurchase(any());
+  }
+
+  @Test
+  void reconcilePendingPurchases_recentRetryableIntent_staysPending() {
+    // requires_payment_method but still within the abandonment window:
+    // the customer may yet pay, so no cancel and no FAILED transition.
+    Purchase recent = pendingPurchase("pi_recent");
+    when(purchaseRepository.findPendingOlderThan(any(Instant.class)))
+        .thenReturn(List.of(recent));
+    when(stripeGateway.retrieve("pi_recent"))
+        .thenReturn(Optional.of(new StripePaymentIntentSnapshot("pi_recent", "requires_payment_method")));
+
+    scheduler.reconcilePendingPurchases();
+
+    verify(stripeGateway, never()).cancel(any());
+    verify(purchaseRepository, never()).markFailed(any());
+    verify(purchaseService, never()).settlePaidPurchase(any());
+  }
+
+  @Test
+  void reconcilePendingPurchases_cancelFails_doesNotMarkFailed() {
+    // If Stripe rejects the cancel (e.g. the intent just succeeded), the
+    // purchase must NOT be marked FAILED — next tick re-reads the status.
+    Purchase abandoned = pendingPurchase("pi_cancel_boom",
+        Instant.now().minus(java.time.Duration.ofHours(25)));
+    when(purchaseRepository.findPendingOlderThan(any(Instant.class)))
+        .thenReturn(List.of(abandoned));
+    when(stripeGateway.retrieve("pi_cancel_boom"))
+        .thenReturn(Optional.of(new StripePaymentIntentSnapshot("pi_cancel_boom", "requires_payment_method")));
+    org.mockito.Mockito.doThrow(new RuntimeException("already succeeded"))
+        .when(stripeGateway).cancel("pi_cancel_boom");
+
+    scheduler.reconcilePendingPurchases();
+
+    verify(purchaseRepository, never()).markFailed(any());
   }
 
   @Test
@@ -212,6 +252,10 @@ class PurchaseReconciliationSchedulerTest {
   // ---------------------------------------------------------------------------
 
   private static Purchase pendingPurchase(String piId) {
+    return pendingPurchase(piId, Instant.now().minusSeconds(7200));
+  }
+
+  private static Purchase pendingPurchase(String piId, Instant createdAt) {
     return new Purchase(
         UUID.randomUUID(),
         piId,
@@ -222,7 +266,7 @@ class PurchaseReconciliationSchedulerTest {
         PurchaseStatus.PENDING,
         1500L,
         "eur",
-        Instant.now().minusSeconds(7200),
+        createdAt,
         null,
         null
     );

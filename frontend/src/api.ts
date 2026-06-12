@@ -26,29 +26,30 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
 }
 
 let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
+let refreshSubscribers: Array<(ok: boolean) => void> = [];
 
 async function tryRefreshToken(): Promise<boolean> {
   if (isRefreshing) {
     return new Promise<boolean>((resolve) => {
-      refreshSubscribers.push(() => resolve(true));
+      refreshSubscribers.push(resolve);
     });
   }
   isRefreshing = true;
+  let ok = false;
   try {
     const res = await fetch(`${apiBase}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
-    if (res.ok) {
-      refreshSubscribers.forEach((cb) => cb());
-      refreshSubscribers = [];
-      return true;
-    }
-    refreshSubscribers = [];
-    return false;
+    ok = res.ok;
+    return ok;
   } finally {
+    // Always flush waiters, even when refresh fails or fetch throws —
+    // otherwise their promises never settle and the requests hang.
     isRefreshing = false;
+    const subscribers = refreshSubscribers;
+    refreshSubscribers = [];
+    subscribers.forEach((cb) => cb(ok));
   }
 }
 
@@ -58,23 +59,36 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
   try {
     const res = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
     if (res.status === 401) {
-      // Avoid refresh loops on the refresh endpoint itself
-      if (!url.includes('/api/auth/')) {
+      // Refresh on 401 except for auth endpoints themselves: refreshing and
+      // retrying login/register/refresh/logout would loop or re-send
+      // credentials. /api/auth/me is the exception — its 401 just means the
+      // access token expired, which is exactly what a refresh fixes (session
+      // restore on page reload).
+      const isRefreshableUrl = !url.includes('/api/auth/') || url.includes('/api/auth/me');
+      if (isRefreshableUrl) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
-          const retryRes = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
-          if (!retryRes.ok) {
-            const err = {
-              message: 'api_error',
-              status: retryRes.status,
-              body: await retryRes.json().catch(() => ({})),
-            };
-            throw err;
+          // Fresh timeout signal for the retry: the original may already have
+          // fired while the first attempt + refresh were in flight, which
+          // would abort the retry instantly.
+          const retry = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
+          try {
+            const retryRes = await fetch(url, { ...fetchOptions, signal: retry.signal, credentials: 'include' });
+            if (!retryRes.ok) {
+              const err = {
+                message: 'api_error',
+                status: retryRes.status,
+                body: await retryRes.json().catch(() => ({})),
+              };
+              throw err;
+            }
+            if (retryRes.status === 204) return undefined as T;
+            const retryText = await retryRes.text();
+            if (!retryText) return undefined as T;
+            return JSON.parse(retryText) as T;
+          } finally {
+            retry.clear();
           }
-          if (retryRes.status === 204) return undefined as T;
-          const retryText = await retryRes.text();
-          if (!retryText) return undefined as T;
-          return JSON.parse(retryText) as T;
         }
       }
       const err: { message: string; status: number; body: unknown; name?: string } = {

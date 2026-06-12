@@ -30,6 +30,11 @@ public class FlashcardRepositoryAdapter implements FlashcardRepository {
   }
 
   @Override
+  public Optional<Flashcard> findByIdForUpdate(UUID id) {
+    return jpa.findByIdForUpdate(id).map(mapper::toDomain);
+  }
+
+  @Override
   public List<Flashcard> findByUnitId(UUID unitId) {
     return jpa.findByUnitId(unitId).stream().map(mapper::toDomain).toList();
   }

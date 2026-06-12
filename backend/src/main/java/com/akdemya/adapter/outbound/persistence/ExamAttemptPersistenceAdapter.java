@@ -6,6 +6,8 @@ import com.akdemya.adapter.outbound.persistence.repository.SpringDataExamAttempt
 import com.akdemya.domain.model.ExamAttempt;
 import com.akdemya.domain.port.out.ExamAttemptRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,5 +44,11 @@ public class ExamAttemptPersistenceAdapter implements ExamAttemptRepository {
   @Override
   public void deleteById(UUID id) {
     repository.deleteById(id);
+  }
+
+  @Override
+  @Transactional
+  public int finishIfUnfinished(UUID id, OffsetDateTime finishedAt, Integer score) {
+    return repository.finishIfUnfinished(id, finishedAt, score);
   }
 }

@@ -1,6 +1,7 @@
 package com.akdemya.adapter.infrastructure.security;
 
 import com.akdemya.domain.port.in.AuthUseCase;
+import org.springframework.dao.DataIntegrityViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +36,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2User oAuth2User = token.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         String name  = oAuth2User.getAttribute("name");
-        AuthUseCase.AuthResponse authResponse = authUseCase.loginWithOAuth2(email, name);
+        AuthUseCase.AuthResponse authResponse;
+        try {
+            authResponse = authUseCase.loginWithOAuth2(email, name);
+        } catch (DataIntegrityViolationException e) {
+            // Two concurrent first logins for the same account can both pass
+            // the findByEmail check; the loser hits uq_users_email at commit.
+            // The user exists now, so one retry takes the existing-user path.
+            authResponse = authUseCase.loginWithOAuth2(email, name);
+        }
         String code = codeStore.store(authResponse.accessToken(), authResponse.refreshToken(), authResponse.role());
         response.sendRedirect(frontendUrl + "/oauth2/callback?code=" + code);
     }

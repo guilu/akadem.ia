@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import type { Question } from './components/ExamRunner';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import { apiBase, apiJson, getMe, logout } from './api';
 import type { Subject, ExamResult, ExamStartResponse, NavUser } from './types';
 import { timeoutMessage } from './utils/messages';
@@ -236,7 +237,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar
         isAuthed={isAuthed}
         isAdmin={role === 'ADMIN'}
@@ -251,7 +252,7 @@ export default function App() {
           {toastError}
         </div>
       )}
-      <main className={isFullWidth ? 'pt-[4rem] overflow-x-hidden' : 'max-w-7xl mx-auto p-6 pt-24'}>
+      <main className={isFullWidth ? 'flex-1 pt-[4rem] overflow-x-hidden' : 'flex-1 max-w-7xl w-full mx-auto p-6 pt-24'}>
         <Routes>
           <Route path={ROUTES.home} element={<HomePage isAuthed={isAuthed} activeAttemptId={activeAttemptId} />} />
           <Route path={ROUTES.syllabusSales} element={<SyllabusSalesPage />} />
@@ -358,6 +359,7 @@ export default function App() {
           <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

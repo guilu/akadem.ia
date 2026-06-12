@@ -14,6 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class RateLimitFilter extends OncePerRequestFilter {
 
+    // Hard cap on tracked IPs so an attacker rotating spoofed addresses
+    // cannot grow the bucket maps without bound.
+    private static final int MAX_TRACKED_IPS = 10_000;
+
     private final int loginRequestsPerMinute;
     private final int registerRequestsPerMinute;
 
@@ -42,6 +46,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean tryConsume(ConcurrentHashMap<String, Bucket> buckets, String ip, int limit,
                                 HttpServletResponse response) throws IOException {
+        if (buckets.size() >= MAX_TRACKED_IPS) {
+            // Crude but bounded: dropping all buckets briefly resets limits,
+            // which is preferable to unbounded memory growth.
+            buckets.clear();
+        }
         Bucket bucket = buckets.computeIfAbsent(ip, k -> buildBucket(limit));
         if (bucket.tryConsume(1)) {
             return true;
@@ -65,7 +74,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private String resolveClientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
+            // The rightmost entry is the one appended by our own reverse
+            // proxy (nginx with proxy_add_x_forwarded_for) and is the only
+            // value the client cannot forge. Leftmost entries are
+            // client-controlled and would let an attacker bypass the limit
+            // by sending a different fake IP on every request.
+            String[] hops = forwarded.split(",");
+            return hops[hops.length - 1].trim();
         }
         return request.getRemoteAddr();
     }
