@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -189,6 +191,30 @@ public class PurchaseService implements
     }
     DigitalProduct product = maybeProduct.get();
 
+    // Send the email only after the surrounding transaction commits. Sending
+    // inside it risks (a) a duplicate email if the transaction rolls back
+    // after the send — markPaid is undone, so the scheduler re-settles and
+    // re-sends — and (b) holding a DB connection during an external HTTP call.
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+          deliverDownloadEmail(purchase, product);
+        }
+      });
+    } else {
+      deliverDownloadEmail(purchase, product);
+    }
+  }
+
+  /**
+   * Sends the download email and records {@code emailSentAt} on success.
+   * Runs outside the settlement transaction (after commit); the
+   * {@code updateEmailSentAt} adapter opens its own transaction. On failure
+   * the purchase stays PAID without {@code emailSentAt}, so the
+   * reconciliation scheduler retries delivery.
+   */
+  private void deliverDownloadEmail(Purchase purchase, DigitalProduct product) {
     String downloadUrl = frontendUrl + "/descarga/" + purchase.getDownloadToken();
     boolean delivered = emailPort.sendDownloadEmail(
         purchase.getEmail(), downloadUrl, product.getDisplayName());

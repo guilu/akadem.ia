@@ -95,4 +95,20 @@ public class StripePaymentAdapter implements StripePaymentGateway {
       throw new RuntimeException("Failed to retrieve Stripe PaymentIntent", ex);
     }
   }
+
+  @Override
+  public void cancel(String paymentIntentId) {
+    if (paymentIntentId == null || paymentIntentId.isBlank()) {
+      throw new IllegalArgumentException("paymentIntentId cannot be blank");
+    }
+    try {
+      PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+      intent.cancel();
+      log.info("Canceled Stripe PaymentIntent {}", paymentIntentId);
+    } catch (StripeException ex) {
+      log.error("Stripe PaymentIntent.cancel failed for paymentIntentId={}: {}",
+          paymentIntentId, ex.getMessage(), ex);
+      throw new RuntimeException("Failed to cancel Stripe PaymentIntent", ex);
+    }
+  }
 }

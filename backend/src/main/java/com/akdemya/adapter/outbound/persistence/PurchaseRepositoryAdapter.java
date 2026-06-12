@@ -5,6 +5,7 @@ import com.akdemya.adapter.outbound.persistence.repository.JpaPurchaseRepository
 import com.akdemya.domain.model.Purchase;
 import com.akdemya.domain.port.out.PurchaseRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -69,7 +70,11 @@ public class PurchaseRepositoryAdapter implements PurchaseRepository {
   }
 
   @Override
-  @Transactional
+  // REQUIRES_NEW: this is called from an afterCommit synchronization, where
+  // the thread is still bound to the already-committed transaction. REQUIRED
+  // would join that dead transaction and fail with "no transaction is in
+  // progress" at flush time.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateEmailSentAt(UUID purchaseId, Instant emailSentAt) {
     jpa.updateEmailSentAt(purchaseId, emailSentAt);
   }

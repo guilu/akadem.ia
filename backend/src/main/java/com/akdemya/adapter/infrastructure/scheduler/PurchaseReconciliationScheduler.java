@@ -29,10 +29,11 @@ import java.util.Optional;
  *       PaymentIntent status. {@code succeeded} → delegate to
  *       {@link PurchaseService#settlePaidPurchase(String)} (idempotent: shares
  *       the same {@code markPaid + email + updateEmailSentAt} flow used by the
- *       webhook). {@code canceled}/{@code payment_failed} →
- *       {@link PurchaseRepository#markFailed(String)}. Other statuses
- *       ({@code processing}, {@code requires_action}, etc.) are left PENDING
- *       and re-checked next tick.</li>
+ *       webhook). {@code canceled} → {@link PurchaseRepository#markFailed(String)}.
+ *       {@code requires_payment_method}/{@code requires_confirmation}/
+ *       {@code requires_action} older than 24h → cancel at Stripe, then mark
+ *       FAILED. Other statuses ({@code processing}, recent retryable ones) are
+ *       left PENDING and re-checked next tick.</li>
  *   <li><b>Function B — email retries</b>: delegates to
  *       {@link ReconciliationService#retryFailedEmails(Instant)} with a
  *       5-minute grace cutoff to avoid racing with the webhook handler.</li>
@@ -48,6 +49,15 @@ public class PurchaseReconciliationScheduler {
 
   private static final Duration PENDING_AGE_CUTOFF = Duration.ofHours(1);
   private static final Duration EMAIL_RETRY_GRACE = Duration.ofMinutes(5);
+
+  /**
+   * Age after which a still-unpaid PaymentIntent is considered abandoned and
+   * is canceled at Stripe + marked FAILED. A failed card attempt sends the
+   * intent back to {@code requires_payment_method} (there is no
+   * {@code payment_failed} status), so without this cutoff abandoned
+   * purchases would stay PENDING and be re-polled forever.
+   */
+  private static final Duration ABANDONED_CUTOFF = Duration.ofHours(24);
 
   private final PurchaseRepository purchaseRepository;
   private final StripePaymentGateway stripeGateway;
@@ -99,21 +109,38 @@ public class PurchaseReconciliationScheduler {
         String status = maybeSnapshot.get().status();
         switch (status) {
           case "succeeded" -> purchaseService.settlePaidPurchase(piId);
-          case "canceled", "payment_failed" -> {
-            int rows = purchaseRepository.markFailed(piId);
-            if (rows == 1) {
-              log.info("Reconciliation: marked Purchase as FAILED for paymentIntent={}", piId);
+          case "canceled" -> markFailed(piId);
+          // A failed or never-attempted payment leaves the intent in one of
+          // these states ("payment_failed" is an event type, not a status).
+          // The customer may still complete payment from an open tab, so only
+          // give up after ABANDONED_CUTOFF — and cancel at Stripe FIRST, so
+          // the intent can no longer succeed once we mark the purchase FAILED.
+          case "requires_payment_method", "requires_confirmation", "requires_action" -> {
+            if (purchase.getCreatedAt().isBefore(Instant.now().minus(ABANDONED_CUTOFF))) {
+              stripeGateway.cancel(piId);
+              markFailed(piId);
             } else {
-              log.info("Reconciliation: idempotent FAILED transition for paymentIntent={}", piId);
+              log.info("Reconciliation: piId={} status={} — within abandonment window, leaving PENDING",
+                  piId, status);
             }
           }
-          default -> log.warn("Reconciliation: skipping piId={} — unhandled status={}",
+          // "processing" and any future statuses: leave PENDING, re-check next tick.
+          default -> log.info("Reconciliation: skipping piId={} — status={} not final",
               piId, status);
         }
       } catch (RuntimeException ex) {
         log.error("Reconciliation: error processing piId={} purchaseId={}: {}",
             piId, purchase.getId(), ex.getMessage(), ex);
       }
+    }
+  }
+
+  private void markFailed(String piId) {
+    int rows = purchaseRepository.markFailed(piId);
+    if (rows == 1) {
+      log.info("Reconciliation: marked Purchase as FAILED for paymentIntent={}", piId);
+    } else {
+      log.info("Reconciliation: idempotent FAILED transition for paymentIntent={}", piId);
     }
   }
 

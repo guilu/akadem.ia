@@ -263,8 +263,11 @@ public class ExamManager implements ExamUseCase {
     ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
 
     if (attempt.getFinishedAt() == null) {
-      attempt.finish(attempt.getTotalTimeSeconds(), scoring.net());
-      attemptRepo.save(attempt);
+      // Atomic UPDATE ... WHERE finished_at IS NULL: two concurrent submits
+      // both pass the in-memory check above, but only one finishes the
+      // attempt. The loser's 0-row result is fine — the stored score is the
+      // winner's, and we still return this caller's computed view.
+      attemptRepo.finishIfUnfinished(attempt.getId(), java.time.OffsetDateTime.now(), scoring.net());
     }
 
     return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),
