@@ -291,6 +291,16 @@ class ExamManagerResumeTest {
     public void deleteById(UUID id) {
       data.remove(id);
     }
+
+    @Override
+    public int finishIfUnfinished(UUID id, java.time.OffsetDateTime finishedAt, Integer score) {
+      ExamAttempt attempt = data.get(id);
+      if (attempt == null || attempt.getFinishedAt() != null) {
+        return 0;
+      }
+      attempt.finish(attempt.getTotalTimeSeconds(), score);
+      return 1;
+    }
   }
 
   static class InMemoryAttemptAnswerRepo implements ExamAttemptAnswerRepository {

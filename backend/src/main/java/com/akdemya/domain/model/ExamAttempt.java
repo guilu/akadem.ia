@@ -21,10 +21,6 @@ public class ExamAttempt {
     this.score = score;
   }
 
-  public static ExamAttempt start(String userEmail) {
-    return new ExamAttempt(UUID.randomUUID(), userEmail, OffsetDateTime.now(), null, null, null);
-  }
-
   public void finish(Integer totalTimeSeconds, Integer score) {
     this.finishedAt = OffsetDateTime.now();
     this.totalTimeSeconds = totalTimeSeconds;

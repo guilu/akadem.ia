@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,16 +27,22 @@ import java.util.function.Function;
 @RequestMapping("/api/manage/questions")
 public class ManageQuestionController {
 
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(ManageQuestionController.class);
+
   private final ContentManagement contentService;
   private final AnswerRepository answerRepo;
   private final UserRepository userRepo;
+  private final TransactionTemplate txTemplate;
 
   public ManageQuestionController(ContentManagement contentService,
                                    AnswerRepository answerRepo,
-                                   UserRepository userRepo) {
+                                   UserRepository userRepo,
+                                   PlatformTransactionManager transactionManager) {
     this.contentService = contentService;
     this.answerRepo = answerRepo;
     this.userRepo = userRepo;
+    this.txTemplate = new TransactionTemplate(transactionManager);
   }
 
   @GetMapping
@@ -241,7 +249,7 @@ public class ManageQuestionController {
         try {
           ImportRow row = csvToImportRow(rows.get(i), unitId);
           if (row == null) { errors++; continue; }
-          saveImportedQuestion(row, importVisibility, importOwner);
+          saveImportedQuestionAtomically(row, importVisibility, importOwner);
           created++;
         } catch (Exception e) {
           errors++;
@@ -255,7 +263,7 @@ public class ManageQuestionController {
             row.difficulty(), row.answers()) : row;
         if (effective.unitId() == null || effective.text() == null) { errors++; continue; }
         try {
-          saveImportedQuestion(effective, importVisibility, importOwner);
+          saveImportedQuestionAtomically(effective, importVisibility, importOwner);
           created++;
         } catch (Exception e) {
           errors++;
@@ -263,6 +271,17 @@ public class ManageQuestionController {
       }
     }
     return ResponseEntity.ok(java.util.Map.of("created", created, "errors", errors));
+  }
+
+  /**
+   * Saves one imported row (question + its answers) in its own transaction.
+   * Without this, an answer-save failure left an orphan question committed
+   * (the row was counted as an error but the question stayed in the DB,
+   * because {@code createQuestion} committed in its own transaction before
+   * the answers were written).
+   */
+  private void saveImportedQuestionAtomically(ImportRow row, Visibility visibility, UUID ownerId) {
+    txTemplate.executeWithoutResult(tx -> saveImportedQuestion(row, visibility, ownerId));
   }
 
   private void saveImportedQuestion(ImportRow row, Visibility visibility, UUID ownerId) {
@@ -280,7 +299,14 @@ public class ManageQuestionController {
     sb.append("unitId,text,explanation,difficulty,answer1,answer2,answer3,answer4,correctIndex\n");
     for (Question q : data) {
       List<Answer> list = answerRepo.findByQuestionId(q.getId());
-      if (list.size() != 4) continue;
+      if (list.size() != 4) {
+        // The CSV format has fixed answer1..answer4 columns, so questions
+        // with a different answer count cannot be represented. Log instead
+        // of dropping them silently so exports are auditable.
+        log.warn("CSV export: skipping question {} — has {} answers, format requires 4",
+            q.getId(), list.size());
+        continue;
+      }
       int correct = 1;
       for (int i = 0; i < list.size(); i++) { if (list.get(i).isCorrect()) correct = i + 1; }
       sb.append(escape(q.getUnitId().toString())).append(',')

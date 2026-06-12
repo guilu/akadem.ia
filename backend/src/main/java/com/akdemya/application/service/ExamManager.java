@@ -47,21 +47,9 @@ public class ExamManager implements ExamUseCase {
 
   @Override
   public StartResponse startExam(StartCommand command) {
-    // Logic from Controller: map minutes -> totalSec, create attempt
     int totalSec = Math.max(60, command.minutes() * 60);
-    ExamAttempt attempt = ExamAttempt.start(command.userEmail());
-    // We need to set totalSeconds explicitly or use a builder/method.
-    // Domain model 'start' factory sets finishedAt=null, score=null.
-    // ExamAttemptEntity constructor took userEmail and totalTimeSeconds.
-    // ExamAttempt domain constructor takes all.
-    // I'll assume I can set totalTimeSeconds via constructor or I should've added a
-    // setter or factory method arg.
-    // Let's create a new instance with correct values instead of start() factory if
-    // it's limited.
-    // OR add logic to factory.
-    // I'll just use constructor for now to be safe as I defined it.
-    attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(), java.time.OffsetDateTime.now(), null, totalSec,
-        null);
+    ExamAttempt attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(),
+        java.time.OffsetDateTime.now(), null, totalSec, null);
 
     attemptRepo.save(attempt);
 
@@ -97,8 +85,6 @@ public class ExamManager implements ExamUseCase {
       ExamAttemptAnswer ans = ExamAttemptAnswer.create(attempt.getId(), q.getId(), null);
       answerPlaceholders.add(ans);
     }
-    // Save answers. Repo has saveAll?
-    // My ExamAttemptAnswerRepository Port has saveAll.
     attemptAnsRepo.saveAll(answerPlaceholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {
@@ -263,8 +249,11 @@ public class ExamManager implements ExamUseCase {
     ExamScoringCalculator.ScoringResult scoring = scoringCalculator.compute(total, correct, wrong, penaltyRatio);
 
     if (attempt.getFinishedAt() == null) {
-      attempt.finish(attempt.getTotalTimeSeconds(), scoring.net());
-      attemptRepo.save(attempt);
+      // Atomic UPDATE ... WHERE finished_at IS NULL: two concurrent submits
+      // both pass the in-memory check above, but only one finishes the
+      // attempt. The loser's 0-row result is fine — the stored score is the
+      // winner's, and we still return this caller's computed view.
+      attemptRepo.finishIfUnfinished(attempt.getId(), java.time.OffsetDateTime.now(), scoring.net());
     }
 
     return new SubmitResult(scoring.total(), scoring.correct(), scoring.wrong(), scoring.penalty(), scoring.net(),

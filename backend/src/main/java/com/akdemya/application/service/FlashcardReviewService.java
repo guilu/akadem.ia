@@ -51,7 +51,12 @@ public class FlashcardReviewService implements FlashcardReviewUseCase {
 
     LocalDateTime reviewedAt = command.reviewedAt() != null ? command.reviewedAt() : LocalDateTime.now();
 
-    flashcardRepo.findById(command.flashcardId())
+    // Pessimistic lock on the card row serializes concurrent registrations
+    // for the same flashcard (e.g. a double-tap firing two requests). The
+    // second transaction blocks here until the first commits, so the
+    // duplicate-review window check below sees the winner's log instead of
+    // racing past it and applying the SM-2 grade twice.
+    flashcardRepo.findByIdForUpdate(command.flashcardId())
         .orElseThrow(() -> new NoSuchElementException("Flashcard not found"));
 
     var existingLog = logRepo.findMostRecentByUserIdAndFlashcardIdAfter(

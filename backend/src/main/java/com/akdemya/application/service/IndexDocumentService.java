@@ -9,7 +9,9 @@ import com.akdemya.domain.port.out.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -34,6 +36,7 @@ public class IndexDocumentService implements IndexSourceUseCase {
     private final FileStoragePort storage;
     private final SourceTextExtractorPort extractor;
     private final TextChunkerPort chunker;
+    private final TransactionTemplate txTemplate;
 
     public IndexDocumentService(SourceDocumentRepository documentRepo,
                                  SourceChunkRepository chunkRepo,
@@ -41,7 +44,8 @@ public class IndexDocumentService implements IndexSourceUseCase {
                                  QuestionRepository questionRepo,
                                  FileStoragePort storage,
                                  SourceTextExtractorPort extractor,
-                                 TextChunkerPort chunker) {
+                                 TextChunkerPort chunker,
+                                 PlatformTransactionManager transactionManager) {
         this.documentRepo = documentRepo;
         this.chunkRepo = chunkRepo;
         this.unitRepo = unitRepo;
@@ -49,47 +53,60 @@ public class IndexDocumentService implements IndexSourceUseCase {
         this.storage = storage;
         this.extractor = extractor;
         this.chunker = chunker;
+        this.txTemplate = new TransactionTemplate(transactionManager);
     }
 
+    /**
+     * Runs as three separate transactions instead of one. With a single
+     * transaction, a chunk-persistence failure marks it rollback-only, so the
+     * recovery {@code save(FAILED)} in the catch block is silently discarded
+     * and the commit throws {@code UnexpectedRollbackException} — the caller
+     * gets a 500 and the document row vanishes. Committing the document first
+     * guarantees the FAILED status can always be recorded.
+     */
     @Override
-    @Transactional
     public UploadPreview upload(UploadCommand command) {
-        documentRepo.findBySubjectIdAndName(command.subjectId(), command.filename())
-                .filter(d -> d.getStatus() != SourceDocument.Status.FAILED)
-                .ifPresent(d -> {
-                    throw new IllegalStateException("document_already_exists:" + d.getName());
-                });
+        SourceDocument doc = txTemplate.execute(tx -> {
+            documentRepo.findBySubjectIdAndName(command.subjectId(), command.filename())
+                    .filter(d -> d.getStatus() != SourceDocument.Status.FAILED)
+                    .ifPresent(d -> {
+                        throw new IllegalStateException("document_already_exists:" + d.getName());
+                    });
 
-        String checksum = sha256(command.bytes());
-        Path storedPath = storage.store(command.filename(), command.bytes());
+            String checksum = sha256(command.bytes());
+            Path storedPath = storage.store(command.filename(), command.bytes());
 
-        SourceDocument doc = SourceDocument.create(
-                command.subjectId(),
-                command.filename(),
-                resolveType(command.contentType()),
-                null,
-                checksum,
-                storedPath.toString()
-        );
-        doc = documentRepo.save(doc);
+            return documentRepo.save(SourceDocument.create(
+                    command.subjectId(),
+                    command.filename(),
+                    resolveType(command.contentType()),
+                    null,
+                    checksum,
+                    storedPath.toString()
+            ));
+        });
         log.info("Source document saved as PENDING_REVIEW: id={} name={}", doc.getId(), doc.getName());
 
         List<SourceChunk> chunks;
         try {
-            InputStream is = new ByteArrayInputStream(command.bytes());
-            String rawText = extractor.extract(is, command.contentType());
-            log.info("Extracted {} chars from document id={}", rawText.length(), doc.getId());
+            chunks = txTemplate.execute(tx -> {
+                InputStream is = new ByteArrayInputStream(command.bytes());
+                String rawText = extractor.extract(is, command.contentType());
+                log.info("Extracted {} chars from document id={}", rawText.length(), doc.getId());
 
-            chunks = chunker.chunk(rawText, doc);
-            log.info("Created {} chunks for document id={}", chunks.size(), doc.getId());
+                List<SourceChunk> created = chunker.chunk(rawText, doc);
+                log.info("Created {} chunks for document id={}", created.size(), doc.getId());
 
-            for (SourceChunk chunk : chunks) {
-                chunkRepo.saveWithoutEmbedding(chunk);
-            }
+                for (SourceChunk chunk : created) {
+                    chunkRepo.saveWithoutEmbedding(chunk);
+                }
+                return created;
+            });
         } catch (Exception e) {
             log.error("Failed to process document id={}: {}", doc.getId(), e.getMessage(), e);
-            documentRepo.save(doc.withStatus(SourceDocument.Status.FAILED));
-            return new UploadPreview(doc.withStatus(SourceDocument.Status.FAILED), List.of());
+            SourceDocument failed = txTemplate.execute(tx ->
+                    documentRepo.save(doc.withStatus(SourceDocument.Status.FAILED)));
+            return new UploadPreview(failed, List.of());
         }
 
         List<String> unitNames = SemanticChunker.extractDetectedUnitNames(chunks);

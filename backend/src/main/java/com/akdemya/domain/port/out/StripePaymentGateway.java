@@ -69,4 +69,16 @@ public interface StripePaymentGateway {
    * @throws RuntimeException on any Stripe SDK failure
    */
   Optional<StripePaymentIntentSnapshot> retrieve(String paymentIntentId);
+
+  /**
+   * Cancels a PaymentIntent at Stripe. Used by the reconciliation scheduler
+   * before marking an abandoned {@code PENDING} purchase as FAILED: once
+   * canceled, the intent can never reach {@code succeeded}, so the customer
+   * cannot be charged for a purchase the system already gave up on.
+   *
+   * @throws RuntimeException if Stripe rejects the cancellation (e.g. the
+   *         intent already succeeded or is {@code processing}); callers must
+   *         NOT mark the purchase FAILED in that case
+   */
+  void cancel(String paymentIntentId);
 }
