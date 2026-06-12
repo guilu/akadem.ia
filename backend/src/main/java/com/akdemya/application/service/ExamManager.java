@@ -47,21 +47,9 @@ public class ExamManager implements ExamUseCase {
 
   @Override
   public StartResponse startExam(StartCommand command) {
-    // Logic from Controller: map minutes -> totalSec, create attempt
     int totalSec = Math.max(60, command.minutes() * 60);
-    ExamAttempt attempt = ExamAttempt.start(command.userEmail());
-    // We need to set totalSeconds explicitly or use a builder/method.
-    // Domain model 'start' factory sets finishedAt=null, score=null.
-    // ExamAttemptEntity constructor took userEmail and totalTimeSeconds.
-    // ExamAttempt domain constructor takes all.
-    // I'll assume I can set totalTimeSeconds via constructor or I should've added a
-    // setter or factory method arg.
-    // Let's create a new instance with correct values instead of start() factory if
-    // it's limited.
-    // OR add logic to factory.
-    // I'll just use constructor for now to be safe as I defined it.
-    attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(), java.time.OffsetDateTime.now(), null, totalSec,
-        null);
+    ExamAttempt attempt = new ExamAttempt(UUID.randomUUID(), command.userEmail(),
+        java.time.OffsetDateTime.now(), null, totalSec, null);
 
     attemptRepo.save(attempt);
 
@@ -97,8 +85,6 @@ public class ExamManager implements ExamUseCase {
       ExamAttemptAnswer ans = ExamAttemptAnswer.create(attempt.getId(), q.getId(), null);
       answerPlaceholders.add(ans);
     }
-    // Save answers. Repo has saveAll?
-    // My ExamAttemptAnswerRepository Port has saveAll.
     attemptAnsRepo.saveAll(answerPlaceholders);
 
     List<QuestionData> questionDataList = pool.stream().map(q -> {

@@ -68,19 +68,27 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
       if (isRefreshableUrl) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
-          const retryRes = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
-          if (!retryRes.ok) {
-            const err = {
-              message: 'api_error',
-              status: retryRes.status,
-              body: await retryRes.json().catch(() => ({})),
-            };
-            throw err;
+          // Fresh timeout signal for the retry: the original may already have
+          // fired while the first attempt + refresh were in flight, which
+          // would abort the retry instantly.
+          const retry = mergeSignal(fetchOptions.signal ?? undefined, timeoutMs);
+          try {
+            const retryRes = await fetch(url, { ...fetchOptions, signal: retry.signal, credentials: 'include' });
+            if (!retryRes.ok) {
+              const err = {
+                message: 'api_error',
+                status: retryRes.status,
+                body: await retryRes.json().catch(() => ({})),
+              };
+              throw err;
+            }
+            if (retryRes.status === 204) return undefined as T;
+            const retryText = await retryRes.text();
+            if (!retryText) return undefined as T;
+            return JSON.parse(retryText) as T;
+          } finally {
+            retry.clear();
           }
-          if (retryRes.status === 204) return undefined as T;
-          const retryText = await retryRes.text();
-          if (!retryText) return undefined as T;
-          return JSON.parse(retryText) as T;
         }
       }
       const err: { message: string; status: number; body: unknown; name?: string } = {

@@ -27,6 +27,9 @@ import java.util.function.Function;
 @RequestMapping("/api/manage/questions")
 public class ManageQuestionController {
 
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(ManageQuestionController.class);
+
   private final ContentManagement contentService;
   private final AnswerRepository answerRepo;
   private final UserRepository userRepo;
@@ -296,7 +299,14 @@ public class ManageQuestionController {
     sb.append("unitId,text,explanation,difficulty,answer1,answer2,answer3,answer4,correctIndex\n");
     for (Question q : data) {
       List<Answer> list = answerRepo.findByQuestionId(q.getId());
-      if (list.size() != 4) continue;
+      if (list.size() != 4) {
+        // The CSV format has fixed answer1..answer4 columns, so questions
+        // with a different answer count cannot be represented. Log instead
+        // of dropping them silently so exports are auditable.
+        log.warn("CSV export: skipping question {} — has {} answers, format requires 4",
+            q.getId(), list.size());
+        continue;
+      }
       int correct = 1;
       for (int i = 0; i < list.size(); i++) { if (list.get(i).isCorrect()) correct = i + 1; }
       sb.append(escape(q.getUnitId().toString())).append(',')
