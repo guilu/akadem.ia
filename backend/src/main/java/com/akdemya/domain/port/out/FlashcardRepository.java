@@ -11,6 +11,18 @@ public interface FlashcardRepository {
 
   Optional<Flashcard> findById(UUID id);
 
+  /**
+   * Like {@link #findById(UUID)} but acquires a pessimistic write lock on the
+   * flashcard row for the duration of the current transaction. Used to
+   * serialize concurrent review registrations for the same card so the
+   * duplicate-review window check cannot be raced. Default delegates to the
+   * unlocked read for implementations (and test fakes) without locking
+   * support.
+   */
+  default Optional<Flashcard> findByIdForUpdate(UUID id) {
+    return findById(id);
+  }
+
   List<Flashcard> findByUnitId(UUID unitId);
 
   List<Flashcard> findByIds(List<UUID> ids);

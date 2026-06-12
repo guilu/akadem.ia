@@ -32,7 +32,8 @@ class ManageQuestionControllerTest {
   private final UserRepository userRepo = mock(UserRepository.class);
 
   private final ManageQuestionController controller =
-      new ManageQuestionController(contentService, answerRepo, userRepo);
+      new ManageQuestionController(contentService, answerRepo, userRepo,
+          mock(org.springframework.transaction.PlatformTransactionManager.class));
 
   private UUID userId = UUID.randomUUID();
 
