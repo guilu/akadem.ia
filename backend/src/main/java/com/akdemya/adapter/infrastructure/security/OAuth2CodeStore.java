@@ -13,8 +13,12 @@ public class OAuth2CodeStore {
     private final ConcurrentHashMap<String, CodeEntry> codes = new ConcurrentHashMap<>();
 
     public String store(String jwt, String refreshToken, String role) {
+        Instant now = Instant.now();
+        // Codes are only removed on exchange; purge expired ones here so
+        // abandoned logins don't accumulate forever.
+        codes.values().removeIf(entry -> now.isAfter(entry.expiresAt));
         String code = UUID.randomUUID().toString();
-        codes.put(code, new CodeEntry(jwt, refreshToken, role, Instant.now().plusSeconds(60)));
+        codes.put(code, new CodeEntry(jwt, refreshToken, role, now.plusSeconds(60)));
         return code;
     }
 

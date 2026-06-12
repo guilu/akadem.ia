@@ -26,29 +26,30 @@ function mergeSignal(existing?: AbortSignal, timeoutMs?: number) {
 }
 
 let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
+let refreshSubscribers: Array<(ok: boolean) => void> = [];
 
 async function tryRefreshToken(): Promise<boolean> {
   if (isRefreshing) {
     return new Promise<boolean>((resolve) => {
-      refreshSubscribers.push(() => resolve(true));
+      refreshSubscribers.push(resolve);
     });
   }
   isRefreshing = true;
+  let ok = false;
   try {
     const res = await fetch(`${apiBase}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
-    if (res.ok) {
-      refreshSubscribers.forEach((cb) => cb());
-      refreshSubscribers = [];
-      return true;
-    }
-    refreshSubscribers = [];
-    return false;
+    ok = res.ok;
+    return ok;
   } finally {
+    // Always flush waiters, even when refresh fails or fetch throws —
+    // otherwise their promises never settle and the requests hang.
     isRefreshing = false;
+    const subscribers = refreshSubscribers;
+    refreshSubscribers = [];
+    subscribers.forEach((cb) => cb(ok));
   }
 }
 
@@ -58,8 +59,13 @@ export async function apiJson<T>(url: string, options: RequestOptions = {}): Pro
   try {
     const res = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });
     if (res.status === 401) {
-      // Avoid refresh loops on the refresh endpoint itself
-      if (!url.includes('/api/auth/')) {
+      // Refresh on 401 except for auth endpoints themselves: refreshing and
+      // retrying login/register/refresh/logout would loop or re-send
+      // credentials. /api/auth/me is the exception — its 401 just means the
+      // access token expired, which is exactly what a refresh fixes (session
+      // restore on page reload).
+      const isRefreshableUrl = !url.includes('/api/auth/') || url.includes('/api/auth/me');
+      if (isRefreshableUrl) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
           const retryRes = await fetch(url, { ...fetchOptions, signal, credentials: 'include' });

@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody AuthUseCase.RegisterCommand req, HttpServletResponse res) {
-        var response = authUseCase.register(req);
+        AuthUseCase.AuthResponse response;
+        try {
+            response = authUseCase.register(req);
+        } catch (DataIntegrityViolationException e) {
+            // Two concurrent registrations can both pass the existsByEmail
+            // check; the loser hits uq_users_email at commit. The only unique
+            // constraint reachable from this flow is the email one, so map it
+            // to the same error the pre-check returns instead of a 500.
+            return ResponseEntity.badRequest().body(Map.of("error", "email_in_use"));
+        }
         if (response.error() != null) {
             return ResponseEntity.badRequest().body(Map.of("error", response.error()));
         }
