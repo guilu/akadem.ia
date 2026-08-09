@@ -30,6 +30,8 @@ import ProtectedRoute from './pages/ProtectedRoute';
 import SyllabusSalesPage from './pages/SyllabusSalesPage';
 import SubalternoGVAPage from './pages/SubalternoGVAPage';
 import DownloadPage from './pages/DownloadPage';
+import ConsentBanner from './components/ConsentBanner';
+import { initAnalytics, trackPageView } from './lib/analytics';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
@@ -93,6 +95,18 @@ export default function App() {
   useEffect(() => {
     refreshSubjects();
   }, [authUser, apiBase]);
+
+  // Analytics. initAnalytics self-gates on stored consent, so this is a no-op
+  // until the user accepts in ConsentBanner. page_view is sent manually (and
+  // sanitized) because automatic history tracking would leak the /descarga
+  // token and the OAuth2 code into GA.
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   // Handle OAuth2 callback: exchange ephemeral code for JWT cookie
   useEffect(() => {
@@ -360,6 +374,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <ConsentBanner />
     </div>
   );
 }

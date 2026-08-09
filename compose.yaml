@@ -62,6 +62,8 @@ services:
       context: ./frontend
       args:
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+        # Leave unset in dev so no analytics is collected from local runs.
+        VITE_GA_MEASUREMENT_ID: ${VITE_GA_MEASUREMENT_ID:-}
     environment:
       VITE_API_URL: /api
     ports:
