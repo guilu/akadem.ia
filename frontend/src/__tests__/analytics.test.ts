@@ -108,6 +108,19 @@ describe('consent gating', () => {
     expect(document.querySelectorAll('script[src*="googletagmanager.com/gtag/js"]').length).toBe(1);
   });
 
+  it('pushes the native arguments object, not an array', () => {
+    // gtag.js checks Array.isArray() on each dataLayer entry: a real array is
+    // treated as a GTM-style push, so `config` never registers and no hit is
+    // ever sent. Pushing `arguments` is the only form gtag.js acts on.
+    setConsent('granted');
+    initAnalytics();
+
+    const raw = (window as unknown as { dataLayer: unknown[] }).dataLayer;
+    expect(raw.length).toBeGreaterThan(0);
+    expect(Array.isArray(raw[0])).toBe(false);
+    expect(Object.prototype.toString.call(raw[0])).toBe('[object Arguments]');
+  });
+
   it('configures GA with send_page_view disabled so route tracking stays manual', () => {
     setConsent('granted');
     initAnalytics();
