@@ -2,6 +2,13 @@
 
 ---
 
+## v1.4.2 - 2026-08-09
+
+### 🐛 Correcciones
+- 🐛 fix(analytics): `document.title` por ruta. La SPA nunca actualizaba el título, así que todas las páginas reportaban a Google Analytics el título del home y cualquier informe agrupado por `page_title` colapsaba en una sola fila. Los títulos se resuelven con el **mismo saneado de rutas** que usa la analítica, de modo que una ruta no puede titularse jamás con un token de descarga ni con un código OAuth2. Mejora además la pestaña del navegador y el historial.
+
+---
+
 ## v1.4.1 - 2026-08-09
 
 ### 🐛 Correcciones
