@@ -32,6 +32,7 @@ import SubalternoGVAPage from './pages/SubalternoGVAPage';
 import DownloadPage from './pages/DownloadPage';
 import ConsentBanner from './components/ConsentBanner';
 import { initAnalytics, trackPageView } from './lib/analytics';
+import { titleForPath } from './lib/pageTitle';
 import { ROUTES } from './constants/routes';
 
 export default function App() {
@@ -96,17 +97,22 @@ export default function App() {
     refreshSubjects();
   }, [authUser, apiBase]);
 
-  // Analytics. initAnalytics self-gates on stored consent, so this is a no-op
-  // until the user accepts in ConsentBanner. page_view is sent manually (and
-  // sanitized) because automatic history tracking would leak the /descarga
-  // token and the OAuth2 code into GA.
+  // Title first, then analytics — both here and in the effect order below.
+  // trackPageView reads document.title, and initAnalytics emits the landing
+  // page_view itself, so a returning visitor deep-linking into an inner route
+  // would otherwise report the static index.html title.
+  useEffect(() => {
+    document.title = titleForPath(location.pathname);
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+
+  // initAnalytics self-gates on stored consent, so this is a no-op until the
+  // user accepts in ConsentBanner. page_view is sent manually (and sanitized)
+  // because automatic history tracking would leak the /descarga token and the
+  // OAuth2 code into GA.
   useEffect(() => {
     initAnalytics();
   }, []);
-
-  useEffect(() => {
-    trackPageView(location.pathname);
-  }, [location.pathname]);
 
   // Handle OAuth2 callback: exchange ephemeral code for JWT cookie
   useEffect(() => {
