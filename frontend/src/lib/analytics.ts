@@ -23,7 +23,7 @@ const DYNAMIC_ROUTES: ReadonlyArray<readonly [RegExp, string]> = [
 
 declare global {
   interface Window {
-    dataLayer?: unknown[][];
+    dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -70,9 +70,14 @@ export function initAnalytics(): void {
   if (initialised || !id || getStoredConsent() !== 'granted') return;
 
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = (...args: unknown[]) => {
-    window.dataLayer!.push(args);
-  };
+  // Must push the native `arguments` object, NOT a rest-args array: gtag.js
+  // runs Array.isArray() on every dataLayer entry and treats a real array as a
+  // GTM-style push, so `config` never registers and no hit is ever sent.
+  function gtagShim() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments);
+  }
+  window.gtag = gtagShim as (...args: unknown[]) => void;
 
   const script = document.createElement('script');
   script.async = true;

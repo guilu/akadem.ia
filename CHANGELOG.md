@@ -2,6 +2,13 @@
 
 ---
 
+## v1.4.1 - 2026-08-09
+
+### 🐛 Correcciones
+- 🐛 fix(analytics): el shim de `gtag` empujaba a `dataLayer` un array de rest args en lugar del objeto nativo `arguments`. `gtag.js` ejecuta `Array.isArray()` sobre cada entrada de `dataLayer` y trata un array real como un push de estilo GTM, así que el comando `config` nunca se registraba y **no se enviaba ni un solo hit**. Detectado porque Realtime seguía a cero tras aceptar el banner en producción, con el bundle, el measurement ID y la CSP ya verificados como correctos. Cubierto con un test de regresión que comprueba que la entrada empujada no es un `Array`.
+
+---
+
 ## v1.4.0 - 2026-08-09
 
 ### ✨ Nuevas funcionalidades
