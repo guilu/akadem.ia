@@ -2,6 +2,23 @@
 
 ---
 
+## v1.4.0 - 2026-08-09
+
+### ✨ Nuevas funcionalidades
+- ✨ feat(analytics): integración de Google Analytics 4 con consentimiento previo (#141) — propiedad GA4 propia `Akadem.ia`, independiente de la de `diegobarrioh.dev`. El script de gtag solo se inyecta después de que el usuario acepte en el banner de consentimiento, de modo que rechazar no deja ninguna cookie de analítica (RGPD/AEPD). Sin GTM: para un SPA versionado en git añadiría una superficie de configuración fuera del repo sin aportar nada.
+
+### 🔒 Privacidad y seguridad
+- 🔒 security(analytics): el `page_view` se envía manualmente con la ruta saneada en lugar de usar el tracking automático por historial. Dos rutas llevan secretos en la URL — `/descarga/:token` (token de descarga de compra) y el callback OAuth2 (`?code=`) — y el envío automático de `page_location` los habría almacenado en Google Analytics. `sanitizePath()` colapsa además los ids de intento, temario y materia, y descarta query string y fragmento.
+- 🔒 security(csp): la CSP de `index.html` permite `googletagmanager.com` en `script-src` y los endpoints de `google-analytics.com` en `connect-src`, sin ampliar nada más.
+
+### 🔧 Infraestructura
+- 🔧 chore(build): `VITE_GA_MEASUREMENT_ID` como build arg en `Dockerfile` y `compose.yaml`, siguiendo el patrón de `VITE_STRIPE_PUBLISHABLE_KEY`. Sin valor definido la analítica queda desactivada por completo, banner incluido, que es el comportamiento en dev.
+
+### ✅ Tests
+- ✅ test(analytics): 26 tests nuevos que cubren el saneado de rutas, la puerta de consentimiento y la deduplicación de `page_view`.
+
+---
+
 ## v1.3.0 - 2026-06-12
 
 ### ✨ Nuevas funcionalidades
