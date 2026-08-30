@@ -4,6 +4,7 @@ import { BookOpen, Cog, Home, ArrowRightToBracket, UserAdd, ArrowLeftToBracket, 
 import { ROUTES } from '../constants/routes';
 import type { NavUser } from '../types';
 import { UserMenuDropdown } from './UserMenuDropdown';
+import PreproRibbon from "./PreproRibbon";
 
 export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onProfile, onSettings }: {
   isAuthed: boolean;
@@ -59,14 +60,23 @@ export default function NavbarComponent({ isAuthed, isAdmin, user, onLogout, onP
       {/* ── Main bar ── */}
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
 
-        {/* Logo */}
-        <button
-          onClick={() => go(ROUTES.home)}
-          className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
-        >
-          <img src="/akadem-ia.png" alt="Akadem.ia" className="w-9 h-9 object-contain" />
-          akadem.ia
-        </button>
+        {/* Logo + aviso de preproducción, agrupados para que viajen juntos */}
+        <div className="flex items-center h-16">
+          <button
+            onClick={() => go(ROUTES.home)}
+            className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight"
+          >
+            <img src="/akadem-ia.png" alt="Akadem.ia" className="w-9 h-9 object-contain" />
+            akadem.ia
+          </button>
+
+          {/*
+           * Sólo aparece bajo los dominios de preproducción, y lo decide el
+           * propio componente mirando el host: el día que akadem.ia tenga
+           * dominio propio se apaga sin tocar nada.
+           */}
+          <PreproRibbon />
+        </div>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
