@@ -8,6 +8,11 @@ ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 # entirely — no gtag script, no consent banner.
 ARG VITE_GA_MEASUREMENT_ID
 ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
+# Commit desplegado, para la banda de preproducción. Va como argumento porque
+# dentro de la imagen no hay forma de averiguarlo: `.git` está en el
+# .dockerignore y node:alpine no trae git. Vacío = la banda avisa sin versión.
+ARG VITE_BUILD_SHA
+ENV VITE_BUILD_SHA=$VITE_BUILD_SHA
 COPY . .
 RUN npm run build
 
