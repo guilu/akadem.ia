@@ -3,6 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from '../components/Login';
 import { API_ROUTES } from '../constants/apiRoutes';
 
+const trackEventMock = vi.hoisted(() => vi.fn());
+vi.mock('../lib/analytics', () => ({ trackEvent: trackEventMock }));
+
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
@@ -82,7 +85,18 @@ describe('Login component', () => {
 
     await waitFor(() => {
       expect(onAuthSuccess).toHaveBeenCalledWith({ email: 'user@example.com', role: 'USER' });
+      expect(trackEventMock).toHaveBeenCalledWith('login', { method: 'password' });
     });
+  });
+
+  it('does not track login when authentication fails', async () => {
+    mockFetch.mockResolvedValue(makeResponse({ error: 'Credenciales incorrectas' }, 401, false));
+    render(<Login onAuthSuccess={onAuthSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'wrongpass' } });
+    fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
+    await screen.findByText('Credenciales incorrectas');
+    expect(trackEventMock).not.toHaveBeenCalled();
   });
 
   it('uses API_ROUTES.auth.login endpoint', async () => {

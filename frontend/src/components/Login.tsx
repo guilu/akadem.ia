@@ -4,6 +4,7 @@ import { ArrowRightToBracket } from 'flowbite-react-icons/outline';
 import { apiUrl } from '../api';
 import { API_ROUTES } from '../constants/apiRoutes';
 import { ROUTES } from '../constants/routes';
+import { trackEvent } from '../lib/analytics';
 
 const inputClass =
   'w-full bg-white/50 dark:bg-[#24394c] border border-secondary/30 rounded-xl px-4 py-3 text-sm text-text placeholder:text-text/35 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors';
@@ -36,6 +37,7 @@ export default function Login({ onAuthSuccess }: { onAuthSuccess: (user: { email
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
+        trackEvent('login', { method: 'password' });
         onAuthSuccess({ email: data.email ?? email, role: data.role ?? '' });
       } else {
         setErr(data.error || 'Credenciales inválidas');

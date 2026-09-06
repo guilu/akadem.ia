@@ -4,6 +4,7 @@ import { BookOpen, Plus, Play } from 'flowbite-react-icons/outline';
 import { getSubjectsInSyllabus } from '../api/syllabusApi';
 import type { Subject } from '../types';
 import { ROUTES } from '../constants/routes';
+import { trackEvent } from '../lib/analytics';
 
 export default function SyllabusSubjectsPage() {
   const { syllabusId } = useParams<{ syllabusId: string }>();
@@ -84,6 +85,10 @@ export default function SyllabusSubjectsPage() {
                 <Link
                   className="btn btn-primary rounded-full px-5 py-2 text-sm shadow-sm shadow-primary/15 inline-flex items-center gap-2"
                   to={ROUTES.subjectBuilder(s.id)}
+                  onClick={() => trackEvent('topic_view', {
+                    syllabus_id: syllabusId,
+                    subject_id: s.id,
+                  })}
                 >
                   <Play className="w-6 h-6" />
                   Crear examen
