@@ -6,6 +6,7 @@ import { apiJson, apiBase } from '../api';
 import type { Syllabus, ExamAttemptSummary } from '../types';
 import { ROUTES } from '../constants/routes';
 import { formatDuration } from '../utils/format';
+import { trackEvent } from '../lib/analytics';
 
 export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onViewResult, onResumeAttempt }: {
   activeAttemptId?: string;
@@ -46,7 +47,10 @@ export default function SyllabusesPage({ activeAttemptId, onUnauthorized, onView
     setLoading(true);
     setError('');
     getSyllabuses()
-      .then(setSyllabuses)
+      .then((items) => {
+        setSyllabuses(items);
+        trackEvent('curriculum_view', { syllabus_count: items.length });
+      })
       .catch(() => setError('No se pudieron cargar los temarios.'))
       .finally(() => setLoading(false));
   }, []);

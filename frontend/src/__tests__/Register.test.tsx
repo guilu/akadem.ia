@@ -3,6 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Register from '../components/Register';
 import { API_ROUTES } from '../constants/apiRoutes';
 
+const trackEventMock = vi.hoisted(() => vi.fn());
+vi.mock('../lib/analytics', () => ({ trackEvent: trackEventMock }));
+
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
@@ -129,7 +132,19 @@ describe('Register component', () => {
 
     await waitFor(() => {
       expect(onAuthSuccess).toHaveBeenCalledWith({ email: 'user@example.com', role: 'USER' });
+      expect(trackEventMock).toHaveBeenCalledWith('sign_up', { method: 'password' });
     });
+  });
+
+  it('does not track sign_up when registration fails', async () => {
+    mockFetch.mockResolvedValue(makeResponse({ error: 'Email ya registrado' }, 409, false));
+    render(<Register onAuthSuccess={onAuthSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('Email *'), { target: { value: 'existing@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Contraseña *'), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByPlaceholderText('Confirmar *'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /crear cuenta/i }));
+    await screen.findByText('Email ya registrado');
+    expect(trackEventMock).not.toHaveBeenCalled();
   });
 
   it('uses API_ROUTES.auth.register endpoint', async () => {
