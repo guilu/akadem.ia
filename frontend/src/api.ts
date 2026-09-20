@@ -1,11 +1,23 @@
 import { API_ROUTES } from './constants/apiRoutes';
+import { isAppHost } from './appDomains';
 
 const rawBase = import.meta.env.VITE_API_URL || '';
 const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 const envBase = normalizedBase.endsWith('/api') ? normalizedBase.slice(0, -4) : normalizedBase;
 
-const isExternalHost = window.location.hostname.endsWith('diegobarrioh.dev');
-const defaultBase = isExternalHost ? window.location.origin : `http://${window.location.hostname}:8080`;
+/*
+ * Servidos desde uno de nuestros dominios, la API llega por el mismo origen a
+ * través de nginx. En local no hay proxy delante, así que se va al 8080 del
+ * backend directamente.
+ *
+ * La lista de dominios vive en `appDomains.ts`: antes esta línea comprobaba
+ * `endsWith('diegobarrioh.dev')` por su cuenta, de modo que mudar la app a
+ * backendtothefuture.com la mandaba a `http://<host>:8080` —un puerto que no
+ * está expuesto en público— y tumbaba todas las llamadas.
+ */
+const defaultBase = isAppHost(window.location.hostname)
+  ? window.location.origin
+  : `http://${window.location.hostname}:8080`;
 export const apiBase = envBase || defaultBase;
 
 export function apiUrl(path: string): string {

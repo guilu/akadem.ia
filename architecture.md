@@ -158,7 +158,7 @@ Este patrón está bien aplicado y mantiene la separación limpia entre dominio 
 **CORS configurado** para:
 - `localhost:5173`, `127.0.0.1:5173`, `192.168.1.175:5173`
 - `localhost:3000`, `127.0.0.1:3000`, `192.168.1.175:3000`
-- `https://akademia.diegobarrioh.dev`
+- `https://akademia.backendtothefuture.com`
 
 > [!CAUTION]
 > En producción se usa `allowCredentials(true)`. Esto requiere que los orígenes estén explícitamente listados (no `*`), lo cual está bien implementado. Pero la IP local `192.168.1.175` sigue hardcodeada en la config de producción, lo que puede romper en otro entorno.
@@ -200,10 +200,12 @@ Todo el estado de sesión vive en `App.tsx` como estado local de React (sin Redu
 
 Lógica de resolución de `apiBase`:
 1. Si hay `VITE_API_URL` en env → usa esa URL
-2. Si el hostname termina en `diegobarrioh.dev` → usa `window.location.origin`
+2. Si el hostname es uno de los nuestros (`isAppHost`, en `appDomains.ts`) → usa `window.location.origin`
 3. Si no → usa `http://{hostname}:8080`
 
 Esto permite que funcione tanto en dev local como en producción sin recompilar. Buena decisión.
+
+La lista de dominios está centralizada en `frontend/src/appDomains.ts` y la comparten `api.ts` y `components/preproHost.ts`. Antes cada uno llevaba su propia comprobación y solo `preproHost` la tenía bien: `api.ts` usaba `endsWith('diegobarrioh.dev')`, así que al mudar la app a `backendtothefuture.com` resolvía `http://{hostname}:8080` —un puerto que no está publicado— y tumbaba todas las llamadas.
 
 ### Flujo de examen
 

@@ -36,7 +36,7 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      # Set FRONTEND_URL=https://akademia.diegobarrioh.dev in .env for production.
+      # Set FRONTEND_URL=https://akademia.backendtothefuture.com in .env for production.
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}

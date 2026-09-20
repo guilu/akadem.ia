@@ -48,7 +48,7 @@ public class AiProperties {
         private String chatModel = "meta-llama/llama-3.3-70b-instruct";
         private String embeddingModel = "openai/text-embedding-3-small";
         /** Optional: shown in OpenRouter dashboard rankings */
-        private String siteUrl = "https://akademia.diegobarrioh.dev";
+        private String siteUrl = "https://akademia.backendtothefuture.com";
         private String appName = "Akademia";
 
         public String getApiKey() { return apiKey; }

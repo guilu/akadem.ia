@@ -14,7 +14,7 @@ The system MUST send exactly one transactional email per `Purchase` when `status
 
 The email MUST be delivered via the Resend API (`POST https://api.resend.com/emails`) using the API key from `RESEND_API_KEY` environment variable.
 
-The `from` address MUST be taken from `RESEND_FROM_EMAIL` environment variable (`noreply@akademia.diegobarrioh.dev` in production; `onboarding@resend.dev` in development/test).
+The `from` address MUST be taken from `RESEND_FROM_EMAIL` environment variable (`noreply@akademia.backendtothefuture.com` in production; `onboarding@resend.dev` in development/test).
 
 **Email delivery tracking**: the `Purchase` aggregate MUST track whether the email was successfully delivered via the `emailSentAt` field (Instant, nullable). This field is set to `now()` only when `TransactionalEmailPort.send(...)` returns `true` (indicating Resend returned 2xx). It remains `NULL` if delivery fails or has not been attempted. The `PurchaseReconciliationScheduler` uses this field to retry failed deliveries (see reconciliation spec).
 
@@ -46,9 +46,9 @@ The `downloadToken` embedded in the URL MUST match `Purchase.downloadToken`.
 #### Scenario: Email content is correct for PAID purchase
 
 - GIVEN a `Purchase` with `downloadToken=abc-123` for product `TEMARIO_SUBALTERNO_GVA`
-- AND `APP_BASE_URL=https://akademia.diegobarrioh.dev`
+- AND `APP_BASE_URL=https://akademia.backendtothefuture.com`
 - WHEN the email is composed
-- THEN the HTML body contains a link to `https://akademia.diegobarrioh.dev/descarga/abc-123`
+- THEN the HTML body contains a link to `https://akademia.backendtothefuture.com/descarga/abc-123`
 - AND the plain-text part contains the same URL as readable text
 - AND the subject contains "Temario Subalterno GVA"
 
