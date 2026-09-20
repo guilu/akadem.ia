@@ -1,20 +1,16 @@
-/**
- * Los dos dominios bajo los que viven hoy las aplicaciones mientras no tienen
- * uno propio. Cuando akadem.ia se mude, el aviso desaparece solo: no hay
- * variable de entorno que recordar ni despliegue especial que hacer.
- */
-const PREPRO_DOMAINS = ["diegobarrioh.dev", "backendtothefuture.com"];
+import { isAppHost } from "../appDomains";
 
 /**
- * Se compara por etiqueta de dominio y no con `endsWith`.
+ * Hoy los dominios que sirven la aplicación son prestados, así que estar en uno
+ * de ellos ES estar en preproducción, y la comprobación es la misma que la de
+ * `isAppHost`.
  *
- * `endsWith` daría por bueno `notdiegobarrioh.dev`, que es de otro. La
- * comprobación exige o bien el dominio exacto, o bien que lo que va delante
- * termine en un punto — que es lo que separa un subdominio nuestro de un
- * dominio ajeno que casualmente acaba igual.
+ * Sigue siendo una función aparte a propósito: el día que akadem.ia tenga
+ * dominio propio, ese dominio entra en `APP_DOMAINS` —la API se resuelve
+ * igual— pero NO debe encender el aviso. Ese día los dos conceptos se separan,
+ * y tener ya dos nombres distintos es lo que permite cambiar uno sin tocar el
+ * otro.
  */
 export function isPreproHost(hostname: string): boolean {
-  return PREPRO_DOMAINS.some(
-    (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
-  );
+  return isAppHost(hostname);
 }

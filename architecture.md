@@ -200,10 +200,12 @@ Todo el estado de sesión vive en `App.tsx` como estado local de React (sin Redu
 
 Lógica de resolución de `apiBase`:
 1. Si hay `VITE_API_URL` en env → usa esa URL
-2. Si el hostname termina en `diegobarrioh.dev` → usa `window.location.origin`
+2. Si el hostname es uno de los nuestros (`isAppHost`, en `appDomains.ts`) → usa `window.location.origin`
 3. Si no → usa `http://{hostname}:8080`
 
 Esto permite que funcione tanto en dev local como en producción sin recompilar. Buena decisión.
+
+La lista de dominios está centralizada en `frontend/src/appDomains.ts` y la comparten `api.ts` y `components/preproHost.ts`. Antes cada uno llevaba su propia comprobación y solo `preproHost` la tenía bien: `api.ts` usaba `endsWith('diegobarrioh.dev')`, así que al mudar la app a `backendtothefuture.com` resolvía `http://{hostname}:8080` —un puerto que no está publicado— y tumbaba todas las llamadas.
 
 ### Flujo de examen
 
