@@ -158,7 +158,7 @@ Este patrón está bien aplicado y mantiene la separación limpia entre dominio 
 **CORS configurado** para:
 - `localhost:5173`, `127.0.0.1:5173`, `192.168.1.175:5173`
 - `localhost:3000`, `127.0.0.1:3000`, `192.168.1.175:3000`
-- `https://akademia.diegobarrioh.dev`
+- `https://akademia.backendtothefuture.com`
 
 > [!CAUTION]
 > En producción se usa `allowCredentials(true)`. Esto requiere que los orígenes estén explícitamente listados (no `*`), lo cual está bien implementado. Pero la IP local `192.168.1.175` sigue hardcodeada en la config de producción, lo que puede romper en otro entorno.

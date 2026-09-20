@@ -23,7 +23,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
-    allowedHosts: ['akademia.diegobarrioh.dev'],
+    allowedHosts: ['akademia.backendtothefuture.com'],
     // Dev proxy: mirrors the nginx rules so the OAuth2 flow works without Docker.
     // The /api prefix covers both REST calls and OAuth2 endpoints.
     proxy: {

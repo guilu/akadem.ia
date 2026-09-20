@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://akademia.diegobarrioh.dev">▶️ Live Demo</a>
+  <a href="https://akademia.backendtothefuture.com">▶️ Live Demo</a>
   •
   <a href="https://github.com/guilu/akadem.ia">📦 Repository</a>
 </p>
@@ -89,7 +89,7 @@
 
 ## 🚀 Live Demo
 
-🔗 <https://akademia.diegobarrioh.dev>
+🔗 <https://akademia.backendtothefuture.com>
 
 ---
 
